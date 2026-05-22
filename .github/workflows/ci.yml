@@ -26,11 +26,15 @@ jobs:
           # Build-time env so Astro doesn't crash on missing Supabase config.
           PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co'
           PUBLIC_SUPABASE_ANON_KEY: 'placeholder-anon-key'
+          SUPABASE_SERVICE_ROLE_KEY: 'placeholder-service-role-key'
           PUBLIC_SITE_URL: 'http://localhost:4321'
+          PII_HMAC_SECRET: 'ci-placeholder-secret-please-rotate-in-real-deploys'
 
       - name: Build
         run: npm run build
         env:
           PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co'
           PUBLIC_SUPABASE_ANON_KEY: 'placeholder-anon-key'
+          SUPABASE_SERVICE_ROLE_KEY: 'placeholder-service-role-key'
           PUBLIC_SITE_URL: 'http://localhost:4321'
+          PII_HMAC_SECRET: 'ci-placeholder-secret-please-rotate-in-real-deploys'

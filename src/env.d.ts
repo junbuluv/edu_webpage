@@ -18,6 +18,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_ANON_KEY: string;
   readonly SUPABASE_SERVICE_ROLE_KEY: string;
   readonly PUBLIC_SITE_URL: string;
+  readonly PII_HMAC_SECRET: string;
 }
 
 interface ImportMeta {

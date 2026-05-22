@@ -114,3 +114,54 @@ create policy "quiz_attempts_instructor_read"
       where p.id = auth.uid() and p.role in ('instructor', 'admin')
     )
   );
+
+-- =========================================================================
+-- audit_log --- record of staff disclosures (FERPA §99.32-style)
+--
+-- One row per administrator/instructor read of an individual student's
+-- record. IP and user-agent are stored as HMAC(SHA-256, server_secret)
+-- so a DB leak cannot enumerate them without the server-side key.
+-- Inserts are performed via the service-role client; the table is RLS-on
+-- so application code can never write to it directly.
+-- =========================================================================
+create table if not exists public.audit_log (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid references public.profiles(id) on delete set null,
+  actor_role user_role,
+  action text not null,
+  target_user_id uuid,
+  target_resource text,
+  client_ip_hmac text,
+  user_agent_hmac text,
+  metadata jsonb,
+  ts timestamptz not null default now()
+);
+
+create index if not exists audit_log_actor_ts_idx
+  on public.audit_log (actor_id, ts desc);
+create index if not exists audit_log_target_ts_idx
+  on public.audit_log (target_user_id, ts desc);
+create index if not exists audit_log_action_ts_idx
+  on public.audit_log (action, ts desc);
+
+alter table public.audit_log enable row level security;
+
+-- The actor can read their own disclosure history (transparency).
+drop policy if exists "audit_log_actor_self_read" on public.audit_log;
+create policy "audit_log_actor_self_read"
+  on public.audit_log for select
+  using (auth.uid() = actor_id);
+
+-- Admins can read all disclosures.
+drop policy if exists "audit_log_admin_read" on public.audit_log;
+create policy "audit_log_admin_read"
+  on public.audit_log for select
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- No INSERT/UPDATE/DELETE policies => only the service-role client (which
+-- bypasses RLS by design) may write.
