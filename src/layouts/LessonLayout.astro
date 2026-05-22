@@ -1,0 +1,52 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+import LessonProgressButton from '@components/lesson/LessonProgressButton';
+
+interface Props {
+  lesson: CollectionEntry<'lessons'>;
+}
+const { lesson } = Astro.props;
+const data = lesson.data;
+---
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <p class="text-sm uppercase tracking-wide text-accent font-medium">
+      {data.course} · {data.unit}
+    </p>
+    <h1 class="text-3xl font-semibold tracking-tight mt-2">{data.title}</h1>
+    <p class="mt-3 text-ink-muted">{data.summary}</p>
+
+    <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
+      <span>⏱ {data.estimatedMinutes} min</span>
+      {data.tags.length > 0 && (
+        <span>Tags: {data.tags.join(', ')}</span>
+      )}
+    </div>
+
+    <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+        Learning objectives
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        {data.learningObjectives.map((o) => <li>{o}</li>)}
+      </ul>
+    </section>
+
+    <div class="prose mt-10">
+      <slot />
+    </div>
+
+    <div class="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
+      <LessonProgressButton client:load lessonSlug={lesson.slug} />
+      {data.quizSlug && (
+        <a
+          href={`/practice/${data.quizSlug}`}
+          class="rounded bg-accent px-4 py-2 text-white font-medium"
+        >
+          Practice quiz →
+        </a>
+      )}
+    </div>
+  </article>
+</BaseLayout>

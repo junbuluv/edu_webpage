@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Quiz from '@components/quiz/Quiz';
+import { getCollection } from 'astro:content';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const quizzes = await getCollection('quizzes');
+  return quizzes.map((q) => ({
+    params: { slug: q.data.slug },
+    props: { quiz: q.data },
+  }));
+}
+
+interface Props {
+  quiz: Awaited<ReturnType<typeof getCollection<'quizzes'>>>[number]['data'];
+}
+const { quiz } = Astro.props;
+---
+
+<BaseLayout title={quiz.title}>
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      Practice · {quiz.course}
+    </p>
+    <h1 class="text-2xl font-semibold tracking-tight mt-2">{quiz.title}</h1>
+
+    <Quiz
+      client:load
+      slug={quiz.slug}
+      title={quiz.title}
+      questions={quiz.questions}
+      passingScore={quiz.passingScore}
+    />
+
+    {quiz.lessonSlug && (
+      <a href={`/lessons/${quiz.lessonSlug}`} class="text-sm text-accent underline">
+        ← Back to the lesson
+      </a>
+    )}
+  </div>
+</BaseLayout>

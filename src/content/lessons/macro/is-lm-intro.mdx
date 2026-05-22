@@ -1,0 +1,79 @@
+---
+title: "The IS-LM Model"
+course: macro
+unit: "Short-run output and interest"
+order: 1
+summary: "Equilibrium output and the interest rate in a closed economy, derived from goods-market and money-market clearing."
+learningObjectives:
+  - "Derive the IS curve from goods-market equilibrium."
+  - "Derive the LM curve from money-market equilibrium."
+  - "Predict how Y* and r* respond to fiscal and monetary shocks."
+prerequisites:
+  - "Marginal propensity to consume and the Keynesian multiplier"
+estimatedMinutes: 25
+tags: ["IS-LM", "fiscal policy", "monetary policy"]
+quizSlug: "macro-is-lm-intro"
+---
+
+import ISLMChart from '@components/viz/ISLMChart';
+
+## Goods market: the IS curve
+
+The IS curve traces combinations of output $Y$ and the real interest rate $r$
+that clear the goods market. Starting from the national-income identity in a
+closed economy,
+
+$$
+Y = C(Y - T) + I(r) + G,
+$$
+
+and assuming a linear consumption function $C = C_0 + c(Y - T)$ with a
+tax rate $T = tY$ and investment $I = I_0 - b r$, solving for $Y$ gives the IS
+relation
+
+$$
+Y_{IS}(r) \;=\; \frac{1}{1 - c(1-t)} \big(C_0 + I_0 + G - b\,r\big).
+$$
+
+The slope is negative: a lower interest rate raises investment and, through the
+multiplier $\alpha = 1/(1 - c(1-t))$, raises equilibrium output.
+
+## Money market: the LM curve
+
+Money-market equilibrium sets real money demand equal to real money supply:
+
+$$
+\frac{M}{P} = k Y - h r \quad\Longrightarrow\quad r_{LM}(Y) = \frac{k Y - M/P}{h}.
+$$
+
+LM is upward-sloping in $(Y, r)$: higher output raises transactions demand for
+money, requiring a higher interest rate to clear the market at fixed $M/P$.
+
+## Equilibrium
+
+Setting $Y_{IS}(r) = Y$ and $r_{LM}(Y) = r$ and solving simultaneously:
+
+$$
+Y^\* = \frac{\alpha h A + b(M/P)}{h + \alpha b k}, \qquad
+r^\* = \frac{k Y^\* - M/P}{h},
+$$
+
+where $A = C_0 + I_0 + G$.
+
+## Play with it
+
+Move the sliders to see how the equilibrium shifts. A positive fiscal shock
+raises $G$, shifting IS right. A monetary expansion raises $M$, shifting LM
+right.
+
+<ISLMChart client:load />
+
+## Comparative statics — try to predict before you drag
+
+1. **Fiscal expansion** (↑ G): IS shifts right ⇒ $Y^\*$ up, $r^\*$ up. The rise
+   in $r$ partially crowds out investment.
+2. **Monetary expansion** (↑ M): LM shifts right ⇒ $Y^\*$ up, $r^\*$ down.
+3. **Confidence shock** (↑ $C_0 + I_0$): IS shifts right ⇒ both $Y^\*$ and
+   $r^\*$ rise.
+
+When you've built intuition, take the practice quiz below.

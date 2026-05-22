@@ -1,0 +1,70 @@
+{
+  "slug": "macro-is-lm-intro",
+  "title": "IS-LM: short-run equilibrium",
+  "course": "macro",
+  "lessonSlug": "macro/is-lm-intro",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "An increase in government spending (G) shifts which curve, and in which direction?",
+      "choices": [
+        "IS to the right",
+        "IS to the left",
+        "LM to the right",
+        "LM to the left"
+      ],
+      "correctIndex": 0,
+      "explanation": "Higher G raises autonomous spending, raising Y for any given r — that's a rightward shift of IS.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Holding the IS curve fixed, an expansionary open-market operation will:",
+      "choices": [
+        "Raise both Y* and r*",
+        "Raise Y* and lower r*",
+        "Lower Y* and raise r*",
+        "Lower both Y* and r*"
+      ],
+      "correctIndex": 1,
+      "explanation": "Buying bonds raises M, shifts LM right, lowers r along the IS curve and raises Y.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following are channels through which a higher interest rate reduces Y in IS-LM?",
+      "choices": [
+        "Lower investment via I(r) = I0 − b·r",
+        "Lower money demand via k·Y − h·r",
+        "Multiplier compression of the autonomous shock",
+        "Crowding out of private spending"
+      ],
+      "correctIndices": [0, 3],
+      "explanation": "Higher r lowers investment directly and crowds out private spending. Money demand effects are about market-clearing, not output, and the multiplier itself isn't an r-channel.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "With c = 0.6, t = 0.2, what is the Keynesian spending multiplier α = 1/(1 − c(1−t))? Round to two decimals.",
+      "answer": 1.92,
+      "tolerance": 0.02,
+      "explanation": "1 − 0.6·(1 − 0.2) = 1 − 0.48 = 0.52, so α ≈ 1/0.52 ≈ 1.92.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Using the baseline parameters in the lesson chart (c = 0.6, t = 0.2, b = 20, k = 0.5, h = 10, P = 1, G = 100, M = 600, C0 + I0 = 200), compute the equilibrium interest rate r* to one decimal.",
+      "answer": 6.4,
+      "tolerance": 0.3,
+      "unit": "%",
+      "explanation": "Plug into Y* = (αhA + b·M/P)/(h + αbk) and r* = (k·Y* − M/P)/h. α ≈ 1.923, A = 300, giving Y* ≈ 423 and r* ≈ 6.4%.",
+      "points": 2
+    }
+  ]
+}

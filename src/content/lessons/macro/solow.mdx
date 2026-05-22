@@ -1,0 +1,45 @@
+---
+title: "The Solow Growth Model"
+course: macro
+unit: "Long-run growth"
+order: 3
+summary: "Capital accumulation, diminishing returns, and the steady state under Cobb-Douglas production."
+learningObjectives:
+  - "Write the Solow law of motion for k."
+  - "Solve for the steady-state capital and output per worker."
+  - "Predict how s, n, δ, and α move the steady state."
+estimatedMinutes: 20
+tags: ["growth", "Solow", "Cobb-Douglas"]
+quizSlug: "macro-solow"
+---
+
+import SolowGrowth from '@components/viz/SolowGrowth';
+
+## Setup
+
+Output per worker is Cobb-Douglas: $y = k^{\alpha}$. Capital evolves with
+investment $s\,y$, population growth $n$, and depreciation $\delta$:
+
+$$
+\dot k \;=\; s\,k^{\alpha} - (n + \delta)\,k.
+$$
+
+## Steady state
+
+Setting $\dot k = 0$:
+
+$$
+k^\* = \left(\frac{s}{n + \delta}\right)^{\!1/(1 - \alpha)}, \qquad
+y^\* = (k^\*)^{\alpha}.
+$$
+
+The growth-accounting punch line: in steady state, output per worker is
+constant in $k$ — long-run growth must come from technology, not saving more.
+
+## Play with it
+
+<SolowGrowth client:load />
+
+Try doubling the savings rate. Watch capital climb to a new higher steady
+state, but growth eventually slow back to zero. That's the "level effect, no
+growth effect" of saving in Solow.

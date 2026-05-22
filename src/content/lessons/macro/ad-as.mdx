@@ -1,0 +1,41 @@
+---
+title: "Aggregate Demand and Short-Run Supply"
+course: macro
+unit: "Short-run output and interest"
+order: 2
+summary: "Output and the price level as the joint outcome of AD and SRAS clearing."
+learningObjectives:
+  - "Derive AD from IS-LM with a price level."
+  - "Explain the slope of SRAS under sticky expectations."
+  - "Predict the short-run effects of demand and supply shocks on (Y, P)."
+estimatedMinutes: 20
+tags: ["AD-AS", "supply shocks", "demand shocks"]
+quizSlug: "macro-ad-as"
+---
+
+import ADASChart from '@components/viz/ADASChart';
+
+## AD: the price-level slice of IS-LM
+
+Holding the rest of the IS-LM apparatus fixed, vary $P$. Higher $P$ shrinks
+real balances $M/P$, shifting LM left, raising $r$, and lowering $Y$. The
+resulting $(Y, P)$ schedule is **aggregate demand**.
+
+## SRAS: prices catch up to expectations
+
+In the short run firms set prices based on expected prices $P^e$ and
+unit-cost pressures. A common parameterization is
+
+$$
+P = P^e + c\,(Y - Y_n),
+$$
+
+where $Y_n$ is the natural rate of output. SRAS slopes upward in $(Y, P)$.
+
+## Equilibrium
+
+<ADASChart client:load />
+
+Try a fiscal expansion (↑ G), a monetary expansion (↑ M), and a stagflationary
+supply shock (↑ $P^e$). Notice that the two demand shocks move $Y$ and $P$ in
+the same direction; the supply shock moves them in opposite directions.

@@ -1,0 +1,57 @@
+---
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Interactive Economics & Finance lessons for undergraduates.' } = Astro.props;
+const user = Astro.locals.user;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title} — Econ Studio</title>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <a href="/" class="font-semibold text-lg tracking-tight">Econ Studio</a>
+        <nav class="flex items-center gap-4 text-sm">
+          <a href="/macro" class="text-ink-muted hover:text-ink">Macro</a>
+          <a href="/practice" class="text-ink-muted hover:text-ink">Practice</a>
+          {user ? (
+            <>
+              <a href="/dashboard" class="text-ink-muted hover:text-ink">Dashboard</a>
+              <form method="POST" action="/api/auth/signout" class="inline">
+                <button class="text-ink-muted hover:text-ink" type="submit">
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <a class="rounded bg-accent px-3 py-1.5 text-white text-sm" href="/auth/login">
+              Sign in
+            </a>
+          )}
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-slate-200 py-8 mt-12 text-sm text-ink-muted">
+      <div class="mx-auto max-w-6xl px-4 flex justify-between">
+        <span>© {new Date().getFullYear()} Econ Studio</span>
+        <span>Built with Astro + Supabase</span>
+      </div>
+    </footer>
+  </body>
+</html>

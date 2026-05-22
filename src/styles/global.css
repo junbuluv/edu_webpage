@@ -1,0 +1,54 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  @apply bg-white text-ink;
+}
+
+.prose {
+  @apply max-w-prose;
+}
+
+.prose h1 {
+  @apply text-3xl font-semibold tracking-tight mt-0 mb-6;
+}
+.prose h2 {
+  @apply text-2xl font-semibold tracking-tight mt-10 mb-4;
+}
+.prose h3 {
+  @apply text-xl font-semibold mt-8 mb-3;
+}
+.prose p {
+  @apply leading-7 my-4 text-ink/90;
+}
+.prose ul {
+  @apply list-disc pl-6 my-4;
+}
+.prose ol {
+  @apply list-decimal pl-6 my-4;
+}
+.prose code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.9em] font-mono;
+}
+.prose pre {
+  @apply rounded-lg bg-slate-900 text-slate-100 p-4 overflow-x-auto;
+}
+.prose blockquote {
+  @apply border-l-4 border-accent/40 pl-4 italic text-ink-muted;
+}
+
+.katex-display {
+  @apply my-6 overflow-x-auto;
+}
