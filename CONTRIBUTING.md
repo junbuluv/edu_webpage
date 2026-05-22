@@ -71,6 +71,57 @@ If you need a new question type, **extend the union and the renderer in
 5. Avoid pulling in a new charting library. Recharts handles most cases;
    Plotly is already wired for the heavy ones.
 
+## Security primitives
+
+### PII HMAC
+
+Any value that is (a) personally identifying and (b) **not** a display name
+is HMAC'd with `PII_HMAC_SECRET` before storage. The helper lives at
+`src/lib/crypto/pii.ts`:
+
+```ts
+import { hmacPII, hmacPIIHex } from '@lib/crypto/pii';
+
+const e_hmac = hmacPIIHex('alice@school.edu');
+```
+
+What we HMAC today:
+
+- Client IP and User-Agent in `audit_log`
+- Email (in a follow-up: `profiles.email_hmac`)
+
+**Rotation.** Rotate `PII_HMAC_SECRET` annually or on suspected exposure.
+Because HMACs are deterministic for a given key, rotation requires re-HMAC'ing
+every stored value:
+
+```sql
+-- inside a transaction with the new secret loaded
+update public.audit_log
+   set client_ip_hmac = encode(hmac(<plaintext-no-longer-available>, $new_secret, 'sha256'), 'hex')
+ where ...;
+```
+
+In practice we cannot re-HMAC IP/UA after the fact (we never stored the
+plaintext). So rotation invalidates historical equality lookups on those
+columns — that's an acceptable trade since we only use them for forensic
+review, not joins.
+
+Email HMACs (when added) **can** be rotated because plaintext lives in
+`auth.users.email`. Do that in a one-shot migration that joins the two
+tables and re-derives.
+
+### Audit log
+
+`src/lib/audit.ts` exposes `logDisclosure(ctx)`. Every staff read of an
+individual student's record should call it. The helper:
+
+- writes through the service-role client (RLS denies regular inserts),
+- HMACs `client_ip` and `user-agent`,
+- captures `actor_id`, `actor_role`, `action`, `target_user_id`, `metadata`.
+
+Do **not** insert into `audit_log` from a page or component. The single
+chokepoint is enforced by RLS denying all writes from anon/student clients.
+
 ## Database changes
 
 The Supabase schema is high-blast-radius. To change it:

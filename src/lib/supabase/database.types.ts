@@ -85,6 +85,43 @@ export type Database = {
         };
         Relationships: [];
       };
+      audit_log: {
+        Row: {
+          id: string;
+          actor_id: string | null;
+          actor_role: 'student' | 'instructor' | 'admin' | null;
+          action: string;
+          target_user_id: string | null;
+          target_resource: string | null;
+          client_ip_hmac: string | null;
+          user_agent_hmac: string | null;
+          metadata: Json | null;
+          ts: string;
+        };
+        Insert: {
+          id?: string;
+          actor_id?: string | null;
+          actor_role?: 'student' | 'instructor' | 'admin' | null;
+          action: string;
+          target_user_id?: string | null;
+          target_resource?: string | null;
+          client_ip_hmac?: string | null;
+          user_agent_hmac?: string | null;
+          metadata?: Json | null;
+        };
+        Update: {
+          id?: string;
+          actor_id?: string | null;
+          actor_role?: 'student' | 'instructor' | 'admin' | null;
+          action?: string;
+          target_user_id?: string | null;
+          target_resource?: string | null;
+          client_ip_hmac?: string | null;
+          user_agent_hmac?: string | null;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

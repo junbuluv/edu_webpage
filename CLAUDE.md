@@ -72,6 +72,15 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 8. **No build artifacts in git.** `.vercel/`, `.astro/`, and `dist/` are
    gitignored. Don't `git add -A` from a fresh build without checking
    `git status` first.
+9. **PII hashing.** Sensitive identifiers other than `display_name` are
+   HMAC'd before storage (emails as `email_hmac` once dedupe lands; IP/UA
+   in `audit_log`). Use `hmacPII(value)` / `hmacPIIHex(value)` from
+   `src/lib/crypto/pii.ts`. Never store plaintext PII you don't need.
+   The HMAC secret (`PII_HMAC_SECRET`) lives outside the DB; rotation
+   procedure is documented in `CONTRIBUTING.md`.
+10. **Audit log writes go through `src/lib/audit.ts`.** Don't insert into
+    `audit_log` directly from a page — always call `logDisclosure(ctx)`
+    so IP/UA are HMAC'd consistently and the service-role client is used.
 
 ## Common tasks
 
