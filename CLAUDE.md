@@ -2,15 +2,17 @@
 
 This is **Econ Studio**, an interactive Economics & Finance education site for
 undergraduates. Lessons are MDX with embedded React-island simulations;
-quizzes are JSON; progress + auth live in Supabase.
+quizzes are JSON; progress + auth live in Supabase. Public repo at
+<https://github.com/junbuluv/edu_webpage>.
 
 ## Stack at a glance
 
-- Astro 5 (`output: 'server'`) + React 19 islands
-- Tailwind CSS (no shadcn-ui yet; primitive HTML + Tailwind is fine for now)
-- MDX with `remark-math` + `rehype-katex` for inline/display math
-- Recharts for most charts; Plotly available for heavier finance visualizations
-- Supabase (Postgres + auth + RLS) — see `supabase/schema.sql`
+- **Astro 5** with `output: 'server'` and the **`@astrojs/vercel`** adapter
+- **React 19** islands (Tailwind for styling, no shadcn-ui yet)
+- **MDX** with `remark-math` + `rehype-katex` for inline/display math
+- **Recharts** for most charts; Plotly available for heavier finance visualizations
+- **Supabase** (Postgres + auth + RLS) — see `supabase/schema.sql`
+- **Node 22+** required (Supabase realtime needs native WebSocket; enforced in `package.json#engines` and CI)
 
 Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@content/*`, `@/*`.
 
@@ -22,7 +24,29 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Visualizations: `src/components/viz/`
 - Quiz engine: `src/components/quiz/Quiz.tsx`
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
-- Middleware injects `Astro.locals.supabase` and `Astro.locals.user`
+- Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
+- Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
+
+## Repository workflow
+
+Branch protection is **active** on `main` (Repository Rulesets, free-tier
+public-repo path):
+
+- All changes go through a PR. Direct `git push origin main` is rejected.
+- CI's `verify` job (typecheck + build) must pass before merge.
+- PR branch must be up-to-date with `main` before merge (`strict`).
+- Conversation threads must be resolved.
+- Force pushes and branch deletions are blocked.
+- Required approvals: **0** today (solo dev can self-merge). Bump to 1 once
+  a second person is in the repo — see "When teammates join" in
+  `CONTRIBUTING.md`.
+
+CI config: `.github/workflows/ci.yml`. Status check name to keep in sync with
+the ruleset: `verify`. If the workflow job name ever changes, update the
+ruleset via:
+```bash
+gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
+```
 
 ## Conventions
 
@@ -35,24 +59,50 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 4. **Progress writes go through `src/lib/progress.ts`.** It transparently
    handles signed-in (Supabase) and anonymous (localStorage) cases. Don't
    sprinkle Supabase calls in components.
-5. **RLS is the source of truth for access control.** When adding a table,
+5. **Supabase is optional at runtime.** `createSupabaseServerClient` returns
+   `null` when env vars are missing; middleware sets `locals.supabase = null`
+   and redirects protected routes to `/auth/setup-required`. Public lessons +
+   practice keep working without `.env`. Don't reintroduce a hard throw.
+6. **RLS is the source of truth for access control.** When adding a table,
    add policies in `supabase/schema.sql` and regenerate types via
-   `npm run supabase:types`.
-6. **Keep lessons calibrated.** If a slider is added, pick parameter ranges
+   `npm run supabase:types`. Tag the PR title with `db:` so reviewers check RLS.
+7. **Keep lessons calibrated.** If a slider is added, pick parameter ranges
    where students see textbook intuitions (e.g. fiscal expansion raises both Y
    and r). Document the parameter choice in a small caption.
+8. **No build artifacts in git.** `.vercel/`, `.astro/`, and `dist/` are
+   gitignored. Don't `git add -A` from a fresh build without checking
+   `git status` first.
 
 ## Common tasks
 
-- New macro lesson: copy `src/content/lessons/macro/is-lm-intro.mdx` as a
-  template; pick a unique `order:` within the unit.
-- New quiz: add JSON under `src/content/quizzes/`. The slug must match
+- **New macro lesson**: copy `src/content/lessons/macro/is-lm-intro.mdx` as
+  a template; pick a unique `order:` within the unit.
+- **New quiz**: add JSON under `src/content/quizzes/`. The slug must match
   `quizSlug:` in the lesson frontmatter to link them.
-- New visualization: drop a `.tsx` under `src/components/viz/`. Keep it
+- **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
   self-contained, accept props for any tunable parameters, default to a
-  calibrated baseline.
-- Schema change: edit `supabase/schema.sql`, run it in Supabase SQL editor,
-  rerun `npm run supabase:types`.
+  calibrated baseline, include a "Reset" affordance for sliders.
+- **Schema change**: edit `supabase/schema.sql` (idempotent, always re-runnable),
+  apply in Supabase SQL editor, rerun `npm run supabase:types`, commit both
+  the SQL and the regenerated `database.types.ts`.
+- **Open a PR**: branch naming `feat/<slug>`, `fix/<slug>`, `lesson/<slug>`,
+  `chore/<slug>`. The PR template is required reading — fill the verification
+  checklist.
+
+## Verifying before declaring done
+
+1. `npm run typecheck` — must pass.
+2. `npm run build` — must compile cleanly. Build env needs at minimum:
+   ```bash
+   PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
+   PUBLIC_SUPABASE_ANON_KEY=placeholder \
+   PUBLIC_SITE_URL=http://localhost:4321 \
+   npm run build
+   ```
+3. `npm run dev` and exercise the affected lesson/quiz in a browser.
+
+If you touched anything Supabase-related, also re-run `supabase/schema.sql`
+in a scratch project and confirm RLS still blocks cross-user reads.
 
 ## Tone for content
 
@@ -73,3 +123,7 @@ cd ~/.claude/skills/gstack && ./setup --team
 
 Skills like /qa, /ship, /review, /investigate, and /browse become available after install.
 Use /browse for all web browsing. Use ~/.claude/skills/gstack/... for gstack file paths.
+
+A reference clone lives at `gstack_upstream/` (gitignored). It's the same
+toolkit, useful for reading the script source — do not import from it into
+the app.
