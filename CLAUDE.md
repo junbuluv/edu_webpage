@@ -54,24 +54,22 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Schema change: edit `supabase/schema.sql`, run it in Supabase SQL editor,
   rerun `npm run supabase:types`.
 
-## gstack (companion toolkit, not part of this app)
-
-Cloned at `gstack_upstream/` for reference. Useful slash commands while
-working on this repo (run from Claude Code with gstack installed under
-`~/.claude/skills/gstack`):
-
-- `/office-hours` — pressure-test the next feature idea
-- `/plan-eng-review` — lock the implementation plan
-- `/review` — diff review with bug/perf/security hits
-- `/qa` — open a real browser and exercise the dev server
-- `/ship` — bundle a PR with checks
-
-Don't import anything from `gstack_upstream/` into the app — it's a separate
-toolkit, not a dependency.
-
 ## Tone for content
 
 Direct, mathematical when useful, no AI-pitch padding. The audience is
 undergrads in an econ/finance class. Lead with the equation, then the
 intuition, then the simulation. Avoid em-dashes everywhere and rule-of-three
 filler.
+
+## gstack (recommended)
+
+This project uses [gstack](https://github.com/garrytan/gstack) for AI-assisted workflows.
+Install it for the best experience:
+
+```bash
+git clone --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+cd ~/.claude/skills/gstack && ./setup --team
+```
+
+Skills like /qa, /ship, /review, /investigate, and /browse become available after install.
+Use /browse for all web browsing. Use ~/.claude/skills/gstack/... for gstack file paths.
