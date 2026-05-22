@@ -9,6 +9,10 @@ declare global {
     interface Locals {
       supabase: SupabaseServerClient;
       user: User | null;
+      profile: {
+        role: 'student' | 'instructor' | 'admin';
+        display_name: string | null;
+      } | null;
     }
   }
 }

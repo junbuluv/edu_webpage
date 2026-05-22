@@ -71,6 +71,36 @@ If you need a new question type, **extend the union and the renderer in
 5. Avoid pulling in a new charting library. Recharts handles most cases;
    Plotly is already wired for the heavy ones.
 
+## Bootstrapping the first admin
+
+There is intentionally no "promote to admin" UI — an attacker who phished an
+admin's account could otherwise grant themselves admin via the app. Day-one
+admins are seeded by running SQL directly against the Supabase project.
+
+1. Have the candidate sign up normally at `/auth/signup` so their `auth.users`
+   row and `public.profiles` row exist.
+2. In the Supabase SQL editor (logged in as the project owner):
+   ```sql
+   update public.profiles
+      set role = 'admin'
+    where email = 'first-admin@school.edu';
+   ```
+   (If you've already dropped `profiles.email` in favor of `email_hmac`,
+   look up the user via `auth.users.email` instead:
+   ```sql
+   update public.profiles
+      set role = 'admin'
+    where id = (select id from auth.users where email = 'first-admin@school.edu');
+   ```)
+3. The admin signs out and back in; `/admin` is now reachable.
+
+Promote subsequent admins/instructors via the admin UI once it's built.
+That UI must:
+- require `aal2` (TOTP MFA) for the actor,
+- write an `audit_log` row via `logDisclosure({ action: 'promote_role', ... })`,
+- never accept the new role from a URL/query param without re-checking the
+  caller's role on the server.
+
 ## Security primitives
 
 ### PII HMAC

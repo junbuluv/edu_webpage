@@ -85,6 +85,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      enrollments: {
+        Row: {
+          user_id: string;
+          course_slug: string;
+          instructor_id: string;
+          semester: string;
+          enrolled_at: string;
+        };
+        Insert: {
+          user_id: string;
+          course_slug: string;
+          instructor_id: string;
+          semester: string;
+          enrolled_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          course_slug?: string;
+          instructor_id?: string;
+          semester?: string;
+          enrolled_at?: string;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: string;
@@ -124,7 +148,17 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      log_disclosure: {
+        Args: {
+          p_action: string;
+          p_target_user_id: string;
+          p_target_resource?: string | null;
+          p_metadata?: Json | null;
+        };
+        Returns: void;
+      };
+    };
     Enums: {
       user_role: 'student' | 'instructor' | 'admin';
       progress_status: 'started' | 'completed';
