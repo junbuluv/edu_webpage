@@ -1,0 +1,24 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+
+const user = Astro.locals.user!;
+const profile = Astro.locals.profile!;
+---
+
+<BaseLayout title="Admin">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">Admin</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Site administration</h1>
+    <p class="mt-3 text-ink-muted">
+      Signed in as {profile.display_name ?? user.email}. Role: {profile.role}.
+    </p>
+
+    <section class="mt-10 space-y-3">
+      <p class="text-ink-muted">
+        Admin tooling lands here as it's built: instructor invites, account
+        management, audit-log search, data exports. For now, day-one admin
+        actions go through SQL — see <a class="text-accent underline" href="https://github.com/junbuluv/edu_webpage/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

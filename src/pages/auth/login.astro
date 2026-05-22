@@ -53,5 +53,9 @@ const error = Astro.url.searchParams.get('error');
       No account yet?
       <a class="text-accent underline" href={`/auth/signup?next=${encodeURIComponent(next)}`}>Create one</a>
     </p>
+    <p class="mt-2 text-sm text-ink-muted">
+      Forgot your password?
+      <a class="text-accent underline" href="/auth/forgot">Reset it</a>
+    </p>
   </div>
 </BaseLayout>
