@@ -1,6 +1,7 @@
-// Placeholder. Replace by running:
-//   npm run supabase:types
-// after creating your Supabase project and applying supabase/schema.sql.
+// Placeholder. Replace by running `npm run supabase:types` once your project
+// is created. The shape below matches what `supabase gen types typescript`
+// emits so query results type-check correctly against this stub.
+
 export type Json =
   | string
   | number
@@ -9,7 +10,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -26,7 +27,13 @@ export interface Database {
           display_name?: string | null;
           role?: 'student' | 'instructor' | 'admin';
         };
-        Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+        Update: {
+          id?: string;
+          email?: string;
+          display_name?: string | null;
+          role?: 'student' | 'instructor' | 'admin';
+        };
+        Relationships: [];
       };
       lesson_progress: {
         Row: {
@@ -42,9 +49,13 @@ export interface Database {
           status?: 'started' | 'completed';
           completed_at?: string | null;
         };
-        Update: Partial<
-          Database['public']['Tables']['lesson_progress']['Insert']
-        >;
+        Update: {
+          user_id?: string;
+          lesson_slug?: string;
+          status?: 'started' | 'completed';
+          completed_at?: string | null;
+        };
+        Relationships: [];
       };
       quiz_attempts: {
         Row: {
@@ -64,9 +75,15 @@ export interface Database {
           max_score: number;
           answers: Json;
         };
-        Update: Partial<
-          Database['public']['Tables']['quiz_attempts']['Insert']
-        >;
+        Update: {
+          id?: string;
+          user_id?: string;
+          quiz_slug?: string;
+          score?: number;
+          max_score?: number;
+          answers?: Json;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
@@ -75,5 +92,6 @@ export interface Database {
       user_role: 'student' | 'instructor' | 'admin';
       progress_status: 'started' | 'completed';
     };
+    CompositeTypes: Record<string, never>;
   };
-}
+};

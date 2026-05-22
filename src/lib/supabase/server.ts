@@ -16,6 +16,8 @@ export function isSupabaseConfigured() {
   );
 }
 
+export type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
+
 export function createSupabaseServerClient(
   cookies: AstroCookies,
   headers: Headers,
@@ -34,7 +36,13 @@ export function createSupabaseServerClient(
           name === 'cookie' ? parseCookieHeader(value) : [],
         );
       },
-      setAll(cookiesToSet) {
+      setAll(
+        cookiesToSet: Array<{
+          name: string;
+          value: string;
+          options: CookieOptionsWithName;
+        }>,
+      ) {
         cookiesToSet.forEach(({ name, value, options }) => {
           cookies.set(name, value, { ...COOKIE_OPTIONS, ...options });
           headers.append(
