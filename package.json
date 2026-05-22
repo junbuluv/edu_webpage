@@ -4,6 +4,9 @@
   "type": "module",
   "private": true,
   "description": "Interactive Economics & Finance course site for undergraduates",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
