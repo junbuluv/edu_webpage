@@ -1,0 +1,41 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lessons = (await getCollection('lessons', (l) => !l.data.draft && l.data.course === 'macro'))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const byUnit = new Map<string, typeof lessons>();
+for (const l of lessons) {
+  const arr = byUnit.get(l.data.unit) ?? [];
+  arr.push(l);
+  byUnit.set(l.data.unit, arr);
+}
+---
+
+<BaseLayout title="Macroeconomics">
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <h1 class="text-3xl font-semibold tracking-tight">Macroeconomics</h1>
+    <p class="mt-3 text-ink-muted">
+      The undergraduate macro sequence in interactive form: short-run output
+      determination, money and interest, growth, and inflation.
+    </p>
+
+    {[...byUnit.entries()].map(([unit, items]) => (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">{unit}</h2>
+        <ol class="mt-4 space-y-2">
+          {items.map((l) => (
+            <li>
+              <a href={`/lessons/${l.slug}`}
+                 class="flex items-baseline justify-between rounded border border-slate-200 px-4 py-3 hover:border-accent">
+                <span class="font-medium">{l.data.title}</span>
+                <span class="text-sm text-ink-muted">⏱ {l.data.estimatedMinutes} min</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

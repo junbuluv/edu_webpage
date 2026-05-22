@@ -1,0 +1,23 @@
+# Default owner — every PR pings @junbuluv unless overridden below.
+*                                   @junbuluv
+
+# Content authors own their course
+# (uncomment and add usernames as teammates join)
+# /src/content/lessons/macro/        @macro-lead
+# /src/content/lessons/micro/        @micro-lead
+# /src/content/lessons/finance/      @finance-lead
+
+# Visualization library — keep this consistent
+/src/components/viz/                 @junbuluv
+
+# Quiz engine — schema changes need engineering review
+/src/components/quiz/                @junbuluv
+/src/content/config.ts               @junbuluv
+
+# Supabase schema is high-blast-radius
+/supabase/                           @junbuluv
+/src/lib/supabase/                   @junbuluv
+/src/middleware.ts                   @junbuluv
+
+# CI + repo hygiene
+/.github/                            @junbuluv
