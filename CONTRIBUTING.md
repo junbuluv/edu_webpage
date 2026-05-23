@@ -73,33 +73,35 @@ If you need a new question type, **extend the union and the renderer in
 
 ## Bootstrapping the first admin
 
-There is intentionally no "promote to admin" UI — an attacker who phished an
-admin's account could otherwise grant themselves admin via the app. Day-one
-admins are seeded by running SQL directly against the Supabase project.
+Admins are designated by the project owner via SQL. There is **no
+self-serve and no in-app promotion path**, by design. An attacker who
+phished an admin account cannot grant themselves further admins through
+the app, because the app has no surface that does so.
 
-1. Have the candidate sign up normally at `/auth/signup` so their `auth.users`
-   row and `public.profiles` row exist.
-2. In the Supabase SQL editor (logged in as the project owner):
+To promote a user to `admin` or `instructor`:
+
+1. Have the candidate sign up normally at `/auth/signup` so their
+   `auth.users` row and `public.profiles` row exist.
+2. In the Supabase SQL editor (logged in as the project owner), look up
+   the user by their email in `auth.users` and update `public.profiles`:
    ```sql
    update public.profiles
-      set role = 'admin'
-    where email = 'first-admin@school.edu';
+      set role = 'admin'   -- or 'instructor'
+    where id = (
+      select id from auth.users where email = 'them@school.edu'
+    );
    ```
-   (If you've already dropped `profiles.email` in favor of `email_hmac`,
-   look up the user via `auth.users.email` instead:
-   ```sql
-   update public.profiles
-      set role = 'admin'
-    where id = (select id from auth.users where email = 'first-admin@school.edu');
-   ```)
-3. The admin signs out and back in; `/admin` is now reachable.
+   (If a future change ever introduces `profiles.email_hmac` for lookup
+   without storing email, the join above still works because
+   `auth.users.email` remains the source of truth.)
+3. The user signs out and back in; `/admin` (or `/instructor`) is now
+   reachable for them.
 
-Promote subsequent admins/instructors via the admin UI once it's built.
-That UI must:
-- require `aal2` (TOTP MFA) for the actor,
-- write an `audit_log` row via `logDisclosure({ action: 'promote_role', ... })`,
-- never accept the new role from a URL/query param without re-checking the
-  caller's role on the server.
+Demotion uses the same flow with `role = 'student'`.
+
+There is no admin UI. Anything that would otherwise need one — bulk
+role changes, instructor invites, account deletions — runs as SQL by
+the project owner, and is recorded by Postgres's own logs.
 
 ## Security primitives
 
