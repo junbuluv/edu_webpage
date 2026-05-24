@@ -66,9 +66,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Investment Decision Rules (NPV, IRR, Payback)",
-    "url": "https://fiveable.me/finance/unit-8/investment-decision-rules-npv-irr-payback/study-guide/hvoZKazC471s3FS4",
-    "source": "Fiveable (Finance study guide)",
-    "why": "A clean side-by-side study guide comparing the three rules, their assumptions, and where each breaks down \u2014 perfect quiz follow-up."
+    "title": "Boeing to Acquire Spirit AeroSystems",
+    "url": "https://investors.boeing.com/investors/news/press-release-details/2024/Boeing-to-Acquire-Spirit-AeroSystems/default.aspx",
+    "source": "Boeing Investor Relations",
+    "why": "Boeing's $4.7B reacquisition of Spirit AeroSystems is a real capital-budgeting decision where the choice between NPV, payback, and strategic real-option logic shaped the bid.",
+    "date": "2024-07"
   }
 }

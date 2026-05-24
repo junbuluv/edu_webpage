@@ -66,9 +66,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Solow Growth Model: Overview, Assumptions, and How to Solve",
-    "url": "https://corporatefinanceinstitute.com/resources/economics/solow-growth-model/",
-    "source": "Corporate Finance Institute",
-    "why": "Concise teaching-style walkthrough of diminishing returns to capital, steady state, and why countries with different parameters fail to converge."
+    "title": "The Productivity Puzzle: AI, Technology Adoption and the Workforce",
+    "url": "https://www.richmondfed.org/publications/research/economic_brief/2024/eb_24-25",
+    "source": "Richmond Fed Economic Brief",
+    "why": "Richmond Fed investigation of why massive AI capex has not yet translated to measurable productivity growth \u2014 a live Solow-paradox case study with hard data.",
+    "date": "2024-08"
   }
 }

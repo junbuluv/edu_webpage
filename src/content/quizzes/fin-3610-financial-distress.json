@@ -67,9 +67,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Trade-Off Theory of Capital Structure: Definition + Factors",
-    "url": "https://www.wallstreetprep.com/knowledge/trade-off-theory/",
-    "source": "Wall Street Prep",
-    "why": "Balances the tax-shield benefit against bankruptcy and debt-overhang costs in plain language, with the optimal-leverage diagram."
+    "title": "WeWork, once valued at $47 billion, files for bankruptcy",
+    "url": "https://www.cnbc.com/2023/11/07/wework-files-for-bankruptcy.html",
+    "source": "CNBC",
+    "why": "WeWork's Chapter 11 with $18.65B liabilities vs $15.06B assets is a vivid recent case of financial distress costs and unsustainable lease/debt obligations driving restructuring.",
+    "date": "2023-11"
   }
 }

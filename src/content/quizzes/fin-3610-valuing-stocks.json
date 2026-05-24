@@ -58,9 +58,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Discounted Cashflow Valuation: Equity and Firm Models (lecture notes)",
-    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/eqnotes/dcfveg.pdf",
-    "source": "Aswath Damodaran, NYU Stern",
-    "why": "Damodaran's own teaching notes show when to use DDM, FCFE, or FCFF and the multi-stage extensions \u2014 the gold-standard next step after a DDM quiz."
+    "title": "The Power of Expectations: Nvidia's Earnings and the Market Reaction",
+    "url": "https://aswathdamodaran.blogspot.com/2024/09/the-expectations-game-aftermath-of.html",
+    "source": "Damodaran's Musings on Markets blog",
+    "why": "Damodaran's own DCF on NVIDIA ($87 intrinsic vs $106 market) is a concrete, named practitioner's valuation of the central AI stock \u2014 not a textbook explainer.",
+    "date": "2024-09"
   }
 }

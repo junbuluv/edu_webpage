@@ -71,9 +71,10 @@
     }
   ],
   "furtherReading": {
-    "title": "An Introduction to Airline Fuel Hedging Strategies \u2014 Swaps",
-    "url": "https://www.mercatusenergy.com/blog/bid/77634/an-introduction-to-airline-fuel-hedging-strategies-swaps",
-    "source": "Mercatus Energy Advisors",
-    "why": "Concrete walk-through of jet-fuel swap mechanics and the cost-variance-reduction motive \u2014 the textbook corporate-hedging case."
+    "title": "Southwest Airlines offsets rising fuel costs with fuel hedging",
+    "url": "https://www.axios.com/local/atlanta/2022/03/15/southwest-airlines-rising-fuel-costs-fuel-hedging",
+    "source": "Axios Atlanta",
+    "why": "Southwest's 64%-hedged 2022 fuel position saved hundreds of millions vs competitors during the post-Ukraine-invasion oil spike \u2014 a canonical risk-management-with-derivatives case.",
+    "date": "2022-03"
   }
 }

@@ -63,9 +63,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Real Options: Fact and Fantasy",
-    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/execval/optval.pdf",
-    "source": "Aswath Damodaran, NYU Stern",
-    "why": "Damodaran's lecture note on valuing options to delay, expand, and abandon \u2014 the canonical free read on real options without paywalls."
+    "title": "Aramco pulls back on oil production expansion plan in surprise move ordered by Saudi government",
+    "url": "https://worldoil.com/news/2024/1/30/aramco-pulls-back-on-oil-production-expansion-plan-in-surprise-move-ordered-by-saudi-government",
+    "source": "World Oil",
+    "why": "Aramco's cancellation of its 13 mb/d capacity expansion ($40B capex cut) is the textbook 'option to defer/abandon' an oil-production project being exercised in real time.",
+    "date": "2024-01"
   }
 }

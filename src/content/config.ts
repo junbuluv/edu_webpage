@@ -20,6 +20,7 @@ const lessons = defineCollection({
         title: z.string(),
         url: z.string().url(),
         source: z.string(),
+        date: z.string().optional(),
         why: z.string(),
       })
       .optional(),
@@ -106,6 +107,7 @@ const quizzes = defineCollection({
         title: z.string(),
         url: z.string().url(),
         source: z.string(),
+        date: z.string().optional(),
         why: z.string(),
       })
       .optional(),

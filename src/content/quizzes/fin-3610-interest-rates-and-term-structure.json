@@ -55,9 +55,10 @@
     }
   ],
   "furtherReading": {
-    "title": "The Yield Curve as a Leading Indicator (FAQ)",
-    "url": "https://www.newyorkfed.org/research/capital_markets/ycfaq",
-    "source": "Federal Reserve Bank of New York",
-    "why": "Authoritative NY Fed FAQ on the term structure that ties yields, expectations, and recession signaling to the curve students just studied."
+    "title": "The most well-known recession indicator stopped flashing red, but now another one is going off",
+    "url": "https://www.cnn.com/2024/09/13/economy/inverted-treasury-yield-recession-indicator/index.html",
+    "source": "CNN Business",
+    "why": "Covers the historic 10y-2y inversion that ran Oct 2022 through Dec 2024 \u2014 the longest yield-curve inversion in 45 years \u2014 and its real-time market interpretation.",
+    "date": "2024-09"
   }
 }

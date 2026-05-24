@@ -59,9 +59,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Optimal Capital Structure with Taxes: Modigliani and Miller 1963",
-    "url": "https://www.simtrade.fr/blog_simtrade/optimal-capital-structure-with-taxes-modigliani-miller-1963/",
-    "source": "SimTrade Blog",
-    "why": "Walks through the 1963 MM-with-taxes extension and the V_L = V_U + T_c\u00b7D tax-shield formula exactly as taught in class."
+    "title": "Debt and Taxes? The Effect of TCJA Interest Limitations on Capital Structure",
+    "url": "https://tax.kenaninstitute.unc.edu/publication/debt-and-taxes-the-effect-of-tcja-interest-limitations-on-capital-structure/",
+    "source": "UNC Kenan Institute / Tax Center",
+    "why": "Empirical research on how TCJA's \u00a7163(j) interest limit lowered affected firms' leverage by 3.5% of assets \u2014 a direct test of the debt-tax-shield trade-off in real firms.",
+    "date": "2024"
   }
 }

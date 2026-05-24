@@ -59,9 +59,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Security Market Line (SML): Formula + Slope of Graph",
-    "url": "https://www.wallstreetprep.com/knowledge/security-market-line-sml/",
-    "source": "Wall Street Prep",
-    "why": "Concise practitioner explainer of CAPM, beta, and the SML with a worked example \u2014 exactly the diagram the quiz references."
+    "title": "Tesla Valuation Debate Intensifies as Fundamentals Slow and AI Hype Builds",
+    "url": "https://www.investing.com/analysis/tesla-valuation-debate-intensifies-as-fundamentals-slow-and-ai-hype-builds-200671155",
+    "source": "Investing.com Analysis",
+    "why": "Live debate over Tesla's beta of ~1.8 and whether traditional CAPM/SML mispricing applies to AI-narrative stocks where realized returns diverge from market-risk-based expected returns.",
+    "date": "2025"
   }
 }

@@ -63,9 +63,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Cost of Capital (Counterpoint Global Insights)",
-    "url": "https://www.morganstanley.com/im/publication/insights/articles/article_costofcapital.pdf",
-    "source": "Morgan Stanley / Michael Mauboussin & Dan Callahan",
-    "why": "Mauboussin's practitioner deep-dive on estimating cost of debt, cost of equity, risk-free rate, and ERP \u2014 the best one-stop practical follow-up."
+    "title": "Data Update 4 for 2024: Danger and Opportunity \u2014 Bringing Risk into the Equation",
+    "url": "https://aswathdamodaran.blogspot.com/2024/01/data-update-4-for-2024-danger-and.html",
+    "source": "Damodaran's Musings on Markets blog",
+    "why": "Damodaran computes the WACC across 47,698 actual companies for 2024 (median 7.9% US) \u2014 concrete cost-of-capital data, not a how-to explainer.",
+    "date": "2024-01"
   }
 }

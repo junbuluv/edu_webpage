@@ -55,9 +55,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Estimating Equity Risk Premiums",
-    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/papers/riskprem.pdf",
-    "source": "Aswath Damodaran, NYU Stern",
-    "why": "The standard reference on historical vs. implied equity premium estimates with the long-run US and global data students see quoted in lecture."
+    "title": "The Indispensability of Risk",
+    "url": "https://www.oaktreecapital.com/insights/memo/the-indispensability-of-risk",
+    "source": "Oaktree Capital Memo (Howard Marks)",
+    "why": "Howard Marks' April 2024 memo makes the practitioner case for the historical risk-return tradeoff using real return distributions \u2014 a named, credible market-view source, not a textbook.",
+    "date": "2024-04"
   }
 }

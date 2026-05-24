@@ -76,9 +76,10 @@
     }
   ],
   "furtherReading": {
-    "title": "How to Read a 10-K",
-    "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
-    "source": "SEC Investor.gov",
-    "why": "The SEC's own beginner guide to navigating the actual document students will be pulling ratios from, including MD&A and audited statements."
+    "title": "Inside Macy's $151 million accounting error",
+    "url": "https://accountancyage.com/2024/12/12/inside-macys-151-million-accounting-error/",
+    "source": "Accountancy Age",
+    "why": "Concrete 2024 case of hidden delivery-expense accruals at Macy's that distorted reported earnings \u2014 direct lesson on earnings quality and internal control over financial statements.",
+    "date": "2024-12"
   }
 }
