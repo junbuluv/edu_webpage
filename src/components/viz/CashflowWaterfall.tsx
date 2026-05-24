@@ -63,6 +63,8 @@ function compute(s: State) {
     fcf: number;
     pv: number;
     cumNPV: number;
+    dWCNeg: number;
+    capexNeg: number;
   }> = [];
   let prevRev = s.revenue0;
   let cum = 0;
