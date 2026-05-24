@@ -9,9 +9,14 @@
       "type": "multiple_choice",
       "id": "q1",
       "prompt": "A bond's coupon rate is 5% and its YTM is 7%. The bond is trading at:",
-      "choices": ["A premium (P > F)", "Par (P = F)", "A discount (P < F)", "Cannot tell without knowing maturity"],
+      "choices": [
+        "A premium (P > F)",
+        "Par (P = F)",
+        "A discount (P < F)",
+        "Cannot tell without knowing maturity"
+      ],
       "correctIndex": 2,
-      "explanation": "When the market demands a higher yield than the coupon offers, the price must drop below face so total return matches YTM. c < y → discount.",
+      "explanation": "When the market demands a higher yield than the coupon offers, the price must drop below face so total return matches YTM. c < y \u2192 discount.",
       "points": 1
     },
     {
@@ -21,7 +26,7 @@
       "answer": 1043.29,
       "tolerance": 1.0,
       "unit": "$",
-      "explanation": "P = 60 × [(1 - 1.05^-5)/0.05] + 1000/1.05^5 = 60 × 4.3295 + 783.53 = 259.77 + 783.53 ≈ 1,043.30.",
+      "explanation": "P = 60 \u00d7 [(1 - 1.05^-5)/0.05] + 1000/1.05^5 = 60 \u00d7 4.3295 + 783.53 = 259.77 + 783.53 \u2248 1,043.30.",
       "points": 2
     },
     {
@@ -35,7 +40,7 @@
         "Falls about 7.5%"
       ],
       "correctIndex": 1,
-      "explanation": "ΔP/P ≈ −D_mod × Δy = −7.5 × 0.005 = −3.75%. The negative sign means price falls when yield rises.",
+      "explanation": "\u0394P/P \u2248 \u2212D_mod \u00d7 \u0394y = \u22127.5 \u00d7 0.005 = \u22123.75%. The negative sign means price falls when yield rises.",
       "points": 2
     },
     {
@@ -52,5 +57,11 @@
       "explanation": "A classic duration mismatch: long-duration assets (Treasuries, MBS) fell sharply in price as yields rose, while deposit liabilities did not appreciate to offset.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "The Silicon Valley Bank Collapse: Takeaways and Lessons Learned",
+    "url": "https://www.kenaninstitute.unc.edu/commentary/the-silicon-valley-bank-collapse-takeaways-and-lessons-learned/",
+    "source": "Kenan Institute, UNC Kenan-Flagler",
+    "why": "UNC finance faculty piece that uses SVB to show exactly how duration and YTM math destroyed a bank \u2014 the canonical real-world bond-pricing case."
+  }
 }

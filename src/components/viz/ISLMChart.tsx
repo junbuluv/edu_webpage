@@ -1,61 +1,57 @@
 import { useMemo, useState } from 'react';
 import {
-  Line,
-  LineChart,
   CartesianGrid,
   Legend,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
-  ResponsiveContainer,
-  ReferenceDot,
+  ZAxis,
 } from 'recharts';
 
 // Closed-economy IS-LM in (Y, r).
-// IS: Y = (C0 + I0 - b*r + G) / (1 - c(1 - t))
-// LM: M/P = k*Y - h*r  ==>  r = (k*Y - M/P) / h
-//
-// Solved equilibrium:
-//   alpha = 1 / (1 - c(1 - t))
-//   A = C0 + I0 + G
-//   IS: Y_IS(r) = alpha*(A - b*r)
-//   LM: r_LM(Y) = (k*Y - M/P) / h
-//   Y* = (A*alpha*h + b*M/P) / (h + alpha*b*k)
-//   r* = (k*Y* - M/P) / h
+// IS: Y = C0 + I0 - b*r + G; with linear C, t, multiplier alpha:
+//   Y_IS(r) = alpha*(A - b*r),   A = C0 + I0 + G,   alpha = 1/(1 - c(1-t))
+// LM: M/P = k*Y - h*r  ==>  r_LM(Y) = (k*Y - M/P)/h
+// Equilibrium (sub LM into IS):
+//   alpha*A*h + alpha*b*(M/P) = Y*(h + alpha*b*k)
+//   Y* = (alpha*A*h + alpha*b*M/P) / (h + alpha*b*k)
+//   r* = (k*Y* - M/P)/h
 
 interface State {
-  G: number; // government spending shifter (IS)
-  M: number; // money supply (LM)
-  A0: number; // autonomous spending C0 + I0 baseline
+  G: number;
+  M: number;
+  A0: number;
 }
 
-const baseline = { G: 100, M: 600, A0: 200 };
+const baseline: State = { G: 100, M: 600, A0: 200 };
 const params = { c: 0.6, t: 0.2, b: 20, k: 0.5, h: 10, P: 1 };
 
 function solve(s: State) {
   const { c, t, b, k, h, P } = params;
   const alpha = 1 / (1 - c * (1 - t));
   const A = s.A0 + s.G;
-  const Yeq = (A * alpha * h + b * (s.M / P)) / (h + alpha * b * k);
+  const Yeq = (A * alpha * h + alpha * b * (s.M / P)) / (h + alpha * b * k);
   const req = (k * Yeq - s.M / P) / h;
   return { alpha, A, Yeq, req };
 }
 
-function buildSeries(s: State) {
+function buildCurves(s: State) {
   const { alpha, A } = solve(s);
   const { b, k, h, P } = params;
-  const rs = Array.from({ length: 41 }, (_, i) => i * 0.5); // r from 0 to 20
-  return rs.map((r) => ({
-    r,
-    Y_IS: alpha * (A - b * r),
-    Y_LM: (h * r + s.M / P) / k, // invert LM to plot Y on x-axis below
-  }));
+  const rs = Array.from({ length: 41 }, (_, i) => i * 0.5);
+  const isCurve = rs.map((r) => ({ x: alpha * (A - b * r), y: r }));
+  const lmCurve = rs.map((r) => ({ x: (h * r + s.M / P) / k, y: r }));
+  return { isCurve, lmCurve };
 }
 
 export default function ISLMChart() {
   const [state, setState] = useState<State>(baseline);
-  const data = useMemo(() => buildSeries(state), [state]);
+  const { isCurve, lmCurve } = useMemo(() => buildCurves(state), [state]);
   const eq = useMemo(() => solve(state), [state]);
+  const eqPoint = [{ x: eq.Yeq, y: eq.req }];
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -99,60 +95,64 @@ export default function ISLMChart() {
 
       <div className="mt-4 h-80">
         <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
-          >
+          <ScatterChart margin={{ top: 8, right: 16, bottom: 28, left: 8 }}>
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
-              dataKey="Y_IS"
+              dataKey="x"
               type="number"
               domain={['auto', 'auto']}
               tickFormatter={(v) => v.toFixed(0)}
-              label={{ value: 'Output (Y)', position: 'insideBottom', offset: -10 }}
+              label={{
+                value: 'Output (Y)',
+                position: 'insideBottom',
+                offset: -10,
+                fontSize: 11,
+              }}
             />
             <YAxis
-              dataKey="r"
+              dataKey="y"
               type="number"
               domain={[0, 20]}
-              label={{ value: 'Interest rate (r, %)', angle: -90, position: 'insideLeft' }}
+              label={{
+                value: 'Interest rate (r, %)',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
             />
+            <ZAxis range={[0, 0]} />
             <Tooltip
-              formatter={(v: number) => v.toFixed(2)}
-              labelFormatter={() => ''}
+              cursor={{ strokeDasharray: '3 3' }}
+              formatter={(v: number, name: string) => [
+                name === 'y' ? `${v.toFixed(2)}%` : v.toFixed(0),
+                name === 'y' ? 'r' : 'Y',
+              ]}
             />
             <Legend verticalAlign="top" height={28} />
-            <Line
-              data={data}
-              dataKey="r"
+            <Scatter
+              data={isCurve}
               name="IS"
-              dot={false}
-              stroke="#2563eb"
-              strokeWidth={2}
+              fill="#2563eb"
+              line={{ stroke: '#2563eb', strokeWidth: 2 }}
+              shape={() => <></>}
               isAnimationActive={false}
-              type="monotone"
             />
-            <Line
-              data={data.map((d) => ({ ...d, _x: d.Y_LM }))}
-              dataKey="r"
+            <Scatter
+              data={lmCurve}
               name="LM"
-              dot={false}
-              stroke="#dc2626"
-              strokeWidth={2}
+              fill="#dc2626"
+              line={{ stroke: '#dc2626', strokeWidth: 2 }}
+              shape={() => <></>}
               isAnimationActive={false}
-              type="monotone"
-              xAxisId={0}
             />
-            <ReferenceDot
-              x={eq.Yeq}
-              y={eq.req}
-              r={5}
+            <Scatter
+              data={eqPoint}
+              name="Equilibrium"
               fill="#0f172a"
-              stroke="white"
-              ifOverflow="visible"
-              label={{ value: 'Equilibrium', position: 'top', fontSize: 12 }}
+              shape="circle"
+              isAnimationActive={false}
             />
-          </LineChart>
+          </ScatterChart>
         </ResponsiveContainer>
       </div>
 

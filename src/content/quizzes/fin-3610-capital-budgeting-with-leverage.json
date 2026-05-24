@@ -9,7 +9,12 @@
       "type": "multiple_choice",
       "id": "q1",
       "prompt": "Which valuation method discounts the unlevered free cash flow at the unlevered cost of capital, then adds the PV of the tax shield separately?",
-      "choices": ["WACC", "APV (Adjusted Present Value)", "FTE (Flow to Equity)", "Dividend Discount Model"],
+      "choices": [
+        "WACC",
+        "APV (Adjusted Present Value)",
+        "FTE (Flow to Equity)",
+        "Dividend Discount Model"
+      ],
       "correctIndex": 1,
       "explanation": "APV explicitly separates operating value from the value of financing-related tax shields. Useful when the debt schedule is known.",
       "points": 1
@@ -38,7 +43,11 @@
         "Capital structure changes over time being ignored in WACC",
         "The three methods are fundamentally different and can't agree"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "In a consistent setup, all three methods give the same answer. Disagreement = inconsistent inputs, mixed CF definitions, or treating WACC as constant when capital structure varies.",
       "points": 2
     },
@@ -49,8 +58,14 @@
       "answer": 100.9,
       "tolerance": 0.5,
       "unit": "$M",
-      "explanation": "V_U = 10/0.11 = 90.9. PV(TS) = 0.25 × 40 = 10.0. V = 90.9 + 10 = 100.9M.",
+      "explanation": "V_U = 10/0.11 = 90.9. PV(TS) = 0.25 \u00d7 40 = 10.0. V = 90.9 + 10 = 100.9M.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "A Comparison of the APV, FTE, and WACC Approaches",
+    "url": "https://highered.mheducation.com/sites/0077129490/student_view0/ebook/chapter17/chbody1/17_4_a_comparison_of_the_apv__fte_and_wacc_approaches.htm",
+    "source": "McGraw-Hill Higher Ed (Ross/Westerfield/Jaffe online chapter)",
+    "why": "The textbook section that lays out when WACC, APV, and FTE each give the right answer \u2014 directly mirrors the quiz's three-method framing."
+  }
 }

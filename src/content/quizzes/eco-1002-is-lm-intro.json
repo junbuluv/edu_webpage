@@ -16,7 +16,7 @@
         "LM to the left"
       ],
       "correctIndex": 0,
-      "explanation": "Higher G raises autonomous spending, raising Y for any given r — that's a rightward shift of IS.",
+      "explanation": "Higher G raises autonomous spending, raising Y for any given r \u2014 that's a rightward shift of IS.",
       "points": 1
     },
     {
@@ -38,22 +38,25 @@
       "id": "q3",
       "prompt": "Which of the following are channels through which a higher interest rate reduces Y in IS-LM?",
       "choices": [
-        "Lower investment via I(r) = I0 − b·r",
-        "Lower money demand via k·Y − h·r",
+        "Lower investment via I(r) = I0 \u2212 b\u00b7r",
+        "Lower money demand via k\u00b7Y \u2212 h\u00b7r",
         "Multiplier compression of the autonomous shock",
         "Crowding out of private spending"
       ],
-      "correctIndices": [0, 3],
+      "correctIndices": [
+        0,
+        3
+      ],
       "explanation": "Higher r lowers investment directly and crowds out private spending. Money demand effects are about market-clearing, not output, and the multiplier itself isn't an r-channel.",
       "points": 2
     },
     {
       "type": "numeric",
       "id": "q4",
-      "prompt": "With c = 0.6, t = 0.2, what is the Keynesian spending multiplier α = 1/(1 − c(1−t))? Round to two decimals.",
+      "prompt": "With c = 0.6, t = 0.2, what is the Keynesian spending multiplier \u03b1 = 1/(1 \u2212 c(1\u2212t))? Round to two decimals.",
       "answer": 1.92,
       "tolerance": 0.02,
-      "explanation": "1 − 0.6·(1 − 0.2) = 1 − 0.48 = 0.52, so α ≈ 1/0.52 ≈ 1.92.",
+      "explanation": "1 \u2212 0.6\u00b7(1 \u2212 0.2) = 1 \u2212 0.48 = 0.52, so \u03b1 \u2248 1/0.52 \u2248 1.92.",
       "points": 1
     },
     {
@@ -63,8 +66,14 @@
       "answer": 6.4,
       "tolerance": 0.3,
       "unit": "%",
-      "explanation": "Plug into Y* = (αhA + b·M/P)/(h + αbk) and r* = (k·Y* − M/P)/h. α ≈ 1.923, A = 300, giving Y* ≈ 423 and r* ≈ 6.4%.",
+      "explanation": "Plug into Y* = (\u03b1hA + b\u00b7M/P)/(h + \u03b1bk) and r* = (k\u00b7Y* \u2212 M/P)/h. \u03b1 \u2248 1.923, A = 300, giving Y* \u2248 423 and r* \u2248 6.4%.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "LM part of the IS-LM model",
+    "url": "https://www.khanacademy.org/economics-finance-domain/macroeconomics/income-and-expenditure-topic/is-lm-model-tutorial/v/lm-part-of-the-is-lm-model",
+    "source": "Khan Academy",
+    "why": "A free, step-by-step walkthrough of the LM curve and how it connects to the goods market \u2014 exactly the visual reinforcement an undergraduate needs after a first IS-LM quiz."
+  }
 }

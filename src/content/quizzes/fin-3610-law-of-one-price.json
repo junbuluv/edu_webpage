@@ -40,17 +40,28 @@
       "answer": 91.24,
       "tolerance": 0.05,
       "unit": "$",
-      "explanation": "Replicate the risky bond as: long the risk-free bond (cost $95.24) + short the CDS (receive $4). Net cost = $95.24 − $4 = $91.24. If the risky bond trades for anything else, arbitrage exists.",
+      "explanation": "Replicate the risky bond as: long the risk-free bond (cost $95.24) + short the CDS (receive $4). Net cost = $95.24 \u2212 $4 = $91.24. If the risky bond trades for anything else, arbitrage exists.",
       "points": 2
     },
     {
       "type": "multiple_choice",
       "id": "q4",
       "prompt": "EUR/USD = 1.10, USD/JPY = 110. What should EUR/JPY be (approximately) to avoid triangular arbitrage?",
-      "choices": ["100", "110", "121", "200"],
+      "choices": [
+        "100",
+        "110",
+        "121",
+        "200"
+      ],
       "correctIndex": 2,
-      "explanation": "1 EUR × 1.10 USD/EUR × 110 JPY/USD = 121 JPY. Any other cross rate enables triangular arbitrage.",
+      "explanation": "1 EUR \u00d7 1.10 USD/EUR \u00d7 110 JPY/USD = 121 JPY. Any other cross rate enables triangular arbitrage.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Arbitrage, Replication & Risk Neutrality",
+    "url": "https://analystprep.com/cfa-level-1-exam/derivatives/concepts-arbitrage-replication-risk-neutrality/",
+    "source": "AnalystPrep (CFA Level 1)",
+    "why": "Connects the law of one price directly to the replicating-portfolio logic used later in option pricing \u2014 the bridge a finance student needs next."
+  }
 }

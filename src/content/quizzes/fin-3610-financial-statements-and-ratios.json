@@ -10,7 +10,7 @@
       "id": "q1",
       "prompt": "Which equation must hold by construction on every balance sheet?",
       "choices": [
-        "Revenue − Expenses = Net Income",
+        "Revenue \u2212 Expenses = Net Income",
         "Assets = Liabilities + Stockholders' Equity",
         "Cash from Operations + Investing + Financing = Net Income",
         "Current Assets = Current Liabilities"
@@ -29,7 +29,11 @@
         "Capital expenditures hit cash this year but income statement over depreciation life",
         "The firm changed its dividend policy"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Non-cash expenses, working-capital changes, and the difference between CapEx timing and depreciation timing are the three primary reconciling items between net income and cash flow. Dividend policy affects financing cash flow but not the gap between NI and operating cash flow.",
       "points": 2
     },
@@ -37,7 +41,7 @@
       "type": "numeric",
       "id": "q3",
       "prompt": "A firm reports Revenue = $2,000M, Net Income = $200M, Total Assets = $1,500M, Equity = $500M. What is its Return on Equity (ROE)? Answer as a decimal (e.g. 0.20 for 20%).",
-      "answer": 0.40,
+      "answer": 0.4,
       "tolerance": 0.005,
       "explanation": "ROE = Net Income / Equity = 200 / 500 = 0.40 (or 40%).",
       "points": 1
@@ -45,8 +49,13 @@
     {
       "type": "multiple_choice",
       "id": "q4",
-      "prompt": "Using the same firm in question 3, decompose ROE via DuPont (net margin × asset turnover × equity multiplier). What is the equity multiplier?",
-      "choices": ["1.5", "2.0", "3.0", "4.0"],
+      "prompt": "Using the same firm in question 3, decompose ROE via DuPont (net margin \u00d7 asset turnover \u00d7 equity multiplier). What is the equity multiplier?",
+      "choices": [
+        "1.5",
+        "2.0",
+        "3.0",
+        "4.0"
+      ],
       "correctIndex": 2,
       "explanation": "Equity multiplier = Assets / Equity = 1500 / 500 = 3.0. The firm finances 2/3 of its assets with debt.",
       "points": 1
@@ -58,12 +67,18 @@
       "choices": [
         "Banks and retailers have identical profit margins",
         "The bank has high leverage (high equity multiplier) compensating for lower margins; the retailer has higher margins with low leverage",
-        "Coincidence — the ratios are unrelated",
+        "Coincidence \u2014 the ratios are unrelated",
         "Banks have negligible assets"
       ],
       "correctIndex": 1,
-      "explanation": "DuPont separates the ROE drivers. Banks lean on leverage; retailers lean on margin × turnover. Same headline number, very different risk profiles.",
+      "explanation": "DuPont separates the ROE drivers. Banks lean on leverage; retailers lean on margin \u00d7 turnover. Same headline number, very different risk profiles.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "How to Read a 10-K",
+    "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+    "source": "SEC Investor.gov",
+    "why": "The SEC's own beginner guide to navigating the actual document students will be pulling ratios from, including MD&A and audited statements."
+  }
 }

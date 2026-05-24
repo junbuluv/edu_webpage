@@ -8,11 +8,11 @@
     {
       "type": "numeric",
       "id": "q1",
-      "prompt": "A stock has β = 1.4. Risk-free rate is 4.2%. Market risk premium is 6%. What is the CAPM expected return? Answer as a percent to one decimal.",
+      "prompt": "A stock has \u03b2 = 1.4. Risk-free rate is 4.2%. Market risk premium is 6%. What is the CAPM expected return? Answer as a percent to one decimal.",
       "answer": 12.6,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "E[R] = R_f + β × MRP = 4.2 + 1.4 × 6.0 = 4.2 + 8.4 = 12.6%.",
+      "explanation": "E[R] = R_f + \u03b2 \u00d7 MRP = 4.2 + 1.4 \u00d7 6.0 = 4.2 + 8.4 = 12.6%.",
       "points": 2
     },
     {
@@ -20,7 +20,7 @@
       "id": "q2",
       "prompt": "A stock plots above the SML. The most direct interpretation is:",
       "choices": [
-        "The stock has positive alpha — it has outperformed what CAPM predicts",
+        "The stock has positive alpha \u2014 it has outperformed what CAPM predicts",
         "The stock has negative alpha",
         "Beta is zero",
         "The market is broken"
@@ -32,10 +32,15 @@
     {
       "type": "multiple_choice",
       "id": "q3",
-      "prompt": "Cov(R_i, R_m) = 0.024, Var(R_m) = 0.020. What is β_i?",
-      "choices": ["0.83", "1.0", "1.2", "1.5"],
+      "prompt": "Cov(R_i, R_m) = 0.024, Var(R_m) = 0.020. What is \u03b2_i?",
+      "choices": [
+        "0.83",
+        "1.0",
+        "1.2",
+        "1.5"
+      ],
       "correctIndex": 2,
-      "explanation": "β = Cov(R_i, R_m) / Var(R_m) = 0.024 / 0.020 = 1.2.",
+      "explanation": "\u03b2 = Cov(R_i, R_m) / Var(R_m) = 0.024 / 0.020 = 1.2.",
       "points": 1
     },
     {
@@ -44,13 +49,19 @@
       "prompt": "Why is a utility company's typical beta lower than a technology company's?",
       "choices": [
         "Utilities are smaller firms",
-        "Utility revenues and earnings are less sensitive to economic cycles than tech revenues and earnings — so utility returns covary less with the market",
+        "Utility revenues and earnings are less sensitive to economic cycles than tech revenues and earnings \u2014 so utility returns covary less with the market",
         "Utilities pay higher dividends",
         "Regulators require it"
       ],
       "correctIndex": 1,
-      "explanation": "Beta reflects covariance with market. Cyclical, growth-sensitive businesses (tech) have higher β; defensive, regulated businesses (utilities) have lower β. Dividend policy and size are unrelated to beta directly.",
+      "explanation": "Beta reflects covariance with market. Cyclical, growth-sensitive businesses (tech) have higher \u03b2; defensive, regulated businesses (utilities) have lower \u03b2. Dividend policy and size are unrelated to beta directly.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Security Market Line (SML): Formula + Slope of Graph",
+    "url": "https://www.wallstreetprep.com/knowledge/security-market-line-sml/",
+    "source": "Wall Street Prep",
+    "why": "Concise practitioner explainer of CAPM, beta, and the SML with a worked example \u2014 exactly the diagram the quiz references."
+  }
 }

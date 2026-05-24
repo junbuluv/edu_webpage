@@ -36,10 +36,15 @@
     {
       "type": "multiple_choice",
       "id": "q3",
-      "prompt": "A target firm has $80M of forecast EBITDA and $200M of net debt. Peer median EV/EBITDA = 12×. With 50M shares outstanding, what is the implied share price?",
-      "choices": ["$12.00", "$15.20", "$19.20", "$80.00"],
+      "prompt": "A target firm has $80M of forecast EBITDA and $200M of net debt. Peer median EV/EBITDA = 12\u00d7. With 50M shares outstanding, what is the implied share price?",
+      "choices": [
+        "$12.00",
+        "$15.20",
+        "$19.20",
+        "$80.00"
+      ],
       "correctIndex": 1,
-      "explanation": "EV = 12 × 80 = $960M. Equity = EV − Net Debt = 960 − 200 = $760M. Per share = 760 / 50 = $15.20.",
+      "explanation": "EV = 12 \u00d7 80 = $960M. Equity = EV \u2212 Net Debt = 960 \u2212 200 = $760M. Per share = 760 / 50 = $15.20.",
       "points": 2
     },
     {
@@ -52,9 +57,19 @@
         "Using transaction multiples (with control premium) to value a public-market stake",
         "Reporting the median multiple instead of the mean"
       ],
-      "correctIndices": [0, 1, 2],
-      "explanation": "Cyclical traps, growth differences, and confusing transaction with trading multiples are all classic errors. Using median (not mean) is good practice — it resists outliers.",
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
+      "explanation": "Cyclical traps, growth differences, and confusing transaction with trading multiples are all classic errors. Using median (not mean) is good practice \u2014 it resists outliers.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "It's All Relative: Multiples, Comparables and Value",
+    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/country/relvalAIMR.pdf",
+    "source": "Aswath Damodaran, NYU Stern",
+    "why": "Damodaran's framework paper on how to pick comparables and use P/E vs EV/EBITDA correctly \u2014 the canonical explainer cited in every multiples class."
+  }
 }

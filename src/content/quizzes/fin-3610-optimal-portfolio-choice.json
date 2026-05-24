@@ -57,9 +57,18 @@
         "Markets are perfectly efficient",
         "Returns are heavily skewed with fat tails"
       ],
-      "correctIndices": [0, 1],
+      "correctIndices": [
+        0,
+        1
+      ],
       "explanation": "Normal returns OR quadratic utility makes mean-variance fully sufficient. Fat tails and skewness violate the framework's assumptions; market efficiency is unrelated to this question.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Efficient Frontier & Investor's Optimal Portfolio (CFA Level 1)",
+    "url": "https://soleadea.org/cfa-level-1/efficient-frontier-investor-optimal-portfolio",
+    "source": "Soleadea (CFA Level 1 prep)",
+    "why": "Crisp visual walk through the minimum-variance frontier, tangent portfolio, and capital allocation line \u2014 the geometry behind indexing."
+  }
 }

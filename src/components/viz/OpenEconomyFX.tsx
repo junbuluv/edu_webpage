@@ -31,13 +31,19 @@ interface State {
 
 const baseline: State = { rWorld: 5, savingRate: 1.0, tariff: 0 };
 
+// Calibrated so the baseline equilibrium ε lies near 1.1 (chart domain
+// 0.5–2.5). With baseline (rWorld=5, savingRate=1, tariff=0):
+//   S = S0 + bS_r·5 = 1500 + 100 = 1600
+//   I = I0 − bI_r·5 = 1700 − 200 = 1500
+//   capOutflow = S − I = 100
+//   NX0 − bNX·ε = capOutflow  ⇒  ε = (900−100)/700 ≈ 1.14
 const params = {
   S0: 1500,
-  bS_r: 30,    // saving slope in r
-  I0: 1500,
-  bI_r: 50,    // investment slope in r (more sensitive than S)
-  NX0_base: 200,
-  bNX: 150,    // NX slope in ε
+  bS_r: 20,
+  I0: 1700,
+  bI_r: 40,
+  NX0_base: 900,
+  bNX: 700,
 };
 
 function computeFlows(s: State) {

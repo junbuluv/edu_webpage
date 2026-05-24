@@ -12,7 +12,7 @@
       "answer": 50,
       "tolerance": 1,
       "unit": "$M",
-      "explanation": "PV(TS) = t × D = 0.25 × 200 = $50M. The tax-shield perpetuity reduces to t·D when discounted at r_D.",
+      "explanation": "PV(TS) = t \u00d7 D = 0.25 \u00d7 200 = $50M. The tax-shield perpetuity reduces to t\u00b7D when discounted at r_D.",
       "points": 2
     },
     {
@@ -21,12 +21,12 @@
       "prompt": "MM with corporate taxes says firm value as a function of debt is:",
       "choices": [
         "V_L = V_U (debt irrelevant)",
-        "V_L = V_U + t·D (rises linearly with debt)",
-        "V_L = V_U − t·D",
-        "V_L = V_U × (1 + D/V)"
+        "V_L = V_U + t\u00b7D (rises linearly with debt)",
+        "V_L = V_U \u2212 t\u00b7D",
+        "V_L = V_U \u00d7 (1 + D/V)"
       ],
       "correctIndex": 1,
-      "explanation": "V_L = V_U + t·D. More debt = more tax shield = more value, before distress costs kick in.",
+      "explanation": "V_L = V_U + t\u00b7D. More debt = more tax shield = more value, before distress costs kick in.",
       "points": 1
     },
     {
@@ -35,12 +35,12 @@
       "prompt": "Why doesn't WACC stay constant when taxes are introduced (compared to MM without taxes)?",
       "choices": [
         "Because cost of equity falls",
-        "Because the after-tax debt rate (1-t)·r_D is lower than r_D, so the weighted average tips toward the cheaper debt component as leverage rises",
+        "Because the after-tax debt rate (1-t)\u00b7r_D is lower than r_D, so the weighted average tips toward the cheaper debt component as leverage rises",
         "Because cost of debt rises with leverage",
         "Because taxes are paid quarterly"
       ],
       "correctIndex": 1,
-      "explanation": "The (1-t) factor on the debt side creates a tax wedge. Higher D/V → more weight on the tax-shielded debt rate → lower WACC.",
+      "explanation": "The (1-t) factor on the debt side creates a tax wedge. Higher D/V \u2192 more weight on the tax-shielded debt rate \u2192 lower WACC.",
       "points": 1
     },
     {
@@ -57,5 +57,11 @@
       "explanation": "MM-with-taxes alone says go to 100% debt. Empirically firms don't, because distress costs (next lesson) push back.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Optimal Capital Structure with Taxes: Modigliani and Miller 1963",
+    "url": "https://www.simtrade.fr/blog_simtrade/optimal-capital-structure-with-taxes-modigliani-miller-1963/",
+    "source": "SimTrade Blog",
+    "why": "Walks through the 1963 MM-with-taxes extension and the V_L = V_U + T_c\u00b7D tax-shield formula exactly as taught in class."
+  }
 }

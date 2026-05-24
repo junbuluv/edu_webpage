@@ -40,12 +40,12 @@ PV = \frac{C}{r}.
 $$
 
 Quick proof: the PV equals $C/(1+r) + C/(1+r)^2 + \ldots$. This is a
-geometric series with first term $C/(1+r)$ and ratio $1/(1+r)$, summing
+geometric series with first term $C/(1+r)$ and ratio \$1/(1+r)$, summing
 to $C/r$.
 
-Example. A perpetuity paying $1,000 per year with $r = 5\%$ is worth
-$1000 / 0.05 = \$20,\!000$ today. Note the inverse relationship: at
-$r = 2.5\%$, the same perpetuity is worth $40,\!000$. Long-duration
+Example. A perpetuity paying \$1,000 per year with $r = 5\%$ is worth
+\$1000 / 0.05 = \$20,\!000$ today. Note the inverse relationship: at
+$r = 2.5\%$, the same perpetuity is worth \$40,\!000$. Long-duration
 streams are very sensitive to the discount rate.
 
 ## Growing perpetuity (the Gordon model)
@@ -62,8 +62,8 @@ This requires $g < r$; otherwise the series diverges. The formula
 is named after Myron Gordon and is the foundation of the
 **dividend discount model** for stock valuation.
 
-Example. A company will pay a $2 dividend next year, growing at 4%
-forever. Cost of equity is 10%. Stock value = $2 / (0.10 - 0.04) =
+Example. A company will pay a \$2 dividend next year, growing at 4%
+forever. Cost of equity is 10%. Stock value = \$2 / (0.10 - 0.04) =
 \$33.33$ per share.
 
 Caveats: the formula's biggest practical sensitivity is to the
@@ -84,7 +84,7 @@ $$
 The bracketed term is the **annuity factor** (sometimes written
 $A_{T,r}$). It's a table lookup or a one-line spreadsheet formula.
 
-Example: 5 annual payments of $500$ at $r = 7\%$:
+Example: 5 annual payments of \$500$ at $r = 7\%$:
 
 $$
 PV = 500 \times \frac{1 - 1.07^{-5}}{0.07} = 500 \times 4.100 \approx \$2,\!050.
@@ -103,12 +103,12 @@ with annual escalators.
 
 ## Worked example: a mortgage payment
 
-You're buying a $500,000 house, putting $100,000 down, and borrowing
-$400,000 at a 7% annual rate (about right for 2024-2026 levels), 30
+You're buying a \$500,000 house, putting \$100,000 down, and borrowing
+\$400,000 at a 7% annual rate (about right for 2024-2026 levels), 30
 years, monthly payments. What's the monthly payment?
 
 Convert annual to monthly: $r_m = 0.07/12 = 0.005833$ per month;
-$T = 360$ months. Set PV of the annuity = $400,000 and solve for $C$:
+$T = 360$ months. Set PV of the annuity = \$400,000 and solve for $C$:
 
 $$
 400,\!000 = C \times \frac{1 - (1.005833)^{-360}}{0.005833}.

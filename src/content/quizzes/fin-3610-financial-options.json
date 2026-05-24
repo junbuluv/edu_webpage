@@ -26,7 +26,7 @@
       "answer": 3.24,
       "tolerance": 0.05,
       "unit": "$",
-      "explanation": "Put-call parity: P = C + K/(1+r)^T − S_0 = 8 + 100/1.05 − 100 = 8 + 95.24 − 100 = $3.24.",
+      "explanation": "Put-call parity: P = C + K/(1+r)^T \u2212 S_0 = 8 + 100/1.05 \u2212 100 = 8 + 95.24 \u2212 100 = $3.24.",
       "points": 2
     },
     {
@@ -39,18 +39,28 @@
         "Shrinks as expiration approaches (time decay)",
         "Negative for in-the-money options"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Time value is always non-negative, peaks at-the-money where uncertainty matters most, and decays toward zero at expiration. Even ITM options have non-negative time value.",
       "points": 2
     },
     {
       "type": "numeric",
       "id": "q4",
-      "prompt": "Binomial: S_0=$50, u=1.2, d=0.9, K=$50, r_f=4%. Compute the replicating-portfolio delta Δ = (C_u - C_d)/(S_u - S_d).",
+      "prompt": "Binomial: S_0=$50, u=1.2, d=0.9, K=$50, r_f=4%. Compute the replicating-portfolio delta \u0394 = (C_u - C_d)/(S_u - S_d).",
       "answer": 0.667,
       "tolerance": 0.01,
-      "explanation": "S_u=60 → C_u=10, S_d=45 → C_d=0. Δ = (10-0)/(60-45) = 10/15 = 0.667.",
+      "explanation": "S_u=60 \u2192 C_u=10, S_d=45 \u2192 C_d=0. \u0394 = (10-0)/(60-45) = 10/15 = 0.667.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "What is Put-Call Parity? Put-Call Parity Formula Explained",
+    "url": "https://www.cqf.com/blog/quant-finance-101/what-is-put-call-parity",
+    "source": "CQF (Certificate in Quantitative Finance)",
+    "why": "Clean derivation of put-call parity from no-arbitrage with a binomial-pricing tie-in \u2014 both core option ideas in one explainer."
+  }
 }

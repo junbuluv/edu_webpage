@@ -39,8 +39,12 @@
         "Synergy overestimation (especially revenue synergies)",
         "Acquirer's stock price always falls regardless of the deal"
       ],
-      "correctIndices": [0, 1, 2],
-      "explanation": "Overpayment, integration risk, and synergy fantasies are the three big destroyers. Stock-price reactions vary by deal quality — they're not uniformly negative.",
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
+      "explanation": "Overpayment, integration risk, and synergy fantasies are the three big destroyers. Stock-price reactions vary by deal quality \u2014 they're not uniformly negative.",
       "points": 2
     },
     {
@@ -57,5 +61,11 @@
       "explanation": "The empirical record is sobering: 40-60% of acquisitions reduce acquirer value. Targets generally do well (control premium); acquirers often don't. Disciplined serial acquirers (Berkshire) are the exception.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "In Conversation: Four Keys to Merger Integration Success",
+    "url": "https://www.mckinsey.com/capabilities/strategy-and-corporate-finance/our-insights/in-conversation-four-keys-to-merger-integration-success",
+    "source": "McKinsey & Company",
+    "why": "Practitioner discussion of why most M&A deals destroy value and the integration mechanics that separate winners from losers."
+  }
 }

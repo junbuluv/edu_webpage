@@ -16,7 +16,7 @@
         "Workers become less productive as capital grows"
       ],
       "correctIndex": 1,
-      "explanation": "Diminishing returns means the production function y = k^α is concave: the marginal product of k falls as k rises.",
+      "explanation": "Diminishing returns means the production function y = k^\u03b1 is concave: the marginal product of k falls as k rises.",
       "points": 1
     },
     {
@@ -30,7 +30,7 @@
         "Output per worker falls because consumption is lower"
       ],
       "correctIndex": 1,
-      "explanation": "Higher saving moves the steady state up — a one-time level gain. Long-run growth is determined by technology, not saving.",
+      "explanation": "Higher saving moves the steady state up \u2014 a one-time level gain. Long-run growth is determined by technology, not saving.",
       "points": 1
     },
     {
@@ -40,11 +40,14 @@
       "choices": [
         "A higher savings rate s",
         "A higher population growth rate n",
-        "A higher depreciation rate δ",
-        "A higher capital share α"
+        "A higher depreciation rate \u03b4",
+        "A higher capital share \u03b1"
       ],
-      "correctIndices": [0, 3],
-      "explanation": "Higher s and higher α raise k*. Higher n or higher δ raise the break-even line, lowering k*.",
+      "correctIndices": [
+        0,
+        3
+      ],
+      "explanation": "Higher s and higher \u03b1 raise k*. Higher n or higher \u03b4 raise the break-even line, lowering k*.",
       "points": 2
     },
     {
@@ -54,12 +57,18 @@
       "choices": [
         "South Korea had a higher savings rate, which alone is enough to explain the gap in the Solow model",
         "South Korea's natural resources were larger",
-        "South Korea adopted and developed better technologies, plus invested heavily — the model points to technology as the driver of sustained growth",
+        "South Korea adopted and developed better technologies, plus invested heavily \u2014 the model points to technology as the driver of sustained growth",
         "Ghana's population didn't grow"
       ],
       "correctIndex": 2,
       "explanation": "Saving alone produces a level effect with no permanent growth in Solow. Sustained divergence requires technology adoption.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Solow Growth Model: Overview, Assumptions, and How to Solve",
+    "url": "https://corporatefinanceinstitute.com/resources/economics/solow-growth-model/",
+    "source": "Corporate Finance Institute",
+    "why": "Concise teaching-style walkthrough of diminishing returns to capital, steady state, and why countries with different parameters fail to converge."
+  }
 }

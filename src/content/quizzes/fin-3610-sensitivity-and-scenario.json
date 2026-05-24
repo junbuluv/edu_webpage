@@ -48,14 +48,24 @@
       "id": "q4",
       "prompt": "Which patterns should make you reconsider a project even though base-case NPV is positive?",
       "choices": [
-        "Knife-edge NPV that swings from +$20M to −$20M with ±5% input changes",
+        "Knife-edge NPV that swings from +$20M to \u2212$20M with \u00b15% input changes",
         "Break-even revenue growth that's far above the historical sector growth rate",
         "IRR comfortably above cost of capital",
         "Discount rate just barely above the IRR"
       ],
-      "correctIndices": [0, 1, 3],
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
       "explanation": "Fragility, unrealistic break-even, and razor-thin risk-adjusted returns are all red flags. A solid IRR above cost of capital is good news, not a warning sign.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Monte Carlo Simulation Tutorial \u2014 Sensitivity Analysis",
+    "url": "https://www.solver.com/monte-carlo-simulation-sensitivity-analysis",
+    "source": "Frontline Systems (Solver.com)",
+    "why": "Explains tornado charts, rank-correlation sensitivity, and Monte Carlo together \u2014 the three tools the quiz lumps under risk in capital budgeting."
+  }
 }

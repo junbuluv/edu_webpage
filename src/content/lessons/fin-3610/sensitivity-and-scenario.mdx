@@ -35,16 +35,16 @@ Three techniques in increasing order of sophistication.
 Vary each input one at a time, holding all others at base case.
 Record the NPV range. Sort by range size.
 
-Example. Base case NPV = $40M. Sensitivity ranges:
+Example. Base case NPV = \$40M. Sensitivity ranges:
 
 | Input | Low → High | NPV range |
 |---|---|---|
-| Revenue growth | 0% → 10% | $-20M to $+110M (range $130M) |
-| Discount rate | 8% → 14% | $+80M to $-15M (range $95M) |
-| Operating margin | 25% → 35% | $-5M to $+85M (range $90M) |
-| Initial CapEx | $800k → $1.2M | $+60M to $+20M (range $40M) |
-| Terminal growth | 1% → 4% | $+30M to $+55M (range $25M) |
-| Tax rate | 20% → 30% | $+50M to $+30M (range $20M) |
+| Revenue growth | 0% → 10% | $-20M to $+110M (range \$130M) |
+| Discount rate | 8% → 14% | $+80M to $-15M (range \$95M) |
+| Operating margin | 25% → 35% | $-5M to $+85M (range \$90M) |
+| Initial CapEx | \$800k → \$1.2M | $+60M to $+20M (range \$40M) |
+| Terminal growth | 1% → 4% | $+30M to $+55M (range \$25M) |
+| Tax rate | 20% → 30% | $+50M to $+30M (range \$20M) |
 
 Plotted as a horizontal bar chart sorted by range, this is a
 **tornado chart**. The widest bar (revenue growth here) is the
@@ -118,7 +118,7 @@ ubiquitous in real-world project finance.
 Three patterns that should make you rethink the project, regardless
 of base-case NPV:
 
-1. **Knife-edge NPV** that swings from +$20M to −$20M for ±5%
+1. **Knife-edge NPV** that swings from +\$20M to −\$20M for ±5%
    changes in a single input — too fragile to bet the firm on.
 2. **High break-even threshold** that the operating team can't
    commit to. If breakeven revenue growth is 8% and history says

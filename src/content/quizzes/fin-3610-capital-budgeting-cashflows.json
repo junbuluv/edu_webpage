@@ -15,14 +15,17 @@
         "Cannibalization effect on existing product sales",
         "Interest expense on debt used to finance the project"
       ],
-      "correctIndices": [0, 2],
+      "correctIndices": [
+        0,
+        2
+      ],
       "explanation": "Opportunity costs and cannibalization are real incremental effects. Sunk costs are gone regardless of the decision. Interest is excluded from FCF because it's captured in the discount rate; including it double-counts.",
       "points": 2
     },
     {
       "type": "multiple_choice",
       "id": "q2",
-      "prompt": "FCF = NOPAT + D&A − ΔWC − CapEx. Why do we ADD back D&A?",
+      "prompt": "FCF = NOPAT + D&A \u2212 \u0394WC \u2212 CapEx. Why do we ADD back D&A?",
       "choices": [
         "It's not a real expense at all",
         "D&A is a non-cash deduction; NOPAT already subtracted it but no cash actually left the firm",
@@ -44,7 +47,7 @@
         "Theft"
       ],
       "correctIndex": 2,
-      "explanation": "Each new dollar of revenue typically ties up ~$0.10-0.20 of working capital. A growing firm with positive accounting profit can still be cash-negative because of this — it's the classic 'profitable but bust' pattern.",
+      "explanation": "Each new dollar of revenue typically ties up ~$0.10-0.20 of working capital. A growing firm with positive accounting profit can still be cash-negative because of this \u2014 it's the classic 'profitable but bust' pattern.",
       "points": 1
     },
     {
@@ -54,8 +57,14 @@
       "answer": 833.33,
       "tolerance": 2.0,
       "unit": "$M",
-      "explanation": "TV_T = FCF_{T+1} / (r - g) = 50 / (0.08 - 0.02) = 50 / 0.06 ≈ 833.33M.",
+      "explanation": "TV_T = FCF_{T+1} / (r - g) = 50 / (0.08 - 0.02) = 50 / 0.06 \u2248 833.33M.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "DCF Terminal Value Formula: How to Calculate Terminal Value",
+    "url": "https://corporatefinanceinstitute.com/resources/financial-modeling/dcf-terminal-value-formula/",
+    "source": "Corporate Finance Institute",
+    "why": "Walks through free cash flow construction and both the perpetuity-growth and exit-multiple terminal-value methods used in any capital-budgeting model."
+  }
 }

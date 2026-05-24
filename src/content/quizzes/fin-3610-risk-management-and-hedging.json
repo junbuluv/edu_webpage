@@ -15,8 +15,12 @@
         "Stabilizing internal cash for funding positive-NPV investments without going to capital markets",
         "Making the firm worth more than the sum of its parts via MM I"
       ],
-      "correctIndices": [0, 1, 2],
-      "explanation": "Tax convexity, distress avoidance, and investment-policy stability are the three financial-friction motives. MM I says hedging is irrelevant in a frictionless market — so violating it doesn't motivate hedging.",
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
+      "explanation": "Tax convexity, distress avoidance, and investment-policy stability are the three financial-friction motives. MM I says hedging is irrelevant in a frictionless market \u2014 so violating it doesn't motivate hedging.",
       "points": 2
     },
     {
@@ -25,12 +29,12 @@
       "prompt": "An airline using a 12-month forward contract on jet fuel at $2.00/gallon for next year's purchases is:",
       "choices": [
         "Speculating on a fuel-price rise",
-        "Hedging — locking in next year's cost regardless of where the spot price goes",
+        "Hedging \u2014 locking in next year's cost regardless of where the spot price goes",
         "Reducing its tax shield",
         "Borrowing at a higher rate"
       ],
       "correctIndex": 1,
-      "explanation": "Forward locks in price. The firm gives up both upside (if oil falls) and downside (if oil rises). That's hedging — insurance against price moves, not a speculative bet.",
+      "explanation": "Forward locks in price. The firm gives up both upside (if oil falls) and downside (if oil rises). That's hedging \u2014 insurance against price moves, not a speculative bet.",
       "points": 1
     },
     {
@@ -57,9 +61,19 @@
         "Hedging an actual exposure to a level that costs more than the expected distress reduction",
         "Hedging the same exposure with both forwards and futures"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Speculation disguised, hedging phantom exposures, and over-hedging away NPV are the three classic abuses. Using both forwards AND futures for the same exposure is unusual but not inherently bad.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "An Introduction to Airline Fuel Hedging Strategies \u2014 Swaps",
+    "url": "https://www.mercatusenergy.com/blog/bid/77634/an-introduction-to-airline-fuel-hedging-strategies-swaps",
+    "source": "Mercatus Energy Advisors",
+    "why": "Concrete walk-through of jet-fuel swap mechanics and the cost-variance-reduction motive \u2014 the textbook corporate-hedging case."
+  }
 }

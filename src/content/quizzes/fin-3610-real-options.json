@@ -15,7 +15,11 @@
         "Option to abandon",
         "Option to issue equity"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Timing, growth, and abandonment are the three classic real-option categories. Issuing equity is a financing decision, not a real option in the project sense.",
       "points": 2
     },
@@ -30,7 +34,7 @@
         "DCF assumes negative NPV"
       ],
       "correctIndex": 0,
-      "explanation": "Options have convex payoffs in uncertainty — more volatility = more value. Static DCF takes point estimates and misses this asymmetry.",
+      "explanation": "Options have convex payoffs in uncertainty \u2014 more volatility = more value. Static DCF takes point estimates and misses this asymmetry.",
       "points": 1
     },
     {
@@ -40,7 +44,7 @@
       "answer": 90.9,
       "tolerance": 1.0,
       "unit": "$M",
-      "explanation": "Blockbuster (50%): NPV next year = -100+300 = $200; discounted: $181.82. Flop (50%): don't invest, NPV = 0. Expected: 0.5×181.82 + 0.5×0 = $90.9M. Versus static NPV of $59M — the option is worth $31.9M extra.",
+      "explanation": "Blockbuster (50%): NPV next year = -100+300 = $200; discounted: $181.82. Flop (50%): don't invest, NPV = 0. Expected: 0.5\u00d7181.82 + 0.5\u00d70 = $90.9M. Versus static NPV of $59M \u2014 the option is worth $31.9M extra.",
       "points": 2
     },
     {
@@ -57,5 +61,11 @@
       "explanation": "High volatility, long time to decision, and big upside-downside asymmetry are the three drivers of real-options value. Common in R&D, resource extraction, and platform tech.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Real Options: Fact and Fantasy",
+    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/execval/optval.pdf",
+    "source": "Aswath Damodaran, NYU Stern",
+    "why": "Damodaran's lecture note on valuing options to delay, expand, and abandon \u2014 the canonical free read on real options without paywalls."
+  }
 }
