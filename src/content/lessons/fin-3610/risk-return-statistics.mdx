@@ -3,25 +3,145 @@ title: "Risk and Return Statistics"
 course: fin-3610
 unit: "Risk and return"
 order: 15
-summary: "Expected return, variance, covariance, and correlation of asset returns; historical evidence on equity vs bond returns; the cost of diversification myth (it has none)."
+summary: "Expected return, variance, covariance, and correlation of asset returns; historical evidence on equity vs bond returns; why diversification reduces risk without reducing expected return."
 learningObjectives:
   - "Compute expected return, variance, covariance, and correlation from return data."
-  - "Cite historical excess returns of equities over Treasuries."
-  - "Distinguish systematic from idiosyncratic risk."
-prerequisites: []
+  - "Cite the historical excess return of US equities over Treasuries."
+  - "Distinguish systematic risk from idiosyncratic risk and explain why only systematic risk is priced."
+prerequisites:
+  - "Basic probability: mean, variance, expectation."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 10"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 10", "risk", "return", "diversification"]
+quizSlug: "fin-3610-risk-return-statistics"
 draft: false
 ---
 
-## Overview
+## What we mean by "return"
 
-Expected return, variance, covariance, and correlation of asset returns; historical evidence on equity vs bond returns; the cost of diversification myth (it has none).
+A holding-period return on an asset over a single period is:
 
-## Why it matters
+$$
+R = \frac{P_1 + D - P_0}{P_0}.
+$$
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 10. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+Where $P_0$ is purchase price, $P_1$ is sale price, $D$ is any
+dividend received during the period. Sometimes quoted as a percentage,
+sometimes as a decimal.
 
-## What you'll be able to do
+If we observe many such periods, we get a distribution of returns and
+can compute its statistics.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## The five statistics that matter
+
+For a single asset with possible returns $R_1, R_2, \ldots, R_n$
+realized with probabilities $p_1, \ldots, p_n$ (or equally weighted
+across $n$ historical observations):
+
+**Expected return** $E[R] = \sum p_i R_i$. The mean.
+
+**Variance** $\text{Var}(R) = E[(R - E[R])^2]$. Average squared
+deviation from the mean.
+
+**Standard deviation** $\sigma = \sqrt{\text{Var}(R)}$. In the same
+units as return. The most common measure of "risk."
+
+For two assets $i$ and $j$:
+
+**Covariance** $\text{Cov}(R_i, R_j) = E[(R_i - E[R_i])(R_j - E[R_j])]$.
+Positive when both tend to be above-mean together; negative when
+they offset.
+
+**Correlation** $\rho_{ij} = \text{Cov}(R_i, R_j) / (\sigma_i \sigma_j)$.
+Covariance normalized to $[-1, 1]$.
+
+## Historical record (US, 1926-2024)
+
+Compounded annual real returns (in 2024 dollars):
+
+| Asset class | Mean return | Std dev |
+|---|---|---|
+| Treasury bills (cash) | ~0.5% | ~3.5% |
+| Treasury bonds (10y) | ~2.5% | ~10% |
+| Corporate bonds (investment grade) | ~3.5% | ~9% |
+| Large-cap stocks (S&P 500) | ~7.5% | ~17% |
+| Small-cap stocks | ~9% | ~22% |
+
+The **equity risk premium** — the expected excess return of stocks
+over T-bills — has averaged 5-7% over the long run. It's compensation
+for bearing the risk shown in the standard-deviation column.
+
+A useful framing: the average annual return of US stocks is around
+10% nominal. In any single year that average is almost never the
+realization — annual returns range from -40% to +50% in the historical
+record. The 10% is what you earn *on average over decades*, not next
+year.
+
+## Diversification: the only free lunch
+
+Combine two assets with weights $w_1$ and $w_2 = 1 - w_1$:
+
+- Portfolio expected return: $E[R_p] = w_1 E[R_1] + w_2 E[R_2]$.
+  (Weighted average; nothing special.)
+- Portfolio variance: $\sigma_p^2 = w_1^2 \sigma_1^2 + w_2^2 \sigma_2^2 + 2 w_1 w_2 \sigma_1 \sigma_2 \rho_{12}$.
+
+That last term is the key. If $\rho_{12} < 1$ (the assets aren't
+perfectly correlated), portfolio variance is *less* than the weighted
+average of individual variances. The lower the correlation, the
+bigger the variance reduction. At $\rho_{12} = -1$, you can construct
+a portfolio with zero variance.
+
+This is why owning 20 stocks is much safer than owning 1, even though
+each individual stock is just as risky as it was before. The
+**diversifiable** part of each stock's risk cancels in the portfolio.
+
+## Systematic vs idiosyncratic risk
+
+Decompose a stock's return into two parts:
+
+- **Systematic** (market) risk — comes from things that affect all
+  stocks (recession, interest rates, oil prices, geopolitics). Cannot
+  be diversified away because every stock shares some exposure to it.
+- **Idiosyncratic** (firm-specific) risk — fires, lawsuits, CEO
+  resignations, drug-trial failures. Can be diversified away by
+  holding many stocks.
+
+In a well-diversified portfolio, idiosyncratic risk averages to
+roughly zero (some firms have good idiosyncratic surprises, some
+bad — they cancel). Only systematic risk remains.
+
+This decomposition matters for pricing. Investors should *not* be
+compensated for bearing risk they could have eliminated for free
+through diversification. So only systematic risk is priced. That's
+the foundation for CAPM, two lessons from now.
+
+## A worked diversification example
+
+Two stocks: A has $E[R_A] = 12\%$, $\sigma_A = 30\%$. B has $E[R_B]
+= 8\%$, $\sigma_B = 20\%$. Correlation $\rho_{AB} = 0.3$.
+
+50/50 portfolio:
+- $E[R_p] = 0.5 \times 12 + 0.5 \times 8 = 10\%$ (linear).
+- $\sigma_p^2 = 0.25 \times 900 + 0.25 \times 400 + 2 \times 0.25 \times 30 \times 20 \times 0.3 = 325$
+- $\sigma_p = \sqrt{325} \approx 18\%$ (less than 25%, the average).
+
+You got an average return at less-than-average risk. That's
+diversification at work.
+
+If $\rho_{AB}$ had been 1.0 instead of 0.3:
+- $\sigma_p = 0.5 \times 30 + 0.5 \times 20 = 25\%$.
+
+No diversification benefit when correlations are perfect.
+
+## Why this matters
+
+Every risk-pricing model in the rest of this course assumes
+investors hold diversified portfolios and care only about
+systematic risk. That assumption is grounded in this lesson's math.
+If investors really held only one stock (no diversification), the
+right discount rate would include compensation for that stock's
+total variance — much higher than what CAPM prescribes. Empirically,
+investors do diversify (most retail investors via index funds;
+institutional investors via mandate); the assumption is reasonable.
+
+Next lesson: the systematic framework for choosing *which* portfolio
+to hold.

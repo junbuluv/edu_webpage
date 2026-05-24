@@ -3,25 +3,151 @@ title: "Factor Models and Market Efficiency"
 course: fin-3610
 unit: "Risk and return"
 order: 19
-summary: "Why CAPM fails empirically; Fama-French three- and five-factor extensions; the size, value, and momentum anomalies; what efficiency does and does not require."
+summary: "Why CAPM falls short empirically; how Fama-French extends it with size, value, profitability, and momentum factors; the three forms of the Efficient Markets Hypothesis."
 learningObjectives:
   - "State the Fama-French three-factor and five-factor models."
-  - "Describe the size, value, profitability, and momentum factors."
-  - "Distinguish the three forms of the efficient-markets hypothesis."
-prerequisites: []
+  - "Describe the size, value, profitability, and momentum factors and what each represents."
+  - "Distinguish the weak, semi-strong, and strong forms of market efficiency."
+prerequisites:
+  - "CAPM and cost of capital (prior lessons)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 13"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 13", "factor models", "Fama-French", "EMH"]
+quizSlug: "fin-3610-factor-models"
 draft: false
 ---
 
-## Overview
+## The CAPM puzzles
 
-Why CAPM fails empirically; Fama-French three- and five-factor extensions; the size, value, and momentum anomalies; what efficiency does and does not require.
+When Eugene Fama and others tested CAPM empirically in the 1970s
+and 1980s, they found patterns the model couldn't explain:
 
-## Why it matters
+- **Size**: small-cap stocks earned higher returns than CAPM predicted.
+- **Value**: stocks with high book-to-market (cheap on accounting
+  metrics) earned higher returns than growth stocks at the same beta.
+- **Momentum** (Jegadeesh-Titman, 1993): past 3-12 month winners
+  continued to outperform; past losers continued to underperform.
+- **Profitability** (Novy-Marx, 2013): firms with higher gross
+  profitability outperformed.
+- **Investment**: firms investing aggressively underperformed those
+  investing conservatively.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 13. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+Each pattern is statistically robust and economically meaningful
+(returns differences of 2-5% per year between portfolios sorted on
+these characteristics). CAPM treats them as anomalies.
 
-## What you'll be able to do
+## Fama-French three-factor (1993)
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Fama and French added two new "factors" to CAPM:
+
+$$
+R_i - R_f = \alpha_i + \beta_M (R_m - R_f) + \beta_S \cdot \text{SMB} + \beta_V \cdot \text{HML} + \varepsilon_i.
+$$
+
+- **SMB** (Small Minus Big): return of small-cap stocks minus return
+  of large-cap stocks.
+- **HML** (High Minus Low): return of high book-to-market stocks
+  (value) minus low book-to-market stocks (growth).
+
+Each factor has a positive long-run premium (small > big, value >
+growth). An asset's expected return depends on its loadings on all
+three factors.
+
+The three-factor model explains the cross-section of US stock
+returns substantially better than CAPM. Many practical applications
+(performance attribution, factor-based investing) use it.
+
+## Five-factor (2015)
+
+Fama and French extended the model with two more factors:
+
+- **RMW** (Robust Minus Weak): high-profitability stocks minus low-
+  profitability stocks.
+- **CMA** (Conservative Minus Aggressive): low-investment firms
+  minus high-investment firms.
+
+The five-factor model dominates the three-factor model in modern
+data. It still doesn't fully explain momentum, leading to a
+separate Carhart **MOM** factor.
+
+## What this means for cost of capital
+
+For most undergraduate work and most corporate-finance applications,
+CAPM is still the workhorse. Factor models are heavily used in:
+
+- Hedge fund performance attribution (separating "alpha" from
+  factor exposures).
+- Smart-beta ETF construction (deliberately tilting toward
+  value, small-cap, momentum factors).
+- Academic asset-pricing research.
+
+For computing a firm's cost of equity for a DCF, factor models give
+slightly different answers than CAPM, but the practical effect is
+usually within the noise of input choices for beta and market
+premium. The exam answer is still CAPM; the research-grade answer
+adds factor adjustments.
+
+## The Efficient Markets Hypothesis (EMH)
+
+The three patterns above (size, value, momentum) raised an old
+question: are markets "efficient" — meaning, do prices fully
+reflect all available information?
+
+Three forms of EMH:
+
+**Weak form**: prices reflect all *past* price and volume
+information. You can't beat the market using only historical chart
+patterns. (Momentum slightly violates this — past returns predict
+future returns. But trading costs erode much of the gain.)
+
+**Semi-strong form**: prices reflect all *publicly available*
+information — financial statements, news, analyst reports.
+Fundamental analysis of public data can't yield consistent abnormal
+returns. (Mostly supported by event studies and mutual-fund
+performance data.)
+
+**Strong form**: prices reflect all information, including
+private/inside information. (Empirically false — insider trading
+generates abnormal returns. That's why it's illegal.)
+
+The mainstream consensus in 2026: markets are *mostly* efficient in
+the semi-strong sense. Most active managers don't beat indexes after
+fees, consistent with semi-strong efficiency. Some persistent
+anomalies exist (small, value, momentum) but capturing them
+requires patience and discipline, and competition over time
+erodes them.
+
+## Why this matters for corporate finance
+
+EMH implies three useful things:
+
+1. **Market prices are a fair estimate of value.** If you're trying
+   to value a target firm, the market price is the consensus
+   estimate of every analyst and investor. Significant disagreement
+   with the market price requires a specific reason.
+
+2. **Issuing equity at market price doesn't dilute existing
+   shareholders.** The new shares are sold at fair value; existing
+   wealth per share is unchanged. (This is a textbook result;
+   reality is messier when issuance signals private information.)
+
+3. **Buybacks at market price don't enrich remaining shareholders.**
+   Same logic. Buybacks transfer value to *exiting* shareholders;
+   remaining holders are left whole.
+
+These results explain why basic corporate-finance theory is
+relatively benign about issuance and buyback decisions: in an
+efficient market, the price action mostly cancels out.
+
+## The honest takeaway
+
+Markets are good but not perfect. Use CAPM for cost of capital
+unless you have a specific reason to do more. When you see an
+"anomaly" in the data, ask whether it survives after trading costs,
+whether it persists out-of-sample, and whether competing
+researchers have been able to replicate it. Most "free lunches"
+turn out to be either (a) compensation for some risk we hadn't
+identified, or (b) statistical artifacts.
+
+Now we're done with Unit 4. Unit 5 takes everything we've covered
+(cash flows, discount rates, equity vs debt) and asks: how should
+the firm be financed?

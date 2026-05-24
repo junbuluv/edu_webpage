@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-cost-of-capital",
+  "title": "Cost of capital",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/cost-of-capital",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A firm's bonds yield 6.0% YTM. Tax rate is 25%. What is the after-tax cost of debt? Answer as a percent.",
+      "answer": 4.5,
+      "tolerance": 0.05,
+      "unit": "%",
+      "explanation": "After-tax r_D = 6.0 × (1 − 0.25) = 4.5%. WACC always uses this version because interest is tax-deductible.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Why should you NOT use a legacy bond's coupon rate as the firm's cost of debt today?",
+      "choices": [
+        "Coupon rates are tax-exempt",
+        "The coupon reflects credit conditions when the bond was issued; today's market YTM reflects what new debt would actually cost",
+        "Coupons compound differently",
+        "Coupons are quoted in different currency"
+      ],
+      "correctIndex": 1,
+      "explanation": "A 2020 3% coupon bond now trading at 6% YTM has a market cost of debt of 6%, not 3%. Cost of capital is forward-looking.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "A consumer-staples firm (low WACC) is starting a biotech R&D division. What discount rate should it use to evaluate the biotech project?",
+      "choices": [
+        "The firm's WACC, because that's the firm's cost of capital",
+        "A higher project-specific rate reflecting biotech's actual risk; use unlevered beta of pure-play biotech comparables, re-levered at the project's planned capital structure",
+        "The Treasury yield, because R&D is exploratory",
+        "Whatever rate makes the project look positive NPV"
+      ],
+      "correctIndex": 1,
+      "explanation": "Using firm WACC when project risk differs causes systematic over- or under-investment. Use a project-specific rate from pure-play comparables.",
+      "points": 2
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Estimating beta for a PRIVATE firm without public comparables would typically follow which steps?",
+      "choices": [
+        "Find 5-10 publicly traded comparable firms",
+        "Unlever each comparable's beta to isolate business risk from financial structure",
+        "Use the firm's own stock-price history (which doesn't exist)",
+        "Average the unlevered betas, then re-lever at the target's capital structure"
+      ],
+      "correctIndices": [0, 1, 3],
+      "explanation": "Comparables → unlever → average → re-lever is the standard recipe. A private firm has no public price history, so direct regression isn't possible.",
+      "points": 2
+    }
+  ]
+}
