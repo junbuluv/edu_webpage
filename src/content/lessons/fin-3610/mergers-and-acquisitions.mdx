@@ -3,25 +3,166 @@ title: "Mergers and Acquisitions"
 course: fin-3610
 unit: "Options and special topics"
 order: 27
-summary: "Strategic and financial rationales for M&A; valuation: synergies, control premium; deal structure (stock vs cash, tax-free vs taxable); post-merger integration risk."
+summary: "Strategic and financial rationales for M&A; valuation of synergies and control premium; deal structure (stock vs cash, tax-free vs taxable); why post-merger integration risk is the single most common source of value destruction."
 learningObjectives:
   - "Compute synergies and the maximum offer price for an acquirer."
   - "Compare stock and cash deals on tax and signaling grounds."
-  - "List common post-merger value-destruction sources."
-prerequisites: []
+  - "List common sources of post-merger value destruction."
+prerequisites:
+  - "Capital structure (Unit 5)."
+  - "Valuation (Units 3-4)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 28"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 28", "M&A"]
+quizSlug: "fin-3610-mergers-and-acquisitions"
 draft: false
 ---
 
-## Overview
+## Why firms acquire
 
-Strategic and financial rationales for M&A; valuation: synergies, control premium; deal structure (stock vs cash, tax-free vs taxable); post-merger integration risk.
+The standard rationales, in roughly the order they hold up
+empirically:
 
-## Why it matters
+1. **Operating synergies.** Combined entity has lower cost
+   structure (eliminating duplicate functions) or higher revenue
+   (cross-selling, scope economies). Most defensible. Microsoft +
+   LinkedIn (\$26B, 2016): real cross-selling synergy via
+   integration with Office.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 28. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+2. **Financial synergies.** Lower cost of capital via diversification
+   or tax-loss utilization. Theoretically real but typically small
+   in well-functioning markets.
 
-## What you'll be able to do
+3. **Strategic / market power.** Reducing competition, acquiring
+   complementary patents/tech, blocking competitors. Often the
+   actual reason, even when the press release talks about synergies.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+4. **Managerial empire-building.** CEO wants to run a bigger firm.
+   The agency-cost story. Empirically, the more often the rationale.
+
+5. **Hubris / overconfidence.** CEOs believe they can run the target
+   better than current management. Roll (1986) showed this is a
+   substantial fraction of acquisition motives.
+
+A useful diagnostic: if "synergies" exceed 20-30% of the target's
+standalone value, be skeptical. Acquirers regularly project
+synergies that don't materialize.
+
+## Valuation: the maximum offer price
+
+Let:
+
+- $V_T$ = target's standalone value (e.g., from a DCF).
+- $V_A$ = acquirer's standalone value.
+- $V_{AT}$ = combined value with synergies.
+- Synergy $S = V_{AT} - V_A - V_T$.
+
+The **maximum** acquirer can pay without destroying value is:
+
+$$
+P_{\max} = V_T + S.
+$$
+
+Any price above this destroys value for acquirer shareholders. In a
+competitive bidding situation, most synergy ends up paid to target
+shareholders as control premium — typically 20-40% above pre-bid
+trading price.
+
+## Stock vs cash deals
+
+Two main forms of payment:
+
+**Cash deal.** Acquirer pays target shareholders in cash. Tax
+consequences for target shareholders: immediate capital gains
+recognition. Often funded by debt.
+
+**Stock deal.** Acquirer issues new shares to exchange for target
+shares. Target shareholders now own a piece of the combined firm.
+Generally tax-free (for properly structured deals) — no gain
+recognized until they sell the new shares.
+
+The choice often reveals what the acquirer believes:
+
+- **Stock deals** are more common when the acquirer's stock is
+  perceived as overvalued — paying with "expensive paper" rather
+  than "cheap cash." Markets often react negatively to stock-deal
+  announcements for this reason.
+- **Cash deals** suggest the acquirer believes its stock is fairly
+  or undervalued. Markets typically react more favorably.
+
+This is **adverse-selection signaling** — the menu of options
+itself reveals the acquirer's private information.
+
+## Deal mechanics — three structures
+
+1. **Statutory merger.** Target ceases to exist; acquirer absorbs
+   assets and liabilities. Standard for public-target deals.
+
+2. **Stock acquisition (tender offer).** Acquirer buys target
+   shares directly from shareholders. Target survives as a
+   subsidiary. Used for hostile bids since it can bypass target
+   management.
+
+3. **Asset acquisition.** Acquirer buys specific assets only,
+   leaving the target shell intact. Used to avoid assuming
+   liabilities, common in distressed-asset deals.
+
+## Why so many M&A deals destroy value
+
+The empirical record: **40-60% of acquisitions destroy value for
+the acquirer** (measured by announcement-window returns and
+3-5 year post-merger performance). Targets do well; acquirers
+often don't. Sources of value destruction:
+
+1. **Overpaying.** Auction dynamics + control premium + winner's
+   curse. The acquirer who wins the bidding war is typically the
+   one who overestimated synergies most.
+
+2. **Integration failure.** Cultures clash. Key talent leaves.
+   Systems migration takes 3x longer than planned. Customers
+   defect during uncertainty. Daimler-Chrysler (\$36B, 1998) sold
+   for \$7B in 2007 — almost entirely an integration failure.
+
+3. **Strategic mismatch.** Acquirer enters a business it doesn't
+   understand. AOL + Time Warner (\$165B, 2000) — peak example.
+
+4. **Distraction.** Senior management spends two years on
+   integration instead of running the existing business; competitors
+   gain share.
+
+5. **Synergy overestimation.** Detailed cost-synergy plans often
+   identify 70-80% of projected savings. Revenue synergies almost
+   always disappoint.
+
+## A worked acquisition example
+
+Acquirer A (V_A = \$5B) wants to acquire target T (V_T = \$1B,
+trading at \$50/share, 20M shares).
+
+Projected synergies (cost savings + cross-selling): $200M PV.
+
+- Max acquirer can pay: $V_T + S = 1B + 0.2B = \$1.2B$.
+- Per-share max: $\$1.2B / 20M = \$60$.
+- Implied control premium at \$60: $(60-50)/50 = 20\%$.
+
+If competing bidders push the price to \$65/share (\$1.3B total),
+acquirer pays \$100M above maximum justified by synergies. Acquirer
+shareholders lose \$100M of value.
+
+This is exactly the pattern documented in event studies of
+contested acquisitions.
+
+## When M&A works
+
+Despite the dismal aggregate record, some patterns of value-
+creating deals:
+
+- **Disciplined serial acquirers** (Berkshire Hathaway, Constellation
+  Software): pay reasonable prices, hold for the long term, leave
+  management in place.
+- **Small bolt-on acquisitions** of complementary technology or
+  geographies. Less integration risk, more achievable synergies.
+- **Distressed-asset purchases** at deep discounts. The discount
+  itself provides a margin of safety.
+
+The deals that get the press attention — \$50B+ "transformative"
+combinations — are also the ones most likely to destroy value.

@@ -1,0 +1,65 @@
+{
+  "slug": "fin-3610-risk-management-and-hedging",
+  "title": "Risk management and hedging",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/risk-management-and-hedging",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Which of the following are valid economic motives for a firm to hedge (vs leaving the exposure unhedged)?",
+      "choices": [
+        "Reducing expected taxes via income smoothing (tax convexity)",
+        "Reducing expected costs of financial distress",
+        "Stabilizing internal cash for funding positive-NPV investments without going to capital markets",
+        "Making the firm worth more than the sum of its parts via MM I"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Tax convexity, distress avoidance, and investment-policy stability are the three financial-friction motives. MM I says hedging is irrelevant in a frictionless market — so violating it doesn't motivate hedging.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "An airline using a 12-month forward contract on jet fuel at $2.00/gallon for next year's purchases is:",
+      "choices": [
+        "Speculating on a fuel-price rise",
+        "Hedging — locking in next year's cost regardless of where the spot price goes",
+        "Reducing its tax shield",
+        "Borrowing at a higher rate"
+      ],
+      "correctIndex": 1,
+      "explanation": "Forward locks in price. The firm gives up both upside (if oil falls) and downside (if oil rises). That's hedging — insurance against price moves, not a speculative bet.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Key difference between hedging via FORWARD and via at-the-money CALL OPTION:",
+      "choices": [
+        "Forward costs premium up front; option doesn't",
+        "Forward gives the firm a chance to profit if prices fall but caps losses if they rise",
+        "Option costs premium up front; forward doesn't, but option preserves upside if prices move favorably",
+        "Both are identical"
+      ],
+      "correctIndex": 2,
+      "explanation": "Forwards lock in (no upside, no downside, no premium). Options cap downside while preserving upside, but cost premium. Choice depends on whether asymmetric coverage is worth the premium.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which of the following are common patterns of BAD hedging?",
+      "choices": [
+        "Speculation disguised as hedging (large directional bets unmatched to real exposures)",
+        "Hedging an exposure the firm doesn't actually have",
+        "Hedging an actual exposure to a level that costs more than the expected distress reduction",
+        "Hedging the same exposure with both forwards and futures"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Speculation disguised, hedging phantom exposures, and over-hedging away NPV are the three classic abuses. Using both forwards AND futures for the same exposure is unusual but not inherently bad.",
+      "points": 2
+    }
+  ]
+}

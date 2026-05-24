@@ -3,25 +3,143 @@ title: "Real Options in Capital Budgeting"
 course: fin-3610
 unit: "Options and special topics"
 order: 26
-summary: "Options to expand, defer, or abandon as financial options on the underlying project value; why static NPV undervalues projects with embedded optionality."
+summary: "Options to expand, defer, or abandon as financial options on the underlying project value; why static NPV undervalues projects with embedded managerial flexibility."
 learningObjectives:
-  - "Identify the three main types of real options."
+  - "Identify the three main types of real options (timing, growth, abandonment)."
   - "Value a deferral option using binomial intuition."
   - "Explain why DCF undervalues projects with managerial flexibility."
-prerequisites: []
+prerequisites:
+  - "Financial options (prior lesson)."
+  - "Capital budgeting (Unit 3)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 22"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 22", "real options"]
+quizSlug: "fin-3610-real-options"
 draft: false
 ---
 
-## Overview
+## DCF's blind spot
 
-Options to expand, defer, or abandon as financial options on the underlying project value; why static NPV undervalues projects with embedded optionality.
+Static NPV assumes management commits to a project today and runs
+it to completion regardless of what happens. Real-world projects
+have choices built in: management can delay, expand, or shut down
+in response to information that arrives over time. These choices
+have value. DCF ignores them.
 
-## Why it matters
+That gap is called **real options value**.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 22. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+## Three common real options
 
-## What you'll be able to do
+**Option to defer (timing option).** A firm has the right to invest
+later. Like a financial call: strike = investment cost, underlying =
+project NPV. Value comes from waiting to see how uncertainty resolves.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Example. An oil company holds drilling rights to a lease. Today's
+NPV at \$70/bbl oil is barely positive. Drilling next year, when
+oil prices may have moved, could be much more attractive. The firm
+keeps the rights and waits.
+
+**Option to expand (growth option).** Building a small initial
+project preserves the option to scale up if it works. The value of
+the option to expand is often much larger than the standalone NPV
+of the small initial investment.
+
+Example. Amazon Web Services in 2006 was a small experimental
+project. The growth option — to scale into the largest cloud
+platform on Earth — was the value, not the initial unit economics.
+
+**Option to abandon.** Management can shut down a money-losing
+project. Like a put: strike = abandonment value, underlying =
+remaining project NPV. Value comes from limiting downside.
+
+Example. A movie studio cancels a film mid-production when test
+screenings come back terrible. The cancellation cost is the strike;
+abandoning prevents larger losses on continuing.
+
+## Why DCF underestimates
+
+Conventional DCF takes a single point estimate of cash flows. It
+treats uncertainty as risk to be discounted, never as opportunity.
+
+But a real option's value comes precisely from asymmetry:
+
+- If things go well, exercise (expand, continue, drill).
+- If things go badly, don't exercise (delay, abandon, hold off).
+
+The asymmetry — "I get the upside but cap the downside" — has
+positive value that DCF can't capture. The technical name is
+**convex payoff in uncertainty**: more volatility makes the option
+more valuable, the opposite of standard risk-aversion.
+
+## A worked deferral example
+
+A pharma firm can invest \$100M today to launch a new drug. Two
+states next year: blockbuster (\$300M PV, 50% probability) or flop
+(\$50M PV, 50%). Discount rate 10%.
+
+**Static NPV today**:
+$$
+NPV = -100 + \frac{0.5(300) + 0.5(50)}{1.10} = -100 + \frac{175}{1.10} = -100 + 159 = +59M.
+$$
+
+Project looks good. Launch today.
+
+But what if they could **wait** until next year, see whether it's a
+blockbuster or flop, and only launch in the blockbuster case?
+
+**NPV with deferral option**:
+- Blockbuster (50% prob): wait, then NPV = $-100 + 300 = +\$200M$ in year 1, discounted: $200/1.10 = \$181.8M$.
+- Flop (50% prob): don't invest. NPV = $\$0$.
+- Expected NPV with optionality: $0.5 \times 181.8 + 0.5 \times 0 = \$90.9M$.
+
+The option to wait is worth \$90.9M vs the immediate \$59M static
+NPV — an extra **\$31.9M of value** from doing nothing for a year.
+The exact magnitude is sensitive to discount rate and probability
+estimates, but the qualitative pattern holds: deferral is valuable
+when uncertainty is large.
+
+## When is real-options value largest?
+
+Three drivers:
+
+1. **High volatility** of project value. More uncertainty → more
+   asymmetric payoffs → more option value.
+2. **Long time to decision**. More time = more chance to learn.
+3. **Big upside-downside asymmetry**. Truncating losses is most
+   valuable when losses would have been large.
+
+Three contexts where real options matter most:
+
+- **R&D-intensive industries** (pharma, biotech, semiconductors).
+- **Resource extraction** (oil, gas, mining — commodity price
+  volatility creates big optionality).
+- **Tech platform investments** with staged scaling potential.
+
+## How practitioners value real options
+
+Three approaches, in increasing sophistication:
+
+1. **Decision-tree analysis** with explicit branches and
+   probabilities. Easy to set up, sometimes hard to defend
+   probabilities.
+2. **Binomial models** (lattice approach). Discretize stock-price
+   movements like in Unit 5's binomial option-pricing example, but
+   with the "stock" being the underlying project value.
+3. **Black-Scholes-style closed-form** for simple cases (e.g., a
+   single deferral option on a single asset).
+
+For undergraduate work, the decision-tree and binomial approaches
+are standard. The honest answer for many real-world decisions is
+that the qualitative recognition of optionality — and the bias-
+correction it brings to DCF — matters more than the exact number.
+
+## Trap to avoid
+
+The most common abuse of real-options analysis is **inflating NPVs
+to justify projects that should be killed**. "It has a real option
+value of \$50M!" is easy to assert and hard to verify. A discipline:
+the option only has value if management actually has the **ability
+and willingness** to exercise it. If the firm never abandons a
+running project for organizational reasons, the abandonment option
+is worth \$0 regardless of theoretical value.
+
+Real options are real. They're also easy to overestimate.

@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-real-options",
+  "title": "Real options",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/real-options",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Which of the following are common types of real options?",
+      "choices": [
+        "Option to defer (timing)",
+        "Option to expand (growth)",
+        "Option to abandon",
+        "Option to issue equity"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Timing, growth, and abandonment are the three classic real-option categories. Issuing equity is a financing decision, not a real option in the project sense.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Why does conventional DCF systematically UNDERVALUE projects with embedded optionality?",
+      "choices": [
+        "DCF treats uncertainty as pure risk to be discounted; it can't capture the asymmetric upside-only payoff from management's right to wait, expand, or abandon",
+        "DCF doesn't use a discount rate",
+        "DCF ignores capital structure",
+        "DCF assumes negative NPV"
+      ],
+      "correctIndex": 0,
+      "explanation": "Options have convex payoffs in uncertainty — more volatility = more value. Static DCF takes point estimates and misses this asymmetry.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "A drug development project: invest $100M today or wait 1 year. Next year is 50% blockbuster (PV=$300M) or 50% flop (PV=$50M). Discount rate 10%. NPV with deferral option (only invest in blockbuster state)?",
+      "answer": 90.9,
+      "tolerance": 1.0,
+      "unit": "$M",
+      "explanation": "Blockbuster (50%): NPV next year = -100+300 = $200; discounted: $181.82. Flop (50%): don't invest, NPV = 0. Expected: 0.5×181.82 + 0.5×0 = $90.9M. Versus static NPV of $59M — the option is worth $31.9M extra.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "When are real-options effects on project value MOST important?",
+      "choices": [
+        "When project cash flows are perfectly predictable",
+        "When the project has high volatility, long time horizons, and substantial asymmetry between upside and downside",
+        "When the firm is privately held",
+        "When the discount rate is below 5%"
+      ],
+      "correctIndex": 1,
+      "explanation": "High volatility, long time to decision, and big upside-downside asymmetry are the three drivers of real-options value. Common in R&D, resource extraction, and platform tech.",
+      "points": 1
+    }
+  ]
+}
