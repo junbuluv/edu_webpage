@@ -16,14 +16,37 @@ exception when duplicate_object then null; end $$;
 
 -- =========================================================================
 -- profiles --- one row per auth.users entry, created via trigger
+--
+-- We do NOT duplicate the plaintext email into public.profiles. The
+-- authoritative email lives in auth.users (managed by Supabase Auth).
+-- This table stores an HMAC-SHA256 of the email for indexable lookups
+-- ("has this email already signed up?") without exposing email in a
+-- leak of just the public schema.
+--
+-- The HMAC secret is read at trigger-execution time from the database
+-- session variable `app.pii_hmac_secret`. Set it once per project:
+--
+--     alter database postgres set app.pii_hmac_secret = 'your-32+ char secret';
+--
+-- The Vercel-side helper at src/lib/crypto/pii.ts must use the same
+-- secret so signup/lookup HMACs agree.
 -- =========================================================================
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  email text not null,
+  email_hmac text,
   display_name text,
   role user_role not null default 'student',
+  tos_accepted_at timestamptz,
   created_at timestamptz not null default now()
 );
+
+-- Idempotent migration: drop legacy plaintext email if it's still here.
+alter table public.profiles drop column if exists email;
+alter table public.profiles add column if not exists email_hmac text;
+alter table public.profiles add column if not exists tos_accepted_at timestamptz;
+
+create unique index if not exists profiles_email_hmac_uq
+  on public.profiles (email_hmac);
 
 alter table public.profiles enable row level security;
 
@@ -37,19 +60,82 @@ create policy "profiles_self_update"
   on public.profiles for update
   using (auth.uid() = id);
 
--- Auto-create profile row on new signup.
+-- Auto-create profile row on new signup, computing email_hmac from
+-- auth.users.email using the session-level secret.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer
+set search_path = public, extensions
 as $$
+declare
+  v_secret text;
+  v_hmac text;
 begin
-  insert into public.profiles (id, email)
-  values (new.id, new.email)
-  on conflict (id) do nothing;
+  -- Read the secret. If it isn't set, fall back to NULL so signup still
+  -- works in dev (lookups by email_hmac will simply miss until the
+  -- secret is configured and existing rows are back-filled).
+  begin
+    v_secret := current_setting('app.pii_hmac_secret', true);
+  exception when others then
+    v_secret := null;
+  end;
+
+  if v_secret is not null and length(v_secret) >= 32 and new.email is not null then
+    v_hmac := encode(
+      hmac(lower(trim(new.email)), v_secret, 'sha256'),
+      'hex'
+    );
+  else
+    v_hmac := null;
+  end if;
+
+  insert into public.profiles (id, email_hmac)
+  values (new.id, v_hmac)
+  on conflict (id) do update
+    set email_hmac = coalesce(excluded.email_hmac, public.profiles.email_hmac);
   return new;
 end;
 $$;
+
+-- Re-compute email_hmac for any existing rows that don't have one yet
+-- (idempotent back-fill). Skips silently if the secret isn't configured.
+create or replace function public.backfill_email_hmac()
+returns integer
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_secret text;
+  v_count integer;
+begin
+  begin
+    v_secret := current_setting('app.pii_hmac_secret', true);
+  exception when others then
+    v_secret := null;
+  end;
+
+  if v_secret is null or length(v_secret) < 32 then
+    raise notice 'app.pii_hmac_secret not configured; skipping back-fill';
+    return 0;
+  end if;
+
+  update public.profiles p
+     set email_hmac = encode(hmac(lower(trim(u.email)), v_secret, 'sha256'), 'hex')
+    from auth.users u
+   where p.id = u.id
+     and u.email is not null
+     and p.email_hmac is null;
+
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+revoke all on function public.backfill_email_hmac() from public;
+-- Run manually as a one-off after first setting app.pii_hmac_secret:
+--   select public.backfill_email_hmac();
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
