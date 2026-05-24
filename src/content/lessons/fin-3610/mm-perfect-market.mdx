@@ -3,25 +3,157 @@ title: "Capital Structure in a Perfect Market (MM I)"
 course: fin-3610
 unit: "Capital structure and payout"
 order: 20
-summary: "Modigliani-Miller Proposition I: in a frictionless market, firm value is invariant to capital structure. MM II: cost of equity rises mechanically with leverage to keep WACC flat."
+summary: "Modigliani-Miller Proposition I: in a frictionless market, firm value is invariant to capital structure. Proposition II: cost of equity rises mechanically with leverage to keep WACC flat."
 learningObjectives:
-  - "State and prove MM I in the perfect-market case."
-  - "Derive MM II as a mechanical implication."
-  - "Identify which MM assumptions matter most for real-world firms."
-prerequisites: []
+  - "State and prove MM I in the perfect-market case via an arbitrage argument."
+  - "Derive MM II as a mechanical consequence of MM I."
+  - "Identify which MM assumptions matter most for real-world deviations."
+prerequisites:
+  - "Cost of capital (Unit 4)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 14"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 14", "MM", "capital structure"]
+quizSlug: "fin-3610-mm-perfect-market"
 draft: false
 ---
 
-## Overview
+## The starting question
 
-Modigliani-Miller Proposition I: in a frictionless market, firm value is invariant to capital structure. MM II: cost of equity rises mechanically with leverage to keep WACC flat.
+Should a firm be financed mostly with debt, mostly with equity, or
+some mix? Common intuition says debt is "cheaper" — interest rates
+on Treasuries are 4%, but expected stock returns are 10%. So
+loading up on debt should lower cost of capital and raise firm
+value. Right?
 
-## Why it matters
+In 1958, Franco Modigliani and Merton Miller showed: not in a
+perfect market. With no taxes, no bankruptcy costs, no agency
+costs, and no information asymmetry, **the firm's total value is
+the same regardless of capital structure**.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 14. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+This is **MM Proposition I**:
 
-## What you'll be able to do
+$$
+V_L = V_U.
+$$
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Where $V_L$ is the value of a levered firm and $V_U$ is the value of
+the same firm if it were all-equity-financed. They're equal.
+
+## Why? An arbitrage proof
+
+Suppose two firms are identical except for capital structure. Firm
+U is all equity, worth $V_U$. Firm L is partly debt, partly equity,
+total worth $V_L$. Suppose $V_L > V_U$.
+
+You could:
+
+1. Buy a fraction $\alpha$ of Firm U's equity (cost: $\alpha V_U$).
+2. Borrow $\alpha \cdot D_L$ personally at the same rate Firm L
+   borrows at (since identical risk).
+3. Use the loan + the equity stake to replicate Firm L's payoff to
+   equity holders.
+
+The replicating position costs $\alpha V_U + \alpha D_L = \alpha(V_U
++ D_L) = \alpha V_L \cdot (V_U + D_L)/V_L$. If $V_L > V_U$, then
+buying L's equity costs more than the replicating portfolio, so you
+sell L's equity and buy the cheaper replicating portfolio. Arbitrage.
+
+The market punishes the price discrepancy and pulls $V_L$ down to
+$V_U$. The logic also works in reverse if $V_L < V_U$. In
+equilibrium, $V_L = V_U$.
+
+## What this says (and doesn't say)
+
+MM I says: in the absence of frictions, **the size of the pie
+doesn't depend on how you slice it**. Slicing the pie into more
+debt slices and fewer equity slices doesn't change the pie's size.
+
+What it doesn't say:
+
+- It does *not* say capital structure doesn't matter in the real
+  world. The real world has taxes (next lesson), bankruptcy costs,
+  agency costs, information asymmetries — all of which break MM.
+- It does *not* say debt is "free." Debt and equity claim different
+  slices of the same pie; the value the firm forgoes to debt
+  holders is exactly the value debt holders receive.
+
+But MM I matters because it tells us *where* to look for capital-
+structure effects: in the frictions. If a corporate-finance change
+adds value, ask which MM assumption it relaxes.
+
+## MM Proposition II
+
+MM I implies that adding debt doesn't change firm value. So if WACC
+stays constant (since neither value nor cash flow changes), then
+adding cheap debt must mechanically raise the cost of *equity* by
+exactly enough to offset.
+
+Formally, MM Proposition II:
+
+$$
+r_E = r_U + \frac{D}{E}\,(r_U - r_D).
+$$
+
+Where $r_U$ is the cost of capital of the unlevered (all-equity)
+firm. As $D/E$ rises, $r_E$ rises linearly. WACC stays at $r_U$
+regardless of leverage:
+
+$$
+\text{WACC} = \frac{E}{V} r_E + \frac{D}{V} r_D = r_U.
+$$
+
+(Algebra: substitute MM II into WACC and simplify.)
+
+**The intuition**: more debt → more risk to equity holders (their
+claim is junior to a bigger pile of debt) → higher required equity
+return. The lower cost of debt and the higher cost of equity
+exactly offset.
+
+## Where MM breaks (preview of next 3 lessons)
+
+Five major real-world frictions:
+
+1. **Taxes** (next lesson). Interest is tax-deductible; dividends
+   aren't. So debt has a tax shield that adds value. MM with taxes
+   says firm value rises monotonically with debt.
+2. **Financial distress costs** (Lesson 22). Levered firms can go
+   bankrupt, which destroys value (legal fees, asset fire-sales,
+   customer and employee defections).
+3. **Agency costs**. Debt disciplines managers; debt can also
+   create perverse incentives.
+4. **Information asymmetry**. Issuing equity signals firm
+   overvaluation; issuing debt signals confidence. The market reacts.
+5. **Capital-market imperfections**. Borrowing rates differ across
+   firms; not everyone has access to the same capital markets at
+   the same terms.
+
+MM is the **benchmark**. Real-world deviations from MM are the
+substance of capital-structure theory.
+
+## A worked numerical example
+
+Consider an all-equity firm with cost of capital $r_U = 12\%$. It
+generates an expected perpetual EBIT of $100M per year. With no
+taxes, firm value $V_U = 100M / 0.12 = \$833M$.
+
+Now suppose the firm issues $300M of debt at 5% and uses the
+proceeds to buy back equity. Capital structure: $D = 300, E = V −
+D$.
+
+MM I: $V_L = V_U = 833M$. So $E = 833 − 300 = 533M$.
+
+MM II: $r_E = 0.12 + (300/533) \times (0.12 − 0.05) = 0.12 + 0.039
+= 15.9\%$.
+
+WACC check:
+$$
+\text{WACC} = (533/833)(0.159) + (300/833)(0.05) = 0.102 + 0.018 = 12.0\%.
+$$
+
+Equal to $r_U$. Value unchanged. Cost of equity rose. WACC stayed
+flat. MM at work.
+
+## Where this leads
+
+The MM benchmark gives us a clean baseline. The next four lessons
+add the frictions back in one at a time and watch the optimal
+capital structure emerge.

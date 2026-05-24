@@ -1,0 +1,65 @@
+{
+  "slug": "fin-3610-payout-policy",
+  "title": "Payout policy",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/payout-policy",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Why have US firms shifted heavily from dividends toward share buybacks since the 1980s?",
+      "choices": [
+        "1982 SEC rule clarified buybacks weren't market manipulation",
+        "Tax preference for capital gains (deferrable) over ordinary dividend income",
+        "Stock-based compensation became a larger share of pay, and buybacks offset its dilution",
+        "Greater flexibility (no commitment to a sustainable per-period level)"
+      ],
+      "correctIndices": [0, 1, 2, 3],
+      "explanation": "All four contributed. The 2022 IRA added a 1% excise tax on buybacks, narrowing but not closing the preference gap.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "A firm with $100M of excess cash, 50M shares at $40, market cap $2B. Compare $2 special dividend vs $100M buyback at $40. In an idealized tax-free world:",
+      "choices": [
+        "Dividend leaves shareholders better off",
+        "Buyback leaves shareholders better off",
+        "Both leave per-shareholder wealth at $40 (cash + remaining shares); MM-equivalent",
+        "Both reduce shareholder wealth"
+      ],
+      "correctIndex": 2,
+      "explanation": "MM equivalence: both transactions return the same $100M; the per-shareholder economics are identical absent taxes and signaling.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Why is dividend cuts considered a stronger negative signal than reducing or pausing buybacks?",
+      "choices": [
+        "Dividends are regulated more strictly",
+        "Once announced, dividends are sticky — cutting them suggests management has lost confidence; buybacks are pre-announced as programs with no specific commitment",
+        "Dividend cuts trigger criminal liability",
+        "Buybacks aren't taxed"
+      ],
+      "correctIndex": 1,
+      "explanation": "Sticky-dividend signaling: a cut is rare and large news. Buybacks are flexible by design; slowing one doesn't signal as strongly.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "When are buybacks value-destroying for remaining shareholders?",
+      "choices": [
+        "Never; they always raise EPS",
+        "When the share price the firm pays exceeds the intrinsic value — overpaying transfers wealth to selling shareholders at the expense of those who hold",
+        "Only during recessions",
+        "When the firm has no debt"
+      ],
+      "correctIndex": 1,
+      "explanation": "Buyback at premium price = value transfer from remaining holders to sellers. The 2007 and 2021 market-peak buyback cohorts illustrated this painfully when prices then fell.",
+      "points": 1
+    }
+  ]
+}

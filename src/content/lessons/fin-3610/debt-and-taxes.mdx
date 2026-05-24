@@ -6,28 +6,147 @@ order: 21
 summary: "Once corporate taxes enter, interest is tax-deductible and debt creates a tax shield. Firm value rises with leverage by PV(tax shield); WACC declines with leverage."
 learningObjectives:
   - "Compute the present value of the interest tax shield."
-  - "Restate MM with taxes: V_L = V_U + t·D."
-  - "Derive the WACC formula with the tax adjustment."
-prerequisites: []
+  - "State MM with taxes: V_L = V_U + t·D."
+  - "Derive the WACC formula with the tax adjustment and explain why it declines with leverage."
+prerequisites:
+  - "MM perfect market (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 15"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 15", "debt", "tax shield"]
+quizSlug: "fin-3610-debt-and-taxes"
 draft: false
 ---
 
 import WACCVisualizer from '@components/viz/WACCVisualizer';
 
-## Overview
+## The tax shield
 
-Once corporate taxes enter, interest is tax-deductible and debt creates a tax shield. Firm value rises with leverage by PV(tax shield); WACC declines with leverage.
+In the US (and most of the world), interest expense is deductible
+from corporate income for tax purposes. Dividends are not. This
+gives debt-financed firms a tax advantage that all-equity firms
+don't have.
 
-## Why it matters
+Consider $1M of interest expense at a 25% corporate tax rate:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 15. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+- All-equity firm: pays \$1M to equity. No tax saving.
+- Levered firm: pays \$1M to debt holders, deducts it from taxable
+  income, saves $0.25M in taxes. Net cost to firm: \$0.75M.
 
-## What you'll be able to do
+The \$0.25M in tax savings is the **interest tax shield**. Over the
+life of the debt, these annual savings accumulate.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## PV of the tax shield (perpetuity case)
 
-## Interactive
+If a firm holds $D$ of debt at rate $r_D$ permanently, annual
+interest is $r_D \cdot D$ and annual tax savings are $t \cdot r_D
+\cdot D$, where $t$ is the corporate tax rate.
+
+Discounted at $r_D$ as a perpetuity:
+
+$$
+PV(\text{tax shield}) = \frac{t \cdot r_D \cdot D}{r_D} = t \cdot D.
+$$
+
+So the PV of the tax shield is simply $t \cdot D$.
+
+## MM with corporate taxes
+
+Add this to MM I:
+
+$$
+V_L = V_U + t \cdot D.
+$$
+
+Firm value grows linearly with debt. If $t = 0.25$ and you add
+\$300M of permanent debt, you add \$75M of tax-shield value to the
+firm.
+
+Pushed to its logical conclusion, this says firms should be 100%
+debt-financed. Empirically they aren't, of course — financial
+distress costs (next lesson) push back. But MM-with-taxes is the
+right starting baseline.
+
+## WACC with taxes
+
+Re-derive WACC including the deductibility:
+
+$$
+\text{WACC} = \frac{E}{V} r_E + \frac{D}{V} r_D (1 - t).
+$$
+
+The $(1 - t)$ on the debt side is exactly the tax shield showing
+up. As debt rises (and equity falls), the weighted average tips
+toward the cheaper (tax-adjusted) debt rate. WACC **declines** with
+leverage — at least until distress costs kick in.
+
+## Play with it
 
 <WACCVisualizer client:load />
+
+Slide the **tax rate** from 0 to 0.5. Watch WACC bend downward more
+sharply at higher tax rates. Now drop the **distress sensitivity** to
+0 — WACC declines monotonically with $D/V$, just as MM-with-taxes
+predicts. Then raise distress sensitivity above 1 — WACC bends back
+up at high leverage, hinting at the optimal capital structure (next
+lesson).
+
+## A worked numerical example
+
+Same firm from the prior lesson: $r_U = 12\%$, perpetual EBIT
+\$100M. Add a 25% corporate tax rate.
+
+Unlevered value:
+$$
+V_U = \frac{100 \times (1 - 0.25)}{0.12} = \frac{75}{0.12} = \$625\text{M}.
+$$
+
+(After-tax cash flows are smaller; value drops by 25%.)
+
+Now issue \$300M of perpetual debt at 5%. Tax-shield value:
+$$
+PV(\text{TS}) = 0.25 \times 300 = \$75\text{M}.
+$$
+
+Levered firm value:
+$$
+V_L = 625 + 75 = \$700\text{M}.
+$$
+
+The capital structure decision added \$75M to firm value. Equity
+holders get most of it (because debt holders just earn $r_D$ on
+their face value).
+
+## How big is the tax shield, really?
+
+For a typical US firm:
+- Average leverage ratio (D/V) ~ 30%.
+- Corporate tax rate ~ 21% (post-TCJA, pre-any reform).
+- So tax-shield value as a fraction of firm value is ~ 0.21 × 0.30
+  = ~6% of firm value.
+
+That's not nothing — for a \$10B firm, it's \$600M of value. But
+it's also not enormous, which is why the *full* capital-structure
+story has to include distress costs and other frictions, not just
+tax shields.
+
+## What the model misses
+
+MM-with-taxes is the model that says "more debt is always better."
+Empirically:
+
+1. Firms don't lever to 100% — distress costs and agency costs
+   matter, not just taxes.
+2. Firms with low effective tax rates (NOLs, R&D credits) have
+   smaller tax shields and indeed carry less debt.
+3. Personal taxes complicate the picture. Miller (1977) extended
+   MM to account for differential personal tax treatment of debt
+   vs equity returns; the result is that the corporate-only tax-
+   shield calc somewhat overstates the benefit.
+
+Each of these adds nuance. The simple $t \cdot D$ formula remains
+the right starting point.
+
+## What's next
+
+The next lesson adds the cost side: financial distress. Together,
+the two sides produce the **trade-off theory** — the workhorse
+positive theory of capital structure.
