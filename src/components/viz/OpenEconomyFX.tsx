@@ -59,10 +59,15 @@ function equilibriumFX(s: State, capOutflow: number) {
   return (NX0 - capOutflow) / params.bNX;
 }
 
-function buildSeries(s: State) {
+function buildSeries(s: State, epsStar: number) {
   const NX0 = params.NX0_base + s.tariff;
+  // Build the line over a domain that always includes the current
+  // equilibrium with some margin on both sides.
+  const lo = Math.min(0.2, epsStar - 0.5);
+  const hi = Math.max(2.5, epsStar + 0.5);
+  const step = (hi - lo) / 40;
   return Array.from({ length: 41 }, (_, i) => {
-    const eps = 0.5 + i * 0.05; // 0.5 to 2.5
+    const eps = lo + i * step;
     return { eps, NX: NX0 - params.bNX * eps };
   });
 }
@@ -71,7 +76,7 @@ export default function OpenEconomyFX() {
   const [s, setS] = useState<State>(baseline);
   const flows = useMemo(() => computeFlows(s), [s]);
   const epsStar = useMemo(() => equilibriumFX(s, flows.capOutflow), [s, flows]);
-  const data = useMemo(() => buildSeries(s), [s]);
+  const data = useMemo(() => buildSeries(s, epsStar), [s, epsStar]);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
