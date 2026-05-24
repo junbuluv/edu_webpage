@@ -3,25 +3,161 @@ title: "Estimating the Cost of Capital"
 course: fin-3610
 unit: "Risk and return"
 order: 18
-summary: "Using CAPM to estimate the cost of equity; estimating the cost of debt from current yields; choosing the right risk-free rate and market risk premium."
+summary: "Practical recipes for estimating the cost of equity (via CAPM with realistic inputs), the after-tax cost of debt, and how to choose project-specific vs firm-wide discount rates."
 learningObjectives:
-  - "Estimate cost of equity from CAPM with realistic inputs."
-  - "Estimate the after-tax cost of debt."
-  - "Adjust for project risk vs firm risk."
-prerequisites: []
+  - "Estimate cost of equity from CAPM with realistic input choices."
+  - "Estimate the pre-tax and after-tax cost of debt from current market yields."
+  - "Adjust for project-specific risk vs firm-wide risk in capital budgeting."
+prerequisites:
+  - "CAPM (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 12"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 12", "cost of capital", "WACC"]
+quizSlug: "fin-3610-cost-of-capital"
 draft: false
 ---
 
-## Overview
+## Three discount rates that get confused
 
-Using CAPM to estimate the cost of equity; estimating the cost of debt from current yields; choosing the right risk-free rate and market risk premium.
+When valuing things you'll use one of three discount rates:
 
-## Why it matters
+- **Cost of equity** $r_E$ — the rate equity holders demand.
+- **Cost of debt** $r_D$ — the rate debt holders demand. (Pre-tax
+  and after-tax versions matter.)
+- **WACC** — weighted average of the two, used to discount FCF.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 12. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+Different cash flows need different rates. FCFE → $r_E$. Project
+free cash flow → WACC. Pre-tax operating cash flow → also WACC,
+but conceptually. Get the rate-cash-flow matching wrong and your
+valuation is meaningless.
 
-## What you'll be able to do
+This lesson focuses on estimating $r_E$ and $r_D$ in practice.
+WACC assembly is in Unit 5 (after we've covered capital structure
+properly).
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## Cost of equity from CAPM
+
+We saw the formula:
+
+$$
+r_E = R_f + \beta_E \times (E[R_m] - R_f).
+$$
+
+Now the practical input choices:
+
+**Pick $R_f$ matching the horizon.** A 5-year project: 5-year
+Treasury yield. A 10-year DCF: 10-year. A perpetual valuation: long-
+end of the curve (10-30 year average). Don't use the federal funds
+rate or 3-month T-bill for long-horizon DCFs — the term premium is
+real and you need to include it.
+
+**Pick a defensible market risk premium.** Three common approaches:
+
+1. *Historical*: long-run average of stock returns minus T-bill.
+   ~5-7% for US.
+2. *Implied*: solve a multi-stage DDM with current S&P 500 price
+   and consensus earnings/dividends for the discount rate that makes
+   them consistent. Tends to give 4-6%.
+3. *Survey*: ask CFOs or finance professionals. CFO surveys (Duke)
+   typically yield 5-6%.
+
+Most finance practitioners settle on 5-6% as a working assumption.
+Don't pick 8%+ unless you can defend it specifically.
+
+**Pick beta carefully.** Use 60 monthly observations against a broad
+market index. Smooth out single-observation outliers (some
+providers Winsorize). For sectors with small samples or thin
+trading, use industry-average beta from comparable public firms
+rather than firm-specific noise.
+
+For a private firm, the public-comparable approach is standard:
+
+1. Find 5-10 public comparables.
+2. Look up each one's levered beta.
+3. **Unlever** each one (remove the leverage effect): $\beta_U = \beta_L / [1 + (1-t)(D/E)]$.
+4. Average the unlevered betas.
+5. **Re-lever** at your target's capital structure: $\beta_L = \beta_U \times [1 + (1-t)(D/E)]$.
+6. Plug into CAPM.
+
+The unlever/re-lever procedure isolates business risk from
+financial-structure risk, so you're comparing apples to apples.
+
+## Cost of debt
+
+Two ways to estimate:
+
+**1. Market YTM on existing debt.** If the firm has publicly
+traded bonds, take the YTM of those bonds (matched to the planned
+horizon). That's the rate the market currently demands for the
+firm's credit risk.
+
+**2. Synthetic rating + spread table.** If the firm doesn't have
+public debt, estimate what rating it *would* get based on coverage
+ratios and leverage, then add the typical spread for that rating to
+the Treasury benchmark. Damodaran (NYU Stern) publishes a synthetic-
+rating table widely used in practice.
+
+**Don't use the coupon rate** on legacy debt — that's a historical
+artifact, not the market's current view. If a firm issued a 3%
+bond in 2020 but trades at 6% YTM today, 6% is what new debt would
+cost.
+
+**Pre-tax vs after-tax.** The after-tax cost of debt is
+
+$$
+r_D^{\text{after-tax}} = r_D \times (1 - t).
+$$
+
+Interest is tax-deductible, so the firm's true cost of debt is
+reduced by the tax shield. WACC always uses the after-tax rate.
+
+## Project risk vs firm risk
+
+If you're using the firm's WACC to discount a *project*, you're
+implicitly assuming the project has the same risk as the average of
+the firm's existing assets. This is right for projects that look
+like the firm's main business. It's wrong when:
+
+- The project is in a much riskier (or safer) business than the
+  firm's main activity. A consumer-staples firm building a biotech
+  R&D division shouldn't use its low cost of capital for that
+  project — biotech is much riskier.
+- The project has a fundamentally different capital structure than
+  the firm.
+
+The fix: use the **division-specific** or **project-specific** cost
+of capital. Start with the unlevered beta of pure-play comparables
+in that business, re-lever at the project's planned capital
+structure, plug into CAPM.
+
+This is one of the most common mistakes in real-world capital
+budgeting. A firm with low WACC easily over-invests in risky new
+ventures because the discount rate they're applying is too low for
+the actual risk.
+
+## A worked example
+
+Estimate cost of capital for a hypothetical mid-cap industrial
+manufacturer.
+
+**Cost of equity**:
+- $R_f$ = 4.2% (10-year Treasury).
+- MRP = 5.5%.
+- Beta = 1.1 (from FactSet, 60-month regression).
+- $r_E = 4.2 + 1.1 \times 5.5 = 4.2 + 6.05 = 10.25\%$.
+
+**Cost of debt**:
+- Existing 10-year bonds trade at 6.0% YTM.
+- Tax rate 25%.
+- $r_D^{\text{after-tax}} = 6.0 \times (1 - 0.25) = 4.5\%$.
+
+These two are the inputs to WACC (Unit 5), but they're also each
+useful on their own — $r_E$ for FCFE-based valuations, $r_D$ for
+bond-portfolio pricing.
+
+## What's hard
+
+The single biggest source of error in cost-of-capital estimation is
+*not* the formulas — they're trivial — but the input choices.
+Sensitivity-test every estimate. If your DCF says $50 per share at
+10% WACC and $30 per share at 11%, the dispersion in plausible WACC
+estimates is meaningful. Present a range, not a point.

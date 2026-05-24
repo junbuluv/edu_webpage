@@ -3,31 +3,161 @@ title: "CAPM and the Security Market Line"
 course: fin-3610
 unit: "Risk and return"
 order: 17
-summary: "CAPM as the equilibrium pricing model; deriving the SML; estimating beta from historical returns; interpreting alpha as mispricing under the CAPM."
+summary: "The Capital Asset Pricing Model as the equilibrium pricing equation: every asset's expected return is the risk-free rate plus beta times the market risk premium."
 learningObjectives:
-  - "State the CAPM and the SML equation."
-  - "Estimate beta via regression of asset return on market return."
-  - "Compute alpha and interpret its sign."
-prerequisites: []
+  - "State the CAPM equation and explain what each term represents."
+  - "Estimate beta from a regression of asset returns on market returns."
+  - "Compute alpha as observed-minus-CAPM and interpret its sign."
+prerequisites:
+  - "Optimal portfolio choice (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 11"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 11", "CAPM", "beta", "SML"]
+quizSlug: "fin-3610-capm-and-sml"
 draft: false
 ---
 
 import CAPMSecurityMarketLine from '@components/viz/CAPMSecurityMarketLine';
 
-## Overview
+## The CAPM equation
 
-CAPM as the equilibrium pricing model; deriving the SML; estimating beta from historical returns; interpreting alpha as mispricing under the CAPM.
+In equilibrium, every investor holds the market portfolio. So the
+risk that matters for any single asset $i$ is its **contribution to
+the market portfolio's risk** — its covariance with the market.
 
-## Why it matters
+That intuition produces the Capital Asset Pricing Model:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 11. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+$$
+E[R_i] = R_f + \beta_i \cdot (E[R_m] - R_f).
+$$
 
-## What you'll be able to do
+Three pieces:
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+- **$R_f$** — risk-free rate (Treasury yield matching the horizon).
+- **$E[R_m] - R_f$** — market risk premium. Compensation per unit of
+  market risk. Historically ~5-7% for US equities.
+- **$\beta_i$** — beta of asset $i$. How much asset $i$ moves when
+  the market moves.
 
-## Interactive
+A beta of 1.0 means the asset moves one-for-one with the market. A
+beta of 0 means the asset is uncorrelated with the market (risk-free
+in the systematic sense). A beta of 2.0 means the asset is twice as
+volatile as the market in the systematic dimension.
+
+## Where beta comes from
+
+Formally:
+
+$$
+\beta_i = \frac{\text{Cov}(R_i, R_m)}{\text{Var}(R_m)}.
+$$
+
+In practice: run a regression of asset $i$'s excess return ($R_i -
+R_f$) on the market's excess return ($R_m - R_f$). The slope
+coefficient is beta. Use weekly or monthly data over 3-5 years.
+Most data providers (Bloomberg, FactSet, Yahoo Finance) publish
+estimated betas for any traded security.
+
+Typical industry betas (US equities):
+
+| Industry | Typical β |
+|---|---|
+| Utilities | 0.4-0.7 |
+| Consumer staples | 0.5-0.8 |
+| Healthcare | 0.8-1.0 |
+| Industrials | 1.0-1.2 |
+| Financials | 1.0-1.3 |
+| Technology | 1.2-1.5 |
+| Highly leveraged / cyclical | 1.5-2.5 |
+
+## The Security Market Line (SML)
+
+CAPM plotted in $(\beta, E[R])$ space is a straight line — the
+**SML**:
+
+- Y-intercept: $R_f$.
+- Slope: market risk premium $E[R_m] - R_f$.
+
+Every fairly-priced asset sits *on* the SML.
 
 <CAPMSecurityMarketLine client:load />
+
+The scatter plot in the viz shows several example assets with
+observed returns plotted against their betas. Three patterns:
+
+- Treasuries (β ≈ 0): observed return near $R_f$, on the line.
+- S&P 500 ETF (β = 1): observed return equal to $R_f + $ market
+  premium, on the line.
+- Levered hedge fund (β = 1.8): observed return below the line,
+  meaning negative alpha. The high-beta strategy hasn't been
+  earning its risk premium.
+
+## Alpha: the deviation from CAPM
+
+For any asset $i$, alpha is the difference between observed return
+and CAPM's prediction:
+
+$$
+\alpha_i = R_i - \big[R_f + \beta_i (R_m - R_f)\big].
+$$
+
+- $\alpha > 0$: asset outperformed what CAPM predicts (above the
+  SML). Either a skillful active manager, or a mispriced asset, or
+  CAPM is missing a risk factor.
+- $\alpha < 0$: underperformed. Same three possibilities in reverse.
+- $\alpha = 0$: exactly on the SML. CAPM-fair pricing.
+
+Active managers exist to deliver positive alpha. The empirical
+record is sobering: most don't, after fees.
+
+## What CAPM gets right
+
+CAPM is conceptually clean, requires few inputs, and gives
+intuitive results. The risk-free rate is observable; the market
+risk premium and beta are estimable from data. For most
+introductory and undergraduate work — including this course —
+CAPM is the workhorse model for cost of equity.
+
+## What CAPM gets wrong
+
+Decades of empirical work have shown that asset returns aren't
+*fully* explained by beta. Three robust patterns CAPM doesn't
+predict:
+
+1. **Size effect**: small-cap stocks earn higher returns than CAPM
+   says they should.
+2. **Value effect**: stocks with high book-to-market ratios (value
+   stocks) earn higher returns than growth stocks at similar beta.
+3. **Momentum**: past winners keep winning over 3-12 month horizons.
+
+These motivated **factor models** that add more risk dimensions
+(Fama-French three-factor, five-factor, momentum). We cover those
+in the last lesson of this unit.
+
+## Practical procedure: cost of equity via CAPM
+
+To estimate the cost of equity for a firm or project:
+
+1. **$R_f$**: yield on a Treasury matching the horizon of cash flows.
+   For a 5-10 year DCF, use the 10-year Treasury yield. (~4.2% in
+   mid-2026.)
+
+2. **Market risk premium**: typically 5-6% for the US, based on the
+   long-run historical excess return of stocks over T-bills.
+   Survey-based estimates range 4-7%; pick a reasonable middle.
+
+3. **Beta**: pull from a data provider, or estimate via regression
+   on 60 months of returns. For a private firm, use the average
+   beta of public comparables (after unlevering and re-levering for
+   capital structure — covered in Unit 5).
+
+4. Plug in: $R_f + \beta \times \text{MRP}$.
+
+Example. A tech firm with beta 1.4, $R_f = 4.2\%$, market premium
+6%:
+
+$$
+r_E = 0.042 + 1.4 \times 0.06 = 0.042 + 0.084 = 12.6\%.
+$$
+
+This is the rate you'd use to discount the firm's equity cash flows
+in a DCF.

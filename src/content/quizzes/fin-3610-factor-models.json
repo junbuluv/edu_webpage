@@ -1,0 +1,65 @@
+{
+  "slug": "fin-3610-factor-models",
+  "title": "Factor models and market efficiency",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/factor-models",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Which patterns in stock returns are NOT explained by CAPM but ARE captured by factor models?",
+      "choices": [
+        "Small-cap stocks outperform large-cap on a risk-adjusted basis",
+        "Value stocks outperform growth stocks at similar beta",
+        "Past 3-12 month winners continue outperforming",
+        "Treasury bills earn the risk-free rate"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Size, value, and momentum are the three classic CAPM anomalies. T-bills earning R_f is exactly what CAPM predicts.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "The Fama-French three-factor model adds which two factors to CAPM?",
+      "choices": [
+        "SMB (Small Minus Big) and HML (High Minus Low book-to-market)",
+        "Momentum and Quality",
+        "Inflation and GDP growth",
+        "Dividend yield and earnings surprise"
+      ],
+      "correctIndex": 0,
+      "explanation": "SMB captures the size premium; HML captures the value premium. RMW and CMA are added in the five-factor extension.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Which form of the Efficient Markets Hypothesis is most clearly violated empirically?",
+      "choices": [
+        "Weak form (prices reflect past prices)",
+        "Semi-strong form (prices reflect public information)",
+        "Strong form (prices reflect all information, including insider info)",
+        "All three forms are confirmed"
+      ],
+      "correctIndex": 2,
+      "explanation": "Insider trading produces abnormal returns — that's why it's illegal. So strong form is clearly false. Semi-strong is mostly supported; weak form is essentially supported with momentum as a minor exception.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Most active mutual fund managers underperform passive index funds after fees. What does this support?",
+      "choices": [
+        "Markets are inefficient and managers are incompetent",
+        "Semi-strong EMH: even with skill, the cost of trying to beat the market typically exceeds the alpha generated",
+        "Strong-form EMH",
+        "That hedge funds are better than mutual funds"
+      ],
+      "correctIndex": 1,
+      "explanation": "Persistent underperformance net of fees is exactly what semi-strong EMH predicts: competition drives alpha to zero on average, and trading costs / fees push net returns below the index.",
+      "points": 1
+    }
+  ]
+}

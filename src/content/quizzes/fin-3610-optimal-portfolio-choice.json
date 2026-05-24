@@ -1,0 +1,65 @@
+{
+  "slug": "fin-3610-optimal-portfolio-choice",
+  "title": "Optimal portfolio choice",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/optimal-portfolio-choice",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "The efficient frontier consists of:",
+      "choices": [
+        "All possible portfolios",
+        "Minimum-variance portfolios for each given expected return level",
+        "Equal-weighted portfolios across all assets",
+        "Only risk-free portfolios"
+      ],
+      "correctIndex": 1,
+      "explanation": "The frontier traces the minimum risk achievable at each expected return. Rational mean-variance investors hold the upper half (above the minimum-variance point).",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "The tangent portfolio is special because:",
+      "choices": [
+        "It contains only the risk-free asset",
+        "Among all risky portfolios on the efficient frontier, it has the highest Sharpe ratio (best risk-return trade-off)",
+        "It always has zero beta",
+        "It's the lowest-variance portfolio"
+      ],
+      "correctIndex": 1,
+      "explanation": "The tangent portfolio is where a line from R_f touches (is tangent to) the efficient frontier. That tangency point is the highest-Sharpe risky portfolio.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Two-fund separation says:",
+      "choices": [
+        "Every investor's optimal allocation is a combination of the risk-free asset and the tangent (market) portfolio",
+        "Every investor should hold exactly two funds named A and B",
+        "The market should be divided into long-only and long-short funds",
+        "Bond and stock allocations must be 50/50"
+      ],
+      "correctIndex": 0,
+      "explanation": "Two funds (risk-free + tangent) suffice for every investor. The proportion of each varies with risk tolerance, but the risky portfolio is always the same.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Under what conditions does mean-variance analysis give exactly correct portfolio recommendations?",
+      "choices": [
+        "Returns are normally distributed",
+        "Investors have quadratic utility",
+        "Markets are perfectly efficient",
+        "Returns are heavily skewed with fat tails"
+      ],
+      "correctIndices": [0, 1],
+      "explanation": "Normal returns OR quadratic utility makes mean-variance fully sufficient. Fat tails and skewness violate the framework's assumptions; market efficiency is unrelated to this question.",
+      "points": 2
+    }
+  ]
+}
