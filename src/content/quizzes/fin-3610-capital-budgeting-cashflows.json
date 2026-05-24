@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-capital-budgeting-cashflows",
+  "title": "Capital budgeting cash flows",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/capital-budgeting-cashflows",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Which of the following should be INCLUDED as incremental cash flows in a capital-budgeting NPV?",
+      "choices": [
+        "Opportunity cost of using a building you already own (instead of renting it)",
+        "Sunk cost: $2M of market research done before the decision",
+        "Cannibalization effect on existing product sales",
+        "Interest expense on debt used to finance the project"
+      ],
+      "correctIndices": [0, 2],
+      "explanation": "Opportunity costs and cannibalization are real incremental effects. Sunk costs are gone regardless of the decision. Interest is excluded from FCF because it's captured in the discount rate; including it double-counts.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "FCF = NOPAT + D&A − ΔWC − CapEx. Why do we ADD back D&A?",
+      "choices": [
+        "It's not a real expense at all",
+        "D&A is a non-cash deduction; NOPAT already subtracted it but no cash actually left the firm",
+        "Accounting standards require it",
+        "To inflate cash flow for valuation purposes"
+      ],
+      "correctIndex": 1,
+      "explanation": "D&A reduces taxable income (good for taxes) but doesn't represent a cash outflow. To get to actual cash, you reverse it after the tax effect is captured in NOPAT.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "A fast-growing firm reports strong net income but is constantly short on cash. The most likely explanation is:",
+      "choices": [
+        "Accounting errors",
+        "Excessive dividends",
+        "Working capital investment (AR and inventory growing faster than collections)",
+        "Theft"
+      ],
+      "correctIndex": 2,
+      "explanation": "Each new dollar of revenue typically ties up ~$0.10-0.20 of working capital. A growing firm with positive accounting profit can still be cash-negative because of this — it's the classic 'profitable but bust' pattern.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "A project's year-T+1 FCF is projected at $50M, growing at 2% forever after year T. Cost of capital is 8%. What is the terminal value AT YEAR T (not discounted to today)? Answer in millions.",
+      "answer": 833.33,
+      "tolerance": 2.0,
+      "unit": "$M",
+      "explanation": "TV_T = FCF_{T+1} / (r - g) = 50 / (0.08 - 0.02) = 50 / 0.06 ≈ 833.33M.",
+      "points": 2
+    }
+  ]
+}

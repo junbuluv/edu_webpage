@@ -3,25 +3,143 @@ title: "Sensitivity, Scenario, and Break-Even Analysis"
 course: fin-3610
 unit: "Valuing projects and firms"
 order: 12
-summary: "How to stress-test an NPV: one-variable sensitivity (tornado charts), multi-variable scenarios, break-even analysis, and the intuition for Monte Carlo."
+summary: "How to stress-test an NPV — one-variable sensitivity (tornado charts), multi-variable scenarios, break-even analysis, and the intuition behind Monte Carlo."
 learningObjectives:
-  - "Construct a one-variable sensitivity (tornado) chart."
-  - "Build best/base/worst scenarios and compute conditional NPVs."
+  - "Construct a one-variable tornado chart from a project model."
+  - "Build best / base / worst-case scenarios and compute conditional NPVs."
   - "Compute break-even thresholds for key drivers."
-prerequisites: []
-estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 8"]
+prerequisites:
+  - "Capital budgeting cash flows (prior lesson)."
+estimatedMinutes: 20
+tags: ["fin-3610", "Berk-DeMarzo Ch 8", "sensitivity", "scenario"]
+quizSlug: "fin-3610-sensitivity-and-scenario"
 draft: false
 ---
 
-## Overview
+## Why a single NPV is misleading
 
-How to stress-test an NPV: one-variable sensitivity (tornado charts), multi-variable scenarios, break-even analysis, and the intuition for Monte Carlo.
+A project model takes a dozen inputs (revenue, growth, margin, tax
+rate, working capital, CapEx, discount rate, terminal value
+multiple, ...) and spits out a single number. That number is highly
+precise and entirely false in the sense that nobody knows the right
+input values in advance.
 
-## Why it matters
+Real-world capital-budgeting practice treats the point-estimate NPV
+as a *starting* point, then asks: how sensitive is it to my
+assumptions, and which assumptions matter most?
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 8. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+Three techniques in increasing order of sophistication.
 
-## What you'll be able to do
+## 1. One-variable sensitivity (tornado chart)
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Vary each input one at a time, holding all others at base case.
+Record the NPV range. Sort by range size.
+
+Example. Base case NPV = $40M. Sensitivity ranges:
+
+| Input | Low → High | NPV range |
+|---|---|---|
+| Revenue growth | 0% → 10% | $-20M to $+110M (range $130M) |
+| Discount rate | 8% → 14% | $+80M to $-15M (range $95M) |
+| Operating margin | 25% → 35% | $-5M to $+85M (range $90M) |
+| Initial CapEx | $800k → $1.2M | $+60M to $+20M (range $40M) |
+| Terminal growth | 1% → 4% | $+30M to $+55M (range $25M) |
+| Tax rate | 20% → 30% | $+50M to $+30M (range $20M) |
+
+Plotted as a horizontal bar chart sorted by range, this is a
+**tornado chart**. The widest bar (revenue growth here) is the
+input the project is most sensitive to. That's where you spend
+your due-diligence time. Don't argue with the CFO about the tax
+rate when revenue growth uncertainty is six times more material.
+
+Tornado charts are easy to compute and easy to communicate. The
+limitation: they vary inputs independently, so they miss
+correlations. If revenue growth and margin are positively
+correlated (good times help both), the tornado understates upside
+and downside.
+
+## 2. Scenarios (best / base / worst)
+
+Define 2-3 internally consistent scenarios with multiple inputs
+varying together:
+
+| Variable | Worst | Base | Best |
+|---|---|---|---|
+| Revenue growth | 0% | 5% | 8% |
+| Operating margin | 22% | 30% | 33% |
+| Working capital / sales | 15% | 10% | 8% |
+| Discount rate | 13% | 10% | 9% |
+| Terminal growth | 1% | 2% | 3% |
+| **NPV** | $-25M | $+40M | $+150M |
+
+Scenarios respect correlations. They produce a small number of
+realistic outcomes managers can reason about. Assign rough
+probabilities and compute expected NPV:
+
+$$
+E[NPV] = 0.25 \times (-25) + 0.50 \times 40 + 0.25 \times 150 = +51\text{M}.
+$$
+
+The downside of scenarios: they collapse a continuous distribution
+of outcomes into 2-3 points. The Monte Carlo extension fixes that.
+
+## 3. Break-even analysis
+
+For each key driver, ask: at what value does NPV = 0?
+
+- Revenue growth break-even: 2.5% (if growth drops below this,
+  project is value-destroying).
+- Operating margin break-even: 24%.
+- Discount rate break-even: 12.5% (this is just the IRR).
+
+Break-even points are easy to communicate to non-technical
+audiences: "we need at least 2.5% revenue growth to break even."
+Pair them with management's confidence level — how likely is it
+that revenue growth ends up *below* break-even?
+
+## Monte Carlo, briefly
+
+Instead of three scenarios, sample 10,000 realizations from
+distributions for each input (with appropriate correlation
+structure), compute NPV for each, and plot the histogram.
+
+Outputs:
+- Mean / median NPV.
+- Probability that NPV > 0.
+- Tail risk (e.g., 5th percentile NPV).
+
+Useful when project NPV is highly skewed (long upside tail, limited
+downside — typical of real options) or when many small input
+uncertainties compound. Not necessary for most coursework, but
+ubiquitous in real-world project finance.
+
+## When sensitivity tells you to walk away
+
+Three patterns that should make you rethink the project, regardless
+of base-case NPV:
+
+1. **Knife-edge NPV** that swings from +$20M to −$20M for ±5%
+   changes in a single input — too fragile to bet the firm on.
+2. **High break-even threshold** that the operating team can't
+   commit to. If breakeven revenue growth is 8% and history says
+   the segment grows at 3%, the project is probably underwater.
+3. **Discount rate close to IRR**. If your IRR is barely above cost
+   of capital, you're earning roughly market returns for taking
+   project-specific risk. The expected risk-adjusted return is near
+   zero.
+
+Sensitivity analysis isn't just defensive — it sometimes reveals
+projects whose downside risk vastly exceeds their headline NPV.
+That's a project worth not doing, even if NPV is technically positive.
+
+## Practical workflow
+
+For any non-trivial capital decision:
+
+1. Build a clean DCF model.
+2. Compute base-case NPV.
+3. Do tornado on every input.
+4. Bracket the top 3-4 inputs in a scenario table.
+5. For each, find break-even.
+6. Discuss the results with the operating team. The numbers that
+   matter are the ones the team can actually influence.

@@ -3,25 +3,153 @@ title: "Valuing Stocks: DDM and FCFE"
 course: fin-3610
 unit: "Valuing projects and firms"
 order: 13
-summary: "Discounted dividend model (Gordon and multi-stage); free-cash-flow-to-equity valuation; reconciling the two and when each is preferred."
+summary: "Two ways to value a share of stock — the dividend discount model and free-cash-flow-to-equity — and when each is preferred."
 learningObjectives:
-  - "Apply the Gordon growth dividend discount model."
-  - "Build a multi-stage DDM with an explicit and terminal phase."
-  - "Compute equity value via FCFE discounted at cost of equity."
-prerequisites: []
+  - "Apply the Gordon growth dividend discount model to a stable mature company."
+  - "Build a multi-stage DDM with an explicit forecast phase and a terminal phase."
+  - "Compute equity value via FCFE discounted at the cost of equity, and explain when this beats the DDM."
+prerequisites:
+  - "Gordon growth model (Unit 2)."
+  - "Free cash flow construction (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 9"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 9", "stock valuation", "DDM", "FCFE"]
+quizSlug: "fin-3610-valuing-stocks"
 draft: false
 ---
 
-## Overview
+## What is a stock worth?
 
-Discounted dividend model (Gordon and multi-stage); free-cash-flow-to-equity valuation; reconciling the two and when each is preferred.
+A share of stock is a claim on the future dividends the firm chooses
+to pay you, plus whatever you can sell the share for later. Since
+"sell it later" itself depends on someone else's view of future
+dividends, the share's intrinsic value reduces to the PV of all
+future dividends. That's the dividend discount model (DDM):
 
-## Why it matters
+$$
+P_0 = \sum_{t=1}^{\infty} \frac{D_t}{(1 + r_E)^t}.
+$$
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 9. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+Where $D_t$ is the dividend at time $t$ and $r_E$ is the cost of
+equity (covered in Unit 4). Until then, treat $r_E$ as given.
 
-## What you'll be able to do
+## The Gordon special case
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+If dividends grow at constant rate $g$ forever, the infinite sum
+collapses to:
+
+$$
+P_0 = \frac{D_1}{r_E - g}.
+$$
+
+Requires $g < r_E$. Works for mature, stable companies (utilities,
+consumer staples) where payout policy is set and growth is predictable.
+
+Example. Coca-Cola pays a $1.88 annual dividend, has historically
+grown it about 5% per year, and has a cost of equity of about 8%.
+
+$$
+P_0 = \frac{1.88 \times 1.05}{0.08 - 0.05} = \frac{1.974}{0.03} \approx \$65.80.
+$$
+
+Coca-Cola actually trades around $60-70 per share in 2025-2026. The
+Gordon model gets us in the ballpark precisely because Coke is the
+kind of company it was designed for.
+
+## When Gordon breaks
+
+Gordon assumes a single constant $g$ forever. Lots of real firms
+don't fit that.
+
+- **High-growth firms** (early Amazon, Nvidia today): $g > r_E$ for
+  some period, so the formula gives infinity. Need multi-stage.
+- **Cyclical firms**: dividend growth is anything but constant.
+- **No-dividend firms** (most tech in their growth phase): $D = 0$
+  forever, so DDM says the stock is worth $0$. Obviously wrong.
+
+For these, two patches:
+
+## Multi-stage DDM
+
+Split the firm's life into two (or more) phases:
+
+1. **Explicit forecast** (years 1 to $T$): forecast each year's
+   dividend individually.
+2. **Terminal value** (year $T+1$ onwards): apply Gordon at a
+   sustainable long-run growth rate.
+
+$$
+P_0 = \sum_{t=1}^{T} \frac{D_t}{(1+r_E)^t} + \frac{1}{(1+r_E)^T} \cdot \frac{D_{T+1}}{r_E - g_{LR}}.
+$$
+
+The first term is the PV of forecasted dividends. The second is the
+PV of the Gordon terminal value, discounted back to today.
+
+Example. A firm pays $D_1 = \$2$, growing 12% per year for 5 years,
+then 3% per year forever. $r_E = 10\%$.
+
+Years 1-5 dividends: 2.00, 2.24, 2.51, 2.81, 3.15. PV at 10%:
+sum to about $9.46.
+
+Year 6 dividend = 3.15 × 1.03 = 3.24. Terminal value at end of year
+5: $3.24 / (0.10 - 0.03) = \$46.32$. PV today: $46.32 / 1.10^5 \approx \$28.76$.
+
+Stock value: $9.46 + 28.76 = \$38.22 per share.
+
+## FCFE: when there are no dividends to discount
+
+For firms that don't pay dividends (most growth-stage tech), use
+**free cash flow to equity**:
+
+$$
+\text{FCFE} = \text{Net Income} + \text{D\&A} - \Delta\text{WC} - \text{CapEx} + \text{Net Borrowing}.
+$$
+
+This is the cash available to equity holders after the firm has paid
+for operations, working capital, CapEx, and net debt repayments. If
+the firm doesn't pay it all out as a dividend, that cash either
+accumulates as additional book value or funds buybacks — either way
+it accrues to equity holders.
+
+Equity value = PV of FCFE discounted at cost of equity:
+
+$$
+\text{Equity value} = \sum_{t=1}^{\infty} \frac{\text{FCFE}_t}{(1+r_E)^t}.
+$$
+
+Per-share value = Equity value / shares outstanding.
+
+This is the right approach for non-dividend payers because what
+matters is the cash the firm *could* pay out, not the cash it
+*chooses* to pay out.
+
+## DDM vs FCFE: which when
+
+| Use DDM when | Use FCFE when |
+|---|---|
+| Firm has stable dividend policy | Firm pays little or no dividend |
+| Payout ratio is predictable | Payout is sporadic / opportunistic |
+| You're valuing utility-like, consumer-staple, mature financial firms | You're valuing tech, growth, M&A targets |
+
+For most large public US firms today, FCFE is the more general tool.
+DDM remains useful as a sanity check and for traditional dividend-
+focused investors.
+
+## A reconciliation
+
+If a firm pays out 100% of FCFE as dividends, FCFE = dividends and
+the two methods give identical equity values. The DDM is a special
+case of FCFE valuation under a specific (and often unrealistic)
+payout policy. Knowing this means you don't need to memorize "which
+method": pick the one whose inputs you can defend.
+
+## What we're skipping for now
+
+- **WACC valuation** of the whole firm (enterprise value), then
+  subtracting debt to get equity. Covered in Unit 5 with capital
+  structure.
+- **Adjusted Present Value (APV)** — value the unlevered firm,
+  then add tax-shield benefits separately. Same unit.
+- **Multiples-based valuation** — covered next lesson.
+
+These all give equity values too; they're just different paths to
+the same destination.

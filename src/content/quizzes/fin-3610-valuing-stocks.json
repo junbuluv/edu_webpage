@@ -1,0 +1,57 @@
+{
+  "slug": "fin-3610-valuing-stocks",
+  "title": "Valuing stocks (DDM and FCFE)",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/valuing-stocks",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A stock will pay $4 in dividends next year, growing 4% forever. Cost of equity is 10%. Using the Gordon DDM, what is the fair value per share? Answer in dollars.",
+      "answer": 66.67,
+      "tolerance": 0.5,
+      "unit": "$",
+      "explanation": "P_0 = D_1 / (r_E - g) = 4 / (0.10 - 0.04) = 4 / 0.06 ≈ 66.67.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Why does the Gordon DDM say a non-dividend-paying tech company is worth $0?",
+      "choices": [
+        "Because the company actually is worthless",
+        "Because Gordon discounts dividends only — if D = 0 forever, the sum is 0. The result is wrong; the company isn't worthless, the model is the wrong tool",
+        "Because the cost of equity is too high",
+        "Because growth exceeds the discount rate"
+      ],
+      "correctIndex": 1,
+      "explanation": "Gordon's special-case assumption (constant D, growing at g) breaks when there are no dividends. Use FCFE — discounts the cash the firm *could* pay out, not what it does pay.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "When should you prefer FCFE over DDM for valuing equity?",
+      "choices": [
+        "Firm pays little or no dividend",
+        "Firm has stable, predictable dividend policy",
+        "Firm uses buybacks instead of dividends",
+        "You want results identical to DDM under any payout policy"
+      ],
+      "correctIndices": [0, 2],
+      "explanation": "FCFE handles non-payers and buyback users correctly. DDM is fine for stable dividend policy; under 100% payout they're identical.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "A multi-stage DDM: D_1 = $2, growing 12% per year for 5 years (so D_5 = $3.15), then 3% forever. r_E = 10%. What is the terminal value at end of year 5 (the Gordon TV at that date)? Answer in $.",
+      "answer": 46.32,
+      "tolerance": 0.5,
+      "unit": "$",
+      "explanation": "D_6 = 3.15 × 1.03 = 3.24. TV_5 = D_6 / (r_E - g) = 3.24 / (0.10 - 0.03) = 3.24 / 0.07 ≈ 46.32.",
+      "points": 2
+    }
+  ]
+}

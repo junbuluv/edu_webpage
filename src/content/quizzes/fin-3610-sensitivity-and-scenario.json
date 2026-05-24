@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-sensitivity-and-scenario",
+  "title": "Sensitivity, scenario, break-even",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/sensitivity-and-scenario",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "A tornado chart helps you identify:",
+      "choices": [
+        "The probability that NPV is positive",
+        "Which inputs the project NPV is most sensitive to",
+        "Correlations between inputs",
+        "The optimal capital structure"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tornado charts vary one input at a time and rank by NPV range. They tell you where to focus due-diligence effort; correlations and probabilities require scenarios or Monte Carlo.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Worst/base/best scenarios produce NPVs of -$25M, +$40M, +$150M with probabilities 0.25/0.50/0.25. What is the expected NPV? Answer in $M.",
+      "answer": 51.25,
+      "tolerance": 0.5,
+      "unit": "$M",
+      "explanation": "E[NPV] = 0.25(-25) + 0.50(40) + 0.25(150) = -6.25 + 20 + 37.5 = 51.25M.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Which limitation is unique to scenario analysis (vs tornado charts)?",
+      "choices": [
+        "It ignores correlations between inputs",
+        "It collapses a continuous distribution of outcomes into a few discrete points",
+        "It requires a discount rate",
+        "It cannot find break-even values"
+      ],
+      "correctIndex": 1,
+      "explanation": "Scenarios respect correlations (their advantage over tornado) but compress the outcome distribution to 2-3 points. Monte Carlo addresses both limitations.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which patterns should make you reconsider a project even though base-case NPV is positive?",
+      "choices": [
+        "Knife-edge NPV that swings from +$20M to −$20M with ±5% input changes",
+        "Break-even revenue growth that's far above the historical sector growth rate",
+        "IRR comfortably above cost of capital",
+        "Discount rate just barely above the IRR"
+      ],
+      "correctIndices": [0, 1, 3],
+      "explanation": "Fragility, unrealistic break-even, and razor-thin risk-adjusted returns are all red flags. A solid IRR above cost of capital is good news, not a warning sign.",
+      "points": 2
+    }
+  ]
+}
