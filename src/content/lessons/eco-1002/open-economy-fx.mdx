@@ -1,0 +1,63 @@
+---
+title: "Open-Economy Macro and the Real Exchange Rate"
+course: eco-1002
+unit: "Open economy"
+order: 20
+summary: "Trade balance as the mirror of saving minus investment; how the real exchange rate adjusts to keep the two sides equal; what tariffs actually do (and don't do)."
+learningObjectives:
+  - "State the saving-investment identity for an open economy: S − I = NX."
+  - "Predict the real exchange rate response to a saving or investment shock."
+  - "Explain why tariffs don't change the trade balance in this framework."
+prerequisites:
+  - "Saving, Investment, and Crowding Out (prior lesson)"
+estimatedMinutes: 20
+tags: ["open economy", "exchange rates", "trade balance"]
+draft: false
+---
+
+import OpenEconomyFX from '@components/viz/OpenEconomyFX';
+
+## The fundamental identity
+
+In any open economy, what a country saves and doesn't invest at home must
+flow somewhere — by accounting, it flows abroad as a net capital
+outflow, which is exactly equal to net exports:
+
+$$
+S - I = NX.
+$$
+
+If the US saves more than it invests, $S - I > 0$, so $NX > 0$: the US
+runs a trade surplus and accumulates foreign assets. If the US invests
+more than it saves, $NX < 0$: a trade deficit, financed by foreign
+borrowing.
+
+## The real exchange rate is the price that clears trade
+
+The real exchange rate $\varepsilon$ is how many units of foreign goods
+trade for one unit of US goods. A higher $\varepsilon$ (a stronger dollar
+in real terms) makes US exports more expensive and imports cheaper,
+reducing $NX$.
+
+Equilibrium $\varepsilon^*$ is whatever value makes $NX(\varepsilon) =
+S - I$. If saving rises, the right-hand side rises, so $NX$ must rise,
+which requires $\varepsilon$ to fall — a weaker real dollar.
+
+<OpenEconomyFX client:load />
+
+Try raising the **world real rate** (slider) and watch what happens.
+Higher world $r$ pulls capital out of the US, lowers investment, raises
+$S - I$, and weakens the dollar to boost net exports.
+
+## Why tariffs don't work the way people think
+
+Try sliding the **tariff** lever. A protective tariff shifts the $NX$
+curve right at any given $\varepsilon$. But the equilibrium quantity of
+$NX$ doesn't change — it's still equal to $S - I$. What changes is
+$\varepsilon$: the dollar appreciates by exactly enough to offset the
+tariff. American consumers pay more for imports, but the trade balance
+doesn't move.
+
+This is the **incidence of tariffs** result that surprises non-economists:
+saving and investment determine the trade balance, and a tariff just
+changes the prices at which trade happens.

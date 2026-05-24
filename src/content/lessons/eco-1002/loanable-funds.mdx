@@ -1,0 +1,53 @@
+---
+title: "Saving, Investment, and Crowding Out"
+course: eco-1002
+unit: "Long-run growth"
+order: 2
+summary: "The loanable funds market: how the real interest rate clears saving with investment, and how government deficits compete with firms for the same pool of funds."
+learningObjectives:
+  - "Describe supply (saving) and demand (investment) in the loanable funds market."
+  - "Explain how a government deficit shifts the supply of loanable funds."
+  - "Define crowding out and quantify it for a simple deficit shock."
+prerequisites: []
+estimatedMinutes: 20
+tags: ["loanable funds", "crowding out", "fiscal policy"]
+draft: false
+---
+
+import LoanableFunds from '@components/viz/LoanableFunds';
+
+## The market for loanable funds
+
+When a household saves a dollar, that dollar is supplied to the market
+for loanable funds (through banks, money market funds, or bond purchases).
+When a firm wants to build a factory it demands loanable funds (by
+issuing bonds, taking out a loan, or selling equity). The **real
+interest rate** is the price that clears this market.
+
+Demand for loanable funds is **investment** $I$, which falls as the real
+rate $r$ rises. Supply is **national saving**: private saving plus
+government saving (a deficit is *negative* government saving). Saving
+rises with $r$ because the reward to deferring consumption is higher.
+
+## Crowding out
+
+Suppose the government runs a $\$300$B deficit. National saving falls
+by $\$300$B at every interest rate — the supply curve shifts left. The
+new equilibrium has a higher $r^*$ and lower $I^*$. The deficit *crowds
+out* private investment, dollar-for-dollar with the rise in saving the
+higher rate triggers, minus the part the higher rate elicits from
+private savers.
+
+<LoanableFunds client:load />
+
+Try setting the deficit slider to $\$300$B and watch the equilibrium
+move. Note how much of the deficit is absorbed by extra private saving
+(the new $r^*$ is higher) vs how much crowds out investment.
+
+## Why it matters for the economy
+
+In the long run, investment becomes the capital stock that drives
+growth. A persistently large deficit means persistently less
+investment, which means a smaller capital stock and lower productivity
+than the economy would otherwise have. This is the **long-run cost** of
+deficits — separate from short-run cyclical effects.
