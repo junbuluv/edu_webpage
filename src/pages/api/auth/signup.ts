@@ -1,5 +1,9 @@
 import type { APIRoute } from 'astro';
 import { safeNext } from '@lib/auth/safe-next';
+import {
+  isAllowedEmail,
+  allowedDomainsHumanList,
+} from '@lib/auth/email-allowlist';
 
 const MIN_PASSWORD_LEN = 12;
 
@@ -10,6 +14,14 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   const email = String(form.get('email') ?? '').trim();
   const password = String(form.get('password') ?? '');
   const next = safeNext(String(form.get('next') ?? '/'));
+
+  if (!isAllowedEmail(email)) {
+    return redirect(
+      `/auth/signup?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+        `Please use a Baruch College email address (${allowedDomainsHumanList()}).`,
+      )}`,
+    );
+  }
 
   if (password.length < MIN_PASSWORD_LEN) {
     return redirect(
