@@ -112,7 +112,7 @@ export default function ISLMChart() {
             <YAxis
               dataKey="y"
               type="number"
-              domain={[0, 20]}
+              domain={['auto', 'auto']}
               label={{
                 value: 'Interest rate (r, %)',
                 angle: -90,

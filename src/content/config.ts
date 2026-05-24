@@ -15,6 +15,14 @@ const lessons = defineCollection({
     quizSlug: z.string().optional(),
     draft: z.boolean().default(false),
     updated: z.date().optional(),
+    furtherReading: z
+      .object({
+        title: z.string(),
+        url: z.string().url(),
+        source: z.string(),
+        why: z.string(),
+      })
+      .optional(),
   }),
 });
 

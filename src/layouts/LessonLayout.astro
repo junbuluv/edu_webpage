@@ -1,13 +1,25 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import LessonProgressButton from '@components/lesson/LessonProgressButton';
+import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 
 interface Props {
   lesson: CollectionEntry<'lessons'>;
 }
 const { lesson } = Astro.props;
 const data = lesson.data;
+
+// Resolve the "read this next" article: lesson-level frontmatter takes
+// priority; otherwise fall back to the matching quiz's article.
+let article = data.furtherReading ?? null;
+if (!article && data.quizSlug) {
+  const quizzes = await getCollection('quizzes');
+  const quiz = quizzes.find((q) => q.data.slug === data.quizSlug);
+  if (quiz?.data.furtherReading) {
+    article = quiz.data.furtherReading;
+  }
+}
 ---
 <BaseLayout title={data.title} description={data.summary}>
   <article class="mx-auto max-w-3xl px-4 py-10">
@@ -36,6 +48,8 @@ const data = lesson.data;
     <div class="prose mt-10">
       <slot />
     </div>
+
+    {article && <FurtherReadingCard article={article} variant="lesson" />}
 
     <div class="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
       <LessonProgressButton client:load lessonSlug={lesson.slug} />
