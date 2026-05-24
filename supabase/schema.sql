@@ -364,3 +364,119 @@ $$;
 
 revoke all on function public.log_disclosure(text, uuid, text, jsonb) from public;
 grant execute on function public.log_disclosure(text, uuid, text, jsonb) to authenticated;
+
+-- =========================================================================
+-- Retention jobs (pg_cron)
+--
+-- Two scheduled functions, both running as the database role and writing
+-- an audit_log row for transparency:
+--
+--   purge_inactive_accounts()
+--     Deletes auth.users rows whose last_sign_in_at is more than 24
+--     months ago. Cascades through public.profiles (and from there
+--     through lesson_progress, quiz_attempts, enrollments).
+--
+--   purge_old_quiz_attempts()
+--     Deletes quiz_attempts whose submitted_at is more than 2 academic
+--     years (730 days) old. lesson_progress is kept (it's keyed on
+--     (user, lesson) so old rows are not multiplying).
+--
+-- Audit log: each run inserts a "system retention" audit_log row with
+-- the count purged in metadata.count. actor_id is NULL because this is
+-- system action, not staff action.
+--
+-- Scheduling:
+--   purge_inactive_accounts  -> monthly, 1st @ 04:00 UTC
+--   purge_old_quiz_attempts  -> weekly, Sunday @ 04:15 UTC
+--
+-- pg_cron is preinstalled on Supabase but the extension must be enabled
+-- by the project owner (Database -> Extensions -> "pg_cron" -> Enable),
+-- after which the cron.schedule(...) calls below succeed. Until then,
+-- the function definitions still install and can be invoked manually.
+-- =========================================================================
+
+create extension if not exists pg_cron;
+
+create or replace function public.purge_inactive_accounts(p_months integer default 24)
+returns integer
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_count integer;
+  v_cutoff timestamptz := now() - (p_months || ' months')::interval;
+begin
+  with deleted as (
+    delete from auth.users
+     where last_sign_in_at is not null
+       and last_sign_in_at < v_cutoff
+    returning id
+  )
+  select count(*) into v_count from deleted;
+
+  insert into public.audit_log (
+    actor_id, actor_role, action, target_resource, metadata
+  ) values (
+    null, null, 'system_retention_purge_inactive', 'auth.users',
+    jsonb_build_object('cutoff_months', p_months, 'count', v_count)
+  );
+
+  return v_count;
+end;
+$$;
+
+create or replace function public.purge_old_quiz_attempts(p_days integer default 730)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count integer;
+  v_cutoff timestamptz := now() - (p_days || ' days')::interval;
+begin
+  with deleted as (
+    delete from public.quiz_attempts
+     where submitted_at < v_cutoff
+    returning id
+  )
+  select count(*) into v_count from deleted;
+
+  insert into public.audit_log (
+    actor_id, actor_role, action, target_resource, metadata
+  ) values (
+    null, null, 'system_retention_purge_quiz_attempts', 'public.quiz_attempts',
+    jsonb_build_object('cutoff_days', p_days, 'count', v_count)
+  );
+
+  return v_count;
+end;
+$$;
+
+revoke all on function public.purge_inactive_accounts(integer) from public;
+revoke all on function public.purge_old_quiz_attempts(integer) from public;
+
+-- Schedule via pg_cron. Re-running cron.schedule with the same name is a
+-- no-op if the schedule + command match; if they differ, the new
+-- definition replaces the old one. We wrap in DO blocks so failures
+-- (e.g. extension not enabled yet) don't abort the rest of the migration.
+do $$ begin
+  perform cron.schedule(
+    'retention_purge_inactive_accounts',
+    '0 4 1 * *',
+    $cron$select public.purge_inactive_accounts();$cron$
+  );
+exception when others then
+  raise notice 'pg_cron not available yet; skipping schedule for purge_inactive_accounts. Enable the extension and re-run this script.';
+end $$;
+
+do $$ begin
+  perform cron.schedule(
+    'retention_purge_old_quiz_attempts',
+    '15 4 * * 0',
+    $cron$select public.purge_old_quiz_attempts();$cron$
+  );
+exception when others then
+  raise notice 'pg_cron not available yet; skipping schedule for purge_old_quiz_attempts. Enable the extension and re-run this script.';
+end $$;

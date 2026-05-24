@@ -160,6 +160,44 @@ any rows that signed up before the secret was set.
    Rotation invalidates historical equality lookups on those columns —
    acceptable since we use them for forensic review, not joins.
 
+### Retention jobs
+
+Two `pg_cron`-scheduled functions enforce the retention policy stated in
+the Privacy Policy:
+
+- `public.purge_inactive_accounts(p_months integer default 24)` —
+  deletes `auth.users` rows whose `last_sign_in_at` is older than the
+  cutoff. Cascades through `public.profiles` and the rest of the
+  per-user tables.
+- `public.purge_old_quiz_attempts(p_days integer default 730)` —
+  deletes `quiz_attempts` older than the cutoff.
+
+Each run writes an `audit_log` row with the count purged in
+`metadata.count`. `actor_id` is `null` (system action).
+
+Schedules (UTC):
+
+- `retention_purge_inactive_accounts` — `0 4 1 * *` (1st of each month at 04:00)
+- `retention_purge_old_quiz_attempts` — `15 4 * * 0` (Sundays at 04:15)
+
+`pg_cron` is preinstalled on Supabase but the extension must be
+**enabled by the project owner** (Database → Extensions → "pg_cron" →
+Enable). Until then, the function definitions still install and can be
+invoked manually:
+```sql
+select public.purge_inactive_accounts();
+select public.purge_old_quiz_attempts();
+```
+
+To change the cutoff window, pass the argument:
+`select public.purge_inactive_accounts(36);` (36 months instead of 24).
+
+To inspect what cron will run next:
+```sql
+select * from cron.job;
+select * from cron.job_run_details order by start_time desc limit 20;
+```
+
 ### Audit log
 
 `src/lib/audit.ts` exposes `logDisclosure(ctx)`. Every staff read of an
