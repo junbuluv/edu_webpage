@@ -1,0 +1,125 @@
+{
+  "slug": "fin-3610-midterm",
+  "title": "FIN 3610 Midterm Exam",
+  "course": "fin-3610",
+  "description": "Covers Units 1-3: Foundations, Time Value of Money, and Valuing Projects & Firms. Closed book. 60 minutes. Single attempt.",
+  "durationMinutes": 60,
+  "passingScore": 0.6,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Which feature of the corporate form is most directly responsible for the existence of a public stock market?",
+      "choices": [
+        "Limited liability",
+        "Perpetual existence",
+        "Transferable shares",
+        "Double taxation"
+      ],
+      "correctIndex": 2,
+      "explanation": "Transferable shares enable secondary-market trading without dissolving the firm.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "A firm reports Revenue = $2,000M, Net Income = $200M, Total Assets = $1,500M, Equity = $500M. What is Return on Equity (ROE)? Answer as a decimal (e.g. 0.20 for 20%).",
+      "answer": 0.40,
+      "tolerance": 0.005,
+      "explanation": "ROE = Net Income / Equity = 200 / 500 = 0.40.",
+      "points": 3
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Two assets produce identical cash flows in every state. The Law of One Price says:",
+      "choices": [
+        "They must have identical prices",
+        "They must have identical risk premiums",
+        "They must trade in the same exchange",
+        "Their prices must be set by the same dealer"
+      ],
+      "correctIndex": 0,
+      "explanation": "Identical cash flows → identical prices, enforced by arbitrage.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "A project costs $1,000 today and pays $500 at the end of each of the next 3 years. Cost of capital is 10%. What is the NPV (in dollars, two decimals)?",
+      "answer": 243.43,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "NPV = −1000 + 500/1.10 + 500/1.21 + 500/1.331 ≈ 243.43.",
+      "points": 4
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "You will receive $2,000 in 7 years. The discount rate is 5%. What is the present value? Answer to the nearest cent.",
+      "answer": 1421.36,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "PV = 2000 / 1.05^7 ≈ 1421.36.",
+      "points": 3
+    },
+    {
+      "type": "numeric",
+      "id": "q6",
+      "prompt": "A perpetuity pays $400 per year forever starting next year, discount rate 5%. What is its PV?",
+      "answer": 8000,
+      "tolerance": 5,
+      "unit": "$",
+      "explanation": "PV = C/r = 400/0.05 = 8000.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q7",
+      "prompt": "A 5-year bond, face value $1,000, 6% annual coupon, YTM 5%. What is its price (to the nearest cent)?",
+      "answer": 1043.29,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "P = 60 × A(5, 5%) + 1000/1.05^5 ≈ 1043.29.",
+      "points": 4
+    },
+    {
+      "type": "multi_select",
+      "id": "q8",
+      "prompt": "Which of the following are legitimate uses of payback period?",
+      "choices": [
+        "Quick liquidity screen for startups with short cash runway",
+        "Primary decision criterion for selecting between mutually exclusive 30-year projects",
+        "Communicating intuition to non-technical stakeholders",
+        "Definitive ranking when NPV and IRR disagree"
+      ],
+      "correctIndices": [0, 2],
+      "explanation": "Payback is a screen and a communication tool; never the primary rule. It ignores TVM and tail cash flows.",
+      "points": 3
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q9",
+      "prompt": "Project A: NPV = $100, IRR = 30%. Project B: NPV = $1,000, IRR = 15%. Cost of capital is 10%. Mutually exclusive. Which do you pick?",
+      "choices": [
+        "A — higher IRR is better",
+        "B — higher dollar value created (NPV is the right criterion)",
+        "Both — both positive NPV",
+        "Neither — too risky"
+      ],
+      "correctIndex": 1,
+      "explanation": "IRR can favor smaller projects. NPV correctly ranks by dollar value created.",
+      "points": 3
+    },
+    {
+      "type": "numeric",
+      "id": "q10",
+      "prompt": "A stock pays $3 in dividends next year, growing 5% forever. Cost of equity 11%. Gordon DDM value per share?",
+      "answer": 50.00,
+      "tolerance": 0.5,
+      "unit": "$",
+      "explanation": "P = D1 / (r − g) = 3 / 0.06 = 50.",
+      "points": 4
+    }
+  ]
+}

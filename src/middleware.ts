@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServerClient } from '@lib/supabase/server';
 
-const PROTECTED_PREFIXES = ['/account', '/dashboard'];
+const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams'];
 const ADMIN_PREFIXES = ['/admin'];
 const STAFF_PREFIXES = ['/instructor'];
 

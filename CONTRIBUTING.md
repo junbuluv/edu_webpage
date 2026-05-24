@@ -71,6 +71,62 @@ If you need a new question type, **extend the union and the renderer in
 5. Avoid pulling in a new charting library. Recharts handles most cases;
    Plotly is already wired for the heavy ones.
 
+## Opening a proctored exam
+
+Proctored exams live in `src/content/exams/<slug>.json` (questions,
+duration, passing score). To actually let students take one, the
+instructor (or project owner) creates an **administration** — a specific
+opening with a time window and geofence — by running SQL.
+
+```sql
+-- Example: open the FIN 3610 midterm for Spring 2027, 60-min duration,
+-- on-campus at 55 Lexington Ave (~100 m radius), accepting submissions
+-- from 2027-03-15 18:00 EDT through 19:30 EDT.
+insert into public.exam_administrations (
+  exam_slug, course_slug, semester, instructor_id,
+  opens_at, closes_at,
+  required_lat, required_lng, required_radius_meters,
+  duration_minutes, notes
+) values (
+  'fin-3610-midterm', 'fin-3610', 'spring-2027',
+  (select id from auth.users where email = 'instructor@baruchmail.cuny.edu'),
+  '2027-03-15 22:00:00+00', '2027-03-15 23:30:00+00',
+  40.7411, -73.9837, 100,
+  60,
+  'Closed book. Single attempt. Auto-submits at 60 min.'
+);
+```
+
+The window is enforced both client-side (UI countdown) and server-side
+(`/api/exams/start` and `/api/exams/submit` reject outside the window).
+The geofence is checked at start; `client_lat_start`, `client_lng_start`,
+and the submit-time coordinates are recorded for audit.
+
+### Honest caveat on geofencing
+
+Browser geolocation can be spoofed via DevTools or system-level location
+overrides. The geo check is a **soft barrier** intended to keep honest
+students honest. For real exam integrity, supplement with in-person
+proctoring, a webcam-based service, or a native app with attestation.
+This caveat is also surfaced on `/exams` and in the Privacy Policy.
+
+### Querying exam attempts
+
+A signed-in student sees their own attempts via the dashboard. An
+instructor can query attempts they have legitimate access to (RLS scopes
+by enrollment + administration ownership):
+
+```sql
+select u.email,
+       a.started_at, a.submitted_at,
+       a.score, a.max_score,
+       a.client_lat_submit, a.client_lng_submit
+from public.exam_attempts a
+join auth.users u on u.id = a.user_id
+where a.administration_id = '<uuid>'
+order by a.submitted_at;
+```
+
 ## Bootstrapping the first admin
 
 Admins are designated by the project owner via SQL. There is **no
