@@ -1,0 +1,106 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const all = await getCollection('instructors');
+  return all
+    .filter((i) => i.data.courses.includes('eco-1002'))
+    .map((instructor) => ({
+      params: { slug: instructor.slug },
+      props: { instructor },
+    }));
+}
+
+interface Props {
+  instructor: CollectionEntry<'instructors'>;
+}
+const { instructor } = Astro.props;
+const { Content } = await instructor.render();
+const d = instructor.data;
+---
+
+<BaseLayout title={`${d.fullName} — Instructor profile`}>
+  <article class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      ECO 1002 · Instructor
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">{d.fullName}</h1>
+    <p class="mt-2 text-lg text-accent">{d.title}</p>
+    {d.department && <p class="mt-1 text-ink-muted">{d.department}</p>}
+    <p class="text-ink-muted">{d.institution}</p>
+
+    <dl class="mt-6 grid grid-cols-2 gap-y-2 text-sm md:grid-cols-3">
+      {d.email && (
+        <>
+          <dt class="text-ink-muted">Email</dt>
+          <dd class="md:col-span-2"><a class="text-accent underline" href={`mailto:${d.email}`}>{d.email}</a></dd>
+        </>
+      )}
+      {d.office && (
+        <>
+          <dt class="text-ink-muted">Office</dt>
+          <dd class="md:col-span-2">{d.office}</dd>
+        </>
+      )}
+      {d.profileUrl && (
+        <>
+          <dt class="text-ink-muted">Official profile</dt>
+          <dd class="md:col-span-2 truncate">
+            <a class="text-accent underline" href={d.profileUrl} target="_blank" rel="noopener">
+              {d.profileUrl}
+            </a>
+          </dd>
+        </>
+      )}
+    </dl>
+
+    <div class="prose mt-8">
+      <Content />
+    </div>
+
+    {d.education.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">Education</h2>
+        <ul class="mt-3 space-y-1 text-sm">
+          {d.education.map((e) => (
+            <li>
+              <strong>{e.degree}</strong> — {e.institution}
+              {e.year && <span class="text-ink-muted"> ({e.year})</span>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {d.researchInterests.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">Research interests</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-1 text-sm">
+          {d.researchInterests.map((r) => <li>{r}</li>)}
+        </ul>
+      </section>
+    )}
+
+    {d.selectedPublications.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">Selected publications</h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          {d.selectedPublications.map((p) => (
+            <li>
+              <strong>{p.title}</strong>
+              {p.journal && <span class="text-ink-muted">, <em>{p.journal}</em></span>}
+              {p.year && <span class="text-ink-muted"> ({p.year})</span>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <p class="mt-12 text-sm">
+      <a class="text-accent underline" href="/eco-1002/instructors">← Back to all instructors</a>
+    </p>
+  </article>
+</BaseLayout>
