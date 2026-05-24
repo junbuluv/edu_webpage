@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-npv-decision-rule",
+  "title": "NPV as the decision rule",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/npv-decision-rule",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A project costs $1,000 today and pays $500 at the end of each of the next three years. The cost of capital is 10%. What is the NPV? Answer in dollars to the nearest cent.",
+      "answer": 243.43,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "NPV = −1000 + 500/1.10 + 500/1.21 + 500/1.331 = −1000 + 454.55 + 413.22 + 375.66 = 243.43.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Two mutually exclusive projects: A has NPV = $100 and IRR = 30%; B has NPV = $1,000 and IRR = 15%. Cost of capital is 10%. Which should the firm take?",
+      "choices": [
+        "A — higher IRR means better return on capital",
+        "B — NPV measures dollar value created and is the correct criterion for mutually exclusive projects",
+        "Both — they're both positive NPV",
+        "Neither — too risky"
+      ],
+      "correctIndex": 1,
+      "explanation": "IRR can favor smaller projects with higher percentage returns. NPV correctly compares dollar value created. For mutually exclusive choices, take the higher NPV.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following are real problems with using payback period as a project-selection criterion?",
+      "choices": [
+        "Ignores time value of money",
+        "Ignores cash flows after the cutoff date",
+        "Easy to compute",
+        "Can reject very long-lived high-NPV projects"
+      ],
+      "correctIndices": [0, 1, 3],
+      "explanation": "Payback ignores TVM and tail cash flows, leading to rejection of long-lived projects with large positive NPV. Being easy to compute is a feature, not a bug — just not enough to make it a good decision rule.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "When can IRR give multiple valid answers (so the IRR rule becomes ambiguous)?",
+      "choices": [
+        "When the project has only positive cash flows",
+        "When the cash flow changes sign more than once (e.g., investment, profits, then a large closure cost)",
+        "When the discount rate is above 10%",
+        "Whenever the cash flows include depreciation"
+      ],
+      "correctIndex": 1,
+      "explanation": "Non-conventional cash-flow streams with multiple sign changes can have multiple IRRs. NPV is unambiguous in all cases.",
+      "points": 1
+    }
+  ]
+}

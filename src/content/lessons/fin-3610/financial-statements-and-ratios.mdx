@@ -3,25 +3,139 @@ title: "Financial Statements and Ratios"
 course: fin-3610
 unit: "Foundations"
 order: 2
-summary: "Reading the balance sheet, income statement, and cash flow statement; computing profitability, liquidity, leverage, and valuation ratios; the DuPont decomposition."
+summary: "Reading the balance sheet, income statement, and cash flow statement; computing the standard profitability, liquidity, leverage, and valuation ratios; the DuPont decomposition."
 learningObjectives:
   - "Read and interpret the three primary financial statements."
   - "Compute and interpret profitability, liquidity, leverage, and valuation ratios."
-  - "Apply the DuPont identity to decompose return on equity."
-prerequisites: []
-estimatedMinutes: 25
+  - "Apply the DuPont identity to decompose return on equity into operating, efficiency, and leverage components."
+prerequisites:
+  - "Basic accounting vocabulary (assets, liabilities, equity)."
+estimatedMinutes: 30
 tags: ["fin-3610", "Berk-DeMarzo Ch 2"]
+quizSlug: "fin-3610-financial-statements-and-ratios"
 draft: false
 ---
 
-## Overview
+## The three statements, in one sentence each
 
-Reading the balance sheet, income statement, and cash flow statement; computing profitability, liquidity, leverage, and valuation ratios; the DuPont decomposition.
+- **Balance sheet** — a *snapshot* at one moment of what the firm
+  owns (assets), what it owes (liabilities), and the residual that
+  belongs to shareholders (equity).
+- **Income statement** — a *movie* over a period showing revenue
+  minus expenses, ending in net income.
+- **Cash flow statement** — a *reconciliation* over the same period
+  showing how net income, working-capital changes, investment, and
+  financing decisions add up to the actual change in cash.
 
-## Why it matters
+The fundamental identity that anchors the balance sheet:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 2. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+$$
+\text{Assets} \;=\; \text{Liabilities} \;+\; \text{Stockholders' Equity}.
+$$
 
-## What you'll be able to do
+It must hold by construction. If your model breaks this, you have a
+modeling mistake.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## The income statement reveals what the cash flow statement why
+
+Net income is not cash flow. A firm can show a profit and run out of
+cash; a firm can post a loss and generate plenty of cash. Three big
+reconciling items:
+
+1. **Depreciation and amortization** — non-cash expense on the income
+   statement; added back in the cash flow statement.
+2. **Changes in working capital** — accounts receivable up = sale
+   booked but cash not yet received; inventory up = cash spent that
+   hasn't hit the income statement as COGS yet.
+3. **Capital expenditures** — cash spent on equipment that will be
+   depreciated over years; the full cash hit happens *now*, the income-
+   statement hit is spread over time.
+
+Why does this matter? Because shareholders ultimately get cash, not
+accrual earnings. Most corporate-finance decisions value cash flows,
+not net income.
+
+## Ratios — four families
+
+Once you have the statements, you compress them into a handful of
+ratios that make firms comparable across time and across peers.
+
+**Profitability ratios:**
+
+- *Gross margin* = (Revenue − COGS) / Revenue. How much of each sales
+  dollar survives the cost of producing the good.
+- *Operating margin* = EBIT / Revenue.
+- *Net margin* = Net Income / Revenue.
+- *Return on Assets (ROA)* = Net Income / Total Assets.
+- *Return on Equity (ROE)* = Net Income / Shareholders' Equity.
+
+**Liquidity ratios** (can it pay current bills?):
+
+- *Current ratio* = Current Assets / Current Liabilities.
+- *Quick ratio* = (Cash + Receivables) / Current Liabilities.
+
+**Leverage ratios** (how much debt?):
+
+- *Debt-to-equity* = Total Debt / Equity.
+- *Interest coverage* = EBIT / Interest Expense.
+
+**Valuation ratios** (how is the market pricing this?):
+
+- *P/E* = Price per share / Earnings per share.
+- *EV/EBITDA* = Enterprise Value / EBITDA.
+- *Price-to-book* = Price per share / Book value per share.
+
+Ratios are not answers — they are starting points. A high ROE could
+be a great business or a highly leveraged one. The DuPont identity
+tells you which.
+
+## DuPont: decomposing ROE
+
+$$
+\text{ROE} \;=\; \underbrace{\frac{\text{Net Income}}{\text{Revenue}}}_{\text{Net margin}} \;\times\; \underbrace{\frac{\text{Revenue}}{\text{Assets}}}_{\text{Asset turnover}} \;\times\; \underbrace{\frac{\text{Assets}}{\text{Equity}}}_{\text{Equity multiplier}}.
+$$
+
+Three different sources of ROE:
+
+1. **Operating profitability** — how much profit per dollar of sales.
+2. **Asset efficiency** — how many dollars of sales per dollar of
+   assets.
+3. **Leverage** — how many dollars of assets per dollar of equity.
+
+Walmart and Tiffany have similar ROEs but very different
+decompositions. Walmart: thin margins, fast turnover, modest leverage.
+Tiffany: fat margins, slow turnover, modest leverage. A bank: ordinary
+margins, very high leverage. The same headline number is masking very
+different businesses.
+
+## A worked example
+
+A firm reports:
+
+- Revenue $1,000M
+- Net income $80M
+- Total assets $800M
+- Equity $200M
+
+Then ROE = 80 / 200 = **40%**. Decomposing:
+
+- Net margin = 80 / 1000 = 8%
+- Asset turnover = 1000 / 800 = 1.25
+- Equity multiplier = 800 / 200 = 4
+
+Check: 0.08 × 1.25 × 4 = 0.40 ✓
+
+This firm's 40% ROE comes mostly from leverage (equity multiplier of
+4 means 75% of assets are debt-financed). If interest rates rise or
+business slows, the leverage that boosted ROE in good times will
+amplify losses in bad times. Same ROE, very different risk profile
+from a firm with the same return at zero leverage.
+
+## Limitations to keep in mind
+
+Accounting is conservative and historical. The book value of equity
+reflects what was paid in plus retained earnings; market value of
+equity reflects what investors will pay tomorrow. The two diverge
+significantly for firms with intangible assets (brand, software, R&D)
+or temporary distress. When you reach valuation in Unit 3, that gap
+is most of the story.

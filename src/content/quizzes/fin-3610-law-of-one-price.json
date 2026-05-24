@@ -1,0 +1,56 @@
+{
+  "slug": "fin-3610-law-of-one-price",
+  "title": "Law of One Price",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/law-of-one-price",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "State the NPV decision rule for a single project:",
+      "choices": [
+        "Take the project if its IRR exceeds the historical average return on stocks",
+        "Take the project if PV(benefits) exceeds PV(costs); equivalently if NPV > 0",
+        "Take the project if its payback period is under three years",
+        "Take the project only if it has positive expected accounting profit"
+      ],
+      "correctIndex": 1,
+      "explanation": "NPV > 0 means the project creates more value than it costs at the market discount rate. The other rules have failure modes covered in the next lesson.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "The Law of One Price says:",
+      "choices": [
+        "Every asset must have the same price",
+        "Two assets that produce identical cash flows in all states must have identical prices",
+        "Stocks and bonds must be equally priced",
+        "Markets must always be efficient"
+      ],
+      "correctIndex": 1,
+      "explanation": "The Law of One Price is cash-flow-specific. Different cash flow patterns can have different prices; identical cash flows cannot, because arbitrageurs would close the gap.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "A one-year risk-free bond paying $100 trades at $95.24 (yielding ~5%). A one-year credit-default-swap that pays $100 in case of default trades at $4 today (you receive the $4 premium upfront). What is the no-arbitrage price for a one-year corporate bond that pays $100 if the firm survives and $0 if it defaults? Answer in dollars to two decimals.",
+      "answer": 91.24,
+      "tolerance": 0.05,
+      "unit": "$",
+      "explanation": "Replicate the risky bond as: long the risk-free bond (cost $95.24) + short the CDS (receive $4). Net cost = $95.24 − $4 = $91.24. If the risky bond trades for anything else, arbitrage exists.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "EUR/USD = 1.10, USD/JPY = 110. What should EUR/JPY be (approximately) to avoid triangular arbitrage?",
+      "choices": ["100", "110", "121", "200"],
+      "correctIndex": 2,
+      "explanation": "1 EUR × 1.10 USD/EUR × 110 JPY/USD = 121 JPY. Any other cross rate enables triangular arbitrage.",
+      "points": 1
+    }
+  ]
+}

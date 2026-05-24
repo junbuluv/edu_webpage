@@ -3,31 +3,149 @@ title: "NPV as the Decision Rule"
 course: fin-3610
 unit: "Foundations"
 order: 4
-summary: "Why maximizing NPV maximizes shareholder wealth; computing NPV for simple multi-period projects; pitfalls of competing rules (payback, IRR)."
+summary: "Why maximizing NPV maximizes shareholder wealth; how to compute NPV for multi-period projects; the specific pitfalls of competing rules — payback, IRR, accounting rate of return."
 learningObjectives:
-  - "Compute NPV for a single project and rank competing projects."
-  - "Explain why NPV is the dominant decision rule in capital budgeting."
-  - "Identify cases where IRR and NPV disagree."
-prerequisites: []
+  - "Compute NPV for a multi-period project and rank competing projects by NPV."
+  - "Explain why NPV is the dominant decision rule and which problems disable IRR, payback, and ARR."
+  - "Identify when NPV and IRR disagree, and which to follow."
+prerequisites:
+  - "Law of One Price (prior lesson)."
 estimatedMinutes: 25
 tags: ["fin-3610", "Berk-DeMarzo Ch 3"]
+quizSlug: "fin-3610-npv-decision-rule"
 draft: false
 ---
 
 import TVMNPV from '@components/viz/TVMNPV';
 
-## Overview
+## Computing NPV
 
-Why maximizing NPV maximizes shareholder wealth; computing NPV for simple multi-period projects; pitfalls of competing rules (payback, IRR).
+For a project with an initial outlay $C_0$ (negative cash flow) and a
+stream of future cash flows $C_1, C_2, \ldots, C_T$ discounted at rate
+$r$:
 
-## Why it matters
+$$
+\text{NPV} \;=\; C_0 \;+\; \sum_{t=1}^{T} \frac{C_t}{(1 + r)^t}.
+$$
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 3. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+The decision rule:
 
-## What you'll be able to do
+- If NPV > 0: take the project. You are creating value.
+- If NPV < 0: don't take it. You are destroying value.
+- If NPV = 0: indifferent. The project earns exactly its cost of
+  capital.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Equivalently and importantly: among **mutually exclusive** projects
+(you can only pick one), choose the one with the highest NPV.
 
-## Interactive
+## Try a few
 
 <TVMNPV client:load />
+
+The interactive lets you set initial outflow, base annual cash flow,
+growth, discount rate, and horizon. Three things to confirm:
+
+1. NPV falls monotonically as the discount rate rises. (More
+   impatience → future cash flows worth less today.)
+2. The IRR is whatever discount rate makes NPV equal to zero — read it
+   off the right-panel chart.
+3. A small change in growth has a larger effect at long horizons.
+   (Compounding asymmetries.)
+
+## Why NPV beats the competition
+
+Three rival rules are still taught — and still misused. Each has a
+specific failure mode:
+
+### IRR (Internal Rate of Return)
+
+IRR is the rate at which NPV = 0. Rule: take the project if IRR
+exceeds the cost of capital.
+
+When it works: a conventional project (one negative cash flow up
+front, all-positive cash flows afterward).
+
+When it breaks:
+
+- **Non-conventional cash flows** (cash flow changes sign more than
+  once — e.g. mining projects with closure costs at the end). Multiple
+  IRRs exist; the rule is ambiguous.
+- **Mutually exclusive projects of different scale.** Project A:
+  invest $1, get $2 back. IRR = 100%. Project B: invest $1M, get
+  $1.2M back. IRR = 20%. NPV at 10% cost of capital: A = $0.82, B =
+  $90,000. IRR ranks A higher; NPV (correctly) ranks B higher.
+- **Mutually exclusive projects of different timing.** IRR favors
+  short, early-payoff projects; NPV correctly accounts for the size
+  of long-term value creation.
+
+### Payback period
+
+Rule: take the project if you recoup the initial investment within
+some cutoff (often 3 years). Easy to compute, easy to communicate.
+
+Problems:
+
+- **Ignores time value of money.** A dollar in year 3 and a dollar in
+  year 1 count equally.
+- **Ignores cash flows after the cutoff.** A 30-year solar farm with
+  a 4-year payback fails a 3-year payback test, even though its NPV
+  is enormous.
+
+A discounted-payback variant fixes problem 1 but not problem 2. Use
+payback only as a rough liquidity screen, never as a decision rule.
+
+### Accounting Rate of Return (ARR)
+
+Rule: take the project if the average accounting net income divided
+by average book value of assets exceeds a hurdle.
+
+Problems:
+
+- Uses accounting income (which includes depreciation and accruals),
+  not cash flows.
+- Ignores the timing of returns.
+- The denominator is sensitive to depreciation policy, which has
+  nothing to do with the project's economic value.
+
+Useful for performance evaluation of existing units; useless for
+project selection.
+
+## The one place NPV needs help
+
+NPV requires a single discount rate. For projects financed with a
+mix of debt and equity, choosing the right rate is the topic of
+Unit 4 (cost of capital) and Unit 5 (WACC, APV, FTE). Until then,
+treat $r$ as given and focus on the mechanics.
+
+## A worked decision
+
+Your firm is considering two mutually exclusive logistics-warehouse
+investments. Cost of capital = 10%.
+
+**Project A**: $C_0 = -\$500\,k$, then $\$150\,k$ per year
+for 5 years.
+
+NPV(A) = -500 + 150 × PV-annuity(10%, 5)
+      = -500 + 150 × 3.791
+      ≈ -500 + 568.65
+      = **+\$68.65k**.
+
+**Project B**: $C_0 = -\$500\,k$, then $\$250\,k$ in year
+1 and 2, $\$0$ thereafter (a shorter contract).
+
+NPV(B) = -500 + 250 / 1.10 + 250 / 1.21
+      = -500 + 227.27 + 206.61
+      = **-\$66.12k**.
+
+Take A. B has a faster payback (under 2 years) and a higher IRR
+(~12%) but **destroys** value because the contract ends just as the
+investment has been recouped. NPV picks the value-creating project;
+the competing rules don't.
+
+## Calibrating your intuition
+
+Once you've internalized NPV, every decision you'll encounter in this
+course becomes a special case: which discount rate is right (cost of
+capital), which cash flows to count (capital-budgeting unit), how to
+handle risk and leverage (units 4 and 5). The framework is settled.
+The interesting work is in the specifics.
