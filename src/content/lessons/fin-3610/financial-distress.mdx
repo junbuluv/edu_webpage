@@ -3,31 +3,158 @@ title: "Financial Distress and Trade-Off Theory"
 course: fin-3610
 unit: "Capital structure and payout"
 order: 22
-summary: "Direct and indirect costs of financial distress: bankruptcy expense, asset fire sales, debt overhang, customer/employee defections. Trade-off theory and the optimal capital structure."
+summary: "Direct and indirect costs of financial distress: bankruptcy fees, asset fire sales, debt overhang, customer and employee defections. The trade-off theory of optimal capital structure."
 learningObjectives:
   - "List direct and indirect costs of financial distress."
   - "State the trade-off theory of capital structure."
-  - "Explain the debt-overhang problem."
-prerequisites: []
+  - "Explain the debt-overhang problem and why it leads to under-investment."
+prerequisites:
+  - "Debt and taxes (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 16"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 16", "financial distress", "trade-off"]
+quizSlug: "fin-3610-financial-distress"
 draft: false
 ---
 
 import WACCVisualizer from '@components/viz/WACCVisualizer';
 
-## Overview
+## Bankruptcy is expensive
 
-Direct and indirect costs of financial distress: bankruptcy expense, asset fire sales, debt overhang, customer/employee defections. Trade-off theory and the optimal capital structure.
+MM-with-taxes (prior lesson) implied firms should be 100% debt.
+They aren't, because debt comes with risk of financial distress.
 
-## Why it matters
+Distress isn't free. Two broad categories of cost:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 16. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+**Direct costs:**
 
-## What you'll be able to do
+- Legal fees (Chapter 11 attorney bills, court-appointed examiners).
+- Accounting and advisory fees (restructuring advisors, expert
+  witnesses).
+- Court costs.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+For a large bankruptcy these can run to hundreds of millions.
+Lehman Brothers' direct bankruptcy costs exceeded \$1B.
 
-## Interactive
+But direct costs are dwarfed by:
+
+**Indirect costs:**
+
+- **Lost customers.** When a firm signals distress, customers
+  worry about future warranty service, parts availability, ongoing
+  software support. They switch to competitors. Sears, JCPenney,
+  Bed Bath & Beyond all saw catastrophic revenue losses during
+  their distress periods.
+- **Lost suppliers.** Vendors demand cash up front instead of net-30
+  terms, tightening working capital exactly when the firm needs
+  liquidity most.
+- **Lost employees.** Talented people leave for stable competitors;
+  recruiting becomes harder.
+- **Asset fire sales.** Selling assets under distress conditions
+  yields well below fair value. Forced sale of an airplane is much
+  cheaper than an unforced one.
+- **Manager distraction.** The CEO spends 60% of time negotiating
+  with creditors instead of running the business.
+- **Debt overhang.** New positive-NPV projects get rejected because
+  any value created accrues to debt holders first; equity holders
+  refuse to fund them.
+
+Empirical estimates put indirect distress costs at 10-25% of firm
+value for firms entering Chapter 11. Even firms that survive
+"financial distress" without bankruptcy lose substantial value.
+
+## The trade-off theory
+
+Combining MM-with-taxes (tax shield is positive) with distress costs
+(loss in distress, multiplied by probability of distress) gives:
+
+$$
+V_L = V_U + PV(\text{tax shield}) - PV(\text{distress costs}).
+$$
+
+The first two terms rise linearly with $D$. The third term is
+small at low leverage (low default probability) but rises convexly:
+as $D$ gets large, default becomes likely and the expected loss
+balloons.
+
+The optimal capital structure $D^\*$ is where the marginal tax-
+shield benefit equals the marginal distress cost. That's the
+**trade-off theory**.
+
+## Play with it
 
 <WACCVisualizer client:load />
+
+Now slide both **tax rate** and **distress sensitivity** up
+together. The U-shape of the WACC curve becomes visible: a clear
+optimum in the middle, with rising WACC on either side.
+
+## How distress costs depend on the firm
+
+The size of distress costs varies across firm types:
+
+| Firm type | Distress cost | Optimal leverage |
+|---|---|---|
+| Stable cash flow, tangible assets (utility, real estate) | Low | High (40-60%) |
+| Cyclical, but tangible (airlines, steel) | Moderate | Medium (25-40%) |
+| Knowledge-intensive, intangible-heavy (tech, pharma, advertising) | High | Low (0-15%) |
+| Startups with no assets | Very high | Zero (equity only) |
+
+This explains a lot of observed leverage variation. Utilities lever
+to ~50%. Tech firms (Google, Microsoft, Apple) have huge cash
+positions and minimal debt despite high tax rates — distress costs
+for a knowledge firm are enormous because losing key engineers and
+customers permanently destroys IP value that has no replacement
+cost.
+
+## The debt-overhang problem
+
+A pernicious indirect cost worth understanding. Suppose:
+
+- A firm has \$100M of existing debt.
+- Asset value (existing operations) is \$80M — so the firm is
+  technically insolvent.
+- A new positive-NPV project would require \$20M new equity and
+  produce \$30M in PV.
+
+The project creates \$10M of value (\$30M PV - \$20M investment).
+Equity holders should fund it.
+
+But: the \$30M in new asset value flows to **debt holders first**
+(they're owed \$100M). Equity holders just put in \$20M and get
+back only what's left after debt: max(0, $80 + 30 - 100$) =
+\$10M. They've spent \$20M to get \$10M. Negative return on their
+investment. They refuse.
+
+A positive-NPV project goes unfunded. Firm value is destroyed by
+the existence of the debt overhang. This is one of the main
+reasons highly-leveraged firms struggle to fund growth — and one
+reason equity holders sometimes vote for debt-for-equity swaps in
+restructurings.
+
+## Empirical leverage patterns explained
+
+Three predictions of trade-off theory that hold up reasonably well:
+
+1. **Profitable firms with stable earnings should lever more.**
+   Higher tax benefit, lower default probability. (Largely
+   confirmed.)
+2. **Asset-heavy firms with tangible collateral should lever more.**
+   Lower distress costs because assets can be sold at closer to
+   book value. (Confirmed.)
+3. **High-growth firms with intangible assets should lever less.**
+   Distress costs are huge; tax shield is smaller because losses
+   reduce taxable income to zero anyway. (Confirmed — Google,
+   Apple, Microsoft.)
+
+The most famous deviation from trade-off theory is the
+**pecking-order theory** (Myers, 1984): firms prefer internal
+financing > debt > equity, in that order, because of information
+asymmetry. Not because of taxes per se, but because issuing equity
+sends a negative signal. Both theories have empirical support; the
+truth is some blend.
+
+## What's next
+
+We've now covered capital structure. Next lesson turns to the other
+side of the financing decision: how to distribute cash to
+shareholders.

@@ -3,25 +3,156 @@ title: "Capital Budgeting with Leverage"
 course: fin-3610
 unit: "Capital structure and payout"
 order: 24
-summary: "Three equivalent valuation methods for a levered project: WACC, APV (adjusted present value), and FTE (flow-to-equity). When each is most convenient."
+summary: "Three equivalent methods for valuing a levered project — WACC, Adjusted Present Value (APV), and Flow to Equity (FTE). When each is most convenient."
 learningObjectives:
-  - "Value a project using WACC, APV, and FTE methods."
-  - "Show why all three methods yield the same value in a frictionless setting."
-  - "Choose the appropriate method based on capital structure dynamics."
-prerequisites: []
+  - "Value a project using the WACC method."
+  - "Value the same project using APV and FTE; show that all three give identical answers in a frictionless setting."
+  - "Choose the appropriate method based on capital-structure dynamics over the project's life."
+prerequisites:
+  - "Debt and taxes, payout policy, cost of capital (Units 4 and 5)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 18"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 18", "WACC", "APV", "FTE"]
+quizSlug: "fin-3610-capital-budgeting-with-leverage"
 draft: false
 ---
 
-## Overview
+## Three valuation methods, one answer
 
-Three equivalent valuation methods for a levered project: WACC, APV (adjusted present value), and FTE (flow-to-equity). When each is most convenient.
+When a project is financed with both debt and equity, you have
+three internally consistent ways to compute its value. All three
+give the **same** number when applied correctly. They differ in
+which inputs you need and how natural the calculation feels.
 
-## Why it matters
+| Method | Discount rate | Cash flow | When to use |
+|---|---|---|---|
+| **WACC** | After-tax WACC | FCF (project) | Stable capital structure |
+| **APV** | Unlevered cost of capital | FCF + separately, tax shield | Changing capital structure |
+| **FTE** | Cost of equity | FCF to equity | Want equity value directly |
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 18. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+## Method 1: WACC
 
-## What you'll be able to do
+Discount the project's free cash flow at the firm's WACC:
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+$$
+V = \sum_{t=1}^{\infty} \frac{FCF_t}{(1 + \text{WACC})^t}.
+$$
+
+The tax shield is implicitly captured in the $(1-t)$ adjustment on
+the cost of debt within WACC.
+
+**When it works:** projects that maintain a constant $D/V$ ratio,
+like the firm overall. Most M&A deals and most public-firm
+valuations use WACC as the default.
+
+**When it breaks:** projects with debt that's scheduled to pay
+down rapidly, or LBOs with high initial leverage that declines.
+The WACC changes year by year if the capital structure does, and
+mechanically applying a single average rate misvalues the project.
+
+## Method 2: Adjusted Present Value (APV)
+
+Two steps:
+
+1. Value the project as if it were all-equity financed: discount
+   FCF at the unlevered cost of capital $r_U$:
+   $$ V_U = \sum_t \frac{FCF_t}{(1+r_U)^t} $$
+
+2. Separately compute the PV of the interest tax shield:
+   $$ PV(\text{TS}) = \sum_t \frac{t \cdot r_D \cdot D_t}{(1+r_D)^t} $$
+
+3. Sum: $V = V_U + PV(TS)$.
+
+**When it works:** LBOs and project finance with debt schedules
+that are known in advance. You can model each year's specific
+debt balance and tax shield without averaging.
+
+**Why some practitioners prefer it:** APV separates the operating
+value from the financing value. Useful for understanding *where*
+value comes from.
+
+## Method 3: Flow to Equity (FTE)
+
+Discount **free cash flow to equity** (FCFE — covered in Unit 3)
+at the cost of equity $r_E$:
+
+$$
+\text{Equity value} = \sum_t \frac{FCFE_t}{(1 + r_E)^t}.
+$$
+
+FCFE = FCF + (net debt taken on - debt repaid - interest after tax).
+
+**When it works:** when you want equity value directly (e.g.,
+buying out an equity stake) and the cost of equity is the most
+defensible input.
+
+**Why some practitioners avoid it:** FCFE is more sensitive to
+financing assumptions than FCF, so small errors in modeling debt
+amplify into the valuation. Easier to make mistakes than with
+WACC or APV.
+
+## When they disagree (you've made an error)
+
+In a frictionless setting all three give identical valuations. If
+your three numbers diverge, one of three things is wrong:
+
+1. **Inconsistent inputs.** Cost of equity not properly levered for
+   the assumed $D/E$. Or vice versa.
+2. **Wrong cash-flow definitions.** FCF vs FCFE mixed up. Tax-
+   shield treatment inconsistent.
+3. **Changing capital structure not reflected.** WACC implicitly
+   assumes constant $D/V$. If you're modeling a debt pay-down, use
+   APV or year-varying WACC.
+
+## A worked comparison
+
+Project with perpetual after-tax operating cash flow (FCF) of \$10M
+per year, financed with \$40M of debt at 5% (constant). Tax rate
+25%. Unlevered cost of capital $r_U = 11\%$.
+
+**WACC method**:
+- $r_E$ (re-levered): $11 + (D/E)(1-t)(11-5)$. We need $E$ first.
+- Iterate: $V = FCF / WACC$. WACC depends on $E/V$, which depends
+  on $V$.
+- Easier: use APV first.
+
+**APV method**:
+- $V_U = 10 / 0.11 = \$90.9M$.
+- $PV(TS) = 0.25 \times 40 = \$10M$.
+- $V = 90.9 + 10 = \$100.9M$.
+- Equity value $E = V - D = 100.9 - 40 = \$60.9M$.
+- $D/E = 40/60.9 = 0.657$.
+
+**WACC re-check**:
+- $r_E = 0.11 + 0.657 \times (1 - 0.25) \times (0.11 - 0.05) = 0.11 + 0.0296 = 13.96\%$.
+- $WACC = (60.9/100.9)(0.1396) + (40/100.9)(0.05)(0.75) = 0.0843 + 0.0149 = 9.92\%$.
+- $V_{WACC} = 10 / 0.0992 = \$100.8M$ ✓ (matches APV within rounding).
+
+**FTE method**:
+- After-tax interest = $40 × 0.05 × 0.75 = \$1.5M$.
+- $FCFE = FCF - \text{interest after tax} = 10 - 1.5 = \$8.5M$ (perpetual debt, no net borrowing/repayment).
+- $\text{Equity} = 8.5 / 0.1396 = \$60.9M$ ✓.
+
+All three methods agree at \$100.9M total firm value and \$60.9M
+equity value.
+
+## Practical guidance
+
+- For most undergraduate problem sets and most stable public-firm
+  valuations: **WACC**. Simplest, single discount rate.
+- For LBOs, project finance, or anything with a known debt schedule:
+  **APV**. Most transparent about what's coming from operations vs
+  financing.
+- When you want equity value directly and the capital structure is
+  stable: **FTE**. Less common in practice; equivalent to others
+  when done right.
+
+The error to avoid: applying the firm's WACC to a project whose
+capital structure (or risk) differs from the firm overall. We
+flagged this in Unit 4 (cost of capital) and it returns here. The
+discount rate must match the cash flow's risk and financing.
+
+## Where this ends Unit 5
+
+We've now built the full machinery for valuing real projects with
+realistic capital structures. Unit 6 covers special topics — real
+options, M&A, risk management — that build on this foundation.

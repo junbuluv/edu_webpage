@@ -1,0 +1,65 @@
+{
+  "slug": "fin-3610-financial-distress",
+  "title": "Financial distress and trade-off",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/financial-distress",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multi_select",
+      "id": "q1",
+      "prompt": "Which of the following are INDIRECT costs of financial distress (vs direct)?",
+      "choices": [
+        "Customer defections to competitors",
+        "Asset fire sales below fair value",
+        "Manager time absorbed by creditor negotiations",
+        "Legal and bankruptcy attorney fees"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Direct = legal/accounting/court fees. Indirect = lost customers, fire sales, distracted management, employee defections, debt overhang. Indirect costs are typically much larger.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Trade-off theory of capital structure says the optimal D/V is where:",
+      "choices": [
+        "Tax shield equals zero",
+        "Marginal tax-shield benefit equals marginal expected distress cost",
+        "Cost of debt equals cost of equity",
+        "Beta equals one"
+      ],
+      "correctIndex": 1,
+      "explanation": "At the optimum, the marginal benefit of adding a dollar of debt (tax shield) equals the marginal cost (extra distress risk). That's the trade-off.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Why do knowledge-intensive firms (tech, pharma) typically carry less debt than utilities?",
+      "choices": [
+        "Lower tax rates",
+        "Distress costs for intangible-heavy firms are much higher — losing key talent and customers permanently destroys IP value that has no replacement cost",
+        "Regulators forbid it",
+        "Their cost of debt is higher"
+      ],
+      "correctIndex": 1,
+      "explanation": "Utilities can be sold at near-book value in distress; tech firms whose key engineers and customers walk away lose IP value that can't be reconstructed. Higher distress costs → lower optimal leverage.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Debt overhang: a firm has $100M existing debt, asset value $80M, and could fund a new project requiring $20M new equity that produces $30M PV. Why might equity holders refuse to fund it?",
+      "choices": [
+        "Because the project has negative NPV",
+        "Because the $30M of new value goes to debt holders first; equity holders pay $20M to get only ~$10M after debt is repaid",
+        "Because the project's risk is too high",
+        "Because management lacks confidence"
+      ],
+      "correctIndex": 1,
+      "explanation": "Debt overhang: positive-NPV project gets rejected because debt holders capture the value of the new investment. A leverage friction unique to distressed firms.",
+      "points": 2
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "slug": "fin-3610-capital-budgeting-with-leverage",
+  "title": "Capital budgeting with leverage",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/capital-budgeting-with-leverage",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Which valuation method discounts the unlevered free cash flow at the unlevered cost of capital, then adds the PV of the tax shield separately?",
+      "choices": ["WACC", "APV (Adjusted Present Value)", "FTE (Flow to Equity)", "Dividend Discount Model"],
+      "correctIndex": 1,
+      "explanation": "APV explicitly separates operating value from the value of financing-related tax shields. Useful when the debt schedule is known.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "WACC is the most natural choice when:",
+      "choices": [
+        "The firm maintains a stable D/V ratio over time",
+        "Debt is scheduled to pay down rapidly",
+        "You want equity value directly without separately computing debt",
+        "There are no taxes"
+      ],
+      "correctIndex": 0,
+      "explanation": "WACC implicitly assumes constant D/V. For LBOs or project finance with declining leverage, APV is more accurate.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "If WACC, APV, and FTE give different valuations for the same project, the most likely causes are:",
+      "choices": [
+        "Cost of equity not properly levered for the assumed D/E",
+        "Cash-flow definitions inconsistent (FCF vs FCFE)",
+        "Capital structure changes over time being ignored in WACC",
+        "The three methods are fundamentally different and can't agree"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "In a consistent setup, all three methods give the same answer. Disagreement = inconsistent inputs, mixed CF definitions, or treating WACC as constant when capital structure varies.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "Perpetual after-tax FCF of $10M, $40M of perpetual debt at 5%, tax rate 25%, unlevered cost of capital r_U = 11%. Compute total firm value V via APV. Answer in $M.",
+      "answer": 100.9,
+      "tolerance": 0.5,
+      "unit": "$M",
+      "explanation": "V_U = 10/0.11 = 90.9. PV(TS) = 0.25 × 40 = 10.0. V = 90.9 + 10 = 100.9M.",
+      "points": 2
+    }
+  ]
+}

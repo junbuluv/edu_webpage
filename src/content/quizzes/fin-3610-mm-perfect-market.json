@@ -1,0 +1,56 @@
+{
+  "slug": "fin-3610-mm-perfect-market",
+  "title": "MM in a perfect market",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/mm-perfect-market",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "MM Proposition I (no taxes, no distress, no agency, no info asymmetry) says:",
+      "choices": [
+        "Firm value V_L = V_U; capital structure is irrelevant",
+        "Firms should be 100% debt to maximize value",
+        "Firms should be 100% equity to minimize risk",
+        "Cost of equity equals cost of debt"
+      ],
+      "correctIndex": 0,
+      "explanation": "In a frictionless market, slicing the value pie differently doesn't change its size. The arbitrage proof shows V_L must equal V_U.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Unlevered cost of capital r_U = 12%. Cost of debt r_D = 5%. The firm has D/E = 0.5 (no taxes). What is the cost of equity per MM II? Answer as a percent.",
+      "answer": 15.5,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "MM II: r_E = r_U + (D/E)(r_U − r_D) = 12 + 0.5 × (12 − 5) = 12 + 3.5 = 15.5%.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Under MM (no taxes), what is WACC at the cost of equity above (D/E = 0.5, r_U=12%, r_E=15.5%, r_D=5%, D/V=1/3)?",
+      "choices": ["10%", "11%", "12%", "13%"],
+      "correctIndex": 2,
+      "explanation": "WACC = (2/3)(15.5) + (1/3)(5) = 10.33 + 1.67 = 12%. Equals r_U; that's MM II's mechanical implication.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which assumptions does MM I rely on (so its violations are what drive real-world capital structure)?",
+      "choices": [
+        "No corporate taxes",
+        "No bankruptcy / distress costs",
+        "Perfect information / no asymmetric info",
+        "Risk-free borrowing for everyone at the same rate"
+      ],
+      "correctIndices": [0, 1, 2, 3],
+      "explanation": "All four are required for the MM frictionless setting. Real-world deviations come from violating each of these.",
+      "points": 2
+    }
+  ]
+}
