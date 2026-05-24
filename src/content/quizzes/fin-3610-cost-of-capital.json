@@ -12,7 +12,7 @@
       "answer": 4.5,
       "tolerance": 0.05,
       "unit": "%",
-      "explanation": "After-tax r_D = 6.0 × (1 − 0.25) = 4.5%. WACC always uses this version because interest is tax-deductible.",
+      "explanation": "After-tax r_D = 6.0 \u00d7 (1 \u2212 0.25) = 4.5%. WACC always uses this version because interest is tax-deductible.",
       "points": 1
     },
     {
@@ -53,9 +53,19 @@
         "Use the firm's own stock-price history (which doesn't exist)",
         "Average the unlevered betas, then re-lever at the target's capital structure"
       ],
-      "correctIndices": [0, 1, 3],
-      "explanation": "Comparables → unlever → average → re-lever is the standard recipe. A private firm has no public price history, so direct regression isn't possible.",
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "Comparables \u2192 unlever \u2192 average \u2192 re-lever is the standard recipe. A private firm has no public price history, so direct regression isn't possible.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Cost of Capital (Counterpoint Global Insights)",
+    "url": "https://www.morganstanley.com/im/publication/insights/articles/article_costofcapital.pdf",
+    "source": "Morgan Stanley / Michael Mauboussin & Dan Callahan",
+    "why": "Mauboussin's practitioner deep-dive on estimating cost of debt, cost of equity, risk-free rate, and ERP \u2014 the best one-stop practical follow-up."
+  }
 }

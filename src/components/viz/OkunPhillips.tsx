@@ -34,8 +34,9 @@ function chain(s: State, gap: number) {
 }
 
 function buildSeries(s: State) {
+  // Iterate over output gap (used by Okun panel x-axis).
   return Array.from({ length: 41 }, (_, i) => {
-    const gap = -5 + i * 0.25; // -5% to +5%
+    const gap = -5 + i * 0.25;
     const { u, pi } = chain(s, gap);
     return { gap, u, pi };
   });
@@ -44,6 +45,11 @@ function buildSeries(s: State) {
 export default function OkunPhillips() {
   const [s, setS] = useState<State>(baseline);
   const data = useMemo(() => buildSeries(s), [s]);
+  // Phillips panel plots π vs u; sort by u so the line draws monotonically.
+  const phillipsData = useMemo(
+    () => [...data].sort((a, b) => a.u - b.u),
+    [data],
+  );
   const current = useMemo(() => chain(s, s.outputGap), [s]);
 
   return (
@@ -92,9 +98,10 @@ export default function OkunPhillips() {
         <h4 className="text-sm font-semibold mb-2">Phillips: unemployment → inflation</h4>
         <div className="h-64">
           <ResponsiveContainer>
-            <LineChart data={data}>
+            <LineChart data={phillipsData}>
               <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
-              <XAxis dataKey="u" tickFormatter={(v) => v.toFixed(1) + '%'}
+              <XAxis dataKey="u" type="number" domain={['auto', 'auto']}
+                tickFormatter={(v) => v.toFixed(1) + '%'}
                 label={{ value: 'unemployment u', position: 'insideBottom', offset: -4, fontSize: 11 }} />
               <YAxis tickFormatter={(v) => v.toFixed(1) + '%'}
                 label={{ value: 'π (%)', angle: -90, position: 'insideLeft', fontSize: 11 }} />

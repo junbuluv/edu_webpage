@@ -19,10 +19,10 @@
       "type": "numeric",
       "id": "q2",
       "prompt": "A stock will pay a $3 dividend next year, growing 5% per year forever. The cost of equity is 11%. Using the Gordon growth model, what is the stock worth? Answer in dollars to the nearest cent.",
-      "answer": 50.00,
+      "answer": 50.0,
       "tolerance": 0.5,
       "unit": "$",
-      "explanation": "PV = D1 / (r − g) = 3 / (0.11 − 0.05) = 3 / 0.06 = 50.00.",
+      "explanation": "PV = D1 / (r \u2212 g) = 3 / (0.11 \u2212 0.05) = 3 / 0.06 = 50.00.",
       "points": 2
     },
     {
@@ -32,7 +32,7 @@
       "answer": 2661.21,
       "tolerance": 5.0,
       "unit": "$",
-      "explanation": "Monthly rate = 0.07/12 = 0.005833; N = 360. Payment = 400,000 / [(1 - (1+r)^-N)/r] = 400,000 / 150.31 ≈ 2,661.21.",
+      "explanation": "Monthly rate = 0.07/12 = 0.005833; N = 360. Payment = 400,000 / [(1 - (1+r)^-N)/r] = 400,000 / 150.31 \u2248 2,661.21.",
       "points": 2
     },
     {
@@ -49,5 +49,11 @@
       "explanation": "If g >= r, the discounted series diverges and PV is infinite (or undefined). The formula PV = C / (r-g) requires g < r.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Growth Perpetuities and the Dividend Discount Model",
+    "url": "https://pressbooks.pub/tourocorporatefinance/chapter/0-9-growth-perpetuities-and-the-dividend-discount-model-2/",
+    "source": "Touro Corporate Finance (open textbook)",
+    "why": "Open-textbook chapter that connects perpetuity formulas to Gordon growth and to mortgages/loans, hitting all three quiz themes together."
+  }
 }

@@ -15,7 +15,11 @@
         "Past 3-12 month winners continue outperforming",
         "Treasury bills earn the risk-free rate"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Size, value, and momentum are the three classic CAPM anomalies. T-bills earning R_f is exactly what CAPM predicts.",
       "points": 2
     },
@@ -44,7 +48,7 @@
         "All three forms are confirmed"
       ],
       "correctIndex": 2,
-      "explanation": "Insider trading produces abnormal returns — that's why it's illegal. So strong form is clearly false. Semi-strong is mostly supported; weak form is essentially supported with momentum as a minor exception.",
+      "explanation": "Insider trading produces abnormal returns \u2014 that's why it's illegal. So strong form is clearly false. Semi-strong is mostly supported; weak form is essentially supported with momentum as a minor exception.",
       "points": 1
     },
     {
@@ -61,5 +65,11 @@
       "explanation": "Persistent underperformance net of fees is exactly what semi-strong EMH predicts: competition drives alpha to zero on average, and trading costs / fees push net returns below the index.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "The Less-Efficient Market Hypothesis",
+    "url": "https://hedgefundalpha.com/news/cliff-asness-the-less-efficient-market-hypothesis/",
+    "source": "Hedge Fund Alpha (Cliff Asness)",
+    "why": "Asness, a Fama PhD and factor-investing pioneer, explains where the EMH and factor models hold up and where they don't \u2014 a great living-debate read."
+  }
 }

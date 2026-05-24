@@ -26,14 +26,19 @@
       "answer": 15.5,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "MM II: r_E = r_U + (D/E)(r_U − r_D) = 12 + 0.5 × (12 − 5) = 12 + 3.5 = 15.5%.",
+      "explanation": "MM II: r_E = r_U + (D/E)(r_U \u2212 r_D) = 12 + 0.5 \u00d7 (12 \u2212 5) = 12 + 3.5 = 15.5%.",
       "points": 2
     },
     {
       "type": "multiple_choice",
       "id": "q3",
       "prompt": "Under MM (no taxes), what is WACC at the cost of equity above (D/E = 0.5, r_U=12%, r_E=15.5%, r_D=5%, D/V=1/3)?",
-      "choices": ["10%", "11%", "12%", "13%"],
+      "choices": [
+        "10%",
+        "11%",
+        "12%",
+        "13%"
+      ],
       "correctIndex": 2,
       "explanation": "WACC = (2/3)(15.5) + (1/3)(5) = 10.33 + 1.67 = 12%. Equals r_U; that's MM II's mechanical implication.",
       "points": 1
@@ -48,9 +53,20 @@
         "Perfect information / no asymmetric info",
         "Risk-free borrowing for everyone at the same rate"
       ],
-      "correctIndices": [0, 1, 2, 3],
+      "correctIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
       "explanation": "All four are required for the MM frictionless setting. Real-world deviations come from violating each of these.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Modigliani and Miller Propositions",
+    "url": "https://www.5minutefinance.org/concepts/modigliani-and-miller-propositions",
+    "source": "5-Minute Finance",
+    "why": "A short, well-illustrated walkthrough of MM I and II with the homemade-leverage intuition \u2014 perfect for cementing the perfect-markets case."
+  }
 }

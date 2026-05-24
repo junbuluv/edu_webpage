@@ -46,11 +46,11 @@ captures the time value of money.
 
 Why? Because if your personal rate differs from the market rate,
 someone can arbitrage you. Here's the canonical example: I'm willing
-to sell a contract that pays $110 in one year for $95 today. The
+to sell a contract that pays \$110 in one year for \$95 today. The
 market rate for one-year risk-free borrowing is 5%. The market price
-of $110 in one year is $110 / 1.05 = $104.76. By selling for $95
-I'm leaving $9.76 on the table — and someone will swoop in, borrow
-$95 from me, buy the same $110 contract in the market for $104.76,
+of \$110 in one year is \$110 / 1.05 = \$104.76. By selling for \$95
+I'm leaving \$9.76 on the table — and someone will swoop in, borrow
+\$95 from me, buy the same \$110 contract in the market for \$104.76,
 borrow the rest from the bank at 5%, and pocket the difference at no
 risk.
 
@@ -66,8 +66,8 @@ disciplines prices. Three forms you'll see in real markets:
 1. **Triangular arbitrage** in foreign exchange. If 1 EUR = 1.10 USD
    and 1 USD = 110 JPY, then 1 EUR had better trade for about 121 JPY.
    Mismatches are exploited and closed in milliseconds.
-2. **ETF arbitrage.** If a stock-index ETF trades at $99.50 but the
-   underlying basket is worth $100.00, authorized participants
+2. **ETF arbitrage.** If a stock-index ETF trades at \$99.50 but the
+   underlying basket is worth \$100.00, authorized participants
    simultaneously buy the ETF and sell the basket, profiting from the
    spread and pushing the prices back together.
 3. **Cash-and-carry.** Buy a commodity today for $S$, store it, sell
@@ -83,20 +83,20 @@ The Law of One Price gives us a powerful pricing tool: if we can
 **build** the cash flows of a target asset using other traded assets,
 the target asset must trade for the cost of that portfolio.
 
-Example. A risky bond promises $100 in one year if the firm survives,
-$0 if it defaults. The market prices a one-year risk-free bond paying
-$100 at $95.24 (5% rate). And the market prices a one-year credit-
-default swap that pays $100 in default at $4 today.
+Example. A risky bond promises \$100 in one year if the firm survives,
+\$0 if it defaults. The market prices a one-year risk-free bond paying
+\$100 at \$95.24 (5% rate). And the market prices a one-year credit-
+default swap that pays \$100 in default at \$4 today.
 
 Can we build the risky bond's cash flows? Yes: long a risk-free bond
-($95.24 in) + short a CDS ($4 out, since you collect the $4 premium
-and pay $100 in default) = a portfolio that pays $100 if no default
-and $0 if default. So the risky bond should cost $95.24 − $4 = **$91.24**.
+(\$95.24 in) + short a CDS (\$4 out, since you collect the \$4 premium
+and pay \$100 in default) = a portfolio that pays \$100 if no default
+and \$0 if default. So the risky bond should cost \$95.24 − \$4 = **\$91.24**.
 
-If the risky bond is selling for $89, buy it and short the
-replicating portfolio. Risk-free profit of $2.24 per bond. If it's
-selling for $93, do the reverse. Either way the price gets pulled
-toward $91.24.
+If the risky bond is selling for \$89, buy it and short the
+replicating portfolio. Risk-free profit of \$2.24 per bond. If it's
+selling for \$93, do the reverse. Either way the price gets pulled
+toward \$91.24.
 
 ## What about risk?
 

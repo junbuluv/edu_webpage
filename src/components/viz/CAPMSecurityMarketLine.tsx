@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
   CartesianGrid,
-  Legend,
+  ComposedChart,
   Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Scatter,
-  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
@@ -75,24 +73,21 @@ export default function CAPMSecurityMarketLine() {
 
       <div className="mt-4 h-72">
         <ResponsiveContainer>
-          <ScatterChart margin={{ top: 8, right: 16, bottom: 28, left: 8 }}>
+          <ComposedChart data={line} margin={{ top: 8, right: 16, bottom: 28, left: 8 }}>
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis dataKey="beta" type="number" domain={[0, 2]}
               label={{ value: 'beta (β)', position: 'insideBottom', offset: -10, fontSize: 11 }} />
-            <YAxis dataKey="exp" type="number" tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{ value: 'expected return E[R]', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+            <YAxis type="number" domain={[0, 0.25]}
+              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+              label={{ value: 'expected / observed return', angle: -90, position: 'insideLeft', fontSize: 11 }} />
             <Tooltip
-              formatter={(v: number, name: string) => [
-                name === 'beta' ? v.toFixed(2) : (v * 100).toFixed(2) + '%',
-                name,
-              ]} />
+              formatter={(v: number) => (v * 100).toFixed(2) + '%'} />
             <ReferenceLine y={s.rf} stroke="#94a3b8" strokeDasharray="3 3"
               label={{ value: 'Rf', position: 'right', fontSize: 10 }} />
             <Line data={line} dataKey="exp" stroke="#2563eb" dot={false}
               name="SML" type="monotone" />
-            <Scatter data={points} fill="#dc2626" name="Assets"
-              dataKey="observed" />
-          </ScatterChart>
+            <Scatter data={points} dataKey="observed" fill="#dc2626" name="Observed assets" />
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 

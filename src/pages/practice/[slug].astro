@@ -34,10 +34,30 @@ const { quiz } = Astro.props;
       passingScore={quiz.passingScore}
     />
 
+    {quiz.furtherReading && (
+      <section class="mt-10 rounded-lg border border-slate-200 bg-slate-50 p-5">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+          Go one level deeper
+        </h2>
+        <a
+          href={quiz.furtherReading.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-2 block text-lg font-medium text-accent underline"
+        >
+          {quiz.furtherReading.title}
+        </a>
+        <p class="mt-1 text-xs text-ink-muted">{quiz.furtherReading.source}</p>
+        <p class="mt-3 text-sm">{quiz.furtherReading.why}</p>
+      </section>
+    )}
+
     {quiz.lessonSlug && (
-      <a href={`/lessons/${quiz.lessonSlug}`} class="text-sm text-accent underline">
-        ← Back to the lesson
-      </a>
+      <p class="mt-8">
+        <a href={`/lessons/${quiz.lessonSlug}`} class="text-sm text-accent underline">
+          ← Back to the lesson
+        </a>
+      </p>
     )}
   </div>
 </BaseLayout>

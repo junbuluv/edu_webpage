@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import {
   Bar,
-  BarChart,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -78,7 +79,24 @@ function compute(s: State) {
     const fcf = nopat + da - dWC - capex;
     const pv = fcf / Math.pow(1 + s.discount, t);
     cum += pv;
-    rows.push({ t, revenue, cogs, da, ebit, taxAmt, nopat, dWC, capex, fcf, pv, cumNPV: cum });
+    rows.push({
+      t,
+      revenue,
+      cogs,
+      da,
+      ebit,
+      taxAmt,
+      nopat,
+      dWC,
+      capex,
+      fcf,
+      pv,
+      cumNPV: cum,
+      // Negated signed values so the stacked bar visually shows
+      // additions above zero and subtractions below.
+      dWCNeg: -dWC,
+      capexNeg: -capex,
+    });
     prevRev = revenue;
   }
   return rows;
@@ -124,20 +142,22 @@ export default function CashflowWaterfall() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">FCF by year (components)</h4>
+        <h4 className="text-sm font-semibold mb-2">FCF by year (additions above zero, subtractions below)</h4>
         <div className="h-64">
           <ResponsiveContainer>
-            <BarChart data={rows}>
+            <ComposedChart data={rows} stackOffset="sign">
               <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
               <XAxis dataKey="t" label={{ value: 'year', position: 'insideBottom', offset: -4, fontSize: 11 }} />
               <YAxis />
               <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
               <Legend verticalAlign="top" height={24} />
+              <ReferenceLine y={0} stroke="#94a3b8" />
               <Bar dataKey="nopat" name="NOPAT" stackId="a" fill="#059669" />
               <Bar dataKey="da" name="+ D&A" stackId="a" fill="#10b981" />
-              <Bar dataKey="dWC" name="− ΔWC" stackId="a" fill="#f97316" />
-              <Bar dataKey="capex" name="− CapEx" stackId="a" fill="#dc2626" />
-            </BarChart>
+              <Bar dataKey="dWCNeg" name="− ΔWC" stackId="a" fill="#f97316" />
+              <Bar dataKey="capexNeg" name="− CapEx" stackId="a" fill="#dc2626" />
+              <Line type="monotone" dataKey="fcf" name="FCF" stroke="#0f172a" strokeWidth={2} dot />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>

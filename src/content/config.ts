@@ -93,6 +93,14 @@ const quizzes = defineCollection({
     lessonSlug: z.string().optional(),
     questions: z.array(QuestionSchema).min(1),
     passingScore: z.number().min(0).max(1).default(0.7),
+    furtherReading: z
+      .object({
+        title: z.string(),
+        url: z.string().url(),
+        source: z.string(),
+        why: z.string(),
+      })
+      .optional(),
   }),
 });
 

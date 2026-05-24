@@ -12,7 +12,7 @@
       "answer": 66.67,
       "tolerance": 0.5,
       "unit": "$",
-      "explanation": "P_0 = D_1 / (r_E - g) = 4 / (0.10 - 0.04) = 4 / 0.06 ≈ 66.67.",
+      "explanation": "P_0 = D_1 / (r_E - g) = 4 / (0.10 - 0.04) = 4 / 0.06 \u2248 66.67.",
       "points": 1
     },
     {
@@ -21,12 +21,12 @@
       "prompt": "Why does the Gordon DDM say a non-dividend-paying tech company is worth $0?",
       "choices": [
         "Because the company actually is worthless",
-        "Because Gordon discounts dividends only — if D = 0 forever, the sum is 0. The result is wrong; the company isn't worthless, the model is the wrong tool",
+        "Because Gordon discounts dividends only \u2014 if D = 0 forever, the sum is 0. The result is wrong; the company isn't worthless, the model is the wrong tool",
         "Because the cost of equity is too high",
         "Because growth exceeds the discount rate"
       ],
       "correctIndex": 1,
-      "explanation": "Gordon's special-case assumption (constant D, growing at g) breaks when there are no dividends. Use FCFE — discounts the cash the firm *could* pay out, not what it does pay.",
+      "explanation": "Gordon's special-case assumption (constant D, growing at g) breaks when there are no dividends. Use FCFE \u2014 discounts the cash the firm *could* pay out, not what it does pay.",
       "points": 1
     },
     {
@@ -39,7 +39,10 @@
         "Firm uses buybacks instead of dividends",
         "You want results identical to DDM under any payout policy"
       ],
-      "correctIndices": [0, 2],
+      "correctIndices": [
+        0,
+        2
+      ],
       "explanation": "FCFE handles non-payers and buyback users correctly. DDM is fine for stable dividend policy; under 100% payout they're identical.",
       "points": 2
     },
@@ -50,8 +53,14 @@
       "answer": 46.32,
       "tolerance": 0.5,
       "unit": "$",
-      "explanation": "D_6 = 3.15 × 1.03 = 3.24. TV_5 = D_6 / (r_E - g) = 3.24 / (0.10 - 0.03) = 3.24 / 0.07 ≈ 46.32.",
+      "explanation": "D_6 = 3.15 \u00d7 1.03 = 3.24. TV_5 = D_6 / (r_E - g) = 3.24 / (0.10 - 0.03) = 3.24 / 0.07 \u2248 46.32.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Discounted Cashflow Valuation: Equity and Firm Models (lecture notes)",
+    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/eqnotes/dcfveg.pdf",
+    "source": "Aswath Damodaran, NYU Stern",
+    "why": "Damodaran's own teaching notes show when to use DDM, FCFE, or FCFF and the multi-stage extensions \u2014 the gold-standard next step after a DDM quiz."
+  }
 }

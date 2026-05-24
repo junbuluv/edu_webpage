@@ -16,7 +16,7 @@
         "Double taxation"
       ],
       "correctIndex": 2,
-      "explanation": "Transferable shares let owners enter and exit without dissolving the firm — that's what a stock market requires. Limited liability and perpetual existence make corporations attractive; transferability is what makes a market possible.",
+      "explanation": "Transferable shares let owners enter and exit without dissolving the firm \u2014 that's what a stock market requires. Limited liability and perpetual existence make corporations attractive; transferability is what makes a market possible.",
       "points": 1
     },
     {
@@ -29,8 +29,12 @@
         "The firm pays a regular dividend",
         "Executive perks (jets, lavish offices) funded out of shareholder profits"
       ],
-      "correctIndices": [0, 1, 3],
-      "explanation": "Empire-building, excessive caution, and perks are classic agency costs. Paying a dividend is not — it's actually a tool that mitigates agency cost by removing cash from management's discretion.",
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "Empire-building, excessive caution, and perks are classic agency costs. Paying a dividend is not \u2014 it's actually a tool that mitigates agency cost by removing cash from management's discretion.",
       "points": 2
     },
     {
@@ -53,13 +57,19 @@
       "prompt": "Why does the secondary market matter to a firm even though no money flows to the firm there?",
       "choices": [
         "Because the SEC requires it",
-        "Because liquidity in the secondary market is what makes the primary market work — investors will only buy if they can sell later",
+        "Because liquidity in the secondary market is what makes the primary market work \u2014 investors will only buy if they can sell later",
         "Because the secondary-market price funds dividends",
         "Because pension funds only trade in the secondary market"
       ],
       "correctIndex": 1,
-      "explanation": "Liquidity in the secondary market is a precondition for willingness to buy in the primary market. Price discovery is the second benefit — secondary prices guide management decisions.",
+      "explanation": "Liquidity in the secondary market is a precondition for willingness to buy in the primary market. Price discovery is the second benefit \u2014 secondary prices guide management decisions.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Agency Issues: Shareholders and Corporate Boards",
+    "url": "https://openstax.org/books/principles-finance/pages/2-4-agency-issues-shareholders-and-corporate-boards",
+    "source": "OpenStax Principles of Finance",
+    "why": "Free open-textbook chapter that links the separation of ownership and control to primary/secondary market mechanics \u2014 exactly the framing the quiz uses."
+  }
 }

@@ -15,7 +15,12 @@
         "Stock-based compensation became a larger share of pay, and buybacks offset its dilution",
         "Greater flexibility (no commitment to a sustainable per-period level)"
       ],
-      "correctIndices": [0, 1, 2, 3],
+      "correctIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
       "explanation": "All four contributed. The 2022 IRA added a 1% excise tax on buybacks, narrowing but not closing the preference gap.",
       "points": 2
     },
@@ -39,7 +44,7 @@
       "prompt": "Why is dividend cuts considered a stronger negative signal than reducing or pausing buybacks?",
       "choices": [
         "Dividends are regulated more strictly",
-        "Once announced, dividends are sticky — cutting them suggests management has lost confidence; buybacks are pre-announced as programs with no specific commitment",
+        "Once announced, dividends are sticky \u2014 cutting them suggests management has lost confidence; buybacks are pre-announced as programs with no specific commitment",
         "Dividend cuts trigger criminal liability",
         "Buybacks aren't taxed"
       ],
@@ -53,7 +58,7 @@
       "prompt": "When are buybacks value-destroying for remaining shareholders?",
       "choices": [
         "Never; they always raise EPS",
-        "When the share price the firm pays exceeds the intrinsic value — overpaying transfers wealth to selling shareholders at the expense of those who hold",
+        "When the share price the firm pays exceeds the intrinsic value \u2014 overpaying transfers wealth to selling shareholders at the expense of those who hold",
         "Only during recessions",
         "When the firm has no debt"
       ],
@@ -61,5 +66,11 @@
       "explanation": "Buyback at premium price = value transfer from remaining holders to sellers. The 2007 and 2021 market-peak buyback cohorts illustrated this painfully when prices then fell.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Data Update 9 for 2025: Dividends and Buybacks \u2014 Inertia and Me-tooism",
+    "url": "https://aswathdamodaran.substack.com/p/data-update-9-for-2025-dividends",
+    "source": "Aswath Damodaran, Musings on Markets",
+    "why": "Damodaran's annual data post quantifies the post-1980 shift toward buybacks with current numbers and explains the behavioral drivers behind it."
+  }
 }

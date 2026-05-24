@@ -15,7 +15,11 @@
         "Manager time absorbed by creditor negotiations",
         "Legal and bankruptcy attorney fees"
       ],
-      "correctIndices": [0, 1, 2],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
       "explanation": "Direct = legal/accounting/court fees. Indirect = lost customers, fire sales, distracted management, employee defections, debt overhang. Indirect costs are typically much larger.",
       "points": 2
     },
@@ -39,12 +43,12 @@
       "prompt": "Why do knowledge-intensive firms (tech, pharma) typically carry less debt than utilities?",
       "choices": [
         "Lower tax rates",
-        "Distress costs for intangible-heavy firms are much higher — losing key talent and customers permanently destroys IP value that has no replacement cost",
+        "Distress costs for intangible-heavy firms are much higher \u2014 losing key talent and customers permanently destroys IP value that has no replacement cost",
         "Regulators forbid it",
         "Their cost of debt is higher"
       ],
       "correctIndex": 1,
-      "explanation": "Utilities can be sold at near-book value in distress; tech firms whose key engineers and customers walk away lose IP value that can't be reconstructed. Higher distress costs → lower optimal leverage.",
+      "explanation": "Utilities can be sold at near-book value in distress; tech firms whose key engineers and customers walk away lose IP value that can't be reconstructed. Higher distress costs \u2192 lower optimal leverage.",
       "points": 1
     },
     {
@@ -61,5 +65,11 @@
       "explanation": "Debt overhang: positive-NPV project gets rejected because debt holders capture the value of the new investment. A leverage friction unique to distressed firms.",
       "points": 2
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Trade-Off Theory of Capital Structure: Definition + Factors",
+    "url": "https://www.wallstreetprep.com/knowledge/trade-off-theory/",
+    "source": "Wall Street Prep",
+    "why": "Balances the tax-shield benefit against bankruptcy and debt-overhang costs in plain language, with the optimal-leverage diagram."
+  }
 }

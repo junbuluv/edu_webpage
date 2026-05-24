@@ -12,17 +12,17 @@
       "answer": 19.56,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "EAR = (1 + 0.18/12)^12 - 1 = (1.015)^12 - 1 ≈ 0.1956 = 19.56%.",
+      "explanation": "EAR = (1 + 0.18/12)^12 - 1 = (1.015)^12 - 1 \u2248 0.1956 = 19.56%.",
       "points": 2
     },
     {
       "type": "numeric",
       "id": "q2",
-      "prompt": "Nominal interest rate i = 6%, inflation π = 3%. Using the approximate Fisher equation r ≈ i − π, what is the approximate real rate? Answer as a percent.",
+      "prompt": "Nominal interest rate i = 6%, inflation \u03c0 = 3%. Using the approximate Fisher equation r \u2248 i \u2212 \u03c0, what is the approximate real rate? Answer as a percent.",
       "answer": 3.0,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "r ≈ i − π = 6% − 3% = 3%. (Exact: (1.06/1.03) − 1 ≈ 2.91%.)",
+      "explanation": "r \u2248 i \u2212 \u03c0 = 6% \u2212 3% = 3%. (Exact: (1.06/1.03) \u2212 1 \u2248 2.91%.)",
       "points": 1
     },
     {
@@ -46,12 +46,18 @@
       "choices": [
         "Positive and large, around +5%",
         "Roughly zero",
-        "Negative, around −5%",
+        "Negative, around \u22125%",
         "Equal to the nominal rate"
       ],
       "correctIndex": 2,
-      "explanation": "r ≈ i − π = 4% − 9% = −5%. Cash savers lost purchasing power even with positive nominal yields.",
+      "explanation": "r \u2248 i \u2212 \u03c0 = 4% \u2212 9% = \u22125%. Cash savers lost purchasing power even with positive nominal yields.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "The Yield Curve as a Leading Indicator (FAQ)",
+    "url": "https://www.newyorkfed.org/research/capital_markets/ycfaq",
+    "source": "Federal Reserve Bank of New York",
+    "why": "Authoritative NY Fed FAQ on the term structure that ties yields, expectations, and recession signaling to the curve students just studied."
+  }
 }

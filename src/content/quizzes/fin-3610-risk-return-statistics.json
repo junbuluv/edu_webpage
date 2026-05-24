@@ -9,7 +9,12 @@
       "type": "multiple_choice",
       "id": "q1",
       "prompt": "Approximately what has been the long-run real annual return on US large-cap stocks (1926-2024)?",
-      "choices": ["About 0.5%", "About 2.5%", "About 7.5%", "About 15%"],
+      "choices": [
+        "About 0.5%",
+        "About 2.5%",
+        "About 7.5%",
+        "About 15%"
+      ],
       "correctIndex": 2,
       "explanation": "Around 7-8% real per year. Nominal returns are closer to 10%; the difference is long-run inflation.",
       "points": 1
@@ -17,11 +22,11 @@
     {
       "type": "numeric",
       "id": "q2",
-      "prompt": "Asset A: E[R]=12%, σ=30%. Asset B: E[R]=8%, σ=20%. Correlation 0.3. 50/50 portfolio expected return (%)?",
+      "prompt": "Asset A: E[R]=12%, \u03c3=30%. Asset B: E[R]=8%, \u03c3=20%. Correlation 0.3. 50/50 portfolio expected return (%)?",
       "answer": 10.0,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "E[R_p] = 0.5×12 + 0.5×8 = 10%. The expected-return calculation is just a weighted average — diversification only helps risk, not expected return.",
+      "explanation": "E[R_p] = 0.5\u00d712 + 0.5\u00d78 = 10%. The expected-return calculation is just a weighted average \u2014 diversification only helps risk, not expected return.",
       "points": 1
     },
     {
@@ -31,7 +36,7 @@
       "answer": 18,
       "tolerance": 1,
       "unit": "%",
-      "explanation": "σ²_p = 0.25(900) + 0.25(400) + 2(0.25)(30)(20)(0.3) = 225+100+90 = 415. Hmm — let me recalculate: 0.25×900=225, 0.25×400=100, 2×0.25×0.25×30×20×0.3 = ... using formula σ²_p = w_A² σ_A² + w_B² σ_B² + 2 w_A w_B σ_A σ_B ρ = 0.25(900) + 0.25(400) + 2(0.5)(0.5)(30)(20)(0.3) = 225 + 100 + 90 = 415. So σ_p ≈ 20.4%. (The lesson example used different weights — accept any answer in the 17-21% range.)",
+      "explanation": "\u03c3\u00b2_p = 0.25(900) + 0.25(400) + 2(0.25)(30)(20)(0.3) = 225+100+90 = 415. Hmm \u2014 let me recalculate: 0.25\u00d7900=225, 0.25\u00d7400=100, 2\u00d70.25\u00d70.25\u00d730\u00d720\u00d70.3 = ... using formula \u03c3\u00b2_p = w_A\u00b2 \u03c3_A\u00b2 + w_B\u00b2 \u03c3_B\u00b2 + 2 w_A w_B \u03c3_A \u03c3_B \u03c1 = 0.25(900) + 0.25(400) + 2(0.5)(0.5)(30)(20)(0.3) = 225 + 100 + 90 = 415. So \u03c3_p \u2248 20.4%. (The lesson example used different weights \u2014 accept any answer in the 17-21% range.)",
       "points": 2
     },
     {
@@ -45,8 +50,14 @@
         "Because regulators require it"
       ],
       "correctIndex": 1,
-      "explanation": "Idiosyncratic risk averages to ~0 in a diversified portfolio. Investors who fail to diversify bear it without compensation — that's their choice, not a market failure.",
+      "explanation": "Idiosyncratic risk averages to ~0 in a diversified portfolio. Investors who fail to diversify bear it without compensation \u2014 that's their choice, not a market failure.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Estimating Equity Risk Premiums",
+    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/papers/riskprem.pdf",
+    "source": "Aswath Damodaran, NYU Stern",
+    "why": "The standard reference on historical vs. implied equity premium estimates with the long-run US and global data students see quoted in lecture."
+  }
 }

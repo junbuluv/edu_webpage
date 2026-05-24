@@ -119,8 +119,8 @@ export default function WACCVisualizer() {
       <p className="mt-3 text-xs text-ink-muted">
         With no taxes or distress (MM I), WACC is flat across leverage. Add
         a tax shield (raise tax rate) and WACC slopes down with D/V. Add
-        distress costs (raise α) and WACC bends back up — the **trade-off
-        theory of capital structure**.
+        distress costs (raise α) and WACC bends back up — the{' '}
+        <strong>trade-off theory of capital structure</strong>.
       </p>
     </div>
   );

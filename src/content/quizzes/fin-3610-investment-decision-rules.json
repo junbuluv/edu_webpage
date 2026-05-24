@@ -8,12 +8,12 @@
     {
       "type": "multiple_choice",
       "id": "q1",
-      "prompt": "Project Alpha: invest $1, get $2 back (NPV = $0.82, IRR = 100%). Project Beta: invest $1,000,000, get $1,200,000 back (NPV ≈ $90,900, IRR = 20%). Cost of capital = 10%. Mutually exclusive — which do you pick?",
+      "prompt": "Project Alpha: invest $1, get $2 back (NPV = $0.82, IRR = 100%). Project Beta: invest $1,000,000, get $1,200,000 back (NPV \u2248 $90,900, IRR = 20%). Cost of capital = 10%. Mutually exclusive \u2014 which do you pick?",
       "choices": [
-        "Alpha — higher IRR is better",
-        "Beta — higher NPV means more dollar value created",
-        "Either — both have positive NPV",
-        "Neither — IRRs are inconsistent"
+        "Alpha \u2014 higher IRR is better",
+        "Beta \u2014 higher NPV means more dollar value created",
+        "Either \u2014 both have positive NPV",
+        "Neither \u2014 IRRs are inconsistent"
       ],
       "correctIndex": 1,
       "explanation": "NPV correctly compares dollar value created and is the right criterion for mutually exclusive choices. IRR rewards percentage returns and can grossly misrank by scale.",
@@ -23,9 +23,14 @@
       "type": "multiple_choice",
       "id": "q2",
       "prompt": "A mining project has cash flows -100, +230, -132 (cleanup at end). How many real IRRs does this have?",
-      "choices": ["Zero", "One", "Two", "Three"],
+      "choices": [
+        "Zero",
+        "One",
+        "Two",
+        "Three"
+      ],
       "correctIndex": 2,
-      "explanation": "Two sign changes → up to two IRRs. This project has IRR = 10% and IRR = 20% (both make NPV = 0). The IRR rule is ambiguous here; NPV is not.",
+      "explanation": "Two sign changes \u2192 up to two IRRs. This project has IRR = 10% and IRR = 20% (both make NPV = 0). The IRR rule is ambiguous here; NPV is not.",
       "points": 1
     },
     {
@@ -38,7 +43,10 @@
         "Communicating intuition to non-technical stakeholders",
         "Definitive ranking when NPV and IRR disagree"
       ],
-      "correctIndices": [0, 2],
+      "correctIndices": [
+        0,
+        2
+      ],
       "explanation": "Payback is useful as a quick screen and for communication, never as the primary decision rule. It ignores TVM and tail cash flows.",
       "points": 2
     },
@@ -53,8 +61,14 @@
         "Only when the discount rate equals the IRR"
       ],
       "correctIndex": 2,
-      "explanation": "For conventional CFs and a single accept/reject decision (no ranking), NPV > 0 ⟺ IRR > cost of capital. Disagreements arise with non-conventional CFs or mutually exclusive choices.",
+      "explanation": "For conventional CFs and a single accept/reject decision (no ranking), NPV > 0 \u27fa IRR > cost of capital. Disagreements arise with non-conventional CFs or mutually exclusive choices.",
       "points": 1
     }
-  ]
+  ],
+  "furtherReading": {
+    "title": "Investment Decision Rules (NPV, IRR, Payback)",
+    "url": "https://fiveable.me/finance/unit-8/investment-decision-rules-npv-irr-payback/study-guide/hvoZKazC471s3FS4",
+    "source": "Fiveable (Finance study guide)",
+    "why": "A clean side-by-side study guide comparing the three rules, their assumptions, and where each breaks down \u2014 perfect quiz follow-up."
+  }
 }
