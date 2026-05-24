@@ -1,45 +1,88 @@
 ---
-title: "The Solow Growth Model"
+title: "Why Some Countries Are Rich: The Solow Model"
 course: eco-1002
 unit: "Long-run growth"
 order: 1
-summary: "Capital accumulation, diminishing returns, and the steady state under Cobb-Douglas production."
+summary: "Why building more factories and roads makes a country richer — for a while. The Solow model explains why saving more is a one-shot boost, not a permanent path to faster growth."
 learningObjectives:
-  - "Write the Solow law of motion for k."
-  - "Solve for the steady-state capital and output per worker."
-  - "Predict how s, n, δ, and α move the steady state."
+  - "Explain in plain English what diminishing returns means for a country's capital stock."
+  - "Predict whether saving more, having more workers, or replacing equipment faster makes the country richer or poorer in the long run."
+  - "Identify why long-run growth has to come from technology, not from saving more."
+prerequisites: []
 estimatedMinutes: 20
-tags: ["growth", "Solow", "Cobb-Douglas"]
-quizSlug: "macro-solow"
+tags: ["growth", "Solow", "long run"]
+quizSlug: "eco-1002-solow"
+draft: false
 ---
 
 import SolowGrowth from '@components/viz/SolowGrowth';
 
-## Setup
+## The puzzle
 
-Output per worker is Cobb-Douglas: $y = k^{\alpha}$. Capital evolves with
-investment $s\,y$, population growth $n$, and depreciation $\delta$:
+In 1960, South Korea and Ghana had roughly the same GDP per person. By
+2025 South Korea's was about **twenty times** Ghana's. Both countries
+gained access to similar technology. Both have hard-working people. So
+what happened?
 
-$$
-\dot k \;=\; s\,k^{\alpha} - (n + \delta)\,k.
-$$
+A useful first model says: it's mostly about **capital per worker** —
+how much equipment, how many machines, how much infrastructure each
+worker has. Build more of that, and each worker produces more.
 
-## Steady state
+## One key idea: diminishing returns
 
-Setting $\dot k = 0$:
+Here's the catch. The hundredth machine added to a factory adds less
+output than the first one. There are only so many places to put a robot
+arm before they start tripping over each other. The same principle
+applies at a country level: doubling capital per worker doesn't double
+output per worker.
 
-$$
-k^\* = \left(\frac{s}{n + \delta}\right)^{\!1/(1 - \alpha)}, \qquad
-y^\* = (k^\*)^{\alpha}.
-$$
+In math: if output per worker is $y$ and capital per worker is $k$, the
+relationship looks like $y = k^{\alpha}$ with $\alpha$ between zero and
+one (roughly $\alpha \approx 1/3$ for the US). Plot it and the curve
+**bends over** as $k$ gets large.
 
-The growth-accounting punch line: in steady state, output per worker is
-constant in $k$ — long-run growth must come from technology, not saving more.
+## The balance
+
+A country adds new capital every year through investment (a fraction
+$s$ of its income, where $s$ is the saving rate). It also *loses*
+capital through depreciation (machines wear out) and through population
+growth (the existing capital has to be spread over more workers). Call
+the combined "drag" $(n + \delta) \cdot k$.
+
+Capital grows when saving exceeds drag. It shrinks when drag exceeds
+saving. They balance at a steady state $k^\*$ where the curve $s \cdot
+k^{\alpha}$ meets the straight line $(n + \delta) \cdot k$.
 
 ## Play with it
 
 <SolowGrowth client:load />
 
-Try doubling the savings rate. Watch capital climb to a new higher steady
-state, but growth eventually slow back to zero. That's the "level effect, no
-growth effect" of saving in Solow.
+Try doubling the savings rate from 0.25 to 0.50. Two things happen:
+
+1. The country's capital and output rise toward a new, higher steady
+   state. This is real and matters — a 30% gain in output per worker is
+   a generation of higher living standards.
+2. Once it gets there, growth slows back to roughly zero. The economy
+   is now richer, but it's no longer **growing**.
+
+That second observation is the Solow model's most important insight.
+
+## What this means
+
+Long-run growth — the kind that turns a country from poor to rich over
+generations — has to come from something the model treats as separate:
+**technology** $A$. Better methods of producing, not just more inputs.
+Innovations let the same $k$ yield a higher $y$.
+
+This is why South Korea's industrial policy after 1960 wasn't just
+about saving and investing (though it was about that, a lot). It was
+about acquiring, copying, and eventually inventing better production
+technologies — semiconductors, shipbuilding, automobiles. Ghana hasn't
+had the same trajectory; the model points us toward asking why its
+technology-adoption story has been different.
+
+## Quick check
+
+Take the practice quiz when you're ready, and try the [guided IS-LM
+walkthrough](/lessons/eco-1002/is-lm-guided) next for the short-run
+counterpart to this long-run model.
