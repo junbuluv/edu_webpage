@@ -114,5 +114,18 @@ const quizzes = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes, instructors };
+const exams = defineCollection({
+  type: 'data',
+  schema: z.object({
+    slug: z.string(),
+    title: z.string(),
+    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
+    description: z.string(),
+    durationMinutes: z.number().int().positive(),
+    questions: z.array(QuestionSchema).min(1),
+    passingScore: z.number().min(0).max(1).default(0.7),
+  }),
+});
+
+export const collections = { lessons, quizzes, instructors, exams };
 export type QuestionT = z.infer<typeof QuestionSchema>;

@@ -1,0 +1,159 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const user = Astro.locals.user!;
+const supabase = Astro.locals.supabase!;
+
+const errorParam = Astro.url.searchParams.get('error');
+const ERROR_MESSAGES: Record<string, string> = {
+  not_found: 'That exam administration could not be found.',
+  not_open: 'That exam window has not opened yet.',
+  closed: 'That exam window has already closed.',
+  already_submitted: "You've already submitted this exam.",
+  missing_exam: 'The exam content for that administration is missing.',
+};
+const errorMessage = errorParam ? ERROR_MESSAGES[errorParam] : null;
+
+// Scope listing to (course, semester) pairs the user is enrolled in.
+// RLS allows reading all administrations; we filter client-side because
+// the page already knows the user's enrollments.
+const nowIso = new Date().toISOString();
+const { data: enrollments } = await supabase
+  .from('enrollments')
+  .select('course_slug, semester')
+  .eq('user_id', user.id);
+const enrolledKeys = new Set(
+  (enrollments ?? []).map((e) => `${e.course_slug}|${e.semester}`),
+);
+
+const { data: allAdmins } = await supabase
+  .from('exam_administrations')
+  .select(
+    'id, exam_slug, course_slug, semester, opens_at, closes_at, required_radius_meters, duration_minutes, notes',
+  )
+  .gt('closes_at', nowIso)
+  .order('opens_at', { ascending: true });
+
+const admins = (allAdmins ?? []).filter((a) =>
+  enrolledKeys.has(`${a.course_slug}|${a.semester}`),
+);
+
+// Pre-fetch the user's attempts so we can hide already-submitted ones.
+const { data: attempts } = await supabase
+  .from('exam_attempts')
+  .select('administration_id, submitted_at')
+  .eq('user_id', user.id);
+const submittedSet = new Set(
+  (attempts ?? []).filter((a) => a.submitted_at).map((a) => a.administration_id),
+);
+
+// Resolve exam slug → title via the static exams collection.
+const exams = await getCollection('exams');
+const titleBySlug = new Map(exams.map((e) => [e.data.slug, e.data.title]));
+
+function statusOf(opens: string, closes: string): string {
+  const now = Date.now();
+  if (now < Date.parse(opens)) return 'upcoming';
+  if (now > Date.parse(closes)) return 'closed';
+  return 'open';
+}
+---
+
+<BaseLayout title="Exams">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <h1 class="text-3xl font-semibold tracking-tight">Exams</h1>
+    <p class="mt-3 text-ink-muted">
+      Proctored, time-windowed, location-gated. The list below shows
+      exams for courses you're enrolled in this semester.
+    </p>
+
+    {errorMessage && (
+      <div class="mt-6 rounded border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900">
+        {errorMessage}
+      </div>
+    )}
+
+    {enrolledKeys.size === 0 && (
+      <p class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        You're not currently enrolled in any course. Ask your instructor
+        to add you to the roster, then your exams will appear here.
+      </p>
+    )}
+
+    {enrolledKeys.size > 0 && admins.length === 0 && (
+      <p class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-ink-muted">
+        No exams are scheduled right now. Check back when your instructor
+        opens one.
+      </p>
+    )}
+
+    {admins && admins.length > 0 && (
+      <ul class="mt-8 space-y-3">
+        {admins.map((a) => {
+          const status = statusOf(a.opens_at, a.closes_at);
+          const submitted = submittedSet.has(a.id);
+          const title = titleBySlug.get(a.exam_slug) ?? a.exam_slug;
+          return (
+            <li class="rounded-lg border border-slate-200 p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-accent font-medium">
+                    {a.course_slug} · {a.semester}
+                  </p>
+                  <h2 class="mt-1 text-lg font-semibold">{title}</h2>
+                  <dl class="mt-2 grid grid-cols-2 gap-y-1 text-sm text-ink-muted">
+                    <dt>Opens</dt>
+                    <dd>{new Date(a.opens_at).toLocaleString()}</dd>
+                    <dt>Closes</dt>
+                    <dd>{new Date(a.closes_at).toLocaleString()}</dd>
+                    <dt>Duration</dt>
+                    <dd>{a.duration_minutes} minutes</dd>
+                    <dt>On-campus radius</dt>
+                    <dd>{a.required_radius_meters} m</dd>
+                  </dl>
+                  {a.notes && <p class="mt-3 text-sm">{a.notes}</p>}
+                </div>
+                <div class="text-right">
+                  <span class={`inline-block rounded px-2 py-0.5 text-xs font-semibold uppercase ${
+                    status === 'open' ? 'bg-emerald-100 text-emerald-800' :
+                    status === 'upcoming' ? 'bg-amber-100 text-amber-800' :
+                    'bg-slate-200 text-slate-700'
+                  }`}>
+                    {status}
+                  </span>
+                  {submitted && (
+                    <div class="mt-2 text-xs text-ink-muted">Submitted ✓</div>
+                  )}
+                </div>
+              </div>
+              <div class="mt-4">
+                {submitted ? (
+                  <span class="text-sm text-ink-muted">You've already submitted this exam.</span>
+                ) : status === 'open' ? (
+                  <a href={`/exams/${a.id}`} class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
+                    Take exam →
+                  </a>
+                ) : status === 'upcoming' ? (
+                  <span class="text-sm text-ink-muted">
+                    Not open yet.
+                  </span>
+                ) : (
+                  <span class="text-sm text-ink-muted">Window closed.</span>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+
+    <p class="mt-10 text-xs text-ink-muted">
+      <strong>Honest note on proctoring.</strong> Browser geolocation is
+      trivially spoofable by anyone with developer tools. The location
+      requirement is a soft barrier intended to keep honest students
+      honest; it is <em>not</em> a substitute for in-person proctoring.
+      Your instructor may require additional verification.
+    </p>
+  </div>
+</BaseLayout>

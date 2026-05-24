@@ -1,0 +1,72 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ExamRunner from '@components/exam/ExamRunner';
+import { getCollection } from 'astro:content';
+
+const user = Astro.locals.user!;
+const supabase = Astro.locals.supabase!;
+const adminId = Astro.params.admin;
+if (!adminId) return Astro.redirect('/exams?error=not_found');
+
+const { data: admin } = await supabase
+  .from('exam_administrations')
+  .select('*')
+  .eq('id', adminId)
+  .maybeSingle();
+
+if (!admin) return Astro.redirect('/exams?error=not_found');
+
+const now = Date.now();
+if (now < Date.parse(admin.opens_at)) {
+  return Astro.redirect('/exams?error=not_open');
+}
+if (now > Date.parse(admin.closes_at)) {
+  return Astro.redirect('/exams?error=closed');
+}
+
+// Has the user already submitted?
+const { data: existing } = await supabase
+  .from('exam_attempts')
+  .select('id, submitted_at')
+  .eq('administration_id', adminId)
+  .eq('user_id', user.id)
+  .maybeSingle();
+
+if (existing?.submitted_at) {
+  return Astro.redirect('/exams?error=already_submitted');
+}
+
+// Load the static exam content.
+const exams = await getCollection('exams');
+const examEntry = exams.find((e) => e.data.slug === admin.exam_slug);
+if (!examEntry) return Astro.redirect('/exams?error=missing_exam');
+const exam = examEntry.data;
+---
+
+<BaseLayout title={exam.title}>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      Proctored exam · {admin.course_slug} · {admin.semester}
+    </p>
+    <h1 class="mt-1 text-2xl font-semibold tracking-tight">{exam.title}</h1>
+    <p class="mt-2 text-ink-muted">{exam.description}</p>
+
+    <ExamRunner
+      client:load
+      adminId={admin.id}
+      exam={{
+        slug: exam.slug,
+        title: exam.title,
+        durationMinutes: admin.duration_minutes,
+        questions: exam.questions,
+        passingScore: exam.passingScore,
+      }}
+      geo={{
+        requiredLat: admin.required_lat,
+        requiredLng: admin.required_lng,
+        requiredRadiusMeters: admin.required_radius_meters,
+      }}
+      closesAt={admin.closes_at}
+    />
+  </div>
+</BaseLayout>
