@@ -4,6 +4,7 @@ interface Props {
     title: string;
     url: string;
     source: string;
+    date?: string;
     why: string;
   };
   variant?: 'lesson' | 'quiz';
@@ -57,6 +58,9 @@ const heading =
       <div class="text-center">
         <div class="text-xs font-semibold uppercase tracking-wider text-accent">Source</div>
         <div class="mt-1 text-sm font-medium text-ink">{article.source}</div>
+        {article.date && article.date !== 'undated' && (
+          <div class="mt-1 text-xs text-ink-muted">{article.date}</div>
+        )}
         <div class="mt-1 font-mono text-xs text-ink-muted">{domain}</div>
       </div>
     </div>

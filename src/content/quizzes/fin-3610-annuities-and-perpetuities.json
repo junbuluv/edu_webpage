@@ -51,9 +51,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Growth Perpetuities and the Dividend Discount Model",
-    "url": "https://pressbooks.pub/tourocorporatefinance/chapter/0-9-growth-perpetuities-and-the-dividend-discount-model-2/",
-    "source": "Touro Corporate Finance (open textbook)",
-    "why": "Open-textbook chapter that connects perpetuity formulas to Gordon growth and to mortgages/loans, hitting all three quiz themes together."
+    "title": "Social Security's Financial Outlook: The 2024 Update in Perspective",
+    "url": "https://crr.bc.edu/social-securitys-financial-outlook-the-2024-update-in-perspective/",
+    "source": "Boston College Center for Retirement Research",
+    "why": "BC CRR's working-through of the 2024 Social Security Trustees Report quantifies the present value of an annuity stream (benefits) versus payroll-tax inflows \u2014 a real annuity-valuation case.",
+    "date": "2024-05"
   }
 }

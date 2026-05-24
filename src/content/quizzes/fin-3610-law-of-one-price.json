@@ -59,9 +59,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Arbitrage, Replication & Risk Neutrality",
-    "url": "https://analystprep.com/cfa-level-1-exam/derivatives/concepts-arbitrage-replication-risk-neutrality/",
-    "source": "AnalystPrep (CFA Level 1)",
-    "why": "Connects the law of one price directly to the replicating-portfolio logic used later in option pricing \u2014 the bridge a finance student needs next."
+    "title": "Hedge funds at the heart of Treasury market turmoil as basis trades unwind",
+    "url": "https://www.hedgeweek.com/hedge-funds-at-the-heart-of-treasury-market-turmoil-as-basis-trades-unwind/",
+    "source": "Hedgeweek",
+    "why": "April 2025 Treasury cash-futures basis blowout \u2014 a textbook real-world breakdown of the law of one price when leveraged arbitrageurs are forced to unwind.",
+    "date": "2025-04"
   }
 }

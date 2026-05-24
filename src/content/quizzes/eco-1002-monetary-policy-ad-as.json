@@ -67,9 +67,10 @@
     }
   ],
   "furtherReading": {
-    "title": "60-Second Explainer: How the Fed is Working to Lower Inflation",
-    "url": "https://www.frbsf.org/research-and-insights/blog/sf-fed-blog/2022/6/2/60-second-explainer-on-lowering-inflation/",
-    "source": "Federal Reserve Bank of San Francisco",
-    "why": "A tight, primary-source SF Fed explainer of the exact 2022 rate-hike mechanism (AD shift via borrowing costs) that the quiz asks about."
+    "title": "Inflation Decline Continues to Support a Soft Landing Along the Nonlinear Phillips Curve",
+    "url": "https://www.frbsf.org/research-and-insights/blog/sf-fed-blog/2024/10/17/inflation-decline-continues-to-support-soft-landing-along-nonlinear-phillips-curve/",
+    "source": "San Francisco Fed Blog",
+    "why": "SF Fed analysis of the 2022-24 disinflation showing how a contraction in aggregate demand from Fed tightening brought inflation down without a recession \u2014 a textbook AD-AS soft landing.",
+    "date": "2024-10"
   }
 }

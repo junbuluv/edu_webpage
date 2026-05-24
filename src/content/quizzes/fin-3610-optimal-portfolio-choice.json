@@ -66,9 +66,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Efficient Frontier & Investor's Optimal Portfolio (CFA Level 1)",
-    "url": "https://soleadea.org/cfa-level-1/efficient-frontier-investor-optimal-portfolio",
-    "source": "Soleadea (CFA Level 1 prep)",
-    "why": "Crisp visual walk through the minimum-variance frontier, tangent portfolio, and capital allocation line \u2014 the geometry behind indexing."
+    "title": "Ruminating on Asset Allocation",
+    "url": "https://www.oaktreecapital.com/insights/memo/ruminating-on-asset-allocation",
+    "source": "Oaktree Capital Memo (Howard Marks)",
+    "why": "Marks directly addresses how endowments and pensions blend ownership and debt assets along the efficient frontier \u2014 real-world optimal-portfolio-choice debate.",
+    "date": "2024-10"
   }
 }

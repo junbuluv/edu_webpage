@@ -67,9 +67,10 @@
     }
   ],
   "furtherReading": {
-    "title": "It's All Relative: Multiples, Comparables and Value",
-    "url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/country/relvalAIMR.pdf",
-    "source": "Aswath Damodaran, NYU Stern",
-    "why": "Damodaran's framework paper on how to pick comparables and use P/E vs EV/EBITDA correctly \u2014 the canonical explainer cited in every multiples class."
+    "title": "Adobe's Failed Acquisition of Figma Has Cost the Company Over $38 Billion and Counting",
+    "url": "https://finance.yahoo.com/news/adobe-failed-acquisition-figma-cost-151035766.html",
+    "source": "Yahoo Finance / GoBankingRates",
+    "why": "Adobe bid 50x ARR for Figma, then multiples collapsed; the deal's termination exposes how peer-multiple pricing in M&A drives both the bid and the post-collapse mark.",
+    "date": "2024-04"
   }
 }

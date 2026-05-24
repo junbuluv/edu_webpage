@@ -58,9 +58,10 @@
     }
   ],
   "furtherReading": {
-    "title": "What is Put-Call Parity? Put-Call Parity Formula Explained",
-    "url": "https://www.cqf.com/blog/quant-finance-101/what-is-put-call-parity",
-    "source": "CQF (Certificate in Quantitative Finance)",
-    "why": "Clean derivation of put-call parity from no-arbitrage with a binomial-pricing tie-in \u2014 both core option ideas in one explainer."
+    "title": "GameStop (GME) Bullish Options Bets Snapped Up for Second Day",
+    "url": "https://www.bloomberg.com/news/articles/2024-12-17/gamestop-far-off-bullish-options-bets-snapped-up-for-second-day",
+    "source": "Bloomberg",
+    "why": "Live December 2024 GameStop option-chain activity (>100,000 $125 calls in two days) \u2014 a current real-world demonstration of equity options, gamma exposure, and dealer hedging.",
+    "date": "2024-12"
   }
 }

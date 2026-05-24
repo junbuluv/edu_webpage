@@ -64,9 +64,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Modigliani and Miller Propositions",
-    "url": "https://www.5minutefinance.org/concepts/modigliani-and-miller-propositions",
-    "source": "5-Minute Finance",
-    "why": "A short, well-illustrated walkthrough of MM I and II with the homemade-leverage intuition \u2014 perfect for cementing the perfect-markets case."
+    "title": "Blackstone & KKR Lead the 2026 Private Equity Renaissance",
+    "url": "https://www.hedgeco.net/news/01/2026/blackstone-kkr-lead-the-2026-private-equity-renaissance.html",
+    "source": "HedgeCo Insights",
+    "why": "PE firms KKR ($1.3T AUM) and Blackstone ($1.27T) explicitly exploit the MM tax-shield deviation from perfect-market irrelevance to amplify equity returns via leverage.",
+    "date": "2026-01"
   }
 }

@@ -62,9 +62,10 @@
     }
   ],
   "furtherReading": {
-    "title": "DCF Terminal Value Formula: How to Calculate Terminal Value",
-    "url": "https://corporatefinanceinstitute.com/resources/financial-modeling/dcf-terminal-value-formula/",
-    "source": "Corporate Finance Institute",
-    "why": "Walks through free cash flow construction and both the perpetuity-growth and exit-multiple terminal-value methods used in any capital-budgeting model."
+    "title": "TSMC Intends to Expand Its Investment in the United States to US$165 Billion to Power the Future of AI",
+    "url": "https://pr.tsmc.com/english/news/3210",
+    "source": "TSMC Press Release",
+    "why": "TSMC's $165B Arizona expansion is a giant real-world capex project that requires forecasting decades of after-tax incremental free cash flows \u2014 the heart of capital-budgeting cash-flow estimation.",
+    "date": "2025-03"
   }
 }

@@ -63,9 +63,10 @@
     }
   ],
   "furtherReading": {
-    "title": "NPV and Other Investment Criteria (Brealey lecture notes)",
-    "url": "https://webpage.pace.edu/pviswanath/class/mba808/notes/invrules_brealey.ppt",
-    "source": "Pace University course notes (based on Brealey/Myers)",
-    "why": "Free university lecture slides built on the canonical Brealey/Myers treatment that grounds when NPV and IRR agree and when they conflict."
+    "title": "Intel Accelerates Arizona Fab Buildout To Regain Lead",
+    "url": "https://newsroom.intel.com/intel-foundry/updates-intel-10-largest-construction-projects",
+    "source": "Intel Newsroom",
+    "why": "Intel's $32B Arizona fab decision is a real multi-decade capex commitment evaluated as a positive-NPV project critical to the firm's long-run value.",
+    "date": "2025"
   }
 }

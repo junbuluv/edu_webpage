@@ -63,9 +63,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Monte Carlo Simulation Tutorial \u2014 Sensitivity Analysis",
-    "url": "https://www.solver.com/monte-carlo-simulation-sensitivity-analysis",
-    "source": "Frontline Systems (Solver.com)",
-    "why": "Explains tornado charts, rank-correlation sensitivity, and Monte Carlo together \u2014 the three tools the quiz lumps under risk in capital budgeting."
+    "title": "Pilot Climate Scenario Analysis Exercise: Summary of Participants' Risk-Management Practices and Estimates",
+    "url": "https://www.federalreserve.gov/publications/2024-may-pilot-climate-scenario-analysis.htm",
+    "source": "Federal Reserve Board",
+    "why": "Fed's May 2024 climate scenario exercise with six biggest US banks is the most prominent real-world institutional application of multi-scenario stress analysis to capital decisions.",
+    "date": "2024-05"
   }
 }

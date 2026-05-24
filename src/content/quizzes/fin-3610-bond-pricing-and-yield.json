@@ -59,9 +59,10 @@
     }
   ],
   "furtherReading": {
-    "title": "The Silicon Valley Bank Collapse: Takeaways and Lessons Learned",
-    "url": "https://www.kenaninstitute.unc.edu/commentary/the-silicon-valley-bank-collapse-takeaways-and-lessons-learned/",
-    "source": "Kenan Institute, UNC Kenan-Flagler",
-    "why": "UNC finance faculty piece that uses SVB to show exactly how duration and YTM math destroyed a bank \u2014 the canonical real-world bond-pricing case."
+    "title": "How 'duration risk' came back to bite Silicon Valley Bank and led to its rapid collapse",
+    "url": "https://www.cnbc.com/2023/03/13/how-duration-risk-came-back-to-bite-svb-and-led-to-rapid-collapse.html",
+    "source": "CNBC",
+    "why": "Definitive real-world bond-duration disaster: SVB's 5.6-year portfolio duration with no hedge produced unmanageable mark-to-market losses when rates rose \u2014 bond pricing math made fatal.",
+    "date": "2023-03"
   }
 }

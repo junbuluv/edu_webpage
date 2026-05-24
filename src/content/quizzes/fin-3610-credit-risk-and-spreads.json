@@ -63,9 +63,10 @@
     }
   ],
   "furtherReading": {
-    "title": "The Credit Spread Puzzle",
-    "url": "https://www.bis.org/publ/qtrpdf/r_qt0312e.pdf",
-    "source": "BIS Quarterly Review (Amato & Remolona)",
-    "why": "The classic BIS paper showing spreads are many times expected default losses \u2014 a one-level-deeper read on what really drives credit spreads."
+    "title": "Country Garden, Evergrande Set Up Two Tense Weeks for Creditors",
+    "url": "https://www.bloomberg.com/news/articles/2023-10-17/country-garden-evergrande-set-up-two-tense-weeks-for-creditors",
+    "source": "Bloomberg",
+    "why": "Country Garden's bonds collapsed from 80 cents to roughly 8 cents on the dollar in 2023 \u2014 a vivid demonstration of credit spreads exploding as default probability rises.",
+    "date": "2023-10"
   }
 }

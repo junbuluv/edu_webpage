@@ -55,9 +55,10 @@
     }
   ],
   "furtherReading": {
-    "title": "Rule of 72",
-    "url": "http://web.stanford.edu/class/ee204/TheRuleof72.html",
-    "source": "Stanford University course page",
-    "why": "Short Stanford teaching note that derives the Rule of 72 from compound interest and shows why it works \u2014 clean reinforcement of TVM intuition."
+    "title": "Mortgage rates were supposed to come down. Instead, they're rising. Here's why",
+    "url": "https://www.npr.org/2024/10/18/g-s1-28576/mortgage-rates-housing-market-home-buying-selling",
+    "source": "NPR",
+    "why": "Concrete TVM story: 30-year mortgage payments more than doubled since 2020 because of compounding higher interest rates, directly demonstrating present-value sensitivity to discount rates.",
+    "date": "2024-10"
   }
 }
