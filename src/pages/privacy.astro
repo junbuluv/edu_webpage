@@ -1,0 +1,161 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+
+const lastUpdated = '2026-05-23';
+---
+
+<BaseLayout title="Privacy Policy">
+  <article class="mx-auto max-w-3xl px-4 py-12 prose">
+    <h1>Privacy Policy</h1>
+    <p class="text-sm text-ink-muted">Last updated: {lastUpdated}</p>
+
+    <p>
+      This page describes what information Econ Studio (the "Service")
+      collects from students, how it is stored, who can see it, and your
+      rights regarding it.
+    </p>
+
+    <h2>1. What we collect</h2>
+    <p>
+      The Service intentionally collects the minimum information needed to
+      operate. When you create an account we store:
+    </p>
+    <ul>
+      <li>Your email address (held only in the authentication system; not
+        duplicated into the application database — only an HMAC-SHA256
+        derivative is kept for "is this email already registered?"
+        lookups).</li>
+      <li>An account identifier (random UUID).</li>
+      <li>An account role (student, instructor, or admin).</li>
+      <li>An optional display name you set.</li>
+      <li>The timestamp at which you accepted the Terms of Service.</li>
+    </ul>
+    <p>
+      When you use the Service we additionally store:
+    </p>
+    <ul>
+      <li>Per-lesson progress markers ("started" / "completed").</li>
+      <li>Quiz attempts: your answers, score, and submission timestamp.</li>
+      <li>For staff disclosures only: an audit record containing the
+        actor's ID, the action taken, the target student's ID, and a
+        salted HMAC of the actor's IP address and User-Agent (the raw
+        IP and User-Agent are not stored).</li>
+    </ul>
+
+    <h2>2. What we do not collect</h2>
+    <p>
+      We do not collect Social Security numbers, dates of birth, home
+      addresses, phone numbers, government IDs, or payment information. We
+      do not embed third-party advertising trackers on authenticated pages.
+    </p>
+
+    <h2>3. FERPA notice and non-waiver</h2>
+    <p>
+      The Service treats quiz attempts, lesson progress, and any related
+      records as <strong>education records</strong> under the Family
+      Educational Rights and Privacy Act of 1974 (FERPA, 20 U.S.C. § 1232g;
+      34 CFR Part 99) when the Service is used as part of an institution-
+      authorized course. Where the Service operates as a "school official"
+      under § 99.31(a)(1) of the FERPA regulations, it does so under the
+      direct control of the contracting institution and is bound by the
+      no-redisclosure terms of the underlying Data Privacy Agreement.
+    </p>
+    <p>
+      <strong>Nothing in this Privacy Policy or in the Terms of Service
+      requires or permits a student to waive any right granted to them by
+      FERPA.</strong> Any clause that purports to do so is void and severable
+      from the rest of these terms. If you believe your FERPA rights have
+      been violated, you may file a complaint with the U.S. Department of
+      Education's Student Privacy Policy Office.
+    </p>
+
+    <h2>4. Who can see your records</h2>
+    <ul>
+      <li><strong>You</strong> can see your own profile, lesson progress,
+        and quiz attempts at any time via your dashboard.</li>
+      <li><strong>Instructors</strong> can see lesson progress and quiz
+        attempts only for students who are enrolled in their own courses
+        (this is enforced in the database by row-level security joining
+        on an enrollment record).</li>
+      <li><strong>Administrators</strong> (the project owner only) can
+        read all records. Every administrator and instructor read of an
+        individual student's record is recorded in an audit log retained
+        for the life of the underlying education record.</li>
+      <li><strong>Nobody else.</strong> We do not sell, rent, or share
+        records with advertisers, data brokers, or any third party except
+        as required by law.</li>
+    </ul>
+
+    <h2>5. How long we keep records</h2>
+    <ul>
+      <li>Inactive accounts (no sign-in for 24 months) are automatically
+        deleted, along with all associated lesson progress and quiz
+        attempts.</li>
+      <li>Quiz attempts older than two academic years are purged unless
+        explicitly retained by an instructor.</li>
+      <li>Audit log records are retained for as long as the underlying
+        education record they reference, per FERPA § 99.32.</li>
+    </ul>
+
+    <h2>6. Your rights</h2>
+    <p>You can at any time:</p>
+    <ul>
+      <li><strong>Access</strong> your records via the dashboard.</li>
+      <li><strong>Update</strong> your display name from your account
+        settings.</li>
+      <li><strong>Delete</strong> your account and all associated data
+        via the "Delete account" flow under your dashboard. This action is
+        irreversible and completes within 30 days.</li>
+      <li><strong>Export</strong> your records — contact us and we will
+        provide a machine-readable copy within 30 days.</li>
+    </ul>
+    <p>
+      Students who are residents of California (CCPA / CPRA), the European
+      Union (GDPR), or other jurisdictions with comparable data-protection
+      laws have the same access, update, deletion, and portability rights
+      described above. Where the Service is acting as a school official
+      under FERPA for records covered by FERPA, that statute controls.
+    </p>
+
+    <h2>7. Security</h2>
+    <ul>
+      <li>All data is encrypted in transit (TLS) and at rest (AES-256, via
+        our database provider Supabase).</li>
+      <li>Per-row access control is enforced in the database via
+        PostgreSQL row-level security, not in application code alone.</li>
+      <li>IP addresses and User-Agent strings in our audit log are stored
+        only as HMAC-SHA256 values using a server-side secret — a leak of
+        the application database alone cannot enumerate them.</li>
+    </ul>
+
+    <h2>8. Children under 13</h2>
+    <p>
+      The Service is not directed to children under 13 and is not designed
+      to comply with the Children's Online Privacy Protection Act
+      (COPPA). By creating an account you affirm you are 18 years of age
+      or older, or that an adult has set up the account on your behalf.
+    </p>
+
+    <h2>9. Changes to this Policy</h2>
+    <p>
+      We may update this Privacy Policy. Material changes will be announced
+      on the Service at least 30 days before they take effect. The "Last
+      updated" date at the top of this page indicates the current version.
+    </p>
+
+    <h2>10. Contact</h2>
+    <p>
+      Questions about this policy, requests to exercise your rights, or
+      reports of suspected privacy violations may be sent to the project
+      owner at <a href="mailto:privacy@example.com">privacy@example.com</a>.
+      We will respond within 30 days.
+    </p>
+
+    <p class="mt-12 text-sm text-ink-muted">
+      This policy is a starting template and is not legal advice. If you
+      are an institution adopting Econ Studio for credit-bearing
+      coursework, please review with your own counsel and Data Privacy
+      Officer before signing a Data Privacy Agreement.
+    </p>
+  </article>
+</BaseLayout>

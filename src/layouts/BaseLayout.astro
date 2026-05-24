@@ -49,8 +49,13 @@ const user = Astro.locals.user;
     </main>
 
     <footer class="border-t border-slate-200 py-8 mt-12 text-sm text-ink-muted">
-      <div class="mx-auto max-w-6xl px-4 flex justify-between">
+      <div class="mx-auto max-w-6xl px-4 flex flex-wrap items-center justify-between gap-3">
         <span>© {new Date().getFullYear()} Econ Studio</span>
+        <nav class="flex gap-4">
+          <a href="/privacy" class="hover:text-ink">Privacy</a>
+          <a href="/terms" class="hover:text-ink">Terms</a>
+          <a href="https://github.com/junbuluv/edu_webpage" class="hover:text-ink">GitHub</a>
+        </nav>
         <span>Built with Astro + Supabase</span>
       </div>
     </footer>
