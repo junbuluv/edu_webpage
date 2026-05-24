@@ -1,0 +1,69 @@
+{
+  "slug": "fin-3610-financial-statements-and-ratios",
+  "title": "Financial statements and ratios",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/financial-statements-and-ratios",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Which equation must hold by construction on every balance sheet?",
+      "choices": [
+        "Revenue − Expenses = Net Income",
+        "Assets = Liabilities + Stockholders' Equity",
+        "Cash from Operations + Investing + Financing = Net Income",
+        "Current Assets = Current Liabilities"
+      ],
+      "correctIndex": 1,
+      "explanation": "Assets = Liabilities + Equity is the fundamental balance-sheet identity. If it doesn't hold in your model, you have a bookkeeping mistake.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q2",
+      "prompt": "Which of these are reasons net income can differ substantially from cash flow in a given year?",
+      "choices": [
+        "Depreciation and amortization are non-cash expenses",
+        "Accounts receivable grew (revenue booked but cash not yet collected)",
+        "Capital expenditures hit cash this year but income statement over depreciation life",
+        "The firm changed its dividend policy"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Non-cash expenses, working-capital changes, and the difference between CapEx timing and depreciation timing are the three primary reconciling items between net income and cash flow. Dividend policy affects financing cash flow but not the gap between NI and operating cash flow.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "A firm reports Revenue = $2,000M, Net Income = $200M, Total Assets = $1,500M, Equity = $500M. What is its Return on Equity (ROE)? Answer as a decimal (e.g. 0.20 for 20%).",
+      "answer": 0.40,
+      "tolerance": 0.005,
+      "explanation": "ROE = Net Income / Equity = 200 / 500 = 0.40 (or 40%).",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Using the same firm in question 3, decompose ROE via DuPont (net margin × asset turnover × equity multiplier). What is the equity multiplier?",
+      "choices": ["1.5", "2.0", "3.0", "4.0"],
+      "correctIndex": 2,
+      "explanation": "Equity multiplier = Assets / Equity = 1500 / 500 = 3.0. The firm finances 2/3 of its assets with debt.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "Bank A and a typical retailer both report ROE of about 12%. What is the most likely reason they look the same on this single ratio despite being very different businesses?",
+      "choices": [
+        "Banks and retailers have identical profit margins",
+        "The bank has high leverage (high equity multiplier) compensating for lower margins; the retailer has higher margins with low leverage",
+        "Coincidence — the ratios are unrelated",
+        "Banks have negligible assets"
+      ],
+      "correctIndex": 1,
+      "explanation": "DuPont separates the ROE drivers. Banks lean on leverage; retailers lean on margin × turnover. Same headline number, very different risk profiles.",
+      "points": 1
+    }
+  ]
+}

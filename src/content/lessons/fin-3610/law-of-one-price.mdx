@@ -3,25 +3,122 @@ title: "Financial Decision-Making and the Law of One Price"
 course: fin-3610
 unit: "Foundations"
 order: 3
-summary: "NPV as the organizing principle of financial decision-making; the no-arbitrage condition and why it implies the Law of One Price."
+summary: "NPV as the organizing principle of financial decision-making; the no-arbitrage condition; how the Law of One Price lets us price any security as a portfolio of others."
 learningObjectives:
-  - "State the NPV decision rule and apply it to one-period decisions."
-  - "Define arbitrage and the Law of One Price."
-  - "Use the Law of One Price to value securities and replicating portfolios."
+  - "State the NPV decision rule and apply it to a one-period investment."
+  - "Define arbitrage and the Law of One Price; explain why competitive financial markets enforce it."
+  - "Use the Law of One Price to price a security by replicating its cash flows with traded instruments."
 prerequisites: []
 estimatedMinutes: 25
 tags: ["fin-3610", "Berk-DeMarzo Ch 3"]
+quizSlug: "fin-3610-law-of-one-price"
 draft: false
 ---
 
-## Overview
+## The one decision rule
 
-NPV as the organizing principle of financial decision-making; the no-arbitrage condition and why it implies the Law of One Price.
+Every financial decision in this course can be reduced to:
 
-## Why it matters
+> Does the present value of the benefits exceed the present value of
+> the costs?
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 3. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+If yes, do it. If no, don't. We'll call the difference **net present
+value (NPV)**:
 
-## What you'll be able to do
+$$
+\text{NPV} \;=\; \text{PV(benefits)} \;-\; \text{PV(costs)}.
+$$
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+Positive NPV creates value for shareholders. Negative NPV destroys it.
+Zero NPV is indifferent. That's the entire decision framework.
+
+Everything else in this course is machinery for computing PV
+correctly in specific situations: discounting future cash flows
+(Unit 2), valuing risky cash flows (Unit 4), choosing the right
+discount rate when financing is mixed (Unit 5).
+
+## Why we use market prices
+
+To compute PV we need to convert future cash flows into today's
+dollars. The right exchange rate to use is whatever rate competitive
+financial markets are quoting — *not* the rate you personally think
+captures the time value of money.
+
+Why? Because if your personal rate differs from the market rate,
+someone can arbitrage you. Here's the canonical example: I'm willing
+to sell a contract that pays $110 in one year for $95 today. The
+market rate for one-year risk-free borrowing is 5%. The market price
+of $110 in one year is $110 / 1.05 = $104.76. By selling for $95
+I'm leaving $9.76 on the table — and someone will swoop in, borrow
+$95 from me, buy the same $110 contract in the market for $104.76,
+borrow the rest from the bank at 5%, and pocket the difference at no
+risk.
+
+The Law of One Price formalizes this: **two assets that produce
+identical cash flows must have identical prices.** Otherwise risk-free
+profit exists, and someone will compete it away in seconds.
+
+## Arbitrage in practice
+
+Pure textbook arbitrage is rare. But the *threat* of arbitrage is what
+disciplines prices. Three forms you'll see in real markets:
+
+1. **Triangular arbitrage** in foreign exchange. If 1 EUR = 1.10 USD
+   and 1 USD = 110 JPY, then 1 EUR had better trade for about 121 JPY.
+   Mismatches are exploited and closed in milliseconds.
+2. **ETF arbitrage.** If a stock-index ETF trades at $99.50 but the
+   underlying basket is worth $100.00, authorized participants
+   simultaneously buy the ETF and sell the basket, profiting from the
+   spread and pushing the prices back together.
+3. **Cash-and-carry.** Buy a commodity today for $S$, store it, sell
+   a futures contract at $F$. If $F > S \cdot (1+r) + \text{storage}$,
+   you've locked in risk-free profit.
+
+In each case the trader doesn't need to forecast where prices are
+going — only that two prices for the same cash flows should match.
+
+## Pricing by replication
+
+The Law of One Price gives us a powerful pricing tool: if we can
+**build** the cash flows of a target asset using other traded assets,
+the target asset must trade for the cost of that portfolio.
+
+Example. A risky bond promises $100 in one year if the firm survives,
+$0 if it defaults. The market prices a one-year risk-free bond paying
+$100 at $95.24 (5% rate). And the market prices a one-year credit-
+default swap that pays $100 in default at $4 today.
+
+Can we build the risky bond's cash flows? Yes: long a risk-free bond
+($95.24 in) + short a CDS ($4 out, since you collect the $4 premium
+and pay $100 in default) = a portfolio that pays $100 if no default
+and $0 if default. So the risky bond should cost $95.24 − $4 = **$91.24**.
+
+If the risky bond is selling for $89, buy it and short the
+replicating portfolio. Risk-free profit of $2.24 per bond. If it's
+selling for $93, do the reverse. Either way the price gets pulled
+toward $91.24.
+
+## What about risk?
+
+The Law of One Price as stated assumes you can match cash flows
+*state by state* — when the firm defaults, when it doesn't, in every
+scenario. For most cases you'll see in this course, that's fine; we
+build portfolios that match outcomes and price them by no-arbitrage.
+
+When the cash flows can't be exactly replicated (e.g. you can't short
+a private firm's equity), the principle still gives upper and lower
+bounds. Unit 4 will introduce a separate machinery — CAPM and factor
+models — for pricing the risk *premium* on assets whose cash flows
+can't be perfectly hedged.
+
+## Why this is the organizing principle
+
+Every corporate-finance decision — invest in a project, issue debt,
+buy back stock, acquire a competitor — can be framed as: "What's the
+NPV of doing this, relative to the next-best alternative?" The Law of
+One Price is what makes the discount rate in that NPV calculation
+unambiguous: it's whatever rate competitive markets are pricing
+similar-risk cash flows at.
+
+Memorize the framework, then we'll spend the rest of the course
+filling in the details.
