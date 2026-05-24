@@ -3,25 +3,158 @@ title: "Financial Options: Calls and Puts"
 course: fin-3610
 unit: "Options and special topics"
 order: 25
-summary: "Payoff and profit diagrams for European calls and puts; put-call parity; intrinsic value vs time value; binomial pricing intuition."
+summary: "Payoff and profit diagrams for European calls and puts; put-call parity as a no-arbitrage relation; intrinsic value vs time value; binomial pricing intuition."
 learningObjectives:
-  - "Draw payoff diagrams for long/short calls and puts."
+  - "Draw payoff diagrams for long and short calls and puts."
   - "State and apply put-call parity."
-  - "Price a one-period option in a two-state binomial model."
-prerequisites: []
+  - "Price a one-period option in a two-state binomial model via replication."
+prerequisites:
+  - "Law of One Price (Unit 1)."
+  - "Time value of money (Unit 2)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 20"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 20", "options", "call", "put"]
+quizSlug: "fin-3610-financial-options"
 draft: false
 ---
 
-## Overview
+## Two contracts, four positions
 
-Payoff and profit diagrams for European calls and puts; put-call parity; intrinsic value vs time value; binomial pricing intuition.
+A **call option** gives the holder the right (not obligation) to
+**buy** the underlying asset at a fixed strike price $K$ on or
+before expiration $T$.
 
-## Why it matters
+A **put option** gives the holder the right to **sell** the
+underlying at strike $K$ on or before $T$.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 20. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+For each contract you can be long (the buyer/holder, who paid the
+premium) or short (the seller/writer, who collected the premium).
+Four positions total.
 
-## What you'll be able to do
+This lesson assumes **European** options (exercisable only at $T$).
+American options (exercisable any time before $T$) follow the same
+structure with one extra wrinkle.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## Payoff diagrams
+
+Let $S_T$ be the stock price at expiration. Payoff at expiration:
+
+| Position | Payoff |
+|---|---|
+| Long call | $\max(S_T - K, 0)$ |
+| Short call | $-\max(S_T - K, 0)$ |
+| Long put | $\max(K - S_T, 0)$ |
+| Short put | $-\max(K - S_T, 0)$ |
+
+Sketch on a $(S_T, \text{payoff})$ axis:
+
+- Long call: zero for $S_T < K$, then upward 45° from $K$.
+- Long put: downward 45° from $K$ for $S_T < K$, zero for $S_T > K$.
+- Short positions are mirror images across the x-axis.
+
+**Profit diagram** = payoff diagram shifted by the premium paid (or
+received). A long call with premium \$2 and strike \$50 breaks even
+at $S_T = 52$.
+
+## Put-call parity
+
+For European options on a non-dividend-paying stock:
+
+$$
+C + \frac{K}{(1+r_f)^T} = P + S_0.
+$$
+
+Where $C$ is the call price, $P$ the put price, $S_0$ current stock
+price, $r_f$ risk-free rate.
+
+**Why?** The left side: buy a call, save enough cash at the risk-
+free rate to grow to $K$ at $T$. If $S_T > K$, exercise the call:
+you get the stock for $K$, paid with your saved cash. If $S_T <
+K$, let the call expire and keep your $K$ in cash. Final value:
+$\max(S_T, K)$.
+
+The right side: buy a put and the stock. If $S_T > K$, the put
+expires worthless, you have the stock. If $S_T < K$, exercise the
+put to sell the stock for $K$. Final value: $\max(S_T, K)$ — same.
+
+Two portfolios with identical payoffs must have the same cost (Law
+of One Price). Hence put-call parity.
+
+**Example.** $S_0 = \$100$, $K = \$100$, $T = 1$ year, $r_f =
+5\%$. Suppose $C = \$8$. Then put price:
+
+$$
+P = C + K/(1+r_f)^T - S_0 = 8 + 100/1.05 - 100 = 8 + 95.24 - 100 = \$3.24.
+$$
+
+If the market quotes the put at $\$5$, arbitrage exists: sell the
+put, buy the call, short the stock, lend $\$95.24$ to receive $\$100$
+at $T$. Net cash today: $5 - 8 + 100 - 95.24 = \$1.76$ of riskless
+profit. Real markets close this kind of mismatch in seconds via
+high-frequency arbitrage.
+
+## Intrinsic value and time value
+
+The price of an option decomposes into:
+
+- **Intrinsic value**: payoff if exercised today. $\max(S - K, 0)$
+  for a call, $\max(K - S, 0)$ for a put.
+- **Time value**: the rest. Reflects the chance the option will be
+  more valuable before expiration (more time = more uncertainty =
+  more upside potential).
+
+Time value is always non-negative. It's largest at the money ($S
+\approx K$) and shrinks as expiration approaches (time decay).
+
+## Pricing by replication: the binomial model
+
+The cleanest way to see why options have unique prices: build a
+**replicating portfolio**.
+
+One-period setup. Today the stock is $S_0$. At time $T$ it will be
+either $S_u = uS_0$ (up state) or $S_d = dS_0$ (down state). Risk-
+free rate is $r_f$. A call with strike $K$ pays $C_u = \max(S_u -
+K, 0)$ in the up state and $C_d = \max(S_d - K, 0)$ in the down
+state.
+
+Build a portfolio of $\Delta$ shares + $B$ dollars in bonds that
+exactly replicates the call:
+
+- Up: $\Delta \cdot S_u + B(1+r_f) = C_u$.
+- Down: $\Delta \cdot S_d + B(1+r_f) = C_d$.
+
+Solve:
+$$
+\Delta = \frac{C_u - C_d}{S_u - S_d}, \quad B = \frac{C_d - \Delta \cdot S_d}{1 + r_f}.
+$$
+
+By the Law of One Price, the call must cost:
+$$
+C_0 = \Delta \cdot S_0 + B.
+$$
+
+**Example.** $S_0 = \$50$, $u = 1.2$, $d = 0.9$, $K = \$50$, $r_f
+= 4\%$.
+
+- $S_u = 60$, $S_d = 45$, $C_u = 10$, $C_d = 0$.
+- $\Delta = (10 - 0)/(60 - 45) = 0.667$.
+- $B = (0 - 0.667 \times 45)/1.04 = -30/1.04 = -28.85$.
+- $C_0 = 0.667 \times 50 + (-28.85) = 33.33 - 28.85 = \$4.48$.
+
+(Negative $B$ means borrow.)
+
+## Why this matters for corporate finance
+
+Two reasons options matter beyond derivatives trading:
+
+1. **Real options** in capital budgeting (next lesson). Many
+   projects have option-like features — defer, expand, abandon —
+   that pure DCF undervalues.
+2. **Capital structure as options.** Equity in a levered firm is
+   a call option on firm value with strike equal to debt face
+   value. Debt is a risk-free bond minus a put. Merton (1974)
+   built credit-risk models on this insight, and modern banking
+   regulation (Basel) still uses derivatives of it.
+
+For undergraduate corporate finance, you mostly need to recognize
+option structures and know put-call parity. The Black-Scholes
+formula is one level deeper than this course goes.

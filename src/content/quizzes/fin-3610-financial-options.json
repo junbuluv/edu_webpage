@@ -1,0 +1,56 @@
+{
+  "slug": "fin-3610-financial-options",
+  "title": "Financial options",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/financial-options",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "A call option's payoff at expiration is:",
+      "choices": [
+        "max(S_T - K, 0)",
+        "max(K - S_T, 0)",
+        "S_T - K (always positive)",
+        "K (the strike)"
+      ],
+      "correctIndex": 0,
+      "explanation": "A call holder exercises if S_T > K, gaining S_T - K. Otherwise lets it expire for $0. Hence max(S_T - K, 0).",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Given: S_0 = $100, K = $100, T = 1 year, r_f = 5%, Call price C = $8. Using put-call parity, what should the put price P be? Answer in dollars to two decimals.",
+      "answer": 3.24,
+      "tolerance": 0.05,
+      "unit": "$",
+      "explanation": "Put-call parity: P = C + K/(1+r)^T − S_0 = 8 + 100/1.05 − 100 = 8 + 95.24 − 100 = $3.24.",
+      "points": 2
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following are true of an option's TIME VALUE (price minus intrinsic value)?",
+      "choices": [
+        "Always non-negative",
+        "Largest when the option is at-the-money",
+        "Shrinks as expiration approaches (time decay)",
+        "Negative for in-the-money options"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Time value is always non-negative, peaks at-the-money where uncertainty matters most, and decays toward zero at expiration. Even ITM options have non-negative time value.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "Binomial: S_0=$50, u=1.2, d=0.9, K=$50, r_f=4%. Compute the replicating-portfolio delta Δ = (C_u - C_d)/(S_u - S_d).",
+      "answer": 0.667,
+      "tolerance": 0.01,
+      "explanation": "S_u=60 → C_u=10, S_d=45 → C_d=0. Δ = (10-0)/(60-45) = 10/15 = 0.667.",
+      "points": 1
+    }
+  ]
+}

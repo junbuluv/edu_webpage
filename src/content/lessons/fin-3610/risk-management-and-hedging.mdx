@@ -3,25 +3,153 @@ title: "Risk Management and Hedging"
 course: fin-3610
 unit: "Options and special topics"
 order: 28
-summary: "Why firms hedge: tax convexity, distress avoidance, managerial risk aversion. Tools: forwards, futures, swaps, options. The cost-benefit of hedging."
+summary: "Why firms hedge — tax convexity, financial-distress avoidance, managerial risk aversion. Tools — forwards, futures, swaps, options. The often-misunderstood cost-benefit of hedging."
 learningObjectives:
-  - "List economic motives for corporate hedging."
-  - "Compare forwards, futures, swaps, and options as hedging tools."
-  - "Critique over-hedging and under-hedging through cases."
-prerequisites: []
+  - "List the economic motives for corporate hedging."
+  - "Compare forwards, futures, swaps, and options as hedging instruments."
+  - "Critique over-hedging and under-hedging with case examples."
+prerequisites:
+  - "Financial options (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 30"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 30", "hedging", "risk management"]
+quizSlug: "fin-3610-risk-management-and-hedging"
 draft: false
 ---
 
-## Overview
+## The textbook puzzle
 
-Why firms hedge: tax convexity, distress avoidance, managerial risk aversion. Tools: forwards, futures, swaps, options. The cost-benefit of hedging.
+Most introductory finance says investors diversify away
+firm-specific risk on their own. So why would a *firm* hedge? Each
+shareholder can hedge their exposure individually if they want.
 
-## Why it matters
+The puzzle is real. In a frictionless MM world, hedging adds no
+value. Firms hedge anyway because four real-world frictions make
+hedging valuable at the firm level.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 30. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+## Four motives for corporate hedging
 
-## What you'll be able to do
+**1. Reducing expected taxes (tax convexity).** Most tax codes are
+convex — taxes paid rise more than proportionally with income.
+Smoothing income via hedging reduces lifetime tax bills. If
+unhedged earnings would swing between \$0 (no tax) and \$200M
+(taxed at 25%), the average tax bill is \$25M. Hedged earnings of
+\$100M every year are taxed at \$25M too — but real tax functions
+have NOLs, AMT, and other complications that make smoothing
+worthwhile.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+**2. Avoiding financial distress.** A firm levered to where a 30%
+revenue drop could trigger covenant breaches has strong reason to
+hedge against that drop. The expected cost of distress (from Unit
+5) is reduced.
+
+**3. Investment-policy stability.** Firms with valuable internal
+investment opportunities want to fund them without going to capital
+markets (which signal information, charge issuance costs). Hedging
+cash-flow volatility lets the firm always have internal cash for
+positive-NPV projects.
+
+**4. Managerial risk aversion.** Managers' wealth, careers, and
+human capital are concentrated in the firm. Even if shareholders
+are well-diversified, managers aren't. Hedging reduces the personal
+risk managers bear, which (via agency costs) the firm pays for.
+
+## The hedging toolbox
+
+| Instrument | What it does | Cost | When best |
+|---|---|---|---|
+| **Forward** | Lock in a price for future delivery | None upfront; bilateral counterparty risk | Bespoke; one-off; relationship-banking |
+| **Futures** | Standardized exchange-traded forward | Margin requirements; mark-to-market | Liquid commodities, FX, rates |
+| **Swap** | Exchange one stream of payments for another (fixed-for-floating rates, FX, commodity) | Bilateral; cleared via ISDA | Multi-period exposures (interest rate, currency) |
+| **Option** | Asymmetric payoff: right but not obligation | Premium paid upfront | When you want to preserve upside |
+
+**Forwards vs futures**: economically very similar; the
+distinction is plumbing (OTC vs exchange). Futures eliminate
+counterparty risk through daily margin; forwards retain it.
+
+**Swaps** are typically multi-year exchanges of cash flows. An
+airline swapping floating-rate fuel costs for a fixed price for 3
+years. A bank swapping fixed-rate mortgage receivables for
+floating-rate liabilities.
+
+**Options vs forwards**: forwards lock in a price; options give
+you a floor (put) or ceiling (call) while keeping the upside.
+Options cost premium; forwards don't. The choice depends on
+whether you're willing to pay for asymmetric coverage.
+
+## A worked airline-hedging example
+
+Southwest Airlines famously hedged jet-fuel prices via crude-oil
+swaps in the 2000s. Suppose:
+
+- Annual jet-fuel consumption: 500M gallons.
+- Current spot price: \$2.00/gallon. Total annual cost: \$1B.
+- Volatility: prices could realistically range from \$1.50 to
+  \$3.50 next year (i.e., $-\$250M$ to $+\$750M$ change in costs).
+
+A 12-month forward at \$2.00 locks in next year's cost at \$1B
+exactly. No upside (if oil drops to \$1.50, the firm pays \$2.00
+anyway). No downside (if oil spikes to \$3.50, the firm still pays
+\$2.00).
+
+An at-the-money call option (right to buy at \$2.00) costs
+premium, say \$0.10/gallon = \$50M. Caps cost at \$1.05B if oil
+spikes; preserves benefit if oil drops below \$2.00.
+
+Which is better? Depends on:
+- The firm's view on future oil prices.
+- The cost of distress at very high oil prices.
+- Whether shareholders want exposure to oil prices.
+
+Southwest famously made money on its hedges in the 2007-2008 oil
+spike. They also gave back gains via hedges that locked them above
+spot in subsequent low-oil periods. **Hedging is insurance, not
+speculation** — the value comes from reducing distress risk, not
+from predicting price moves.
+
+## When hedging destroys value
+
+Three patterns of bad hedging:
+
+1. **Speculation disguised as hedging.** A trader takes large
+   directional bets on commodity prices, justifies them internally
+   as "hedges," but they aren't matched to real exposures. Hammer-
+   smith's losses (\$1.5B in interest-rate swaps, 1990) are the
+   textbook case.
+
+2. **Hedging a non-existent exposure.** Buying jet-fuel futures
+   when you don't actually use that much fuel. The "hedge" becomes
+   a directional bet.
+
+3. **Over-hedging away NPV.** A hedge that costs more than the
+   expected reduction in distress costs destroys value. Hedging
+   premiums aren't free.
+
+The general rule: only hedge exposures that genuinely correspond
+to one of the four motives. Hedge them only to the extent that the
+hedging cost is less than the expected benefit.
+
+## What about Berkshire Hathaway?
+
+Famously, Warren Buffett's firm hedges very little. The reason is
+the inverse of our four motives: Berkshire has so much excess
+liquidity, low leverage, and tax-advantaged investment opportunities
+that none of the standard motives bite. For a typical operating
+firm with leverage and earnings sensitivity, those motives matter
+and hedging is usually worth doing.
+
+## What we covered in this course
+
+This was the last lesson. Across six units and 28 lessons, FIN
+3610 has built up the foundations a finance professional needs:
+
+- Unit 1: how firms are structured and how to read them.
+- Unit 2: the time value of money and fixed-income basics.
+- Unit 3: valuing projects and firms.
+- Unit 4: risk-adjusted discount rates.
+- Unit 5: financing decisions and capital structure.
+- Unit 6: options, real options, M&A, hedging.
+
+From here, advanced courses cover derivatives in depth, fixed-
+income portfolio management, M&A practice, and corporate
+governance. The framework you've built — discount cash flows, do
+it carefully — applies to all of them.

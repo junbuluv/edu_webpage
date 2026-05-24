@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-mergers-and-acquisitions",
+  "title": "Mergers and acquisitions",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/mergers-and-acquisitions",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Acquirer values target standalone at $1B and projects $200M of synergies. What is the maximum the acquirer should pay (max offer) without destroying acquirer-shareholder value? Answer in $B.",
+      "answer": 1.2,
+      "tolerance": 0.05,
+      "unit": "$B",
+      "explanation": "P_max = V_T + S = 1.0 + 0.2 = $1.2B. Paying more than this transfers more than the synergy to target holders.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Stock deals (vs cash deals) are MORE common when:",
+      "choices": [
+        "The acquirer believes its stock is undervalued",
+        "The acquirer believes its stock is overvalued (\"paying with expensive paper\")",
+        "Interest rates are very high",
+        "Tax rates are low"
+      ],
+      "correctIndex": 1,
+      "explanation": "Stock deals dilute existing acquirer shareholders; using overvalued stock is cheaper. Markets often react negatively to stock-deal announcements because they infer overvaluation.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Common sources of post-merger value destruction include:",
+      "choices": [
+        "Overpaying due to winner's curse in competitive bidding",
+        "Integration failures (cultures, systems, talent loss)",
+        "Synergy overestimation (especially revenue synergies)",
+        "Acquirer's stock price always falls regardless of the deal"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Overpayment, integration risk, and synergy fantasies are the three big destroyers. Stock-price reactions vary by deal quality — they're not uniformly negative.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Empirically, what fraction of acquisitions destroy value for the ACQUIRER (per 3-5 year post-merger studies)?",
+      "choices": [
+        "Roughly 10%",
+        "Roughly 25%",
+        "Roughly 40-60%",
+        "Roughly 90%"
+      ],
+      "correctIndex": 2,
+      "explanation": "The empirical record is sobering: 40-60% of acquisitions reduce acquirer value. Targets generally do well (control premium); acquirers often don't. Disciplined serial acquirers (Berkshire) are the exception.",
+      "points": 1
+    }
+  ]
+}
