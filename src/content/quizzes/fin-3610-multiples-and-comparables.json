@@ -1,0 +1,60 @@
+{
+  "slug": "fin-3610-multiples-and-comparables",
+  "title": "Multiples and comparables",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/multiples-and-comparables",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Why do analysts prefer EV/EBITDA over P/E when comparing firms with very different capital structures?",
+      "choices": [
+        "EBITDA is always larger than earnings, making the multiple smaller",
+        "EV/EBITDA is capital-structure-neutral; P/E is distorted by interest expense and the share of value owed to debt",
+        "P/E is a deprecated metric",
+        "EBITDA accounts for taxes correctly"
+      ],
+      "correctIndex": 1,
+      "explanation": "EV adds back debt and EBITDA strips out interest and taxes, so both leveraged and unleveraged firms become comparable. P/E mixes operating performance with financing choice.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "An early-stage biotech with negative earnings can still be valued via which multiple?",
+      "choices": [
+        "Trailing P/E",
+        "Price-to-book",
+        "EV/Sales",
+        "Forward EPS"
+      ],
+      "correctIndex": 2,
+      "explanation": "EV/Sales is the multiple of last resort when earnings are negative or volatile. It doesn't reflect margin but it always exists.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "A target firm has $80M of forecast EBITDA and $200M of net debt. Peer median EV/EBITDA = 12×. With 50M shares outstanding, what is the implied share price?",
+      "choices": ["$12.00", "$15.20", "$19.20", "$80.00"],
+      "correctIndex": 1,
+      "explanation": "EV = 12 × 80 = $960M. Equity = EV − Net Debt = 960 − 200 = $760M. Per share = 760 / 50 = $15.20.",
+      "points": 2
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which of these are common ways multiples mislead?",
+      "choices": [
+        "Cyclical firm at the peak of its cycle looks 'cheap' on P/E",
+        "Lumping fast-growers with slow-growers and comparing P/E without adjusting",
+        "Using transaction multiples (with control premium) to value a public-market stake",
+        "Reporting the median multiple instead of the mean"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Cyclical traps, growth differences, and confusing transaction with trading multiples are all classic errors. Using median (not mean) is good practice — it resists outliers.",
+      "points": 2
+    }
+  ]
+}

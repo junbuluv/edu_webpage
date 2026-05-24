@@ -1,0 +1,60 @@
+{
+  "slug": "fin-3610-investment-decision-rules",
+  "title": "Investment decision rules",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/investment-decision-rules",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Project Alpha: invest $1, get $2 back (NPV = $0.82, IRR = 100%). Project Beta: invest $1,000,000, get $1,200,000 back (NPV ≈ $90,900, IRR = 20%). Cost of capital = 10%. Mutually exclusive — which do you pick?",
+      "choices": [
+        "Alpha — higher IRR is better",
+        "Beta — higher NPV means more dollar value created",
+        "Either — both have positive NPV",
+        "Neither — IRRs are inconsistent"
+      ],
+      "correctIndex": 1,
+      "explanation": "NPV correctly compares dollar value created and is the right criterion for mutually exclusive choices. IRR rewards percentage returns and can grossly misrank by scale.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "A mining project has cash flows -100, +230, -132 (cleanup at end). How many real IRRs does this have?",
+      "choices": ["Zero", "One", "Two", "Three"],
+      "correctIndex": 2,
+      "explanation": "Two sign changes → up to two IRRs. This project has IRR = 10% and IRR = 20% (both make NPV = 0). The IRR rule is ambiguous here; NPV is not.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following are legitimate uses of the payback period rule?",
+      "choices": [
+        "Quick liquidity screen for early-stage startups with limited cash runway",
+        "Primary decision criterion for selecting between mutually exclusive 30-year projects",
+        "Communicating intuition to non-technical stakeholders",
+        "Definitive ranking when NPV and IRR disagree"
+      ],
+      "correctIndices": [0, 2],
+      "explanation": "Payback is useful as a quick screen and for communication, never as the primary decision rule. It ignores TVM and tail cash flows.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "When do NPV and IRR always agree on accept/reject?",
+      "choices": [
+        "Always; they're equivalent rules",
+        "Never; they always disagree",
+        "For a single conventional project (one negative CF then all positive)",
+        "Only when the discount rate equals the IRR"
+      ],
+      "correctIndex": 2,
+      "explanation": "For conventional CFs and a single accept/reject decision (no ranking), NPV > 0 ⟺ IRR > cost of capital. Disagreements arise with non-conventional CFs or mutually exclusive choices.",
+      "points": 1
+    }
+  ]
+}
