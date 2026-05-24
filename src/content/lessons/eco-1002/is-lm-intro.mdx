@@ -1,15 +1,15 @@
 ---
-title: "The IS-LM Model"
+title: "The IS-LM Model: Output and Interest Together"
 course: eco-1002
 unit: "Short-run output and interest"
 order: 1
-summary: "Equilibrium output and the interest rate in a closed economy, derived from goods-market and money-market clearing."
+summary: "How the goods market and the money market jointly determine output and interest rates in the short run — and why fiscal policy and monetary policy push them in different combinations."
 learningObjectives:
-  - "Derive the IS curve from goods-market equilibrium."
-  - "Derive the LM curve from money-market equilibrium."
-  - "Predict how Y* and r* respond to fiscal and monetary shocks."
+  - "Explain what the IS curve and LM curve each represent in plain English."
+  - "Predict the direction Y and r move under fiscal expansion (↑G) vs monetary expansion (↑M)."
+  - "Identify why a rate cut and a deficit-financed spending boost are not interchangeable."
 prerequisites:
-  - "Marginal propensity to consume and the Keynesian multiplier"
+  - "Basic idea of the Keynesian multiplier (more spending raises output)."
 estimatedMinutes: 25
 tags: ["IS-LM", "fiscal policy", "monetary policy"]
 quizSlug: "eco-1002-is-lm-intro"
@@ -17,63 +17,109 @@ quizSlug: "eco-1002-is-lm-intro"
 
 import ISLMChart from '@components/viz/ISLMChart';
 
-## Goods market: the IS curve
+> **Looking for a step-by-step version?** This same material is also
+> available as a [guided walkthrough](/lessons/eco-1002/is-lm-guided)
+> that breaks it into 5 bite-size steps with a check after each.
 
-The IS curve traces combinations of output $Y$ and the real interest rate $r$
-that clear the goods market. Starting from the national-income identity in a
-closed economy,
+## The story IS-LM is trying to tell
 
-$$
-Y = C(Y - T) + I(r) + G,
-$$
+Consider what happened in late 2022. Inflation was running near 9%.
+The Fed had raised the federal-funds rate from near zero to about 4.5%
+in nine months. Mortgage rates jumped from 3% to over 7%. Homebuilders
+like Lennar started offering buyers thousands of dollars in mortgage-
+rate buydowns just to keep deals closing. New-home sales fell sharply.
 
-and assuming a linear consumption function $C = C_0 + c(Y - T)$ with a
-tax rate $T = tY$ and investment $I = I_0 - b r$, solving for $Y$ gives the IS
-relation
+Two questions the IS-LM model is built to answer:
 
-$$
-Y_{IS}(r) \;=\; \frac{1}{1 - c(1-t)} \big(C_0 + I_0 + G - b\,r\big).
-$$
+1. When the Fed raises rates, why does *output* fall (not just home
+   sales)?
+2. If Congress had simultaneously cut taxes by the same dollar amount
+   the Fed tightened, would the two have just cancelled out?
 
-The slope is negative: a lower interest rate raises investment and, through the
-multiplier $\alpha = 1/(1 - c(1-t))$, raises equilibrium output.
+We need two curves to answer these. One for the goods market (IS) and
+one for the money market (LM). Where they cross is the short-run
+equilibrium pair $(Y, r)$.
 
-## Money market: the LM curve
+## The IS curve: every borrower's friend
 
-Money-market equilibrium sets real money demand equal to real money supply:
+**IS** = "Investment equals Saving" — equivalently, every $(Y, r)$
+point where the goods market clears. The intuition: lower interest
+rates make it cheaper for firms to borrow and invest, so they invest
+more, which boosts output. Hence IS is **downward-sloping** in $(Y,
+r)$: lower $r$ → higher $Y$.
 
-$$
-\frac{M}{P} = k Y - h r \quad\Longrightarrow\quad r_{LM}(Y) = \frac{k Y - M/P}{h}.
-$$
+What shifts IS?
 
-LM is upward-sloping in $(Y, r)$: higher output raises transactions demand for
-money, requiring a higher interest rate to clear the market at fixed $M/P$.
+- **Government spending up** (Congress passes a stimulus): IS shifts
+  right at every $r$.
+- **Consumer confidence up** (households spend a larger share of
+  income): IS shifts right.
+- **Business confidence up** (firms invest more at every $r$): IS
+  shifts right.
 
-## Equilibrium
+The mechanism in one sentence: anything that raises spending at a
+given interest rate pushes IS right.
 
-Setting $Y_{IS}(r) = Y$ and $r_{LM}(Y) = r$ and solving simultaneously:
+## The LM curve: where the money market clears
 
-$$
-Y^\* = \frac{\alpha h A + b(M/P)}{h + \alpha b k}, \qquad
-r^\* = \frac{k Y^\* - M/P}{h},
-$$
+**LM** = "Liquidity equals Money supply" — every $(Y, r)$ point where
+money demand equals money supply. Higher $Y$ means more transactions,
+which means more demand for money. To keep the market clearing at a
+fixed money supply, the price of money (the interest rate) must rise.
+So LM is **upward-sloping**.
 
-where $A = C_0 + I_0 + G$.
+What shifts LM?
 
-## Play with it
+- **Money supply up** (Fed expands its balance sheet, lowers its
+  policy rate target): LM shifts right at every $Y$.
+- **Money demand shifts** (panic-driven demand for cash in a
+  financial crisis): LM shifts left.
 
-Move the sliders to see how the equilibrium shifts. A positive fiscal shock
-raises $G$, shifting IS right. A monetary expansion raises $M$, shifting LM
-right.
+The mechanism in one sentence: anything that raises the supply of
+money relative to demand pushes LM right and the interest rate down.
+
+## Equilibrium: where they cross
+
+The short-run economy sits at the unique $(Y^\*, r^\*)$ where IS
+meets LM. Both markets clear at the same instant.
 
 <ISLMChart client:load />
 
-## Comparative statics — try to predict before you drag
+Try the sliders. Three patterns you should be able to predict before
+dragging:
 
-1. **Fiscal expansion** (↑ G): IS shifts right ⇒ $Y^\*$ up, $r^\*$ up. The rise
-   in $r$ partially crowds out investment.
-2. **Monetary expansion** (↑ M): LM shifts right ⇒ $Y^\*$ up, $r^\*$ down.
-3. **Confidence shock** (↑ $C_0 + I_0$): IS shifts right ⇒ both $Y^\*$ and
-   $r^\*$ rise.
+| Shock | Curve | Y* moves | r* moves |
+|---|---|---|---|
+| Fiscal expansion (↑ G or tax cut) | IS right | up | **up** |
+| Monetary expansion (↑ M) | LM right | up | down |
+| Confidence boom (↑ C₀ or I₀) | IS right | up | **up** |
 
-When you've built intuition, take the practice quiz below.
+## Back to the 2022 puzzle
+
+The Fed's rate hikes in 2022-2023 were a **leftward** shift of LM
+(tightening money). Equilibrium moved up the IS curve to a higher $r$
+and lower $Y$. Why output fell rather than just home sales: the IS
+curve doesn't track home sales — it tracks *total* output, including
+business investment, durable-goods consumption, and other interest-
+sensitive components. All of them respond to higher $r$.
+
+Would a simultaneous tax cut have cancelled the Fed out? Not exactly.
+A tax cut shifts IS right while tight money shifts LM left. The Y
+effects could roughly cancel, but $r$ would rise even more. So
+borrowers (homebuyers, businesses, the federal government itself)
+would face *higher* rates than under the Fed alone. The two policies
+do different things to the equilibrium even when they're sized to
+offset each other on $Y$.
+
+## A small note about the math
+
+The model can be written down compactly as
+
+$$
+Y_{IS}(r) = \alpha (A - b r) \qquad r_{LM}(Y) = (k Y - M/P)/h,
+$$
+
+with $\alpha = 1/(1 - c(1-t))$ the multiplier. We use the parameters
+$\alpha = 1.92$, $b = 20$, $k = 0.5$, $h = 10$ in the chart. You don't
+need to memorize this. You do need to remember the curve directions
+and what shifts each one.

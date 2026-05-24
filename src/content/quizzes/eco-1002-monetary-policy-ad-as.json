@@ -48,13 +48,17 @@
       "points": 2
     },
     {
-      "type": "numeric",
+      "type": "multiple_choice",
       "id": "q4",
-      "prompt": "Using a Taylor rule with r* = 2%, inflation target π_T = 2%, current inflation π = 4%, and output gap (y − y*) = +1%, what FFR does the rule prescribe? Answer in percent, rounded to one decimal.",
-      "answer": 7.5,
-      "tolerance": 0.2,
-      "unit": "%",
-      "explanation": "FFR = r* + π + 0.5(π − π_T) + 0.5(y − y*) = 2 + 4 + 0.5(2) + 0.5(1) = 7.5%.",
+      "prompt": "Imagine inflation is well above the Fed's 2% target and unemployment is right at the natural rate. Which way would you expect the Fed to move its policy rate, and what would happen to the AD curve in the short run?",
+      "choices": [
+        "Cut rates; AD shifts right",
+        "Raise rates; AD shifts left",
+        "Hold rates; AD doesn't move",
+        "Raise rates; AD shifts right"
+      ],
+      "correctIndex": 1,
+      "explanation": "With inflation above target and no slack to protect, the Fed tightens. Higher rates discourage interest-sensitive spending, shifting AD left and pulling inflation back toward target.",
       "points": 2
     }
   ]

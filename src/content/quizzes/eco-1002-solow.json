@@ -1,0 +1,65 @@
+{
+  "slug": "eco-1002-solow",
+  "title": "Solow growth model",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/solow",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "What does 'diminishing returns to capital' mean in the Solow model?",
+      "choices": [
+        "Returns to capital eventually fall to zero everywhere",
+        "Each additional unit of capital per worker adds less output than the previous one",
+        "Capital depreciates faster as the country gets richer",
+        "Workers become less productive as capital grows"
+      ],
+      "correctIndex": 1,
+      "explanation": "Diminishing returns means the production function y = k^α is concave: the marginal product of k falls as k rises.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "A country permanently raises its savings rate from 25% to 50%. In the long run:",
+      "choices": [
+        "Output per worker grows faster forever",
+        "Output per worker reaches a higher level but eventually stops growing",
+        "Output per worker is unchanged",
+        "Output per worker falls because consumption is lower"
+      ],
+      "correctIndex": 1,
+      "explanation": "Higher saving moves the steady state up — a one-time level gain. Long-run growth is determined by technology, not saving.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following raise the steady-state capital per worker k*?",
+      "choices": [
+        "A higher savings rate s",
+        "A higher population growth rate n",
+        "A higher depreciation rate δ",
+        "A higher capital share α"
+      ],
+      "correctIndices": [0, 3],
+      "explanation": "Higher s and higher α raise k*. Higher n or higher δ raise the break-even line, lowering k*.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Why did South Korea overtake Ghana between 1960 and 2025, even though both had similar GDP per person in 1960?",
+      "choices": [
+        "South Korea had a higher savings rate, which alone is enough to explain the gap in the Solow model",
+        "South Korea's natural resources were larger",
+        "South Korea adopted and developed better technologies, plus invested heavily — the model points to technology as the driver of sustained growth",
+        "Ghana's population didn't grow"
+      ],
+      "correctIndex": 2,
+      "explanation": "Saving alone produces a level effect with no permanent growth in Solow. Sustained divergence requires technology adoption.",
+      "points": 1
+    }
+  ]
+}
