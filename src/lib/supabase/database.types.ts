@@ -16,22 +16,25 @@ export type Database = {
       profiles: {
         Row: {
           id: string;
-          email: string;
+          email_hmac: string | null;
           display_name: string | null;
           role: 'student' | 'instructor' | 'admin';
+          tos_accepted_at: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
-          email: string;
+          email_hmac?: string | null;
           display_name?: string | null;
           role?: 'student' | 'instructor' | 'admin';
+          tos_accepted_at?: string | null;
         };
         Update: {
           id?: string;
-          email?: string;
+          email_hmac?: string | null;
           display_name?: string | null;
           role?: 'student' | 'instructor' | 'admin';
+          tos_accepted_at?: string | null;
         };
         Relationships: [];
       };

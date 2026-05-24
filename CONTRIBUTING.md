@@ -119,28 +119,46 @@ const e_hmac = hmacPIIHex('alice@school.edu');
 
 What we HMAC today:
 
-- Client IP and User-Agent in `audit_log`
-- Email (in a follow-up: `profiles.email_hmac`)
+- `profiles.email_hmac` — written by the `handle_new_user()` trigger
+- `audit_log.client_ip_hmac`, `audit_log.user_agent_hmac` — written by `logDisclosure()`
 
-**Rotation.** Rotate `PII_HMAC_SECRET` annually or on suspected exposure.
-Because HMACs are deterministic for a given key, rotation requires re-HMAC'ing
-every stored value:
+**Two places need the secret in sync:**
 
-```sql
--- inside a transaction with the new secret loaded
-update public.audit_log
-   set client_ip_hmac = encode(hmac(<plaintext-no-longer-available>, $new_secret, 'sha256'), 'hex')
- where ...;
-```
+1. **Application side (`PII_HMAC_SECRET` env var)** — used by
+   `src/lib/crypto/pii.ts` for HMAC'ing IP/UA in `logDisclosure` and
+   for looking up users by email via `findProfileIdByEmail`.
+2. **Database side (`app.pii_hmac_secret` session var)** — used by the
+   `handle_new_user()` trigger when stamping `email_hmac` on signup.
+   Set it once per Supabase project:
+   ```sql
+   alter database postgres set app.pii_hmac_secret = '<same value as PII_HMAC_SECRET>';
+   ```
+   New connections pick up the value automatically.
 
-In practice we cannot re-HMAC IP/UA after the fact (we never stored the
-plaintext). So rotation invalidates historical equality lookups on those
-columns — that's an acceptable trade since we only use them for forensic
-review, not joins.
+If either side has a mismatched (or missing) secret, signups still
+succeed but `email_hmac` lookups will miss. Run `select
+public.backfill_email_hmac();` after configuring the secret to fill in
+any rows that signed up before the secret was set.
 
-Email HMACs (when added) **can** be rotated because plaintext lives in
-`auth.users.email`. Do that in a one-shot migration that joins the two
-tables and re-derives.
+**Rotation.** Rotate `PII_HMAC_SECRET` annually or on suspected exposure:
+
+1. Generate new secret: `openssl rand -hex 32`.
+2. Update Vercel env (`PII_HMAC_SECRET`) and Supabase
+   (`alter database postgres set app.pii_hmac_secret = '<new>';`).
+3. Re-HMAC existing email rows (plaintext lives in `auth.users`):
+   ```sql
+   update public.profiles p
+      set email_hmac = encode(
+        hmac(lower(trim(u.email)),
+             current_setting('app.pii_hmac_secret'),
+             'sha256'),
+        'hex')
+     from auth.users u
+    where p.id = u.id and u.email is not null;
+   ```
+4. IP/UA in `audit_log` **cannot** be re-HMAC'd (no plaintext stored).
+   Rotation invalidates historical equality lookups on those columns —
+   acceptable since we use them for forensic review, not joins.
 
 ### Audit log
 
