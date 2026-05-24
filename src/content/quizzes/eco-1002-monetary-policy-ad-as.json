@@ -1,0 +1,61 @@
+{
+  "slug": "eco-1002-monetary-policy-ad-as",
+  "title": "Monetary policy & AD-AS",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/monetary-policy-ad-as",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "An expansionary monetary policy (the Fed lowering its FFR target) shifts which curve in which direction in the short-run AD-AS model?",
+      "choices": [
+        "AD shifts right",
+        "AD shifts left",
+        "SRAS shifts right",
+        "SRAS shifts left"
+      ],
+      "correctIndex": 0,
+      "explanation": "Lower rates raise interest-sensitive spending, shifting aggregate demand right. SRAS doesn't move from a rate change (it shifts on cost or expectation shocks).",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Which Fed tool sets a floor on short-term rates in the post-QE era?",
+      "choices": [
+        "Open-market operations",
+        "Reserve requirements",
+        "Interest on reserve balances (IORB)",
+        "Discount-window lending"
+      ],
+      "correctIndex": 2,
+      "explanation": "Because abundant reserves persist, paying IORB lets the Fed lift short rates without draining reserves. Open-market ops still occur but aren't the primary floor mechanism.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following were tools the Fed used at the zero lower bound in 2008-2014?",
+      "choices": [
+        "Quantitative easing (large-scale asset purchases)",
+        "Negative interest on reserves",
+        "Forward guidance",
+        "Special lending facilities (TAF, PDCF, etc.)"
+      ],
+      "correctIndices": [0, 2, 3],
+      "explanation": "The Fed used QE, forward guidance, and emergency facilities. It did NOT use negative IORB; rates stayed at or above zero throughout.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "Using a Taylor rule with r* = 2%, inflation target π_T = 2%, current inflation π = 4%, and output gap (y − y*) = +1%, what FFR does the rule prescribe? Answer in percent, rounded to one decimal.",
+      "answer": 7.5,
+      "tolerance": 0.2,
+      "unit": "%",
+      "explanation": "FFR = r* + π + 0.5(π − π_T) + 0.5(y − y*) = 2 + 4 + 0.5(2) + 0.5(1) = 7.5%.",
+      "points": 2
+    }
+  ]
+}

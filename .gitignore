@@ -29,5 +29,8 @@ pnpm-debug.log*
 # vendored reference toolkit (kept out of repo)
 gstack_upstream/
 
+# course materials (copyrighted textbooks; local-only, never commit)
+materials/
+
 # Supabase generated types are committed (safe to remove this line if you regen often)
 # src/lib/supabase/database.types.ts

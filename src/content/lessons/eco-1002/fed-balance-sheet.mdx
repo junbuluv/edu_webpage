@@ -1,0 +1,87 @@
+---
+title: "The Fed's Balance Sheet and the Money Supply"
+course: eco-1002
+unit: "Money and monetary policy"
+order: 10
+summary: "How the Federal Reserve's assets and liabilities determine the monetary base, and how that base is multiplied into the broader money supply through bank lending."
+learningObjectives:
+  - "Explain the relationship between the Fed's balance sheet and the monetary base."
+  - "Derive the equation for the simple deposit multiplier and use T-accounts to illustrate multiple deposit creation."
+  - "Explain how the actions of banks and the nonbank public affect the money multiplier."
+prerequisites:
+  - "Functions of money and the difference between M1 and M2"
+estimatedMinutes: 30
+tags: ["monetary policy", "Fed", "money supply", "Hubbard Ch 14"]
+---
+
+import MoneyMultiplier from '@components/viz/MoneyMultiplier';
+
+## The Fed's balance sheet
+
+The Federal Reserve, like any bank, has a balance sheet. Its assets are
+primarily Treasury securities and (since 2008) mortgage-backed securities.
+Its liabilities are **currency in circulation** and **bank reserves**.
+Together those two liabilities form the **monetary base**, often denoted
+$MB$ or $B$:
+
+$$
+MB \;=\; \text{Currency} \;+\; \text{Reserves}.
+$$
+
+When the Fed buys $\$1$ billion of Treasuries on the open market, it pays
+with newly created reserves — both sides of its balance sheet grow by
+$\$1$B. The monetary base rises by that same $\$1$B. This is the central
+fact that makes the Fed's open-market operations a monetary-policy tool.
+
+## From base to broad money
+
+The monetary base is small. The actual money supply (M1, M2) is much
+larger because banks lend out a fraction of every deposit, and those loans
+become new deposits at other banks. The ratio between $M$ and $MB$ is the
+**money multiplier** $m$:
+
+$$
+M \;=\; m \cdot MB.
+$$
+
+In the simple case where banks hold a fraction $r$ of every deposit as
+reserves and the public holds *no* currency, repeated re-lending gives the
+**simple deposit multiplier** $m_{\text{simple}} = 1/r$. With $r = 0.10$,
+$\$1$ of base creates $\$10$ of deposits.
+
+## The realistic money multiplier
+
+Two leakages shrink the multiplier:
+
+1. The public chooses to hold some currency. Let $C/D$ be the
+   currency-deposit ratio.
+2. Banks hold some reserves beyond what's required (excess reserves).
+   Let $R/D$ be the total reserve-deposit ratio.
+
+The full money multiplier is
+
+$$
+m \;=\; \frac{1 + C/D}{(C/D) + (R/D)}.
+$$
+
+Both leakages reduce $m$. After 2008, $R/D$ rose dramatically because the
+Fed began paying interest on reserves and banks chose to park excess
+reserves there instead of lending. The multiplier fell, so even though
+the Fed expanded $MB$ enormously (quantitative easing), $M$ rose much
+less than $MB$ did.
+
+## Play with it
+
+<MoneyMultiplier client:load />
+
+Try raising $R/D$ from 0.10 to 0.30. Notice that the multiplier roughly
+halves — that's the QE-era story in one chart.
+
+## Where the policy lever is
+
+The Fed directly controls $MB$ (through open-market operations, discount
+lending, and the size of its balance sheet). It influences $R/D$
+indirectly through the interest rate it pays on reserves. It does *not*
+control $C/D$ — that's a household choice driven by trust in banks and
+the cost of holding cash. This division of control is why monetary policy
+transmission can be slow and uncertain.
