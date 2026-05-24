@@ -49,6 +49,41 @@ const QuestionSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
+const instructors = defineCollection({
+  type: 'content',
+  schema: z.object({
+    fullName: z.string(),
+    preferredName: z.string().optional(),
+    title: z.string(),
+    department: z.string().optional(),
+    institution: z.string(),
+    profileUrl: z.string().url().optional(),
+    email: z.string().email().optional(),
+    office: z.string().optional(),
+    courses: z.array(z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives'])).default([]),
+    researchInterests: z.array(z.string()).default([]),
+    selectedPublications: z
+      .array(
+        z.object({
+          title: z.string(),
+          journal: z.string().optional(),
+          year: z.number().int().optional(),
+        }),
+      )
+      .default([]),
+    education: z
+      .array(
+        z.object({
+          degree: z.string(),
+          institution: z.string(),
+          year: z.number().int().optional(),
+        }),
+      )
+      .default([]),
+    order: z.number().default(100),
+  }),
+});
+
 const quizzes = defineCollection({
   type: 'data',
   schema: z.object({
@@ -61,5 +96,5 @@ const quizzes = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes };
+export const collections = { lessons, quizzes, instructors };
 export type QuestionT = z.infer<typeof QuestionSchema>;

@@ -1,0 +1,37 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const instructors = (await getCollection('instructors', (i) =>
+  i.data.courses.includes('eco-1002'),
+)).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="ECO 1002 — Instructors">
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">ECO 1002</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Instructors</h1>
+    <p class="mt-3 text-ink-muted">
+      ECO 1002 is taught by faculty across the Bert W. Wasserman Department
+      of Economics and Finance at Baruch College's Zicklin School of
+      Business.
+    </p>
+
+    <ul class="mt-10 grid gap-6 md:grid-cols-2">
+      {instructors.map((i) => (
+        <li class="rounded-lg border border-slate-200 bg-white p-5 hover:border-accent transition">
+          <a href={`/eco-1002/instructors/${i.slug}`} class="block">
+            <h2 class="text-lg font-semibold">{i.data.fullName}</h2>
+            <p class="mt-1 text-sm text-accent">{i.data.title}</p>
+            <p class="mt-2 text-sm text-ink-muted">{i.data.department}</p>
+            {i.data.researchInterests.length > 0 && (
+              <p class="mt-3 text-xs text-ink-muted">
+                <strong>Research:</strong> {i.data.researchInterests.slice(0, 3).join(', ')}
+              </p>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
