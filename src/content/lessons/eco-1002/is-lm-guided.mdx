@@ -1,0 +1,121 @@
+---
+title: "IS-LM (Guided Walkthrough)"
+course: eco-1002
+unit: "Short-run output and interest"
+order: 3
+summary: "Same content as the IS-LM lesson, but presented as a chunked guided reader — one idea per step, with a check-yourself question after each."
+learningObjectives:
+  - "Derive the IS curve from goods-market equilibrium."
+  - "Derive the LM curve from money-market equilibrium."
+  - "Predict how Y* and r* respond to fiscal and monetary shocks."
+prerequisites:
+  - "Marginal propensity to consume and the Keynesian multiplier"
+estimatedMinutes: 20
+tags: ["IS-LM", "guided", "fiscal policy", "monetary policy"]
+draft: false
+---
+
+import GuidedReader from '@components/lesson/GuidedReader';
+
+<GuidedReader
+  client:load
+  lessonSlug="eco-1002/is-lm-guided"
+  steps={[
+    {
+      heading: 'Where we are headed',
+      bodyHtml: `
+        <p>The IS-LM model gives us the equilibrium output (Y) and interest rate (r) in a closed economy. By the end of this walkthrough you should be able to predict how Y and r move when the government changes spending (fiscal policy) or the central bank changes the money supply (monetary policy).</p>
+        <p>We'll get there in five short steps, each followed by a quick check.</p>
+      `,
+      check: {
+        prompt: 'In one sentence: what does the IS-LM model determine?',
+        choices: [
+          'The price level and output',
+          'Equilibrium output and the interest rate',
+          'Unemployment and inflation',
+          'Exchange rates and trade balance',
+        ],
+        correctIndex: 1,
+        explanation:
+          'IS-LM determines Y (output) and r (interest rate). Price level comes in once we layer AD-AS on top.',
+      },
+    },
+    {
+      heading: 'IS curve: where the goods market clears',
+      bodyHtml: `
+        <p>The <strong>IS curve</strong> traces (Y, r) combinations where total spending equals total output. Higher interest rates discourage investment, so equilibrium output falls. That means the IS curve slopes <strong>downward</strong>.</p>
+        <p>Anything that raises spending at any given r — higher government spending G, higher consumer confidence C₀, lower taxes — shifts IS <strong>to the right</strong>.</p>
+      `,
+      check: {
+        prompt: 'A tax cut that boosts disposable income shifts which curve, and in which direction?',
+        choices: [
+          'IS to the right',
+          'IS to the left',
+          'LM to the right',
+          'LM to the left',
+        ],
+        correctIndex: 0,
+        explanation:
+          'A tax cut raises spending at every r, shifting IS rightward. (LM is unaffected by tax changes.)',
+      },
+    },
+    {
+      heading: 'LM curve: where the money market clears',
+      bodyHtml: `
+        <p>The <strong>LM curve</strong> traces (Y, r) combinations where money demand equals money supply. Higher Y means more transactions and more money demand; to keep the market clearing at a fixed money supply, r must rise. So LM slopes <strong>upward</strong>.</p>
+        <p>An increase in the money supply M shifts LM <strong>to the right</strong> (lower r at every Y).</p>
+      `,
+      check: {
+        prompt: 'The Fed buys bonds in the open market. What happens to LM?',
+        choices: [
+          'Shifts right (lower r at every Y)',
+          'Shifts left',
+          'Doesn\'t move; only IS shifts',
+          'Rotates around its origin',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Open-market bond purchases inject reserves and raise M, shifting LM rightward.',
+      },
+    },
+    {
+      heading: 'Equilibrium and play with it',
+      bodyHtml: `
+        <p>Equilibrium is the (Y*, r*) where IS and LM cross. Both markets clear simultaneously.</p>
+        <p>Below is the interactive model. Drag the sliders for G, M, and autonomous spending and watch the equilibrium move.</p>
+      `,
+      viz: 'ISLMChart',
+    },
+    {
+      heading: 'Predicting policy effects',
+      bodyHtml: `
+        <p>Two memorable patterns:</p>
+        <ul>
+          <li><strong>Fiscal expansion</strong> (↑ G): IS shifts right ⇒ both Y* and r* rise. The rate rise partially "crowds out" investment.</li>
+          <li><strong>Monetary expansion</strong> (↑ M): LM shifts right ⇒ Y* rises, r* falls.</li>
+        </ul>
+        <p>That's the model in one sentence: where IS and LM cross. Take the practice quiz to test these predictions yourself.</p>
+      `,
+      check: {
+        prompt:
+          'During the 2008 crisis, the Fed cut rates aggressively. In IS-LM, which shift were they engineering, and what happened to Y* and r* on the chart?',
+        choices: [
+          'LM right; Y* up, r* down',
+          'IS right; Y* up, r* up',
+          'LM left; Y* down, r* up',
+          'IS left; Y* down, r* down',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Rate cuts = expanding M, which shifts LM right. Equilibrium moves down the IS curve to higher Y and lower r.',
+      },
+    },
+  ]}
+/>
+
+## After the walkthrough
+
+If this guided format worked well for you, the same content is also
+available as the classic [IS-LM lesson](/lessons/eco-1002/is-lm-intro)
+in single-scroll form. Try the [practice quiz](/practice/eco-1002-is-lm-intro)
+when you're ready.
