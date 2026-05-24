@@ -1,15 +1,29 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import {
+  ALLOWED_EMAIL_DOMAINS,
+  allowedDomainsHumanList,
+} from '@lib/auth/email-allowlist';
 
 const next = Astro.url.searchParams.get('next') ?? '/';
 const error = Astro.url.searchParams.get('error');
+
+// HTML5 pattern: any local-part, then @, then exactly one of our allowed
+// domains. Browser-side check only; server-side is the source of truth.
+const emailPattern = `^[^@\\s]+@(${ALLOWED_EMAIL_DOMAINS.map((d) =>
+  d.replace(/\./g, '\\.'),
+).join('|')})$`;
+const allowedList = allowedDomainsHumanList();
 ---
 
 <BaseLayout title="Create account">
   <div class="mx-auto max-w-md py-16">
     <h1 class="text-2xl font-semibold mb-2">Create account</h1>
-    <p class="text-ink-muted mb-8">
-      Free for students. Use your school email if your instructor is grading.
+    <p class="text-ink-muted mb-2">
+      For Baruch College students, faculty, and staff.
+    </p>
+    <p class="text-sm text-ink-muted mb-6">
+      Use your Baruch email: <strong>{allowedList}</strong>.
     </p>
 
     {error && (
@@ -21,12 +35,15 @@ const error = Astro.url.searchParams.get('error');
     <form method="POST" action="/api/auth/signup" class="space-y-4">
       <input type="hidden" name="next" value={next} />
       <label class="block">
-        <span class="text-sm font-medium">Email</span>
+        <span class="text-sm font-medium">Baruch email</span>
         <input
           name="email"
           type="email"
           required
           autocomplete="email"
+          pattern={emailPattern}
+          title={`Must be a Baruch College address (${allowedList}).`}
+          placeholder="firstname.lastname@baruchmail.cuny.edu"
           class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
         />
       </label>
@@ -36,10 +53,13 @@ const error = Astro.url.searchParams.get('error');
           name="password"
           type="password"
           required
-          minlength="8"
+          minlength="12"
           autocomplete="new-password"
           class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
         />
+        <span class="mt-1 block text-xs text-ink-muted">
+          At least 12 characters.
+        </span>
       </label>
       <button
         type="submit"
