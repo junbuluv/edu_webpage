@@ -4,7 +4,7 @@ const lessons = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    course: z.enum(['macro', 'micro', 'finance', 'derivatives']),
+    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
     unit: z.string(),
     order: z.number(),
     summary: z.string(),
@@ -54,7 +54,7 @@ const quizzes = defineCollection({
   schema: z.object({
     slug: z.string(),
     title: z.string(),
-    course: z.enum(['macro', 'micro', 'finance', 'derivatives']),
+    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
     lessonSlug: z.string().optional(),
     questions: z.array(QuestionSchema).min(1),
     passingScore: z.number().min(0).max(1).default(0.7),

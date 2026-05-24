@@ -1,8 +1,8 @@
 {
-  "slug": "macro-is-lm-intro",
+  "slug": "eco-1002-is-lm-intro",
   "title": "IS-LM: short-run equilibrium",
-  "course": "macro",
-  "lessonSlug": "macro/is-lm-intro",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/is-lm-intro",
   "passingScore": 0.7,
   "questions": [
     {

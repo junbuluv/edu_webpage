@@ -2,7 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-const lessons = (await getCollection('lessons', (l) => !l.data.draft && l.data.course === 'macro'))
+const lessons = (await getCollection('lessons', (l) => !l.data.draft && l.data.course === 'fin-3610'))
   .sort((a, b) => a.data.order - b.data.order);
 
 const byUnit = new Map<string, typeof lessons>();
@@ -13,12 +13,17 @@ for (const l of lessons) {
 }
 ---
 
-<BaseLayout title="Macroeconomics">
+<BaseLayout title="FIN 3610 — Corporate Finance">
   <div class="mx-auto max-w-4xl px-4 py-12">
-    <h1 class="text-3xl font-semibold tracking-tight">Macroeconomics</h1>
-    <p class="mt-3 text-ink-muted">
-      The undergraduate macro sequence in interactive form: short-run output
-      determination, money and interest, growth, and inflation.
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">Course</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">
+      FIN 3610 — Corporate Finance
+    </h1>
+    <p class="mt-3 text-ink-muted max-w-2xl">
+      Upper-division corporate finance, aligned to Berk &amp; DeMarzo 6e.
+      Time value of money, valuation, risk and return, capital structure,
+      payout, options, and special topics. Includes interactive TVM, bond
+      pricing, CAPM, WACC, and project-cashflow visualizations.
     </p>
 
     {[...byUnit.entries()].map(([unit, items]) => (
@@ -37,5 +42,9 @@ for (const l of lessons) {
         </ol>
       </section>
     ))}
+
+    {lessons.length === 0 && (
+      <p class="mt-10 text-ink-muted">No lessons published yet.</p>
+    )}
   </div>
 </BaseLayout>
