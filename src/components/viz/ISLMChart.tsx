@@ -2,23 +2,33 @@ import { useMemo, useState } from 'react';
 import {
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
+  ReferenceDot,
   ResponsiveContainer,
-  Scatter,
-  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
-  ZAxis,
 } from 'recharts';
 
 // Closed-economy IS-LM in (Y, r).
-// IS: Y = C0 + I0 - b*r + G; with linear C, t, multiplier alpha:
-//   Y_IS(r) = alpha*(A - b*r),   A = C0 + I0 + G,   alpha = 1/(1 - c(1-t))
-// LM: M/P = k*Y - h*r  ==>  r_LM(Y) = (k*Y - M/P)/h
-// Equilibrium (sub LM into IS):
-//   alpha*A*h + alpha*b*(M/P) = Y*(h + alpha*b*k)
-//   Y* = (alpha*A*h + alpha*b*M/P) / (h + alpha*b*k)
-//   r* = (k*Y* - M/P)/h
+//
+//   IS curve (goods market clears):
+//     Y = alpha*(A - b*r)   where A = C0 + I0 + G,  alpha = 1/(1 - c(1-t))
+//     Equivalently r as a function of Y:
+//       r_IS(Y) = (alpha*A - Y) / (alpha*b)
+//
+//   LM curve (money market clears):
+//     M/P = k*Y - h*r   ==>   r_LM(Y) = (k*Y - M/P) / h
+//
+// Equilibrium (set r_IS(Y) = r_LM(Y), solve for Y):
+//     Y* = (alpha*A*h + alpha*b*(M/P)) / (h + alpha*b*k)
+//     r* = (k*Y* - M/P) / h
+//
+// Calibrated so baseline equilibrium sits at a textbook-style positive
+// rate (~3-6%). Slider ranges keep r* > 0 across the bulk of settings;
+// extreme combinations can still produce negative r, and the chart's
+// auto-scaled Y axis handles that gracefully.
 
 interface State {
   G: number;
@@ -26,7 +36,7 @@ interface State {
   A0: number;
 }
 
-const baseline: State = { G: 100, M: 600, A0: 200 };
+const baseline: State = { G: 100, M: 100, A0: 100 };
 const params = { c: 0.6, t: 0.2, b: 20, k: 0.5, h: 10, P: 1 };
 
 function solve(s: State) {
@@ -38,20 +48,28 @@ function solve(s: State) {
   return { alpha, A, Yeq, req };
 }
 
-function buildCurves(s: State) {
+function buildSeries(s: State, Yeq: number) {
   const { alpha, A } = solve(s);
   const { b, k, h, P } = params;
-  const rs = Array.from({ length: 41 }, (_, i) => i * 0.5);
-  const isCurve = rs.map((r) => ({ x: alpha * (A - b * r), y: r }));
-  const lmCurve = rs.map((r) => ({ x: (h * r + s.M / P) / k, y: r }));
-  return { isCurve, lmCurve };
+  // Common Y grid bracketing the equilibrium with margin on both sides.
+  const lo = Math.max(0, Yeq - 200);
+  const hi = Yeq + 200;
+  const n = 41;
+  const step = (hi - lo) / (n - 1);
+  return Array.from({ length: n }, (_, i) => {
+    const Y = lo + i * step;
+    return {
+      Y,
+      rIS: (alpha * A - Y) / (alpha * b),
+      rLM: (k * Y - s.M / P) / h,
+    };
+  });
 }
 
 export default function ISLMChart() {
   const [state, setState] = useState<State>(baseline);
-  const { isCurve, lmCurve } = useMemo(() => buildCurves(state), [state]);
   const eq = useMemo(() => solve(state), [state]);
-  const eqPoint = [{ x: eq.Yeq, y: eq.req }];
+  const data = useMemo(() => buildSeries(state, eq.Yeq), [state, eq.Yeq]);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -60,23 +78,23 @@ export default function ISLMChart() {
           label="Government spending G"
           value={state.G}
           min={0}
-          max={300}
+          max={250}
           step={5}
           onChange={(v) => setState((s) => ({ ...s, G: v }))}
         />
         <Slider
           label="Money supply M"
           value={state.M}
-          min={200}
-          max={1200}
-          step={10}
+          min={50}
+          max={250}
+          step={5}
           onChange={(v) => setState((s) => ({ ...s, M: v }))}
         />
         <Slider
           label="Autonomous spending C₀+I₀"
           value={state.A0}
           min={50}
-          max={400}
+          max={250}
           step={5}
           onChange={(v) => setState((s) => ({ ...s, A0: v }))}
         />
@@ -95,13 +113,16 @@ export default function ISLMChart() {
 
       <div className="mt-4 h-80">
         <ResponsiveContainer>
-          <ScatterChart margin={{ top: 8, right: 16, bottom: 28, left: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
+          >
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
-              dataKey="x"
+              dataKey="Y"
               type="number"
-              domain={['auto', 'auto']}
-              tickFormatter={(v) => v.toFixed(0)}
+              domain={['dataMin', 'dataMax']}
+              tickFormatter={(v: number) => v.toFixed(0)}
               label={{
                 value: 'Output (Y)',
                 position: 'insideBottom',
@@ -110,55 +131,64 @@ export default function ISLMChart() {
               }}
             />
             <YAxis
-              dataKey="y"
               type="number"
               domain={['auto', 'auto']}
+              tickFormatter={(v: number) => v.toFixed(0) + '%'}
               label={{
-                value: 'Interest rate (r, %)',
+                value: 'Interest rate (r)',
                 angle: -90,
                 position: 'insideLeft',
                 fontSize: 11,
               }}
             />
-            <ZAxis range={[0, 0]} />
             <Tooltip
-              cursor={{ strokeDasharray: '3 3' }}
-              formatter={(v: number, name: string) => [
-                name === 'y' ? `${v.toFixed(2)}%` : v.toFixed(0),
-                name === 'y' ? 'r' : 'Y',
-              ]}
+              formatter={(v: number) => `${v.toFixed(2)}%`}
+              labelFormatter={(label: number) => `Y = ${label.toFixed(0)}`}
             />
             <Legend verticalAlign="top" height={28} />
-            <Scatter
-              data={isCurve}
-              name="IS"
-              fill="#2563eb"
-              line={{ stroke: '#2563eb', strokeWidth: 2 }}
-              shape={() => <></>}
+            <Line
+              type="linear"
+              dataKey="rIS"
+              name="IS (goods market)"
+              stroke="#2563eb"
+              strokeWidth={2}
+              dot={false}
               isAnimationActive={false}
             />
-            <Scatter
-              data={lmCurve}
-              name="LM"
-              fill="#dc2626"
-              line={{ stroke: '#dc2626', strokeWidth: 2 }}
-              shape={() => <></>}
+            <Line
+              type="linear"
+              dataKey="rLM"
+              name="LM (money market)"
+              stroke="#dc2626"
+              strokeWidth={2}
+              dot={false}
               isAnimationActive={false}
             />
-            <Scatter
-              data={eqPoint}
-              name="Equilibrium"
+            <ReferenceDot
+              x={eq.Yeq}
+              y={eq.req}
+              r={5}
               fill="#0f172a"
-              shape="circle"
-              isAnimationActive={false}
+              stroke="white"
+              strokeWidth={2}
+              label={{
+                value: 'eq',
+                position: 'top',
+                fontSize: 11,
+                offset: 8,
+              }}
             />
-          </ScatterChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
       <p className="mt-4 text-xs text-ink-muted">
-        Closed-economy IS-LM. Parameters: c = 0.6, t = 0.2, b = 20, k = 0.5, h = 10, P = 1.
-        Drag sliders to study fiscal (G) and monetary (M) shocks.
+        Closed-economy IS-LM. Parameters: c = 0.6, t = 0.2, b = 20, k = 0.5,
+        h = 10, P = 1. The IS curve slopes down (lower r ⇒ more investment
+        ⇒ higher Y). The LM curve slopes up (higher Y ⇒ more money demand
+        ⇒ higher r to clear the money market at fixed M). They cross at
+        equilibrium. Drag sliders to study fiscal (G) and monetary (M)
+        shocks.
       </p>
     </div>
   );
