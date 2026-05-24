@@ -3,25 +3,127 @@ title: "Credit Risk and Spreads"
 course: fin-3610
 unit: "Time, money, and interest rates"
 order: 9
-summary: "How default risk shows up as a yield spread over Treasuries; credit ratings, recovery rates, and the term structure of credit spreads."
+summary: "How default risk shows up as a yield spread over Treasuries, what credit ratings actually mean, and how recovery rates and macro conditions drive the term structure of credit spreads."
 learningObjectives:
-  - "Decompose a corporate bond yield into Treasury + spread."
+  - "Decompose a corporate bond yield into Treasury yield + credit spread."
   - "Explain how rating, recovery rate, and macro factors drive spreads."
-  - "Compute expected return under a simple default model."
-prerequisites: []
+  - "Compute the expected return on a defaultable bond given a simple default-and-recovery model."
+prerequisites:
+  - "Bond pricing and YTM (prior lesson)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 6"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 6", "credit risk", "spreads"]
+quizSlug: "fin-3610-credit-risk-and-spreads"
 draft: false
 ---
 
-## Overview
+## Where the spread comes from
 
-How default risk shows up as a yield spread over Treasuries; credit ratings, recovery rates, and the term structure of credit spreads.
+A 10-year US Treasury yields about 4.2%. A 10-year AT&T corporate
+bond yields about 5.5%. A 10-year B-rated junk bond yields about
+9%. Why the differences?
 
-## Why it matters
+Treasuries are essentially default-free in nominal terms (the US
+government can always print dollars to pay). Corporate bonds can
+default. The extra yield over Treasury is the **credit spread**,
+compensating investors for that risk:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 6. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+$$
+y_{\text{corp}} = y_{\text{Treasury}} + \text{spread}.
+$$
 
-## What you'll be able to do
+A simple way to see why: if a bond defaults with probability $p$ and
+recovers fraction $\delta$ of face value, then the **expected**
+payment per dollar of promised payment is $1 \cdot (1 - p) + \delta
+\cdot p$. To get the same expected return as the risk-free rate, the
+promised yield must be high enough to compensate. Algebra gives
+(approximately, for small p):
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+$$
+\text{spread} \approx p \cdot (1 - \delta).
+$$
+
+A bond with 2% annual default probability and 40% recovery rate
+needs a spread of about $0.02 \times 0.6 = 1.2\% = 120$ bps over
+Treasury to break even on expected return. Real-world spreads are
+typically *higher* than this — investors demand extra premium for
+bearing the risk (not just the expected loss).
+
+## Credit ratings
+
+Three big rating agencies (S&P, Moody's, Fitch) classify bonds on a
+letter-grade scale. Simplified:
+
+| Grade | S&P / Fitch | Moody's | Default risk |
+|---|---|---|---|
+| Investment grade | AAA | Aaa | Very low |
+|  | AA | Aa | Very low |
+|  | A | A | Low |
+|  | BBB | Baa | Modest |
+| Speculative ("high yield" / "junk") | BB | Ba | Material |
+|  | B | B | High |
+|  | CCC | Caa | Distressed |
+|  | D | C | In default |
+
+Two bright lines matter:
+
+1. **Investment grade vs speculative**, drawn between BBB- and BB+.
+   Many institutions (pension funds, insurance companies) are
+   legally barred from holding below-investment-grade bonds; a
+   downgrade across this line forces selling and widens spreads
+   sharply.
+2. **AAA**: very few entities qualify. The US Treasury did not even
+   carry universal AAA after S&P downgraded it in 2011.
+
+Empirically, rating predicts default reasonably well over 1-5 year
+horizons; less well at very long horizons or in deep recessions.
+
+## What drives spreads
+
+Three forces:
+
+- **Issuer-specific.** Financial leverage, profitability, cash flow,
+  industry. A heavily indebted firm in a cyclical industry trades
+  wider than a cash-rich tech company.
+- **Macro.** In recessions, default rates rise across the board and
+  spreads widen for everyone, even firms whose individual risk
+  hasn't changed.
+- **Risk appetite.** When investors are flush with capital and
+  comfortable, spreads compress to almost nothing. In 2007 BBB
+  spreads were under 100 bps; by late 2008 they were over 800.
+
+FRED series to watch: `BAMLC0A0CM` (investment-grade corporate
+spread), `BAMLH0A0HYM2` (high-yield spread), and `T10Y3M`
+(yield-curve slope). Together they tell you a lot about how
+financial markets are pricing risk.
+
+## The term structure of spreads
+
+Spreads also depend on maturity. For investment-grade firms, the
+curve typically slopes upward (longer = more time for things to go
+wrong). For deeply distressed firms, it can slope *downward* —
+if a firm survives the near term, it has demonstrated some
+resilience; the unconditional default rate is concentrated in the
+short window.
+
+## A worked example
+
+A 5-year corporate bond pays a 6% annual coupon on face value of
+$1,000. Treasury 5-year yields are 4%. Investors believe the bond
+defaults with 1.5% annual probability; recovery in default is
+expected to be 50 cents on the dollar.
+
+Approximate fair spread: $0.015 \times (1 - 0.5) = 0.0075 = 75$ bps.
+So the fair YTM (under risk-neutral pricing) is about 4.75%. The
+market actually trades it at 6%, so there's a **125 bps** spread —
+of which roughly 75 bps compensates for expected loss and the
+remaining ~50 bps is the risk premium.
+
+In recessions both pieces grow: expected default rate rises *and*
+the risk premium rises. That's why high-yield spreads can swing
+from 250 bps in good times to 1,\!000+ bps in crises.
+
+## What's next
+
+Unit 3 turns from pricing financial securities to valuing real
+projects and equity. The same TVM machinery applies; only the
+discount rate (now the cost of capital, not a bond yield) changes.

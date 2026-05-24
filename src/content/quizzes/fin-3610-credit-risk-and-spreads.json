@@ -1,0 +1,61 @@
+{
+  "slug": "fin-3610-credit-risk-and-spreads",
+  "title": "Credit risk and spreads",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/credit-risk-and-spreads",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A bond has annual default probability 2% and recovery rate 30%. What is the approximate fair credit spread over Treasury (basis points)? Use the approximation spread ≈ p · (1 − δ).",
+      "answer": 140,
+      "tolerance": 5,
+      "unit": "bps",
+      "explanation": "Spread ≈ 0.02 × (1 − 0.30) = 0.014 = 140 bps. Real-world spreads typically exceed this to compensate for risk on top of expected loss.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Which rating boundary is the most operationally important because many institutional investors are forbidden by mandate from holding bonds below it?",
+      "choices": [
+        "AAA vs AA",
+        "BBB- vs BB+ (investment grade vs speculative)",
+        "B vs CCC",
+        "A vs BBB"
+      ],
+      "correctIndex": 1,
+      "explanation": "The investment-grade/speculative line at BBB-/BB+ is the legal threshold for many pension funds and insurance portfolios; downgrades across it force selling and widen spreads.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following tend to widen credit spreads?",
+      "choices": [
+        "Recession / rising default rates",
+        "Lower investor risk appetite",
+        "Falling firm leverage",
+        "Tighter monetary policy hurting cyclical firms"
+      ],
+      "correctIndices": [0, 1, 3],
+      "explanation": "Recession, lower risk appetite, and tightening that hurts borrowers all widen spreads. *Falling* firm leverage tends to *narrow* spreads (lower default risk).",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "If high-yield spreads jumped from 250 bps to 1,000 bps during a financial crisis, what's the most accurate interpretation?",
+      "choices": [
+        "Expected default losses alone widened 750 bps",
+        "Both expected default losses AND the risk premium investors demand both rose",
+        "Default probabilities fell, but recovery rates rose",
+        "Treasury yields fell by 750 bps"
+      ],
+      "correctIndex": 1,
+      "explanation": "In crises both pieces grow: actual default rates climb and the risk premium demanded for bearing that risk climbs even faster. Separating the two is a research-active topic.",
+      "points": 1
+    }
+  ]
+}

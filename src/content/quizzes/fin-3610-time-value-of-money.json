@@ -1,0 +1,52 @@
+{
+  "slug": "fin-3610-time-value-of-money",
+  "title": "Time value of money",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/time-value-of-money",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "You will receive $2,000 in 7 years. The discount rate is 5%. What is the present value? Answer in dollars to the nearest cent.",
+      "answer": 1421.36,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "PV = 2000 / (1.05)^7 = 2000 / 1.4071 ≈ 1421.36.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "You invest $10,000 today at 8% annual interest. What is its future value in 10 years? Answer in dollars to the nearest cent.",
+      "answer": 21589.25,
+      "tolerance": 5.0,
+      "unit": "$",
+      "explanation": "FV = 10000 × (1.08)^10 = 10000 × 2.158925 ≈ 21589.25.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Using the Rule of 72, approximately how long does an investment earning 9% per year take to double?",
+      "choices": ["6 years", "8 years", "10 years", "12 years"],
+      "correctIndex": 1,
+      "explanation": "Rule of 72: doubling time ≈ 72 / r = 72 / 9 = 8 years. (Exact answer is ~8.04 years.)",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Which of the three rules of time travel forbids you to add $100 today to $100 in five years without first discounting or compounding?",
+      "choices": [
+        "Rule 1: only same-date cash flows can be combined",
+        "Rule 2: compound to move forward in time",
+        "Rule 3: discount to move backward in time",
+        "There is no such rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Rule 1 establishes that cash flows at different dates are different goods and cannot be combined directly.",
+      "points": 1
+    }
+  ]
+}

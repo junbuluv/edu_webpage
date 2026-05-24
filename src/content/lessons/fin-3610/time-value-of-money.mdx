@@ -3,31 +3,121 @@ title: "The Time Value of Money"
 course: fin-3610
 unit: "Time, money, and interest rates"
 order: 5
-summary: "Three rules of time travel: discount the future, compound the past, never add cash flows from different dates. Compute PV and FV of single cash flows."
+summary: "Three rules of time travel — discount the future, compound the past, never add cash flows from different dates. The single most important computational skill in finance."
 learningObjectives:
-  - "Apply the three rules of time travel."
-  - "Compute present value and future value of single cash flows."
-  - "Use the Rule of 72 to estimate doubling times."
-prerequisites: []
+  - "Apply the three rules of time travel to a single cash flow."
+  - "Compute present value (PV) and future value (FV) given a discount rate r and horizon T."
+  - "Use the Rule of 72 to estimate doubling times in your head."
+prerequisites:
+  - "Algebra: exponents and percentages."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 4"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 4", "TVM"]
+quizSlug: "fin-3610-time-value-of-money"
 draft: false
 ---
 
 import TVMNPV from '@components/viz/TVMNPV';
 
-## Overview
+## A dollar today vs a dollar tomorrow
 
-Three rules of time travel: discount the future, compound the past, never add cash flows from different dates. Compute PV and FV of single cash flows.
+You can earn interest on a dollar you have today. A dollar promised
+next year can't earn interest until you actually receive it. So a
+dollar today is worth more than a dollar tomorrow — even ignoring
+inflation, default risk, and your patience.
 
-## Why it matters
+The exchange rate between dollars at different dates is the **interest
+rate** $r$. Specifically, if the one-year interest rate is $r$:
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 4. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+- **\$1 today** = **\$(1 + r) next year** (compounding forward).
+- **\$1 next year** = **\$1 / (1 + r) today** (discounting back).
 
-## What you'll be able to do
+Everything else in TVM is just iterating this rule across multiple
+periods.
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+## The three rules of time travel
 
-## Interactive
+Berk and DeMarzo state these as three numbered rules. They are easy
+to memorize and impossible to violate without making a finance
+mistake.
+
+**Rule 1.** Only cash flows at the *same* point in time can be
+compared or combined. Adding "\$100 today" to "\$100 in five years"
+is meaningless until you've moved one of them to the other date.
+
+**Rule 2.** To move a cash flow *forward* in time by $n$ periods,
+compound it:
+
+$$
+FV \;=\; C \times (1 + r)^n.
+$$
+
+**Rule 3.** To move a cash flow *backward* in time by $n$ periods,
+discount it:
+
+$$
+PV \;=\; \frac{C}{(1 + r)^n}.
+$$
+
+That's the entire toolkit. Every multi-period NPV calculation is just
+Rules 2 and 3 applied repeatedly and Rule 1 applied to sum the
+results.
+
+## Play with it
 
 <TVMNPV client:load />
+
+Set CF₀ to 0 and the base annual CF to $100 with growth = 0. The
+right-panel "NPV(r)" line shows how PV changes with the discount
+rate. Drag $r$ from 2% to 15% and watch a flat $100-per-year stream's
+PV halve as $r$ doubles.
+
+## A few worked examples
+
+**Example 1.** You'll receive $1,000 in five years. Discount rate is
+6%. What is it worth today?
+
+$$
+PV = \frac{1000}{(1.06)^5} = \frac{1000}{1.3382} \approx \$747.26.
+$$
+
+**Example 2.** You invest $5,000 today at 8% for 10 years (annual
+compounding). How much do you have?
+
+$$
+FV = 5000 \times (1.08)^{10} = 5000 \times 2.1589 \approx \$10,\!795.
+$$
+
+**Example 3.** Your friend offers you $500 today or $600 in three
+years. Which is better if you can earn 5% on safe investments?
+
+Move both to today's dollars:
+- Option A: \$500 (already today).
+- Option B: $600 / (1.05)^3 = 600 / 1.1576 ≈ \$518.30.
+
+Take option B — it's worth about \$18.30 more in today's dollars.
+
+## The Rule of 72
+
+A useful mental shortcut: at interest rate $r$ (in percent), an
+investment doubles in approximately $72 / r$ years.
+
+- At 4%: doubles in 18 years.
+- At 6%: doubles in 12 years.
+- At 9%: doubles in 8 years.
+- At 12%: doubles in 6 years.
+
+This is exact within 2-3% for rates between 4% and 15%. Useful for
+quick sanity checks: "If my mutual fund averages 7%, it should double
+roughly every 10 years."
+
+## When does $r$ change?
+
+In the basic TVM setup, we use a single rate $r$ for the entire
+horizon. In reality interest rates differ by horizon (the yield
+curve, covered next lesson) and by risk (the cost of capital, covered
+in Unit 4). The mechanics of compounding and discounting don't
+change; only the choice of which $r$ to plug in changes.
+
+The discipline: never write down a future cash flow without also
+writing down the date it occurs on. Date-mismatched cash flows are
+the source of nearly every preventable TVM mistake.

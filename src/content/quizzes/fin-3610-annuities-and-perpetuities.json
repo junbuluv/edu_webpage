@@ -1,0 +1,53 @@
+{
+  "slug": "fin-3610-annuities-and-perpetuities",
+  "title": "Annuities and perpetuities",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/annuities-and-perpetuities",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A perpetuity pays $500 per year starting next year. The discount rate is 4%. What is its present value? Answer in dollars to the nearest cent.",
+      "answer": 12500,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "PV = C / r = 500 / 0.04 = 12,500.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "A stock will pay a $3 dividend next year, growing 5% per year forever. The cost of equity is 11%. Using the Gordon growth model, what is the stock worth? Answer in dollars to the nearest cent.",
+      "answer": 50.00,
+      "tolerance": 0.5,
+      "unit": "$",
+      "explanation": "PV = D1 / (r − g) = 3 / (0.11 − 0.05) = 3 / 0.06 = 50.00.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "A 30-year mortgage of $400,000 at a 7% annual rate, monthly compounding (rate per month = 0.07/12). What is the monthly payment? Answer in dollars to the nearest cent.",
+      "answer": 2661.21,
+      "tolerance": 5.0,
+      "unit": "$",
+      "explanation": "Monthly rate = 0.07/12 = 0.005833; N = 360. Payment = 400,000 / [(1 - (1+r)^-N)/r] = 400,000 / 150.31 ≈ 2,661.21.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Which assumption does the Gordon growth model require?",
+      "choices": [
+        "g > r",
+        "g < r",
+        "g = r",
+        "r = 0"
+      ],
+      "correctIndex": 1,
+      "explanation": "If g >= r, the discounted series diverges and PV is infinite (or undefined). The formula PV = C / (r-g) requires g < r.",
+      "points": 1
+    }
+  ]
+}

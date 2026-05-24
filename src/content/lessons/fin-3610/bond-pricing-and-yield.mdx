@@ -3,31 +3,124 @@ title: "Bond Pricing and Yield to Maturity"
 course: fin-3610
 unit: "Time, money, and interest rates"
 order: 8
-summary: "Pricing coupon and zero-coupon bonds as PV of cash flows; defining YTM as the IRR of a bond; the price-yield curve, duration, and convexity."
+summary: "Pricing coupon and zero-coupon bonds as the PV of their cash flows; defining YTM as the IRR of a bond; the price-yield curve, duration, and convexity."
 learningObjectives:
-  - "Price a coupon bond given coupon rate, face value, and YTM."
-  - "Compute YTM given price."
-  - "Use Macaulay and modified duration to approximate price changes from yield changes."
-prerequisites: []
+  - "Price a coupon bond given coupon rate, face value, maturity, and YTM."
+  - "Compute YTM given a bond's price."
+  - "Use modified duration to approximate price changes from yield changes."
+prerequisites:
+  - "Annuity and TVM formulas (prior two lessons)."
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 6"]
+tags: ["fin-3610", "Berk-DeMarzo Ch 6", "bonds", "duration"]
+quizSlug: "fin-3610-bond-pricing-and-yield"
 draft: false
 ---
 
 import BondPriceYield from '@components/viz/BondPriceYield';
 
-## Overview
+## A bond is just an annuity plus a lump sum
 
-Pricing coupon and zero-coupon bonds as PV of cash flows; defining YTM as the IRR of a bond; the price-yield curve, duration, and convexity.
+A standard coupon bond has three numbers:
 
-## Why it matters
+- **Face value** $F$ (also called par or principal), typically $1,\!000 for US corporates.
+- **Coupon rate** $c$ (annual rate, paid as $c \cdot F / 2$ semiannually in the US; we'll use annual coupons here for simplicity).
+- **Maturity** $T$ years.
 
-This lesson maps to Berk & DeMarzo *Corporate Finance* 6e, Chapter 6. The decisions covered here recur in nearly every later unit: every valuation, capital-structure, and capital-budgeting question reduces to applying one or more of the ideas introduced here.
+It pays $c \cdot F$ each year for $T$ years, plus $F$ at maturity.
+Its price is the PV of those cash flows at the yield to maturity $y$:
 
-## What you'll be able to do
+$$
+P = \sum_{t=1}^{T} \frac{c \cdot F}{(1+y)^t} + \frac{F}{(1+y)^T}.
+$$
 
-After completing this lesson and its practice problems, you should be able to execute each learning objective above on a textbook problem set or a real-world short case. Worked examples follow the Berk-DeMarzo notation conventions; the interactive components on the page let you stress-test the model with sliders.
+The first term is a coupon annuity; the second is a lump-sum face
+value. Both formulas you've already seen.
 
-## Interactive
+## YTM = IRR of a bond
+
+The **yield to maturity** is the single discount rate that makes
+the bond's PV equal to its current market price. It's the bond
+investor's IRR if held to maturity, assuming all coupons are
+reinvested at $y$.
+
+Given a price, you solve for $y$ — usually iteratively, or with a
+spreadsheet's RATE function.
+
+## Three regimes
+
+| Coupon vs YTM | Price vs Face | Name |
+|---|---|---|
+| $c > y$ | $P > F$ | trading at a **premium** |
+| $c = y$ | $P = F$ | trading at **par** |
+| $c < y$ | $P < F$ | trading at a **discount** |
+
+A bond issued at par at a 5% coupon, then yields rise to 7%: the price
+falls below par. Why would anyone pay par for a 5% coupon when the
+market wants 7%? They wouldn't — so the price drops to make the
+*total* return (coupons + capital gain at maturity) equal 7%.
+
+## Play with it
 
 <BondPriceYield client:load />
+
+Three things to confirm:
+
+1. **Price-yield is downward-sloping and convex.** As yield rises,
+   price falls — at a decreasing rate (the convexity).
+2. **Longer maturity = steeper curve.** A 30-year bond's price is
+   far more sensitive to yield changes than a 2-year bond's.
+3. **Zero-coupon bonds are the most sensitive of all.** Toggle the
+   "zero-coupon" checkbox and watch the curve get even steeper —
+   100% of the cash flow comes at maturity, so duration equals
+   maturity.
+
+## Duration: how price-sensitive
+
+Two duration concepts you should know:
+
+**Macaulay duration** $D_{\text{Mac}}$ is the weighted-average time
+until you receive the bond's cash flows, with weights equal to each
+cash flow's share of the bond's total PV:
+
+$$
+D_{\text{Mac}} = \frac{1}{P} \sum_{t=1}^{T} t \cdot \frac{C_t}{(1+y)^t}.
+$$
+
+**Modified duration** $D_{\text{mod}} = D_{\text{Mac}} / (1 + y)$ is
+the one that's actually useful for risk management. It estimates the
+percentage price change for a small yield change:
+
+$$
+\frac{\Delta P}{P} \approx -D_{\text{mod}} \cdot \Delta y.
+$$
+
+Example. A 10-year bond at 5% YTM with a 5% coupon has Macaulay
+duration ≈ 8.1 years and modified duration ≈ 7.7. If yields jump
+50 bps (from 5% to 5.5%), the bond price falls by approximately
+$7.7 \times 0.005 = 3.85\%$.
+
+This is the **interest-rate risk** banks and bond funds manage every
+day. Silicon Valley Bank's failure in 2023 was largely a duration
+mismatch story — they held long-duration bonds and Treasuries, and
+when yields spiked in 2022-2023, the mark-to-market value of those
+holdings fell sharply, eroding their capital.
+
+## Why convexity matters
+
+Modified duration is a *linear* approximation. For small yield
+moves it's accurate; for large moves, the price-yield curve is
+visibly bent, so the linear approximation under-estimates how much
+price falls when yields rise and how much it gains when yields
+fall. The bend is **convexity**, and it's a positive thing for the
+bondholder — they benefit asymmetrically.
+
+For most coursework you can treat convexity as a second-order
+correction; for real-world risk management of large portfolios, it's
+material.
+
+## Spreads come next
+
+So far we've assumed a single risk-free yield $y$. Corporate bonds
+trade at higher yields than Treasuries — the difference is the
+**credit spread**, which compensates for default risk. That's the
+subject of the next lesson.

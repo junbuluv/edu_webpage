@@ -1,0 +1,56 @@
+{
+  "slug": "fin-3610-bond-pricing-and-yield",
+  "title": "Bond pricing and yield to maturity",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/bond-pricing-and-yield",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "A bond's coupon rate is 5% and its YTM is 7%. The bond is trading at:",
+      "choices": ["A premium (P > F)", "Par (P = F)", "A discount (P < F)", "Cannot tell without knowing maturity"],
+      "correctIndex": 2,
+      "explanation": "When the market demands a higher yield than the coupon offers, the price must drop below face so total return matches YTM. c < y → discount.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "A 5-year bond with face value $1,000, 6% annual coupon, YTM 5%. What is its price? Answer in dollars to the nearest cent.",
+      "answer": 1043.29,
+      "tolerance": 1.0,
+      "unit": "$",
+      "explanation": "P = 60 × [(1 - 1.05^-5)/0.05] + 1000/1.05^5 = 60 × 4.3295 + 783.53 = 259.77 + 783.53 ≈ 1,043.30.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "A 10-year bond has modified duration of 7.5. If yields jump 50 bps (from 5.0% to 5.5%), approximately what happens to price?",
+      "choices": [
+        "Falls about 0.4%",
+        "Falls about 3.75%",
+        "Rises about 3.75%",
+        "Falls about 7.5%"
+      ],
+      "correctIndex": 1,
+      "explanation": "ΔP/P ≈ −D_mod × Δy = −7.5 × 0.005 = −3.75%. The negative sign means price falls when yield rises.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Why was interest-rate risk such a problem for Silicon Valley Bank in 2023?",
+      "choices": [
+        "They had short-duration assets and long-duration liabilities",
+        "They had long-duration assets that lost mark-to-market value when yields spiked in 2022-2023, eroding their capital base",
+        "They held no Treasuries at all",
+        "Their assets and liabilities were perfectly matched"
+      ],
+      "correctIndex": 1,
+      "explanation": "A classic duration mismatch: long-duration assets (Treasuries, MBS) fell sharply in price as yields rose, while deposit liabilities did not appreciate to offset.",
+      "points": 1
+    }
+  ]
+}

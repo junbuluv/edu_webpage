@@ -1,0 +1,57 @@
+{
+  "slug": "fin-3610-interest-rates-and-term-structure",
+  "title": "Interest rates and the term structure",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/interest-rates-and-term-structure",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A credit card has an APR of 18% with monthly compounding. What is the EAR? Answer as a percent to two decimals.",
+      "answer": 19.56,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "EAR = (1 + 0.18/12)^12 - 1 = (1.015)^12 - 1 ≈ 0.1956 = 19.56%.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Nominal interest rate i = 6%, inflation π = 3%. Using the approximate Fisher equation r ≈ i − π, what is the approximate real rate? Answer as a percent.",
+      "answer": 3.0,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "r ≈ i − π = 6% − 3% = 3%. (Exact: (1.06/1.03) − 1 ≈ 2.91%.)",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Why has yield-curve inversion historically been associated with recession?",
+      "choices": [
+        "Inversion directly causes a recession",
+        "It typically reflects Fed tightening pushing short rates up while markets expect lower long-run growth and inflation",
+        "It reflects an SEC rule change",
+        "Inversion lowers consumer confidence directly"
+      ],
+      "correctIndex": 1,
+      "explanation": "An inverted curve is a marker, not a cause: aggressive Fed tightening at the short end + lower long-run growth/inflation expectations at the long end together produce the shape, and both forces tend to precede recessions.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "If 2022 had nominal Treasury yields around 4% and US inflation near 9%, what was approximately true of real returns on cash?",
+      "choices": [
+        "Positive and large, around +5%",
+        "Roughly zero",
+        "Negative, around −5%",
+        "Equal to the nominal rate"
+      ],
+      "correctIndex": 2,
+      "explanation": "r ≈ i − π = 4% − 9% = −5%. Cash savers lost purchasing power even with positive nominal yields.",
+      "points": 1
+    }
+  ]
+}
