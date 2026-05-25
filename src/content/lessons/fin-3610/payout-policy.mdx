@@ -16,6 +16,8 @@ quizSlug: "fin-3610-payout-policy"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## Two ways to return cash to shareholders
 
 A firm with excess cash can return it via:
@@ -117,6 +119,32 @@ Drivers:
 Total US corporate payouts (dividends + buybacks) in 2024 exceeded
 \$1.5 trillion. That's roughly 6% of US market cap returned to
 shareholders annually.
+
+<BarFigure
+  client:load
+  data={[
+    { fy: 'FY14', dividends: 11.1, buybacks: 45.0 },
+    { fy: 'FY15', dividends: 11.6, buybacks: 36.1 },
+    { fy: 'FY16', dividends: 12.2, buybacks: 29.7 },
+    { fy: 'FY17', dividends: 12.8, buybacks: 33.5 },
+    { fy: 'FY18', dividends: 13.7, buybacks: 73.1 },
+    { fy: 'FY19', dividends: 14.1, buybacks: 66.9 },
+    { fy: 'FY20', dividends: 14.1, buybacks: 72.4 },
+    { fy: 'FY21', dividends: 14.5, buybacks: 86.0 },
+    { fy: 'FY22', dividends: 14.8, buybacks: 89.4 },
+    { fy: 'FY23', dividends: 15.0, buybacks: 77.6 },
+    { fy: 'FY24', dividends: 15.2, buybacks: 94.9 },
+  ]}
+  xKey="fy"
+  series={[
+    { key: 'dividends', name: 'Dividends ($B)', color: '#4572a7' },
+    { key: 'buybacks', name: 'Buybacks ($B)', color: '#aa4643' },
+  ]}
+  yAxisLabel="USD billions"
+  caption="Apple's annual dividends and share repurchases, fiscal years 2014–2024. The dividend line grows slowly and steadily (~3% per year); the buyback line is several times larger and more volatile. Across this decade Apple returned nearly $800B to shareholders, with over 80% via buybacks — the textbook example of the post-1982 buyback revolution."
+  credit="Apple Inc. 10-K cash flow statements via SEC EDGAR"
+  creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
+/>
 
 ## A worked comparison
 

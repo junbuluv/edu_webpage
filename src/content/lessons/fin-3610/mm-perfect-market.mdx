@@ -16,6 +16,8 @@ quizSlug: "fin-3610-mm-perfect-market"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## The starting question
 
 Should a firm be financed mostly with debt, mostly with equity, or
@@ -79,6 +81,23 @@ What it doesn't say:
 But MM I matters because it tells us *where* to look for capital-
 structure effects: in the frictions. If a corporate-finance change
 adds value, ask which MM assumption it relaxes.
+
+<BarFigure
+  client:load
+  data={[
+    { firm: 'Berkshire', de: 0.2 },
+    { firm: 'ExxonMobil', de: 0.3 },
+    { firm: 'Microsoft', de: 0.4 },
+    { firm: 'Walmart', de: 0.6 },
+    { firm: 'JPMorgan', de: 1.4 },
+    { firm: 'Apple', de: 1.5 },
+  ]}
+  xKey="firm"
+  series={[{ key: 'de', name: 'Debt / Equity (book)', color: '#4572a7' }]}
+  yAxisLabel="D/E ratio"
+  caption="Book debt-to-equity ratios for six large US firms (approximate end-of-2024 values). MM I says capital structure shouldn't affect total firm value — yet real firms in the same broad market choose wildly different leverage. The 7× spread from Berkshire (~0.2) to Apple (~1.5) is the empirical puzzle the next three lessons (taxes, distress, signaling) work to explain."
+  credit="Compiled from 10-K filings via SEC EDGAR"
+/>
 
 ## MM Proposition II
 
