@@ -1,13 +1,9 @@
 import type { APIRoute } from 'astro';
 import { isCourseSlug } from '@lib/courses';
-import { listAvailableCourses } from '@lib/dashboard';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   if (!locals.supabase || !locals.user) {
-    return new Response(JSON.stringify({ ok: false, reason: 'unauthenticated' }), {
-      status: 401,
-      headers: { 'content-type': 'application/json' },
-    });
+    return json({ ok: false, reason: 'unauthenticated' }, 401);
   }
 
   const body = await safeJson(request);
@@ -16,10 +12,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ ok: false, reason: 'invalid_course_slug' }, 400);
   }
 
-  const available = await listAvailableCourses(locals.supabase, locals.user.id);
-  if (!available.some((c) => c.slug === slug)) {
-    return json({ ok: false, reason: 'not_accessible' }, 403);
-  }
+  // Any course in the catalog is a valid active course — students can
+  // browse non-enrolled courses too. The accessibility gate previously
+  // here was overly restrictive.
 
   const { error } = await locals.supabase
     .from('profiles')
@@ -27,7 +22,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .eq('id', locals.user.id);
 
   if (error) {
-    return json({ ok: false, reason: 'update_failed' }, 500);
+    // Surface Supabase's actual error so callers (and the user) can
+    // distinguish missing-column from RLS denial from a network blip.
+    return json(
+      {
+        ok: false,
+        reason: 'update_failed',
+        detail: error.message,
+        code: error.code,
+        hint: error.hint,
+      },
+      500,
+    );
   }
 
   return json({ ok: true, redirectTo: `/dashboard?course=${slug}` });

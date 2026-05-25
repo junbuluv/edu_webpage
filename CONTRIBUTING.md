@@ -61,15 +61,24 @@ Email this verbatim to a new collaborator:
       - PUBLIC_SITE_URL              http://localhost:4321
 8.  In your Supabase SQL Editor, run:
       alter database postgres set app.pii_hmac_secret = '<same as PII_HMAC_SECRET>';
-    (If Supabase rejects this, it's the hosted-Postgres permission case — the
-    trigger gracefully falls back to NULL email_hmac. Proceed.)
-9.  npm run dev
-10. http://localhost:4321 should load. Hero typing effect should run.
-11. Sign up at /auth/signup; if Supabase's email goes to spam, confirm via SQL:
+    (If Supabase rejects this with 42501 permission denied, it's the
+    hosted-Postgres restriction — the trigger gracefully falls back to NULL
+    email_hmac. Proceed without it.)
+9.  In Supabase Dashboard, configure Authentication URLs so signup emails
+    redirect back to your localhost:
+      - Authentication → URL Configuration → Site URL: http://localhost:4321
+      - Authentication → URL Configuration → Redirect URLs → Add URL:
+          http://localhost:4321/auth/callback
+    Without this, the email link in the confirmation message returns
+    "redirect_url not allowed."
+10. npm run dev
+11. http://localhost:4321 should load. Hero typing effect should run.
+12. Sign up at /auth/signup; if Supabase's email goes to spam (common on
+    free tier with university addresses), confirm via SQL:
       update auth.users set email_confirmed_at = now() where email = 'you@example.com';
-12. Read CLAUDE.md (especially the numbered Conventions list and "Hosted
+13. Read CLAUDE.md (especially the numbered Conventions list and "Hosted
     Supabase gotchas") and the rest of this CONTRIBUTING.md.
-13. Pick a starter task. Branch names: feat/<slug>, fix/<slug>, lesson/<slug>,
+14. Pick a starter task. Branch names: feat/<slug>, fix/<slug>, lesson/<slug>,
     chore/<slug>. One topic per PR. Branch protection requires 1 review and
     passing CI before merge.
 ```

@@ -37,6 +37,17 @@ const data = activeSlug ? await getDashboardData(supabase, user.id, activeSlug) 
 
     {data && (
       <div class="mt-8 space-y-10">
+        {data.enrolledSemester === null && (
+          <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+            <p>
+              <strong>Browse mode.</strong> You're not enrolled in this course.
+              You can read lessons and try the practice quizzes, but
+              enrollment-only features (proctored quizzes, instructor support,
+              roster-scoped exam administrations) won't appear until your
+              instructor adds you to the roster.
+            </p>
+          </div>
+        )}
         <CourseHeaderCard
           course={data.course}
           instructors={data.instructors}

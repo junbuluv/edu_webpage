@@ -60,10 +60,11 @@ export async function resolveActiveCourse(
       .filter(isCourseSlug),
   );
   const activitySlugs = await fetchActivityCourseSlugs(supabase, user.id);
+  // Any slug that round-trips isCourseSlug is acceptable now (browse mode).
   const accessible = new Set<CourseSlug>([...enrolledSlugs, ...activitySlugs]);
 
-  // 1. Honor explicit ?course=X if accessible.
-  if (courseParam && isCourseSlug(courseParam) && accessible.has(courseParam)) {
+  // 1. Honor explicit ?course=X for any valid course slug.
+  if (courseParam && isCourseSlug(courseParam)) {
     void persistActiveCourse(supabase, user.id, courseParam);
     return { kind: 'render', courseSlug: courseParam };
   }
@@ -76,7 +77,7 @@ export async function resolveActiveCourse(
     .maybeSingle();
 
   const stored = profile?.active_course_slug;
-  if (stored && isCourseSlug(stored) && accessible.has(stored)) {
+  if (stored && isCourseSlug(stored)) {
     return { kind: 'redirect', to: `/dashboard?course=${stored}` };
   }
 
@@ -91,40 +92,34 @@ export async function resolveActiveCourse(
 }
 
 /**
- * Lists every course the user can switch to, with enrollment status,
- * ordered enrolled-first then activity-only.
+ * Lists every course in the catalog, annotated with whether the user
+ * is enrolled. Used by the global course switcher so students can browse
+ * any course (not just the ones they're enrolled in). Sorted by the
+ * course `order` field, alphabetical fallback on code.
  */
 export async function listAvailableCourses(
   supabase: AnyClient,
   userId: string,
 ): Promise<AvailableCourse[]> {
   const enrollments = await fetchEnrollments(supabase, userId);
-  const activitySlugs = await fetchActivityCourseSlugs(supabase, userId);
   const all = await getCollection('courses');
 
   const enrolledMap = new Map<string, string>();
   for (const e of enrollments) enrolledMap.set(e.course_slug, e.semester);
 
-  const result: AvailableCourse[] = [];
-  for (const entry of all) {
-    const slug = entry.data.slug;
-    const enrolled = enrolledMap.has(slug);
-    const hasActivity = activitySlugs.has(slug);
-    if (!enrolled && !hasActivity) continue;
-    result.push({
-      slug,
-      code: entry.data.code,
-      title: entry.data.title,
-      accentColor: entry.data.accentColor,
-      order: entry.data.order,
-      enrolled,
-      semester: enrolledMap.get(slug) ?? null,
-    });
-  }
+  const result: AvailableCourse[] = all.map((entry) => ({
+    slug: entry.data.slug,
+    code: entry.data.code,
+    title: entry.data.title,
+    accentColor: entry.data.accentColor,
+    order: entry.data.order,
+    enrolled: enrolledMap.has(entry.data.slug),
+    semester: enrolledMap.get(entry.data.slug) ?? null,
+  }));
 
   result.sort((a, b) => {
-    if (a.enrolled !== b.enrolled) return a.enrolled ? -1 : 1;
-    return a.order - b.order;
+    if (a.order !== b.order) return a.order - b.order;
+    return a.code.localeCompare(b.code);
   });
   return result;
 }
