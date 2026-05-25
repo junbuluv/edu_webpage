@@ -1,0 +1,44 @@
+{
+  "slug": "fin-3610-unit-6-options-special",
+  "title": "Workshop: Options and Special Topics",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/financial-options",
+  "summary": "Unit 6 wrap-up discussion: financial options, real options, M&A, sensitivity/scenario analysis, risk management, credit risk.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Put-call parity: C + K/(1+r_f)^T = P + S_0. Verify with S_0 = $100, K = $100, T = 1y, r_f = 5%, C = $8. What's the implied put price? If the market quotes P = $5, sketch the arbitrage trade.",
+      "notes": "P = 8 + 100/1.05 - 100 ≈ $3.24. Market overprices put. Arbitrage: sell market put ($5), buy call ($8), short stock ($100), lend $95.24 to receive $100 at T. Net cash today: 5 - 8 + 100 - 95.24 = $1.76 of riskless profit."
+    },
+    {
+      "id": "q2",
+      "prompt": "Black-Scholes inputs: S_0, K, T, r_f, σ. Which is hardest to observe in real markets? Why does that matter for option pricing in practice?",
+      "notes": "σ (volatility) — others are essentially observable. Practitioners use implied volatility from current option prices, often graph it (the 'volatility smile') and use it to price related options. Most pricing models that fail in crashes fail because σ assumptions break."
+    },
+    {
+      "id": "q3",
+      "prompt": "Real option example: a drug company can invest $100M now in a development trial, OR wait 1 year. Next year there's a 50% chance the trial is a blockbuster (PV $300M) and 50% it's a flop (PV $50M). Discount rate 10%. NPV with deferral vs immediate?",
+      "notes": "Immediate: -100 + 0.5×300 + 0.5×50 = +$75M, or PV = (175-100)/1.10 = $59M. Defer: only invest in blockbuster state. NPV = 0.5 × (-100+300)/1.10 + 0.5×0 = $90.9M. Option to defer worth $31.9M extra."
+    },
+    {
+      "id": "q4",
+      "prompt": "M&A premium and synergy: Buyer offers $60/share for a target trading at $50. Implied premium = 20%. What synergies would justify this? When does the buyer's stock fall on the announcement?",
+      "notes": "Synergies must exceed $10/share × shares outstanding × buyer ownership stake. Buyer stock falls if market thinks they overpaid (most acquisitions destroy buyer value historically). Stock rises if synergies look real and management's track record is good."
+    },
+    {
+      "id": "q5",
+      "prompt": "Sensitivity vs scenario analysis: define each. Which would you use for a discounted cash flow on a new manufacturing plant — and why?",
+      "notes": "Sensitivity: vary one input at a time. Scenario: vary correlated inputs together (e.g., 'recession' = lower revenue + higher discount rate + lower terminal growth). For a plant: scenario, because the inputs move together with macro conditions."
+    },
+    {
+      "id": "q6",
+      "prompt": "Credit risk approximation: spread ≈ p × (1 - δ) where p = default probability, δ = recovery rate. A bond with 2% annual default probability and 40% recovery — what's the fair spread? Real-world spreads are higher; why?",
+      "notes": "Spread ≈ 0.02 × 0.6 = 1.2% = 120 bps. Real spreads higher due to: (1) risk premium beyond expected loss, (2) liquidity premium, (3) regulatory capital costs on corporate bonds, (4) recovery rates are uncertain and right-tail dependent."
+    },
+    {
+      "id": "q7",
+      "prompt": "Risk management: a firm hedges 80% of its FX exposure with forwards. What's the residual risk? When does it make sense NOT to hedge?",
+      "notes": "Residual: 20% directional exposure + counterparty risk on the forward + basis risk (if the hedge doesn't match the exposure perfectly). Don't hedge when: (1) shareholders can diversify the exposure themselves, (2) hedging costs > expected benefit, (3) the exposure is a strategic positioning (e.g., commodity producer)."
+    }
+  ]
+}

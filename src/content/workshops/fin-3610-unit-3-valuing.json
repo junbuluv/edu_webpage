@@ -1,0 +1,39 @@
+{
+  "slug": "fin-3610-unit-3-valuing",
+  "title": "Workshop: Valuing Projects and Firms",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/npv-decision-rule",
+  "summary": "Unit 3 discussion: NPV, IRR, capital budgeting, stock valuation, multiples. Tie back to interactive cashflow-waterfall and DDM tools.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Two mutually exclusive projects: A has NPV $100 and IRR 30%. B has NPV $1,000 and IRR 15%. Cost of capital 10%. Which does your group pick, and why?",
+      "notes": "B. NPV maximizes shareholder value. IRR can mislead on scale: project A could only invest a tiny amount; project B creates 10× the absolute value. Use IRR for ranking *only* when projects are scaled comparably and unconventional cash flow patterns don't reverse the signs."
+    },
+    {
+      "id": "q2",
+      "prompt": "Sketch a cash-flow pattern with non-conventional sign changes (e.g., -100, 300, -250). What's the IRR? Why does NPV remain a reliable signal?",
+      "notes": "Multiple IRRs possible (the polynomial has multiple roots). NPV gives one answer at any given r. Use modified IRR or NPV decision rule directly to avoid the trap."
+    },
+    {
+      "id": "q3",
+      "prompt": "Two analysts disagree: Analyst A uses 8% discount rate (the firm's WACC), Analyst B uses 12% (industry average for risky projects). Same FCF stream. Argue when each is right.",
+      "notes": "WACC if project has firm-average risk. Industry-adjusted rate if project risk differs (e.g., expanding into a riskier line). Mismatched discount rate is the most common DCF error in practice — should use *project* risk, not firm risk."
+    },
+    {
+      "id": "q4",
+      "prompt": "Apply the Gordon growth model to a firm with $2 dividend, 4% growth, 10% cost of equity. Why does increasing g by 1% have an outsized effect on price?",
+      "notes": "P = D/(r-g). At g=4%: $33.33. At g=5%: $40. ~20% jump in price for a 1% growth bump. The denominator (r-g) is small, so price is highly sensitive — biggest critique of single-stage DDM in practice."
+    },
+    {
+      "id": "q5",
+      "prompt": "Valuation by multiples (P/E, EV/EBITDA): name three pitfalls of relative valuation. When is the method most reliable?",
+      "notes": "Pitfalls: (1) cherry-picking comparables, (2) accounting differences across firms, (3) industry-wide mispricing (everyone is overvalued). Most reliable: mature industries with many similar firms, stable margins, and comparable capital structures."
+    },
+    {
+      "id": "q6",
+      "prompt": "A startup has negative FCF for years 1-5 and turns FCF-positive in year 6. Show how the terminal value typically dominates DCF in this case. What does that mean for sensitivity?",
+      "notes": "Terminal value at year 5 = FCF₆/(r-g) discounted back 5 periods. Often 60-80% of total PV. DCF is sensitive to terminal assumptions (r, g) more than near-term forecasts — a key risk for startup valuations."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "slug": "fin-3610-unit-4-risk-return",
+  "title": "Workshop: Risk and Return",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/capm-and-sml",
+  "summary": "Unit 4 group discussion: portfolio statistics, the efficient frontier, CAPM, factor models, and cost of capital. Use the CAPM/SML chart to anchor the conversation.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Two stocks: A with σ=30%, B with σ=20%, correlation 0.3. 50-50 portfolio. Calculate portfolio σ. Why isn't it just 25%?",
+      "notes": "σ² = 0.25 × 0.09 + 0.25 × 0.04 + 2 × 0.5 × 0.5 × 0.3 × 0.3 × 0.2 = 0.0325 + 0.018 = 0.0505. σ ≈ 22.5%. Diversification: less than the average due to imperfect correlation. If ρ = 1, σ = 25% exactly."
+    },
+    {
+      "id": "q2",
+      "prompt": "Sharpe ratio interpretation: portfolio P has SR = 0.4. Portfolio Q has SR = 0.6. Risk-free rate is 4%. If you can borrow/lend at the risk-free rate, which is the better risky portfolio? Why?",
+      "notes": "Q — higher SR. With borrowing/lending you can combine the risk-free asset with Q at any risk level you want and dominate any combination involving P. Optimal risky portfolio is always max-Sharpe."
+    },
+    {
+      "id": "q3",
+      "prompt": "Define beta. If a stock has β = 1.4, what does it mean concretely? What does a negative beta look like in practice?",
+      "notes": "β = Cov(R_i, R_m)/Var(R_m). β=1.4 means when market rises 1%, stock rises ~1.4% on average. Negative β: stock that goes up when market falls — rare; gold miners sometimes, defensive utilities sometimes."
+    },
+    {
+      "id": "q4",
+      "prompt": "CAPM predicted return for a stock with β = 1.2, R_f = 4.5%, equity premium 5.5%. The stock's actual realized return last year was 14%. What's the 'alpha'? Is the stock 'beating the market'?",
+      "notes": "Predicted = 4.5 + 1.2 × 5.5 = 11.1%. Alpha = 14 - 11.1 = +2.9 pp. One year isn't statistically meaningful — alpha needs many periods to distinguish from luck. Hedge funds report alpha but most of it is statistical noise on small samples."
+    },
+    {
+      "id": "q5",
+      "prompt": "CAPM has been heavily criticized empirically. Name two factor models that extend or replace it. What 'anomalies' did they explain?",
+      "notes": "Fama-French 3-factor (market, size, value) explains size premium and value premium. Fama-French 5-factor adds profitability and investment. Carhart 4-factor adds momentum. These came from observed return patterns not captured by CAPM beta alone."
+    },
+    {
+      "id": "q6",
+      "prompt": "Cost of equity for a firm: which is more sensitive to estimation error — beta or the equity risk premium? How would you defend your DCF when challenged?",
+      "notes": "Both matter; ERP is usually more sensitive (4% vs 6% range matters more than β=1.1 vs 1.2). Defense: sensitivity tables showing valuation across plausible ERP and β values; cross-check via industry analyst consensus and reverse-DCF (what r makes the current price fair)."
+    },
+    {
+      "id": "q7",
+      "prompt": "WACC ≠ cost of equity. Walk through the components. Why use WACC for project NPV instead of just r_E?",
+      "notes": "WACC = (E/V) × r_E + (D/V) × r_D × (1-t). Captures that debt is cheaper (lower r_D, tax shield). Using only r_E would underprice debt-financed projects. Use WACC when the project has the firm's average capital structure."
+    }
+  ]
+}

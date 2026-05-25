@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-phillips-curve",
+  "title": "Workshop: Phillips Curve and the Output Gap",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/phillips-curve",
+  "summary": "Small-group work on the short-run vs long-run Phillips curve. Use the chart presets (1970s stagflation, 2010s post-crisis, 2021-22 inflation) as discussion anchors.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Friedman's natural-rate hypothesis: in one sentence, what changes about the Phillips curve when you move from short run to long run?",
+      "notes": "Short run: trade-off (lower u, higher π). Long run: no trade-off; π adjusts to whatever AD implies; u returns to u*. Expectations are the bridge."
+    },
+    {
+      "id": "q2",
+      "prompt": "In 2021-22 the US saw unemployment fall to ~3.5% while inflation rose to 9%. Which Phillips curve story fits best: a movement along, a shift of, or a breakdown?",
+      "notes": "Mix of both. AD-driven move along the SR Phillips curve (low u, high π) plus a leftward shift from supply shocks (raises π at any u). The 'breakdown' framing is too strong — Phillips relations still held conditionally."
+    },
+    {
+      "id": "q3",
+      "prompt": "Define NAIRU. Does NAIRU drift over time, or is it a structural constant? Give one mechanism that could move it.",
+      "notes": "Drifts. Mechanisms: demographic shifts (younger workforce → higher u*), shifting bargaining power, hysteresis (long-term unemployment becomes structural), labor market matching efficiency. Estimates around 4-5% but contested."
+    },
+    {
+      "id": "q4",
+      "prompt": "If the Fed credibly commits to a 2% inflation target, what does the long-run Phillips curve imply about the cost of a disinflation?",
+      "notes": "If expectations adjust instantly, disinflation is costless. With sticky expectations (the realistic case), there's a sacrifice ratio: ~2-5 percentage-point-years of unemployment per point of disinflation. Volcker's experience: 2-3 years of high u to bring π down ~10 pp."
+    },
+    {
+      "id": "q5",
+      "prompt": "Sketch a group consensus diagram of the 1970s stagflation in (u, π) space. Where does the SRPC sit at the start and end of the decade? What's the role of expectations?",
+      "notes": "1970-71: classical SRPC, moderate u and π. 1973-75: oil shock shifts SRPC up. By 1979: expected inflation embedded, SRPC up further. Volcker pushes economy along to high-u/lowering-π and then SRPC drifts back down as expectations re-anchor."
+    },
+    {
+      "id": "q6",
+      "prompt": "Modern central banks watch expectations measures (TIPS breakevens, survey-based forecasts). Why are these arguably more important than current π for predicting future π?",
+      "notes": "Expectations enter the SR Phillips curve directly: π = πᵉ + (other terms). If πᵉ stays anchored at target despite a price shock, the shock is one-off and reverses. If πᵉ drifts up, the shock embeds into wages and prices and persists."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-loanable-funds",
+  "title": "Workshop: Loanable Funds Market and Crowding Out",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/loanable-funds",
+  "summary": "Build group intuition around the supply and demand of loanable funds: who's supplying, who's borrowing, and how policy shocks shift the equilibrium.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Who supplies loanable funds and who demands them? Name three actors on each side. What price clears the market?",
+      "notes": "Suppliers: households (saving), foreign savers (capital inflows), firms (retained earnings). Demanders: firms (investment), government (deficit), households (mortgages). Price = real interest rate."
+    },
+    {
+      "id": "q2",
+      "prompt": "Congress passes a $3.4T deficit-financed spending bill. Predict the effect on the loanable funds equilibrium: which curve shifts, in what direction, and what happens to r* and Q*?",
+      "notes": "Supply shifts left (or equivalently: demand for funds shifts right, since government is now borrowing more). r* rises. Q* in private investment falls — that's the crowding-out effect."
+    },
+    {
+      "id": "q3",
+      "prompt": "Argue: in the very short run, can the loanable funds market clear at any interest rate? What's special about the long-run equilibrium?",
+      "notes": "Short run: sticky prices, sticky expectations, partial-equilibrium effects can let q clear at non-equilibrium r. Long run: r adjusts to balance S and I globally. The long-run real rate is pinned by structural factors (TFP growth, savings rate, demographics)."
+    },
+    {
+      "id": "q4",
+      "prompt": "In the lesson chart, find a setting that produces a 'paradox of thrift'-like outcome: households save more, but aggregate investment doesn't rise. What's the mechanism?",
+      "notes": "If everyone saves more at once during a recession, AD falls → output falls → income falls → savings end up flat or lower. In Keynesian-cross terms, the equilibrium S = I is reached through Y, not r. Loanable funds is partial — misses the multiplier."
+    },
+    {
+      "id": "q5",
+      "prompt": "Government runs surpluses (Clinton late 1990s). How does this affect the loanable funds market? Are private investors better off?",
+      "notes": "Public saving rises → S shifts right → r* falls → private investment rises. The crowding-out reverses; surpluses 'crowd in' investment. This is one of the textbook arguments for fiscal discipline in good times."
+    },
+    {
+      "id": "q6",
+      "prompt": "Foreign investors hold ~$8T of US Treasuries. What does that mean for the loanable funds diagram applied to the US economy? What happens if foreign appetite suddenly halves?",
+      "notes": "Foreign demand makes the supply curve much flatter — keeps US rates low. If foreign appetite halves: supply curve becomes steeper, r* rises sharply, private investment crowded out. The 'savings glut' hypothesis (Bernanke) attributes low pre-2008 rates partly to foreign supply."
+    }
+  ]
+}

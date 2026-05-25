@@ -46,23 +46,7 @@ export interface WorkshopStaffMetrics {
   openNow: number;
 }
 
-export interface ExamStaffMetrics {
-  kind: 'exam';
-  rangeStartISO: string | null;
-  totalAttempts: number;
-  avgScore: number | null;
-  recent: Array<{
-    administration_id: string;
-    exam_slug: string;
-    user_id: string;
-    score: number | null;
-    max_score: number | null;
-    submitted_at: string;
-  }>;
-  openNow: number;
-}
-
-export type StaffMetrics = WorkshopStaffMetrics | ExamStaffMetrics | null;
+export type StaffMetrics = WorkshopStaffMetrics | null;
 
 export async function loadStaffMetrics(
   supabase: AnyClient,
@@ -71,11 +55,10 @@ export async function loadStaffMetrics(
 ): Promise<StaffMetrics> {
   const startISO = rangeStartISO(range);
 
-  if (courseSlug === 'eco-1002') {
+  // Both courses now use workshops; exam-based metrics retained as a
+  // helper in case a future course uses exams.
+  if (courseSlug === 'eco-1002' || courseSlug === 'fin-3610') {
     return loadWorkshopMetrics(supabase, courseSlug, startISO);
-  }
-  if (courseSlug === 'fin-3610') {
-    return loadExamMetrics(supabase, courseSlug, startISO);
   }
   return null;
 }
@@ -138,62 +121,3 @@ async function loadWorkshopMetrics(
   };
 }
 
-async function loadExamMetrics(
-  supabase: AnyClient,
-  courseSlug: CourseSlug,
-  startISO: string | null,
-): Promise<ExamStaffMetrics> {
-  const { data: admins } = await supabase
-    .from('exam_administrations')
-    .select('id, exam_slug, opens_at, closes_at')
-    .eq('course_slug', courseSlug);
-  const adminIds = (admins ?? []).map((a) => a.id);
-  const adminById = new Map((admins ?? []).map((a) => [a.id, a]));
-
-  let attempts: Array<{
-    administration_id: string;
-    user_id: string;
-    score: number | null;
-    max_score: number | null;
-    submitted_at: string | null;
-  }> = [];
-  if (adminIds.length > 0) {
-    let query = supabase
-      .from('exam_attempts')
-      .select('administration_id, user_id, score, max_score, submitted_at')
-      .in('administration_id', adminIds)
-      .not('submitted_at', 'is', null)
-      .order('submitted_at', { ascending: false });
-    if (startISO) query = query.gte('submitted_at', startISO);
-    const { data } = await query;
-    attempts = data ?? [];
-  }
-
-  const validScores = attempts
-    .filter((a) => a.max_score != null && a.max_score > 0 && a.score != null)
-    .map((a) => (a.score as number) / (a.max_score as number));
-  const avgScore = validScores.length
-    ? validScores.reduce((s, v) => s + v, 0) / validScores.length
-    : null;
-
-  const now = Date.now();
-  const openNow = (admins ?? []).filter(
-    (a) => Date.parse(a.opens_at) <= now && now <= Date.parse(a.closes_at),
-  ).length;
-
-  return {
-    kind: 'exam',
-    rangeStartISO: startISO,
-    totalAttempts: attempts.length,
-    avgScore,
-    openNow,
-    recent: attempts.slice(0, 10).map((a) => ({
-      administration_id: a.administration_id,
-      exam_slug: adminById.get(a.administration_id)?.exam_slug ?? '',
-      user_id: a.user_id,
-      score: a.score,
-      max_score: a.max_score,
-      submitted_at: a.submitted_at!,
-    })),
-  };
-}
