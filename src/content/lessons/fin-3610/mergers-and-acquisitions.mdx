@@ -17,6 +17,8 @@ quizSlug: "fin-3610-mergers-and-acquisitions"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## Why firms acquire
 
 The standard rationales, in roughly the order they hold up
@@ -46,6 +48,27 @@ empirically:
 A useful diagnostic: if "synergies" exceed 20-30% of the target's
 standalone value, be skeptical. Acquirers regularly project
 synergies that don't materialize.
+
+<BarFigure
+  client:load
+  data={[
+    { year: '2010', dealValue: 890 },
+    { year: '2012', dealValue: 1010 },
+    { year: '2014', dealValue: 1505 },
+    { year: '2016', dealValue: 1743 },
+    { year: '2018', dealValue: 1706 },
+    { year: '2020', dealValue: 1355 },
+    { year: '2021', dealValue: 2640 },
+    { year: '2022', dealValue: 1481 },
+    { year: '2023', dealValue: 1059 },
+    { year: '2024', dealValue: 1376 },
+  ]}
+  xKey="year"
+  series={[{ key: 'dealValue', name: 'Aggregate deal value ($B)', color: '#4572a7' }]}
+  yAxisLabel="USD billions"
+  caption="Annual aggregate value of announced US M&A deals (approximate). The 2021 peak above $2.6T was a record cycle driven by ZIRP-era cheap capital, SPACs, and pandemic-stimulus liquidity. The 2022-2023 retreat tracks the Fed tightening cycle — higher discount rates depress strategic deal values and make leveraged buyouts harder. M&A is cyclical, and the cycle is largely the cost of capital."
+  credit="Refinitiv/LSEG aggregate US M&A deal-value data"
+/>
 
 ## Valuation: the maximum offer price
 

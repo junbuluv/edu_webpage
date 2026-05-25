@@ -16,6 +16,8 @@ quizSlug: "fin-3610-credit-risk-and-spreads"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## Where the spread comes from
 
 A 10-year US Treasury yields about 4.2%. A 10-year AT&T corporate
@@ -76,6 +78,24 @@ Two bright lines matter:
 
 Empirically, rating predicts default reasonably well over 1-5 year
 horizons; less well at very long horizons or in deep recessions.
+
+<BarFigure
+  client:load
+  data={[
+    { rating: 'Aaa', defaultRate: 0.5 },
+    { rating: 'Aa', defaultRate: 1.0 },
+    { rating: 'A', defaultRate: 2.0 },
+    { rating: 'Baa', defaultRate: 4.5 },
+    { rating: 'Ba', defaultRate: 14.0 },
+    { rating: 'B', defaultRate: 27.0 },
+    { rating: 'Caa-C', defaultRate: 52.0 },
+  ]}
+  xKey="rating"
+  series={[{ key: 'defaultRate', name: '10-year cumulative default rate (%)', color: '#4572a7' }]}
+  yAxisLabel="Default probability (%)"
+  caption="Approximate 10-year cumulative default rates by initial Moody's rating, from the long-run global corporate default study. Investment grade (Aaa through Baa) defaults are rare even over a decade; speculative-grade bonds default at materially higher rates, with the lowest tier (Caa-C) defaulting more than half the time. The ratings encode this cumulative risk; the spread is the market's price for it."
+  credit="Moody's Annual Default Study (long-run global corporate cohort)"
+/>
 
 ## What drives spreads
 
