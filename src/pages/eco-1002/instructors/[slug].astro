@@ -1,23 +1,18 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 
-export const prerender = true;
+// SSR so Astro.locals.user is populated by middleware (same reason as
+// lessons/practice — see those files).
 
-export async function getStaticPaths() {
-  const all = await getCollection('instructors');
-  return all
-    .filter((i) => i.data.courses.includes('eco-1002'))
-    .map((instructor) => ({
-      params: { slug: instructor.slug },
-      props: { instructor },
-    }));
+const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404 });
 }
-
-interface Props {
-  instructor: CollectionEntry<'instructors'>;
+const instructor = await getEntry('instructors', slug);
+if (!instructor || !instructor.data.courses.includes('eco-1002')) {
+  return new Response(null, { status: 404 });
 }
-const { instructor } = Astro.props;
 const { Content } = await instructor.render();
 const d = instructor.data;
 ---
