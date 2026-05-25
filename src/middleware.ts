@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServerClient } from '@lib/supabase/server';
 import { ensureDeviceId } from '@lib/device';
+import { isAdmin as isAdminRole, isStaff as isStaffRole } from '@lib/roles';
 
 const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams', '/workshops'];
 const ADMIN_PREFIXES = ['/admin'];
@@ -41,8 +42,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const url = new URL(context.request.url);
   const role = context.locals.profile?.role ?? 'student';
-  const isAdmin = role === 'admin';
-  const isStaff = role === 'instructor' || role === 'admin';
+  const isAdmin = isAdminRole(role);
+  const isStaff = isStaffRole(role);
 
   if (ADMIN_PREFIXES.some((p) => url.pathname.startsWith(p))) {
     if (!context.locals.user) {

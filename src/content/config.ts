@@ -150,7 +150,9 @@ const workshops = defineCollection({
   schema: z.object({
     slug: z.string(),
     title: z.string(),
-    course: courseEnum,
+    // Workshops are an ECO 1002 feature today. If this ever expands,
+    // widen this back to courseEnum.
+    course: z.literal('eco-1002'),
     lessonSlug: z.string(),
     summary: z.string(),
     questions: z

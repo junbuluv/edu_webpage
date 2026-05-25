@@ -18,7 +18,7 @@ export type Database = {
           id: string;
           email_hmac: string | null;
           display_name: string | null;
-          role: 'student' | 'instructor' | 'admin';
+          role: 'student' | 'instructor' | 'ta' | 'admin';
           tos_accepted_at: string | null;
           active_course_slug: string | null;
           created_at: string;
@@ -27,7 +27,7 @@ export type Database = {
           id: string;
           email_hmac?: string | null;
           display_name?: string | null;
-          role?: 'student' | 'instructor' | 'admin';
+          role?: 'student' | 'instructor' | 'ta' | 'admin';
           tos_accepted_at?: string | null;
           active_course_slug?: string | null;
         };
@@ -35,7 +35,7 @@ export type Database = {
           id?: string;
           email_hmac?: string | null;
           display_name?: string | null;
-          role?: 'student' | 'instructor' | 'admin';
+          role?: 'student' | 'instructor' | 'ta' | 'admin';
           tos_accepted_at?: string | null;
           active_course_slug?: string | null;
         };
@@ -292,7 +292,7 @@ export type Database = {
         Row: {
           id: string;
           actor_id: string | null;
-          actor_role: 'student' | 'instructor' | 'admin' | null;
+          actor_role: 'student' | 'instructor' | 'ta' | 'admin' | null;
           action: string;
           target_user_id: string | null;
           target_resource: string | null;
@@ -304,7 +304,7 @@ export type Database = {
         Insert: {
           id?: string;
           actor_id?: string | null;
-          actor_role?: 'student' | 'instructor' | 'admin' | null;
+          actor_role?: 'student' | 'instructor' | 'ta' | 'admin' | null;
           action: string;
           target_user_id?: string | null;
           target_resource?: string | null;
@@ -315,7 +315,7 @@ export type Database = {
         Update: {
           id?: string;
           actor_id?: string | null;
-          actor_role?: 'student' | 'instructor' | 'admin' | null;
+          actor_role?: 'student' | 'instructor' | 'ta' | 'admin' | null;
           action?: string;
           target_user_id?: string | null;
           target_resource?: string | null;
@@ -339,7 +339,7 @@ export type Database = {
       };
     };
     Enums: {
-      user_role: 'student' | 'instructor' | 'admin';
+      user_role: 'student' | 'instructor' | 'ta' | 'admin';
       progress_status: 'started' | 'completed';
     };
     CompositeTypes: Record<string, never>;

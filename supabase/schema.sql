@@ -10,6 +10,13 @@ do $$ begin
   create type user_role as enum ('student', 'instructor', 'admin');
 exception when duplicate_object then null; end $$;
 
+-- Add 'ta' to user_role if it isn't already present. ALTER TYPE ADD
+-- VALUE cannot run inside an explicit transaction block, but
+-- Supabase's SQL Editor runs statements outside one by default. If
+-- you ever see "ALTER TYPE ... ADD cannot run inside a transaction
+-- block", run this single statement on its own.
+alter type user_role add value if not exists 'ta';
+
 do $$ begin
   create type progress_status as enum ('started', 'completed');
 exception when duplicate_object then null; end $$;
@@ -258,7 +265,7 @@ create policy "quiz_attempts_instructor_read_scoped"
       join public.profiles p on p.id = auth.uid()
       where e.user_id = quiz_attempts.user_id
         and e.instructor_id = auth.uid()
-        and p.role in ('instructor', 'admin')
+        and p.role in ('instructor', 'ta', 'admin')
     )
   );
 
@@ -274,7 +281,7 @@ create policy "lesson_progress_instructor_read_scoped"
       join public.profiles p on p.id = auth.uid()
       where e.user_id = lesson_progress.user_id
         and e.instructor_id = auth.uid()
-        and p.role in ('instructor', 'admin')
+        and p.role in ('instructor', 'ta', 'admin')
     )
   );
 
@@ -353,7 +360,7 @@ declare
 begin
   select role into v_role from public.profiles where id = auth.uid();
   if v_role is null or v_role = 'student' then
-    raise exception 'log_disclosure: caller must be instructor or admin';
+    raise exception 'log_disclosure: caller must be instructor, ta, or admin';
   end if;
   insert into public.audit_log (
     actor_id, actor_role, action, target_user_id, target_resource, metadata

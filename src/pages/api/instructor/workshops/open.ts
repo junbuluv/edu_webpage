@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAdminClient } from '@lib/supabase/admin';
+import { isStaff } from '@lib/roles';
 
 // Open a new workshop_administrations row for one section in one week.
 // Instructor only. Posted as form data (so the page's plain <form>
@@ -12,7 +13,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
   if (!user) return redirectBack(request, 'unauthenticated');
-  if (role !== 'instructor' && role !== 'admin') {
+  if (!isStaff(role)) {
     return redirectBack(request, 'forbidden');
   }
 

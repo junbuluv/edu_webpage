@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAdminClient } from '@lib/supabase/admin';
+import { isStaff } from '@lib/roles';
 
 // Close a workshop_administrations window early by setting closes_at to
 // now. Instructor only and only for their own administrations.
@@ -8,7 +9,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
   if (!user) return new Response(null, { status: 401 });
-  if (role !== 'instructor' && role !== 'admin') {
+  if (!isStaff(role)) {
     return new Response(null, { status: 403 });
   }
 
@@ -23,7 +24,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .eq('id', administrationId)
     .maybeSingle();
   if (!row) return new Response('not found', { status: 404 });
-  if (role !== 'admin' && row.instructor_id !== user.id) {
+  // Admins and TAs can close any window; instructors only their own.
+  if (role === 'instructor' && row.instructor_id !== user.id) {
     return new Response('not owner', { status: 403 });
   }
 
