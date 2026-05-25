@@ -2,6 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { isAdmin } from '@lib/roles';
+import { isCourseSlug, type CourseSlug } from '@lib/courses';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
@@ -9,17 +10,23 @@ const role = Astro.locals.profile?.role ?? 'student';
 
 // Admins see all courses; instructor/ta see only courses where
 // they're listed as instructor_id on at least one enrollment row.
-let instructorCourses = new Set<string>();
+const allCoursesCollection = await getCollection('courses');
+const instructorCourses = new Set<CourseSlug>();
 if (isAdmin(role)) {
-  const allCourses = await getCollection('courses');
-  for (const c of allCourses) instructorCourses.add(c.data.slug);
+  for (const c of allCoursesCollection) instructorCourses.add(c.data.slug);
 } else {
   const { data: rows } = await supabase
     .from('enrollments')
     .select('course_slug')
     .eq('instructor_id', user.id);
-  for (const r of rows ?? []) instructorCourses.add(r.course_slug);
+  for (const r of rows ?? []) {
+    if (isCourseSlug(r.course_slug)) instructorCourses.add(r.course_slug);
+  }
 }
+
+const courseMetaBySlug = new Map(
+  allCoursesCollection.map((c) => [c.data.slug, c.data]),
+);
 
 const allWorkshops = await getCollection('workshops');
 const visible = allWorkshops.filter((w) => instructorCourses.has(w.data.course));
@@ -36,6 +43,46 @@ const openCountBySlug = new Map<string, number>();
 for (const a of openAdmins ?? []) {
   openCountBySlug.set(a.workshop_slug, (openCountBySlug.get(a.workshop_slug) ?? 0) + 1);
 }
+
+// Tab filter via ?course=eco-1002 (default 'all').
+const filterParam = Astro.url.searchParams.get('course');
+const filterCourse: CourseSlug | 'all' =
+  filterParam && isCourseSlug(filterParam) && instructorCourses.has(filterParam)
+    ? filterParam
+    : 'all';
+
+const filtered =
+  filterCourse === 'all'
+    ? visible
+    : visible.filter((w) => w.data.course === filterCourse);
+
+// Group by course for the rendered list.
+const byCourse = new Map<CourseSlug, typeof visible>();
+for (const w of filtered) {
+  const arr = byCourse.get(w.data.course) ?? [];
+  arr.push(w);
+  byCourse.set(w.data.course, arr);
+}
+// Sort courses by their order field; sort workshops within a course by slug.
+const orderedCourses = [...byCourse.keys()].sort((a, b) => {
+  const ao = courseMetaBySlug.get(a)?.order ?? 999;
+  const bo = courseMetaBySlug.get(b)?.order ?? 999;
+  return ao - bo;
+});
+for (const c of orderedCourses) {
+  byCourse.get(c)?.sort((a, b) => a.data.slug.localeCompare(b.data.slug));
+}
+
+// Count per course for the tab UI.
+const countByCourse = new Map<CourseSlug, number>();
+for (const w of visible) {
+  countByCourse.set(w.data.course, (countByCourse.get(w.data.course) ?? 0) + 1);
+}
+const tabCourses = [...instructorCourses].sort((a, b) => {
+  const ao = courseMetaBySlug.get(a)?.order ?? 999;
+  const bo = courseMetaBySlug.get(b)?.order ?? 999;
+  return ao - bo;
+});
 ---
 
 <BaseLayout title="Instructor · Workshops">
@@ -48,6 +95,41 @@ for (const a of openAdmins ?? []) {
       (CML/CTL/CWL/CRL) which you open independently.
     </p>
 
+    {tabCourses.length > 1 && (
+      <nav class="mt-8 flex flex-wrap gap-2" aria-label="Filter by course">
+        <a
+          href="/instructor/workshops"
+          aria-current={filterCourse === 'all' ? 'page' : undefined}
+          class:list={[
+            'rounded-full border px-3 py-1 text-xs font-medium',
+            filterCourse === 'all'
+              ? 'border-accent bg-accent text-white'
+              : 'border-slate-300 bg-white text-ink hover:border-accent',
+          ]}
+        >
+          All courses ({visible.length})
+        </a>
+        {tabCourses.map((slug) => {
+          const meta = courseMetaBySlug.get(slug);
+          const active = filterCourse === slug;
+          return (
+            <a
+              href={`/instructor/workshops?course=${slug}`}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'rounded-full border px-3 py-1 text-xs font-medium',
+                active
+                  ? 'border-accent bg-accent text-white'
+                  : 'border-slate-300 bg-white text-ink hover:border-accent',
+              ]}
+            >
+              {meta?.code ?? slug} ({countByCourse.get(slug) ?? 0})
+            </a>
+          );
+        })}
+      </nav>
+    )}
+
     {instructorCourses.size === 0 && (
       <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
         You're not listed as the instructor for any course yet. Ask an
@@ -56,43 +138,53 @@ for (const a of openAdmins ?? []) {
       </p>
     )}
 
-    {visible.length > 0 && (
-      <ul class="mt-8 space-y-3">
-        {visible.map((w) => {
-          const openCount = openCountBySlug.get(w.data.slug) ?? 0;
-          return (
-            <li class="rounded-lg border border-slate-200 p-5">
-              <div class="flex items-start justify-between gap-3">
-                <div class="flex-1">
-                  <p class="text-xs uppercase tracking-wide text-accent font-medium">
-                    {w.data.course}
-                  </p>
-                  <h2 class="mt-1 text-lg font-semibold">{w.data.title}</h2>
-                  <p class="mt-1 text-sm text-ink-muted">{w.data.summary}</p>
-                  <p class="mt-2 text-xs text-ink-muted">
-                    {w.data.questions.length} discussion questions ·
-                    lesson <code>{w.data.lessonSlug}</code>
-                  </p>
-                </div>
-                {openCount > 0 && (
-                  <span class="inline-block whitespace-nowrap rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold uppercase text-emerald-800">
-                    {openCount} open now
-                  </span>
-                )}
-              </div>
-              <div class="mt-3">
-                <a
-                  href={`/instructor/workshops/${w.data.slug}`}
-                  class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
-                >
-                  Manage →
-                </a>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    )}
+    {orderedCourses.map((slug) => {
+      const list = byCourse.get(slug) ?? [];
+      const meta = courseMetaBySlug.get(slug);
+      return (
+        <section class="mt-10">
+          <header class="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
+            <h2 class="text-xl font-semibold">
+              {meta?.code ?? slug}
+              {meta?.title && <span class="ml-2 text-sm font-normal text-ink-muted">{meta.title}</span>}
+            </h2>
+            <span class="text-xs text-ink-muted">{list.length} workshop{list.length === 1 ? '' : 's'}</span>
+          </header>
+          <ul class="mt-4 space-y-3">
+            {list.map((w) => {
+              const openCount = openCountBySlug.get(w.data.slug) ?? 0;
+              return (
+                <li class="rounded-lg border border-slate-200 p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold">{w.data.title}</h3>
+                      <p class="mt-1 text-sm text-ink-muted">{w.data.summary}</p>
+                      <p class="mt-2 text-xs text-ink-muted">
+                        {w.data.questions.length} discussion questions ·
+                        lesson <code>{w.data.lessonSlug}</code>
+                      </p>
+                    </div>
+                    {openCount > 0 && (
+                      <span class="inline-block whitespace-nowrap rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold uppercase text-emerald-800">
+                        {openCount} open now
+                      </span>
+                    )}
+                  </div>
+                  <div class="mt-3">
+                    <a
+                      href={`/instructor/workshops/${w.data.slug}`}
+                      class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
+                    >
+                      Manage →
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      );
+    })}
 
     {visible.length === 0 && instructorCourses.size > 0 && (
       <p class="mt-10 text-ink-muted">
