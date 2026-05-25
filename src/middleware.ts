@@ -49,7 +49,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
-        `/auth/login?next=${encodeURIComponent(url.pathname)}`,
+        `/auth/signin?next=${encodeURIComponent(url.pathname)}`,
       );
     }
     if (!isAdmin) return context.redirect('/');
@@ -57,7 +57,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
-        `/auth/login?next=${encodeURIComponent(url.pathname)}`,
+        `/auth/signin?next=${encodeURIComponent(url.pathname)}`,
       );
     }
     if (!isStaff) return context.redirect('/');
@@ -65,7 +65,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
-        `/auth/login?next=${encodeURIComponent(url.pathname)}`,
+        `/auth/signin?next=${encodeURIComponent(url.pathname)}`,
       );
     }
   }

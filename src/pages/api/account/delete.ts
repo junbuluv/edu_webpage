@@ -5,7 +5,7 @@ const CONFIRM_PHRASE = 'delete my account';
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (!locals.supabase) return redirect('/auth/setup-required');
-  if (!locals.user) return redirect('/auth/login?next=/account/delete');
+  if (!locals.user) return redirect('/auth/signin?next=/account/delete');
 
   const form = await request.formData();
   const confirm = String(form.get('confirm') ?? '').trim().toLowerCase();

@@ -5,7 +5,7 @@ const MIN_PASSWORD_LEN = 12;
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (!locals.supabase) return redirect('/auth/setup-required');
   if (!locals.user) {
-    return redirect('/auth/login?error=Reset+link+expired%2C+request+a+new+one');
+    return redirect('/auth/signin?error=Reset+link+expired%2C+request+a+new+one');
   }
 
   const form = await request.formData();
