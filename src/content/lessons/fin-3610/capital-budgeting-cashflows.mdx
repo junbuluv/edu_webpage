@@ -18,6 +18,7 @@ draft: false
 ---
 
 import CashflowWaterfall from '@components/viz/CashflowWaterfall';
+import BarFigure from '@components/mdx/BarFigure';
 
 ## The cash flow we need
 
@@ -39,6 +40,32 @@ Where:
 - **ΔWC** subtracted because growing receivables and inventory tie up
   cash even though they don't show up in net income that year.
 - **CapEx** subtracted in the year the cash leaves the firm.
+
+<BarFigure
+  client:load
+  data={[
+    { fy: 'FY14', ocf: 59.7, capex: 9.6 },
+    { fy: 'FY15', ocf: 81.3, capex: 11.2 },
+    { fy: 'FY16', ocf: 66.2, capex: 12.7 },
+    { fy: 'FY17', ocf: 63.6, capex: 12.5 },
+    { fy: 'FY18', ocf: 77.4, capex: 13.3 },
+    { fy: 'FY19', ocf: 69.4, capex: 10.5 },
+    { fy: 'FY20', ocf: 80.7, capex: 7.3 },
+    { fy: 'FY21', ocf: 104.0, capex: 11.1 },
+    { fy: 'FY22', ocf: 122.2, capex: 10.7 },
+    { fy: 'FY23', ocf: 110.5, capex: 11.0 },
+    { fy: 'FY24', ocf: 118.3, capex: 9.4 },
+  ]}
+  xKey="fy"
+  series={[
+    { key: 'ocf', name: 'Operating cash flow ($B)', color: '#4572a7' },
+    { key: 'capex', name: 'CapEx ($B)', color: '#aa4643' },
+  ]}
+  yAxisLabel="USD billions"
+  caption="Apple's annual operating cash flow and capital expenditures, fiscal years 2014–2024. The simple back-of-envelope free cash flow (OCF − CapEx) runs roughly $50B in 2014 and over $100B by 2024, with FY22 the peak ($122B OCF, $11B CapEx → ~$111B FCF). This is the cash stream that the discount rate will eventually price."
+  credit="Apple Inc. 10-K cash flow statements via SEC EDGAR"
+  creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
+/>
 
 ## Play with it
 

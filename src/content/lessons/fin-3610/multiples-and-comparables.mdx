@@ -16,6 +16,8 @@ quizSlug: "fin-3610-multiples-and-comparables"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## The shortcut
 
 Building a full DCF takes hours. A comparables analysis takes
@@ -75,6 +77,24 @@ Significantly above means investors expect ROE > cost of equity.
 Below 1.0 historically signaled distress. Less useful for asset-
 light businesses where book value misses most of the firm's economic
 value (brand, IP, customer base).
+
+<BarFigure
+  client:load
+  data={[
+    { sector: 'Energy', pe: 12 },
+    { sector: 'Financials', pe: 15 },
+    { sector: 'Utilities', pe: 19 },
+    { sector: 'Cons. Staples', pe: 23 },
+    { sector: 'Healthcare', pe: 25 },
+    { sector: 'Info Tech', pe: 36 },
+  ]}
+  xKey="sector"
+  series={[{ key: 'pe', name: 'Trailing P/E', color: '#4572a7' }]}
+  yAxisLabel="P/E ratio (×)"
+  caption="Trailing twelve-month P/E by US equity sector, approximate values as of January 2024. The 3× spread between Energy (~12) and Info Tech (~36) is the central reason you compare a firm to its sector, not to 'the market.' Applying a tech multiple to an energy firm — or vice versa — generates wildly wrong valuations."
+  credit="NYU Stern (Damodaran), sector-level multiples dataset, January 2024"
+  creditHref="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/pedata.html"
+/>
 
 ## How to do comparables right
 
