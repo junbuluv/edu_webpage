@@ -7,7 +7,11 @@ const STAFF_PREFIXES = ['/instructor'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const headers = new Headers();
-  const supabase = createSupabaseServerClient(context.cookies, headers);
+  const supabase = createSupabaseServerClient(
+    context.cookies,
+    headers,
+    context.request,
+  );
 
   context.locals.supabase = supabase;
   context.locals.user = null;

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useAnimatedValue } from '@lib/animation/useAnimatedValue';
 import {
   CartesianGrid,
   Legend,
@@ -57,16 +58,34 @@ function duration(s: State, y: number) {
 
 export default function BondPriceYield() {
   const [s, setS] = useState<State>(baseline);
+  // Tween numeric values for smooth transitions. maturity stays snapped
+  // because the pricing loop bounds it as an integer.
+  const coupon = useAnimatedValue(s.coupon, { durationMs: 200 });
+  const face = useAnimatedValue(s.face, { durationMs: 200 });
+  const yieldRate = useAnimatedValue(s.yieldRate, { durationMs: 200 });
+  const animated: State = {
+    coupon,
+    face,
+    maturity: s.maturity,
+    yieldRate,
+    zero: s.zero,
+  };
   const data = useMemo(
     () =>
       Array.from({ length: 41 }, (_, i) => {
         const y = i * 0.005;
-        return { y, p: price(s, y) };
+        return { y, p: price(animated, y) };
       }),
-    [s],
+    [coupon, face, s.maturity, yieldRate, s.zero],
   );
-  const currentP = useMemo(() => price(s, s.yieldRate), [s]);
-  const { macaulay, modified } = useMemo(() => duration(s, s.yieldRate), [s]);
+  const currentP = useMemo(
+    () => price(animated, yieldRate),
+    [coupon, face, s.maturity, yieldRate, s.zero],
+  );
+  const { macaulay, modified } = useMemo(
+    () => duration(animated, yieldRate),
+    [coupon, face, s.maturity, yieldRate, s.zero],
+  );
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">

@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -17,6 +18,7 @@ const user = Astro.locals.user;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
     <title>{title} — Econ Studio</title>
+    <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col">
     <header class="border-b border-slate-200 bg-white">
@@ -43,7 +45,7 @@ const user = Astro.locals.user;
       </div>
     </header>
 
-    <main class="flex-1">
+    <main class="flex-1" transition:animate="fade">
       <slot />
     </main>
 

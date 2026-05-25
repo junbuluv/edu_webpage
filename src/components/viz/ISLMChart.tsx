@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useAnimatedValue } from '@lib/animation/useAnimatedValue';
 import {
   CartesianGrid,
   Legend,
@@ -68,8 +69,15 @@ function buildSeries(s: State, Yeq: number) {
 
 export default function ISLMChart() {
   const [state, setState] = useState<State>(baseline);
-  const eq = useMemo(() => solve(state), [state]);
-  const data = useMemo(() => buildSeries(state, eq.Yeq), [state, eq.Yeq]);
+  // Animate the underlying state so curves and the equilibrium point
+  // ease into place when sliders jump (Reset, scenario buttons), while
+  // staying responsive during scrubbing.
+  const G = useAnimatedValue(state.G, { durationMs: 200 });
+  const M = useAnimatedValue(state.M, { durationMs: 200 });
+  const A0 = useAnimatedValue(state.A0, { durationMs: 200 });
+  const animated: State = { G, M, A0 };
+  const eq = useMemo(() => solve(animated), [G, M, A0]);
+  const data = useMemo(() => buildSeries(animated, eq.Yeq), [G, M, A0, eq.Yeq]);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">

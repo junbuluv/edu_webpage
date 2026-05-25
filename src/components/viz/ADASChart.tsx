@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useAnimatedValue } from '@lib/animation/useAnimatedValue';
 import {
   CartesianGrid,
   Legend,
@@ -52,8 +53,16 @@ function buildSeries(s: State) {
 
 export default function ADASChart() {
   const [state, setState] = useState<State>(baseline);
-  const data = useMemo(() => buildSeries(state), [state]);
-  const eq = useMemo(() => solve(state), [state]);
+  // Tween state values so curves and equilibrium ease into place on
+  // discrete jumps (Reset, scenario buttons) while staying responsive
+  // during slider scrubbing.
+  const G = useAnimatedValue(state.G, { durationMs: 200 });
+  const M = useAnimatedValue(state.M, { durationMs: 200 });
+  const Pe = useAnimatedValue(state.Pe, { durationMs: 200 });
+  const Yn = useAnimatedValue(state.Yn, { durationMs: 200 });
+  const animated: State = { G, M, Pe, Yn };
+  const data = useMemo(() => buildSeries(animated), [G, M, Pe, Yn]);
+  const eq = useMemo(() => solve(animated), [G, M, Pe, Yn]);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
