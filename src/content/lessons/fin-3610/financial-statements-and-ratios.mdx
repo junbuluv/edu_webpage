@@ -16,6 +16,8 @@ quizSlug: "fin-3610-financial-statements-and-ratios"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## The three statements, in one sentence each
 
 - **Balance sheet** — a *snapshot* at one moment of what the firm
@@ -54,6 +56,32 @@ reconciling items:
 Why does this matter? Because shareholders ultimately get cash, not
 accrual earnings. Most corporate-finance decisions value cash flows,
 not net income.
+
+<BarFigure
+  client:load
+  data={[
+    { fy: 'FY14', revenue: 182.8, netIncome: 39.5 },
+    { fy: 'FY15', revenue: 233.7, netIncome: 53.4 },
+    { fy: 'FY16', revenue: 215.6, netIncome: 45.7 },
+    { fy: 'FY17', revenue: 229.2, netIncome: 48.4 },
+    { fy: 'FY18', revenue: 265.6, netIncome: 59.5 },
+    { fy: 'FY19', revenue: 260.2, netIncome: 55.3 },
+    { fy: 'FY20', revenue: 274.5, netIncome: 57.4 },
+    { fy: 'FY21', revenue: 365.8, netIncome: 94.7 },
+    { fy: 'FY22', revenue: 394.3, netIncome: 99.8 },
+    { fy: 'FY23', revenue: 383.3, netIncome: 97.0 },
+    { fy: 'FY24', revenue: 391.0, netIncome: 93.7 },
+  ]}
+  xKey="fy"
+  series={[
+    { key: 'revenue', name: 'Revenue ($B)', color: '#4572a7' },
+    { key: 'netIncome', name: 'Net Income ($B)', color: '#aa4643' },
+  ]}
+  yAxisLabel="USD billions"
+  caption="Apple's annual revenue and net income, fiscal years 2014 through 2024 (Apple's FY ends in late September). The 2021 jump is the iPhone 12 super-cycle + pandemic demand; 2023 was the post-cycle digestion year. Net income is roughly 25% of revenue across the period — exceptionally high for a hardware company, the result of services + margins on iPhone."
+  credit="Apple Inc. 10-K filings via SEC EDGAR"
+  creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
+/>
 
 ## Ratios — four families
 
