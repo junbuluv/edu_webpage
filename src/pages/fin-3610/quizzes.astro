@@ -1,11 +1,15 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { isAdmin } from '@lib/roles';
 
 const user = Astro.locals.user;
 const supabase = Astro.locals.supabase;
 
-// Enrollment gate: only show this page to students enrolled in FIN 3610.
+// Enrollment gate: enrolled students OR admins see this page. Admins
+// see it as "view-as" so they can audit the schedule even without
+// being on the roster.
+const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
 let enrolled = false;
 if (user && supabase) {
   const { data } = await supabase
@@ -16,6 +20,7 @@ if (user && supabase) {
     .maybeSingle();
   enrolled = !!data;
 }
+const canView = enrolled || viewerIsAdmin;
 
 if (!user) {
   return Astro.redirect(`/auth/login?next=${encodeURIComponent('/fin-3610/quizzes')}`);
@@ -39,7 +44,7 @@ type AdminRow = {
   notes: string | null;
 };
 let admins: AdminRow[] = [];
-if (enrolled && supabase) {
+if (canView && supabase) {
   const { data } = await supabase
     .from('exam_administrations')
     .select(
@@ -58,7 +63,7 @@ for (const a of admins) {
 // Pre-fetch submitted attempts so we can suppress 'Take' on completed ones.
 type AttemptRow = { administration_id: string; submitted_at: string | null };
 let attempts: AttemptRow[] = [];
-if (enrolled && supabase) {
+if (canView && supabase) {
   const { data } = await supabase
     .from('exam_attempts')
     .select('administration_id, submitted_at')
@@ -99,7 +104,7 @@ function bestAdmin(rows: AdminRow[]): AdminRow | null {
       location your instructor specifies for the duration of the quiz.
     </p>
 
-    {!enrolled && (
+    {!canView && (
       <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
         <p class="font-medium">You're not enrolled in FIN 3610.</p>
         <p class="mt-2">
@@ -109,11 +114,17 @@ function bestAdmin(rows: AdminRow[]): AdminRow | null {
       </div>
     )}
 
-    {enrolled && quizContent.length === 0 && (
+    {canView && !enrolled && viewerIsAdmin && (
+      <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
+        <strong>Admin view.</strong> You're viewing this page without being enrolled in FIN 3610.
+      </div>
+    )}
+
+    {canView && quizContent.length === 0 && (
       <p class="mt-8 text-ink-muted">No quizzes have been authored for this course yet.</p>
     )}
 
-    {enrolled && quizContent.length > 0 && (
+    {canView && quizContent.length > 0 && (
       <ul class="mt-8 space-y-4">
         {quizContent.map((quiz) => {
           const admin = bestAdmin(adminsBySlug.get(quiz.data.slug) ?? []);

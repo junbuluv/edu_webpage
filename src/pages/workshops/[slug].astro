@@ -2,6 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getEntry } from 'astro:content';
 import StampInButton from '@components/workshop/StampInButton';
+import { isAdmin } from '@lib/roles';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
@@ -15,8 +16,11 @@ if (!workshop) {
   return new Response(null, { status: 404 });
 }
 
-// Enrollment gate: only students enrolled in the workshop's course see
-// the schedule.
+// Enrollment gate: students enrolled in the course OR admins see the
+// schedule. Admin "view-as" sees the page but won't be able to stamp
+// unless they're also enrolled (the stamp API still requires enrollment
+// or being the course's instructor).
+const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
 const { data: enrollment } = await supabase
   .from('enrollments')
   .select('user_id')
@@ -24,12 +28,13 @@ const { data: enrollment } = await supabase
   .eq('course_slug', workshop.data.course)
   .maybeSingle();
 const enrolled = !!enrollment;
+const canView = enrolled || viewerIsAdmin;
 
 // Pull this workshop's administrations across all sections, sorted by
 // section then opens_at. Only show those whose closes_at is still in
 // the future (don't leak past windows).
 const nowIso = new Date().toISOString();
-const { data: admins } = enrolled
+const { data: admins } = canView
   ? await supabase
       .from('workshop_administrations')
       .select(
@@ -40,7 +45,7 @@ const { data: admins } = enrolled
       .order('opens_at', { ascending: true })
   : { data: [] };
 
-const myAttempts = enrolled
+const myAttempts = canView
   ? await supabase
       .from('workshop_attendance')
       .select('administration_id, stamped_at')
@@ -64,7 +69,7 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">{workshop.data.title}</h1>
     <p class="mt-3 text-ink-muted">{workshop.data.summary}</p>
 
-    {!enrolled && (
+    {!canView && (
       <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
         <p class="font-medium">You're not enrolled in this course.</p>
         <p class="mt-2">
@@ -74,7 +79,13 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
       </div>
     )}
 
-    {enrolled && (admins ?? []).length === 0 && (
+    {canView && !enrolled && viewerIsAdmin && (
+      <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
+        <strong>Admin view.</strong> You're viewing this page without being enrolled. Stamping is not available without enrollment.
+      </div>
+    )}
+
+    {canView && (admins ?? []).length === 0 && (
       <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
         <p>
           <strong>No workshop sessions are scheduled right now.</strong>{' '}
@@ -85,7 +96,7 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
       </div>
     )}
 
-    {enrolled && (admins?.length ?? 0) > 0 && (
+    {canView && (admins?.length ?? 0) > 0 && (
       <section class="mt-10">
         <h2 class="text-xl font-semibold">This week's sections</h2>
         <p class="mt-1 text-sm text-ink-muted">

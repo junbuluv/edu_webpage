@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { isAdmin } from '@lib/roles';
 
 const user = Astro.locals.user;
 const supabase = Astro.locals.supabase;
@@ -15,7 +16,8 @@ for (const l of lessons) {
   byUnit.set(l.data.unit, arr);
 }
 
-// Enrollment-gated quiz teaser.
+// Enrollment-gated quiz teaser (admins also see it as view-as).
+const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
 let enrolled = false;
 let openQuizCount = 0;
 let totalQuizCount = 0;
@@ -27,7 +29,7 @@ if (user && supabase) {
     .eq('course_slug', 'fin-3610')
     .maybeSingle();
   enrolled = !!enrollment;
-  if (enrolled) {
+  if (enrolled || viewerIsAdmin) {
     const quizContent = await getCollection('exams', (e) => e.data.course === 'fin-3610');
     totalQuizCount = quizContent.length;
     const nowIso = new Date().toISOString();
@@ -40,6 +42,7 @@ if (user && supabase) {
     openQuizCount = (openAdmins ?? []).length;
   }
 }
+const showQuizTeaser = enrolled || viewerIsAdmin;
 ---
 
 <BaseLayout title="FIN 3610 — Corporate Finance">
@@ -76,7 +79,7 @@ if (user && supabase) {
       <p class="mt-10 text-ink-muted">No lessons published yet.</p>
     )}
 
-    {enrolled && totalQuizCount > 0 && (
+    {showQuizTeaser && totalQuizCount > 0 && (
       <section class="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -88,6 +91,9 @@ if (user && supabase) {
                 <span class="ml-1 font-medium text-emerald-700">
                   {openQuizCount} open right now.
                 </span>
+              )}
+              {viewerIsAdmin && !enrolled && (
+                <span class="ml-1 italic text-sky-700">(admin view)</span>
               )}
             </p>
           </div>

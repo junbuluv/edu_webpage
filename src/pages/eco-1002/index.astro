@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { isAdmin } from '@lib/roles';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
 
 const lessons = (await getCollection('lessons', (l) => !l.data.draft && l.data.course === 'eco-1002'))
   .sort((a, b) => a.data.order - b.data.order);
@@ -11,6 +15,36 @@ for (const l of lessons) {
   arr.push(l);
   byUnit.set(l.data.unit, arr);
 }
+
+// Enrollment-gated workshop teaser (admins also see it).
+const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
+let enrolled = false;
+let openWorkshopCount = 0;
+let totalWorkshopCount = 0;
+if (user && supabase) {
+  const { data: enrollment } = await supabase
+    .from('enrollments')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .eq('course_slug', 'eco-1002')
+    .maybeSingle();
+  enrolled = !!enrollment;
+}
+if (enrolled || viewerIsAdmin) {
+  const workshopContent = await getCollection('workshops', (w) => w.data.course === 'eco-1002');
+  totalWorkshopCount = workshopContent.length;
+  if (supabase) {
+    const nowIso = new Date().toISOString();
+    const { data: openAdmins } = await supabase
+      .from('workshop_administrations')
+      .select('id')
+      .eq('course_slug', 'eco-1002')
+      .lte('opens_at', nowIso)
+      .gt('closes_at', nowIso);
+    openWorkshopCount = (openAdmins ?? []).length;
+  }
+}
+const showWorkshopTeaser = (enrolled || viewerIsAdmin) && totalWorkshopCount > 0;
 ---
 
 <BaseLayout title="ECO 1002 — Introduction to Macroeconomics">
@@ -51,6 +85,34 @@ for (const l of lessons) {
 
     {lessons.length === 0 && (
       <p class="mt-10 text-ink-muted">No lessons published yet.</p>
+    )}
+
+    {showWorkshopTeaser && (
+      <section class="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold">Workshops</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+              {totalWorkshopCount} weekly small-group session{totalWorkshopCount === 1 ? '' : 's'} for this course.
+              Geofenced stamp-in attendance.
+              {openWorkshopCount > 0 && (
+                <span class="ml-1 font-medium text-emerald-700">
+                  {openWorkshopCount} open right now.
+                </span>
+              )}
+              {viewerIsAdmin && !enrolled && (
+                <span class="ml-1 italic text-sky-700">(admin view)</span>
+              )}
+            </p>
+          </div>
+          <a
+            href="/eco-1002/workshops"
+            class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            See all workshops →
+          </a>
+        </div>
+      </section>
     )}
   </div>
 </BaseLayout>

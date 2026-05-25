@@ -12,7 +12,7 @@ export type DisclosureAction =
 
 export interface DisclosureContext {
   actorId: string;
-  actorRole: 'instructor' | 'admin';
+  actorRole: 'instructor' | 'ta' | 'admin';
   action: DisclosureAction;
   targetUserId?: string;
   targetResource?: string;
