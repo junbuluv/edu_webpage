@@ -1,0 +1,149 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { isAdmin } from '@lib/roles';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+
+if (!user) {
+  return Astro.redirect(`/auth/login?next=${encodeURIComponent('/fin-3610/workshops')}`);
+}
+
+const role = Astro.locals.profile?.role ?? 'student';
+const viewerIsAdmin = isAdmin(role);
+
+let enrolled = false;
+if (supabase) {
+  const { data } = await supabase
+    .from('enrollments')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .eq('course_slug', 'fin-3610')
+    .maybeSingle();
+  enrolled = !!data;
+}
+const allowed = enrolled || viewerIsAdmin;
+
+const workshops = (await getCollection('workshops', (w) => w.data.course === 'fin-3610'))
+  .sort((a, b) => a.data.slug.localeCompare(b.data.slug));
+
+const nowIso = new Date().toISOString();
+type AdminRow = {
+  id: string;
+  workshop_slug: string;
+  section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+  opens_at: string;
+  closes_at: string;
+  week_of: string;
+};
+let admins: AdminRow[] = [];
+if (allowed && supabase) {
+  const { data } = await supabase
+    .from('workshop_administrations')
+    .select('id, workshop_slug, section, opens_at, closes_at, week_of')
+    .eq('course_slug', 'fin-3610')
+    .gt('closes_at', nowIso)
+    .order('opens_at', { ascending: true });
+  admins = (data ?? []) as AdminRow[];
+}
+const adminsBySlug = new Map<string, AdminRow[]>();
+for (const a of admins) {
+  const arr = adminsBySlug.get(a.workshop_slug) ?? [];
+  arr.push(a);
+  adminsBySlug.set(a.workshop_slug, arr);
+}
+
+function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed' {
+  const now = Date.now();
+  if (now < Date.parse(opens)) return 'upcoming';
+  if (now > Date.parse(closes)) return 'closed';
+  return 'open';
+}
+---
+
+<BaseLayout title="FIN 3610 — Workshops">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">FIN 3610</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Workshops</h1>
+    <p class="mt-3 text-ink-muted">
+      Weekly small-group discussion sessions, one per FIN 3610 unit. Four
+      weekly sections: <code>CML</code> (Mon), <code>CTL</code> (Tue),
+      <code>CWL</code> (Wed), <code>CRL</code> (Thu). Stamp in during
+      class to record participation.
+    </p>
+
+    {!allowed && (
+      <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        <p class="font-medium">You're not enrolled in FIN 3610.</p>
+        <p class="mt-2">Workshops are visible only to enrolled students. Ask your instructor to add you to the roster.</p>
+      </div>
+    )}
+
+    {allowed && viewerIsAdmin && !enrolled && (
+      <div class="mt-8 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
+        <strong>Admin view.</strong> You're seeing this page without being enrolled in FIN 3610.
+      </div>
+    )}
+
+    {allowed && workshops.length === 0 && (
+      <p class="mt-8 text-ink-muted">No workshops authored yet.</p>
+    )}
+
+    {allowed && workshops.length > 0 && (
+      <ul class="mt-8 space-y-4">
+        {workshops.map((w) => {
+          const wAdmins = adminsBySlug.get(w.data.slug) ?? [];
+          return (
+            <li class="rounded-lg border border-slate-200 p-5">
+              <h2 class="text-lg font-semibold">{w.data.title}</h2>
+              <p class="mt-1 text-sm text-ink-muted">{w.data.summary}</p>
+              <p class="mt-2 text-xs text-ink-muted">
+                Lesson: <a class="text-accent underline" href={`/lessons/${w.data.lessonSlug}`}>{w.data.lessonSlug}</a> · {w.data.questions.length} discussion questions
+              </p>
+
+              {wAdmins.length === 0 ? (
+                <p class="mt-3 rounded bg-slate-50 px-3 py-2 text-xs text-ink-muted">
+                  No section windows scheduled. Your instructor will open them at meeting times.
+                </p>
+              ) : (
+                <ul class="mt-3 space-y-1">
+                  {wAdmins.map((a) => {
+                    const status = statusOf(a.opens_at, a.closes_at);
+                    return (
+                      <li class="flex items-center justify-between gap-3 rounded bg-slate-50 px-3 py-1.5 text-xs">
+                        <span>
+                          Section <strong>{a.section}</strong> · week of {new Date(a.week_of).toLocaleDateString()}
+                        </span>
+                        <span
+                          class={`rounded px-1.5 py-0.5 font-semibold uppercase ${
+                            status === 'open'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : status === 'upcoming'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-slate-200 text-slate-700'
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <div class="mt-3">
+                <a
+                  href={`/workshops/${w.data.slug}`}
+                  class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  Go to workshop →
+                </a>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </div>
+</BaseLayout>

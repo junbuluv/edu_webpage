@@ -1,0 +1,44 @@
+{
+  "slug": "fin-3610-unit-2-time-money",
+  "title": "Workshop: Time, Money, and Interest Rates",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/time-value-of-money",
+  "summary": "Unit 2 group session: present value, annuities, term structure, bond pricing. Bring calculators or spreadsheets — at least one question will require numerical work.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "You can receive $10,000 today or $11,000 in two years. At what discount rate would you be indifferent? At what rate would the future option be strictly worse?",
+      "notes": "Indifference: 10000 × (1+r)² = 11000 → r ≈ 4.88%. If your discount rate > 4.88%, take today. If r < 4.88%, take future."
+    },
+    {
+      "id": "q2",
+      "prompt": "A 30-year mortgage at 7% on $400,000. Calculate the monthly payment. How much of the first payment is interest vs principal?",
+      "notes": "Payment = 400,000 × (0.00583)/(1-1.00583^(-360)) ≈ $2,661/month. First month interest: 400,000 × 0.00583 = $2,333. Principal: $2,661 - $2,333 = $328. Slow amortization in early years is why total interest paid is staggering on a 30-year."
+    },
+    {
+      "id": "q3",
+      "prompt": "Bond pricing example: 10-year Treasury, 4% coupon (paid semi-annually), face $1,000, YTM 5%. Without calculating, is the price above or below par? Estimate within $50.",
+      "notes": "Below par (YTM > coupon). Rough estimate: $1000 - (5%-4%) × duration × 1000 ≈ 1000 - 0.01 × 8 × 1000 = $920. Exact ≈ $922. Modified duration approximation is good for small yield differences."
+    },
+    {
+      "id": "q4",
+      "prompt": "Yield curve is steeply upward sloping. Two interpretations: (a) markets expect rate hikes, (b) term premium for holding long bonds is positive. Which is empirically more important, and how would you test?",
+      "notes": "Both matter; term premium typically dominates for very long horizons (10y+). Test: compare ex-ante forwards to ex-post realized rates over many cycles. Forwards over-predict future short rates in expansions, under-predict in recessions — consistent with positive term premium."
+    },
+    {
+      "id": "q5",
+      "prompt": "Group exercise: 30-year Treasury at 4.5% vs 1-year T-bill rolled monthly. Argue who has more interest-rate risk over a 1-year holding period. Over a 30-year horizon?",
+      "notes": "1-year horizon: 30y has massive interest-rate risk (mark-to-market loss if rates rise). T-bill rolled monthly: reinvestment risk only, much smaller MTM moves. 30-year horizon: 30y bond pinned to its own YTM (hold to maturity). T-bill: every month's reinvestment rate is uncertain — actually more risk over very long horizons."
+    },
+    {
+      "id": "q6",
+      "prompt": "Convexity is positive for vanilla bonds. Explain in one sentence why convexity is 'good' for the holder, and one situation where investors give up yield to get more convexity.",
+      "notes": "Good because gain from a yield fall > loss from an equal-sized yield rise. Investors pay (lower YTM) for convexity in long-duration zero-coupon Treasuries — used by pension funds and insurers to immunize liabilities."
+    },
+    {
+      "id": "q7",
+      "prompt": "Annuity-due vs ordinary annuity: which has higher PV at the same r, C, and T? By how much (formula)?",
+      "notes": "Annuity-due (payments at start of period) has higher PV. PV_due = PV_ordinary × (1 + r). Each cash flow arrives one period earlier, so the discount factor applies one less time."
+    }
+  ]
+}

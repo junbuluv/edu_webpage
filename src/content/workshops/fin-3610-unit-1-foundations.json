@@ -1,0 +1,39 @@
+{
+  "slug": "fin-3610-unit-1-foundations",
+  "title": "Workshop: Foundations — Corporation, Markets, and Law of One Price",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/corporation-and-markets",
+  "summary": "Unit 1 group discussion: corporate form, financial markets, financial statements, and the law of one price as a no-arbitrage discipline.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "What feature of the corporate form is most directly responsible for the existence of liquid public stock markets? Argue with a counterexample.",
+      "notes": "Limited liability + perpetual existence enable transferability. Counterexample: a partnership where each owner is personally liable for firm debts and the partnership dissolves on any owner exit — no liquid secondary market is possible."
+    },
+    {
+      "id": "q2",
+      "prompt": "Identify the principal-agent problem in a public company. Give one mechanism that mitigates it and one mechanism that aggravates it.",
+      "notes": "Shareholders (principals) vs management (agents). Mitigates: stock-based compensation aligning incentives, independent board, takeover threat. Aggravates: dispersed ownership (no one shareholder bears full monitoring cost), executive compensation gaming, golden parachutes."
+    },
+    {
+      "id": "q3",
+      "prompt": "The law of one price says identical cash flows must trade at the same price across markets. Show one violation example from real markets, and explain why arbitrageurs eventually close it.",
+      "notes": "Examples: Royal Dutch/Shell dual listing (closed by 2005 merger), closed-end fund discounts, ADR/local mismatches. Arbitrage closes via capital flows; remaining gaps are limits-to-arbitrage (haircuts, frictions, regulatory constraints)."
+    },
+    {
+      "id": "q4",
+      "prompt": "On a balance sheet, define current ratio, quick ratio, and debt-to-equity. Which would change first if a firm took out a large bank loan to refinance trade payables?",
+      "notes": "Current ratio (CA/CL) and quick ratio ((CA-Inv)/CL) likely improve (long-term debt replaces current liabilities). D/E rises (more debt). Refinancing swaps short-term for long-term liability — looks healthier on liquidity, levered higher overall."
+    },
+    {
+      "id": "q5",
+      "prompt": "An arbitrage opportunity offers $0 today, $100 in good state, $0 in bad state. State probabilities and prices imply discounted expected value is $40, but the asset trades at $50. Is there arbitrage?",
+      "notes": "Not necessarily — discounted expected value vs market price differ because the market uses risk-adjusted discounting. If the asset pays $100 in bad-times state, investors pay a premium for the hedge. The 'price minus expected PV' gap is the risk premium."
+    },
+    {
+      "id": "q6",
+      "prompt": "A firm has high ROA but low ROE. What does that imply about its capital structure? What's the textbook decomposition that makes the gap visible?",
+      "notes": "DuPont: ROE = ROA × leverage (Assets/Equity). High ROA + low ROE means low leverage. The firm could increase ROE by financing more with debt — but financial distress costs cap that strategy at moderate levels."
+    }
+  ]
+}

@@ -24,19 +24,11 @@ if (isAdmin(role)) {
 const workshops = (await getCollection('workshops')).filter((w) =>
   instructorCourses.has(w.data.course),
 );
-const exams = (await getCollection('exams')).filter((e) =>
-  instructorCourses.has(e.data.course),
-);
 
 const nowIso = new Date().toISOString();
 const { data: openWorkshops } = await supabase
   .from('workshop_administrations')
   .select('workshop_slug')
-  .lte('opens_at', nowIso)
-  .gt('closes_at', nowIso);
-const { data: openExams } = await supabase
-  .from('exam_administrations')
-  .select('exam_slug')
   .lte('opens_at', nowIso)
   .gt('closes_at', nowIso);
 
@@ -62,13 +54,13 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
     )}
 
     {instructorCourses.size > 0 && (
-      <div class="mt-10 grid gap-6 md:grid-cols-2">
+      <div class="mt-10">
         <section class="rounded-lg border border-slate-200 p-5">
           <h2 class="text-xl font-semibold">Workshops</h2>
           <p class="mt-1 text-sm text-ink-muted">
-            ECO 1002 weekly small-group sessions. Open one window per
-            section (CML / CTL / CWL / CRL) per week. Geofenced stamp-in
-            attendance.
+            Weekly small-group sessions for both ECO 1002 and FIN 3610.
+            Open one window per section (CML / CTL / CWL / CRL) per
+            week. Geofenced stamp-in attendance.
           </p>
           <p class="mt-3 text-xs text-ink-muted">
             <strong>{workshops.length}</strong> workshop{workshops.length === 1 ? '' : 's'} in your courses ·
@@ -80,26 +72,6 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
               class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
             >
               Manage workshops →
-            </a>
-          </div>
-        </section>
-
-        <section class="rounded-lg border border-slate-200 p-5">
-          <h2 class="text-xl font-semibold">Exams</h2>
-          <p class="mt-1 text-sm text-ink-muted">
-            Proctored, time-windowed, location-gated assessments. One
-            administration per exam per semester.
-          </p>
-          <p class="mt-3 text-xs text-ink-muted">
-            <strong>{exams.length}</strong> exam{exams.length === 1 ? '' : 's'} in your courses ·
-            <strong> {openExams?.length ?? 0}</strong> open right now
-          </p>
-          <div class="mt-4">
-            <a
-              href="/instructor/exams"
-              class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Manage exams →
             </a>
           </div>
         </section>

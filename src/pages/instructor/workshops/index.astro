@@ -1,18 +1,25 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { isAdmin } from '@lib/roles';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
+const role = Astro.locals.profile?.role ?? 'student';
 
-// Instructor sees workshops in courses where they're an instructor on
-// at least one enrollment row. Middleware already enforces staff role
-// on /instructor/* so this scope check is just for listing relevance.
-const { data: rows } = await supabase
-  .from('enrollments')
-  .select('course_slug')
-  .eq('instructor_id', user.id);
-const instructorCourses = new Set((rows ?? []).map((r) => r.course_slug));
+// Admins see all courses; instructor/ta see only courses where
+// they're listed as instructor_id on at least one enrollment row.
+let instructorCourses = new Set<string>();
+if (isAdmin(role)) {
+  const allCourses = await getCollection('courses');
+  for (const c of allCourses) instructorCourses.add(c.data.slug);
+} else {
+  const { data: rows } = await supabase
+    .from('enrollments')
+    .select('course_slug')
+    .eq('instructor_id', user.id);
+  for (const r of rows ?? []) instructorCourses.add(r.course_slug);
+}
 
 const allWorkshops = await getCollection('workshops');
 const visible = allWorkshops.filter((w) => instructorCourses.has(w.data.course));

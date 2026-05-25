@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-fed-balance-sheet",
+  "title": "Workshop: Money Multiplier, QE, and the Fed Balance Sheet",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/fed-balance-sheet",
+  "summary": "Use the money-multiplier chart to walk through how fractional reserve banking creates money. Discuss the post-2008 era when the textbook multiplier broke down.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Define the money multiplier in one sentence and write the textbook formula. What does it equal at 10% reserve ratio with no currency drain?",
+      "notes": "Multiplier ≡ (1 + cr)/(rr + cr + er) where cr = currency/deposit ratio, rr = reserve ratio, er = excess reserves/deposit. Textbook minimal case (cr = 0, er = 0): 1/rr = 10."
+    },
+    {
+      "id": "q2",
+      "prompt": "Pre-2008, the actual money multiplier was around 8. Post-2008, it collapsed to below 1. What changed?",
+      "notes": "Excess reserves exploded after the Fed started paying IOER (interest on excess reserves) in October 2008. Banks held QE-injected reserves at the Fed rather than lending them. The relationship between base money and broader money supply de-coupled."
+    },
+    {
+      "id": "q3",
+      "prompt": "Walk through one round of fractional-reserve money creation. Bank receives a $1,000 deposit, reserve ratio 10%. What's the deposit, the loan, and the borrower's new deposit at the next bank?",
+      "notes": "Bank A receives $1,000 deposit, holds $100 in reserves, loans out $900. Borrower spends/deposits $900 at Bank B, which holds $90 in reserves, loans $810. Process continues geometric series → total deposits = $10,000 from the original $1,000."
+    },
+    {
+      "id": "q4",
+      "prompt": "QE expanded the Fed's balance sheet from ~$900B (2008) to ~$9T (2022). Yet broad money (M2) didn't grow proportionally, and inflation stayed near 2% until 2021. Why?",
+      "notes": "Reserves piled up at the Fed earning IOER (banks held the proceeds rather than lending). M2 growth tracked nominal GDP growth, not base money. 'Pushing on a string' framing: monetary base ≠ broad money when banks won't lend."
+    },
+    {
+      "id": "q5",
+      "prompt": "Quantitative tightening (QT) is QE in reverse — the Fed lets bonds mature without reinvestment. How does that mechanically shrink the balance sheet, and what's the effect on bank reserves?",
+      "notes": "When a Treasury matures, the Treasury pays the Fed and the bond is removed from the Fed's assets. The Treasury's General Account is debited (so the Treasury raises new debt elsewhere). Net: bank reserves fall because new buyers (banks/funds) draw down their reserves to buy the new debt. Plumbing-of-money story."
+    },
+    {
+      "id": "q6",
+      "prompt": "The Fed announced halting QT in December 2025. What does that decision imply about Fed views on reserve scarcity? What signals would tell them they pushed reserves too low?",
+      "notes": "They believe reserves are approaching 'ample' rather than 'abundant.' Signals: SOFR-IORB spreads widen, repo rates spike, banks bid heavily in repo. The September 2019 repo spike is the cautionary case — reserves got too scarce too fast."
+    }
+  ]
+}

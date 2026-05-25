@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-open-economy-fx",
+  "title": "Workshop: Open Economy, Tariffs, and the Exchange Rate",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/open-economy-fx",
+  "summary": "Work through how trade policy and macro shocks move the real exchange rate. Use the chart's tariff lever and savings-shock controls.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "The fundamental identity NX = S - I. If a country's investment opportunities improve (think US shale boom, late 2000s), what happens to NX in the medium run? How does the dollar adjust?",
+      "notes": "Higher I → S < I → NX < 0 (current account deficit). Dollar appreciates to suck in foreign capital. The 'twin deficit' framing is partial — investment-driven deficits are different from consumption/fiscal-driven ones."
+    },
+    {
+      "id": "q2",
+      "prompt": "A protective tariff is imposed at any given exchange rate ε. Using the NX vs ε chart, predict: does the equilibrium quantity of NX change? Does ε change? Does the trade balance 'improve'?",
+      "notes": "NX doesn't change in equilibrium (still pinned down by S - I). ε falls (real dollar appreciates). Trade balance is unchanged — tariffs don't fix it because the fundamental constraint is S - I. Households lose: imports cost more without offsetting export gains."
+    },
+    {
+      "id": "q3",
+      "prompt": "China runs a structural current account surplus. By the NX = S - I identity, what's true of their S and I? Compare with a typical OECD country.",
+      "notes": "China S > I → NX > 0. Very high household saving + corporate retained earnings. OECD typically S ≈ I or S < I (consumer/fiscal-led economies). This is one frame for the 'savings glut' hypothesis."
+    },
+    {
+      "id": "q4",
+      "prompt": "If the Fed cuts rates while the ECB holds steady, what should happen to the EUR/USD exchange rate (in the short run)? Use the interest parity intuition.",
+      "notes": "Capital flows toward higher-yielding EUR assets. EUR appreciates, USD depreciates. Lower US rates → cheaper dollar → more competitive US exports → NX up. (Long run still pinned by S - I.)"
+    },
+    {
+      "id": "q5",
+      "prompt": "Critique this claim: 'A weaker dollar always helps American exporters.' Identify at least two mechanisms that complicate it.",
+      "notes": "Counter-mechanisms: (1) imported inputs cost more (US firms use foreign intermediates); (2) commodity prices spike for US consumers; (3) global slowdown response makes foreign demand inelastic to FX; (4) pass-through can be slow and incomplete."
+    },
+    {
+      "id": "q6",
+      "prompt": "Apply NX = S - I to the post-2017 US tariff escalation. Tariffs raised the cost of imports but the US trade deficit kept widening. Why is that consistent with the model?",
+      "notes": "US national S was falling (tax cuts, increased fiscal deficits). With S - I shrinking (more negative), NX must shrink (more negative) regardless of tariff policy. Tariffs change *composition* of imports and prices but not aggregate trade balance."
+    }
+  ]
+}

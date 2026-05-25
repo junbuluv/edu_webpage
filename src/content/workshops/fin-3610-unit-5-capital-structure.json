@@ -1,0 +1,44 @@
+{
+  "slug": "fin-3610-unit-5-capital-structure",
+  "title": "Workshop: Capital Structure and Payout Policy",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/mm-perfect-market",
+  "summary": "Unit 5 group session: Modigliani-Miller, debt and taxes, financial distress, capital budgeting with leverage, payout policy.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "State MM Proposition I in perfect markets. What three assumptions make it work, and which assumption breaks first in the real world?",
+      "notes": "PropI: firm value independent of capital structure. Assumptions: no taxes, no bankruptcy costs, symmetric information, no transactions costs, investors can borrow at the same rate as firms. First to break: taxes (interest deductibility creates a tax shield)."
+    },
+    {
+      "id": "q2",
+      "prompt": "MM-with-taxes: PV of tax shield = t_C × D for permanent debt. A firm with D = $200M, corporate tax rate 25% — what's the value of its debt tax shield? Why might the realized number be lower?",
+      "notes": "PV(tax shield) = 0.25 × 200 = $50M. Realized lower if: (1) personal tax disadvantage to debt holders partly offsets corporate advantage (Miller's debt-tax-shield critique), (2) firm doesn't always have profits to shield (NOLs limit the benefit), (3) probability of default reduces the shield."
+    },
+    {
+      "id": "q3",
+      "prompt": "Trade-off theory: optimal debt level balances tax shield benefits against expected financial distress costs. Sketch a U-shaped V(D) curve. Why don't we see the same optimal D/V across industries?",
+      "notes": "Industries differ in: (1) profitability stability (utilities can take more leverage than tech), (2) asset tangibility (more tangible → easier to liquidate → lower distress costs), (3) growth opportunities (debt overhang risk for high-growth firms)."
+    },
+    {
+      "id": "q4",
+      "prompt": "Define debt overhang. Walk through the numerical example from the lesson: assets $80M, debt $100M, NPV-positive project worth $30M PV that needs $20M investment. Why don't equity holders fund?",
+      "notes": "Project value flows first to debt holders (recovery: max(0, $80+30 - 100) = $10M). Equity holders pay $20M, recover $10M, net loss $10M. Even though project is +NPV in absolute terms, equity refuses. Solution: debt forgiveness, debt-for-equity swaps, or convertibility provisions."
+    },
+    {
+      "id": "q5",
+      "prompt": "APV method: V = V_U + PV(tax shield) - PV(distress costs). Compute V for an unlevered firm value $100M, perpetual debt $40M at 5% interest, tax rate 25%, distress costs ~$5M.",
+      "notes": "V = 100 + 0.25 × 40 - 5 = 100 + 10 - 5 = $105M. APV is most useful when leverage changes over time (e.g., LBO restructuring) — separate the firm's pure operating value from the financing decision."
+    },
+    {
+      "id": "q6",
+      "prompt": "Dividend policy irrelevance (MM): in perfect markets, dividend vs share repurchase don't affect firm value. Why do firms still care so much about dividend smoothing?",
+      "notes": "Signaling — dividend cuts send a negative signal. Sticky dividends commit management to maintain profitability. Tax clienteles — different investors prefer different payout mixes. Real markets have frictions MM abstracts away."
+    },
+    {
+      "id": "q7",
+      "prompt": "WACC under leverage: as D/V increases, does WACC always fall (because debt is cheaper)? Where's the turning point?",
+      "notes": "Falls initially (more cheap debt). Eventually r_E rises faster than the debt shield gains, and r_D rises with default risk. WACC has a U-shape — usually flat near typical industry leverage levels (50-60% D/V for utilities, 10-20% for tech)."
+    }
+  ]
+}
