@@ -107,8 +107,8 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
         </h2>
         <p class="mt-1 text-sm text-ink-muted">
           {courseUsesSections
-            ? <>Stamp in for <em>your</em> section once you're physically in the room. One stamp per device per session.</>
-            : <>Stamp in once you're physically in the room. One stamp per device per session.</>}
+            ? <>Stamp in for <em>your</em> section once you're physically in the room.</>
+            : <>Stamp in once you're physically in the room.</>}
         </p>
         <ul class="mt-4 space-y-3">
           {(admins ?? []).map((a) => {
@@ -170,13 +170,9 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     )}
 
     <p class="mt-12 text-xs text-ink-muted">
-      <strong>How attendance is verified.</strong> Stamping records your
-      location (within the geofence radius set for this session) and a
-      device cookie tied to this browser. The same device can only be
-      used to stamp one student per session. This is a soft barrier
-      designed to prevent the most common attempts at proxy attendance;
-      a determined student can defeat it. Your instructor may still take
-      an in-person headcount.
+      Stamping records your location and links the attendance to your own
+      account. See the <a class="underline" href="/privacy">privacy policy</a>
+      for details.
     </p>
   </article>
 </BaseLayout>
