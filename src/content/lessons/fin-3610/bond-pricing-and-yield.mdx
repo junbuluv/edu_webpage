@@ -17,6 +17,7 @@ draft: false
 ---
 
 import BondPriceYield from '@components/viz/BondPriceYield';
+import Figure from '@components/mdx/Figure';
 
 ## A bond is just an annuity plus a lump sum
 
@@ -58,6 +59,14 @@ A bond issued at par at a 5% coupon, then yields rise to 7%: the price
 falls below par. Why would anyone pay par for a 5% coupon when the
 market wants 7%? They wouldn't — so the price drops to make the
 *total* return (coupons + capital gain at maturity) equal 7%.
+
+<Figure
+  src="/figures/fin-3610/bond-pricing-and-yield/dgs10-vs-dgs2-1976-2024.png"
+  alt="10-year and 2-year US Treasury constant maturity yields, daily, from 1976 to 2024."
+  caption="Long- and short-Treasury yields since 1976. A bond's YTM at issuance plus the path of these market yields is what determines whether it later trades at a premium or discount. The 2022–2024 stretch where the 2-year (red) exceeded the 10-year (blue) — the inverted curve — is unusual: it means brand-new short-term Treasuries paid more than long-term ones, the opposite of the normal upward-sloping shape."
+  credit="FRED, St. Louis Fed (DGS10, DGS2)"
+  creditHref="https://fred.stlouisfed.org/graph/?id=DGS10,DGS2"
+/>
 
 ## Play with it
 
