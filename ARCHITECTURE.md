@@ -1,6 +1,6 @@
 # Architecture
 
-Why Econ Studio is built the way it is. For setup and commands, see
+Why Baruch Econ & Finance Studio is built the way it is. For setup and commands, see
 `README.md`. For collaboration conventions, see `AGENTS.md`.
 
 ## The core idea

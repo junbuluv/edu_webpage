@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for working on Econ Studio. This document is the short version of "how
+Thanks for working on Baruch Econ & Finance Studio. This document is the short version of "how
 to add things without breaking other things." For the *why*, see
 `ARCHITECTURE.md`. For agent collaborators, see `AGENTS.md`.
 

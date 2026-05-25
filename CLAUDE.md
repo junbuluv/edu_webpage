@@ -1,6 +1,6 @@
 # Project memory for Claude Code
 
-This is **Econ Studio**, an interactive Economics & Finance education site for
+This is **Baruch Econ & Finance Studio**, an interactive Economics & Finance education site for
 undergraduates. Lessons are MDX with embedded React-island simulations;
 quizzes are JSON; progress + auth live in Supabase. Public repo at
 <https://github.com/junbuluv/edu_webpage>.
