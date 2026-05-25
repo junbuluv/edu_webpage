@@ -2,11 +2,18 @@ import type { APIRoute } from 'astro';
 import { getAdminClient } from '@lib/supabase/admin';
 import { isStaff } from '@lib/roles';
 
-// Open a new workshop_administrations row for one section in one week.
+// Open a new workshop_administrations row for one workshop window.
 // Instructor only. Posted as form data (so the page's plain <form>
 // submission works without JS).
+//
+// ECO 1002 runs four per-day sections (CML/CTL/CWL/CRL); the form sends
+// `section` and we store it. FIN 3610 has no per-day sections; the form
+// omits `section` and we store NULL. The DB has partial unique indexes
+// keyed on either (workshop_slug, section, week_of) or
+// (workshop_slug, week_of) depending on whether section is set.
 
 const SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
+const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
 const BARUCH_55_LEX = { lat: 40.7411, lng: -73.9837 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -20,14 +27,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const form = await request.formData();
   const workshopSlug = String(form.get('workshop_slug') ?? '');
   const courseSlug = String(form.get('course_slug') ?? '');
-  const section = String(form.get('section') ?? '');
+  const rawSection = String(form.get('section') ?? '');
   const weekOf = String(form.get('week_of') ?? '');
   const opensAt = String(form.get('opens_at') ?? '');
   const closesAt = String(form.get('closes_at') ?? '');
   const radius = Number(form.get('required_radius_meters') ?? 200);
   const notes = String(form.get('notes') ?? '').trim() || null;
 
-  if (!workshopSlug || !courseSlug || !SECTIONS.has(section) || !weekOf || !opensAt || !closesAt) {
+  if (!workshopSlug || !courseSlug || !weekOf || !opensAt || !closesAt) {
+    return redirectBack(request, 'invalid_input');
+  }
+
+  const courseUsesSections = COURSES_WITH_SECTIONS.has(courseSlug);
+  const section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null = courseUsesSections
+    ? (SECTIONS.has(rawSection) ? (rawSection as 'CML' | 'CTL' | 'CWL' | 'CRL') : null)
+    : null;
+  if (courseUsesSections && section == null) {
     return redirectBack(request, 'invalid_input');
   }
 
@@ -47,7 +62,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { error } = await admin.from('workshop_administrations').insert({
     workshop_slug: workshopSlug,
     course_slug: courseSlug,
-    section: section as 'CML' | 'CTL' | 'CWL' | 'CRL',
+    section,
     week_of: weekOf,
     instructor_id: user.id,
     opens_at: new Date(opensAt).toISOString(),
@@ -59,7 +74,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   if (error) {
-    // Most common: 23505 unique violation on (workshop_slug, section, week_of)
+    // 23505 unique violation on whichever partial index applies (with-section
+    // for ECO; no-section for FIN).
     const reason = error.code === '23505' ? 'already_opened' : 'insert_failed';
     return redirectBack(request, reason, error.message);
   }

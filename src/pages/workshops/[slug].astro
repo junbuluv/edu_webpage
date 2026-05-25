@@ -59,6 +59,9 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
   if (now > Date.parse(closes)) return 'closed';
   return 'open';
 }
+
+const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
+const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
 ---
 
 <BaseLayout title={workshop.data.title}>
@@ -89,19 +92,23 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
       <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
         <p>
           <strong>No workshop sessions are scheduled right now.</strong>{' '}
-          Your instructor will open Monday (CML), Tuesday (CTL), Wednesday
-          (CWL), and Thursday (CRL) sections each week. Come back during
-          class time.
+          {courseUsesSections
+            ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
+            : 'Your instructor will open a workshop window each week.'}{' '}
+          Come back during class time.
         </p>
       </div>
     )}
 
     {canView && (admins?.length ?? 0) > 0 && (
       <section class="mt-10">
-        <h2 class="text-xl font-semibold">This week's sections</h2>
+        <h2 class="text-xl font-semibold">
+          {courseUsesSections ? "This week's sections" : "This week's workshop"}
+        </h2>
         <p class="mt-1 text-sm text-ink-muted">
-          Stamp in for <em>your</em> section once you're physically in the
-          room. One stamp per device per session.
+          {courseUsesSections
+            ? <>Stamp in for <em>your</em> section once you're physically in the room. One stamp per device per session.</>
+            : <>Stamp in once you're physically in the room. One stamp per device per session.</>}
         </p>
         <ul class="mt-4 space-y-3">
           {(admins ?? []).map((a) => {
@@ -112,7 +119,8 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="text-sm font-medium">
-                      Section {a.section} · week of {new Date(a.week_of).toLocaleDateString()}
+                      {a.section ? <>Section {a.section} · </> : null}
+                      week of {new Date(a.week_of).toLocaleDateString()}
                     </p>
                     <p class="mt-1 text-xs text-ink-muted">
                       Open {new Date(a.opens_at).toLocaleString()} — closes{' '}
@@ -143,7 +151,7 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
                     <StampInButton
                       client:load
                       administrationId={a.id}
-                      section={a.section}
+                      section={a.section ?? null}
                       requiredLat={a.required_lat}
                       requiredLng={a.required_lng}
                       requiredRadiusMeters={a.required_radius_meters}

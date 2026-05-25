@@ -59,8 +59,8 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
           <h2 class="text-xl font-semibold">Workshops</h2>
           <p class="mt-1 text-sm text-ink-muted">
             Weekly small-group sessions for both ECO 1002 and FIN 3610.
-            Open one window per section (CML / CTL / CWL / CRL) per
-            week. Geofenced stamp-in attendance.
+            ECO 1002 has four per-day sections (CML / CTL / CWL / CRL);
+            FIN 3610 has one window per week. Geofenced stamp-in attendance.
           </p>
           <p class="mt-3 text-xs text-ink-muted">
             <strong>{workshops.length}</strong> workshop{workshops.length === 1 ? '' : 's'} in your courses ·
@@ -98,7 +98,7 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
           >
             CONTRIBUTING.md
           </a>{' '}
-          <span class="text-ink-muted">— workshop/exam SQL examples, role promotion, secret rotation.</span>
+          <span class="text-ink-muted">— workshop SQL examples, role promotion, secret rotation.</span>
         </li>
       </ul>
     </section>

@@ -138,12 +138,14 @@ If you need a new question type, **extend the union and the renderer in
 
 Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is tracked via stamp-in with three barriers: open/close window, geofence, and one-stamp-per-device.
 
-Sections are `CML` (Monday), `CTL` (Tuesday), `CWL` (Wednesday), `CRL` (Thursday). The instructor opens one administration per section per week.
+**Two course models:**
+- **ECO 1002** runs four per-day sections — `CML` (Mon), `CTL` (Tue), `CWL` (Wed), `CRL` (Thu). The instructor opens one administration per section per week (four per workshop per week).
+- **FIN 3610** runs one workshop window per week, no per-day sections. The `section` column is `NULL` for FIN administrations.
 
 **From the instructor UI** (recommended):
-`/instructor/workshops/<slug>` — fill the form, choose section, set the open/close window, click "Open section window."
+`/instructor/workshops/<slug>` — fill the form, set the open/close window, click the open button. The form shows a section picker only for ECO.
 
-**Or via SQL:**
+**Or via SQL (ECO 1002 with section):**
 ```sql
 insert into public.workshop_administrations (
   workshop_slug, course_slug, section, week_of, instructor_id,
@@ -159,7 +161,25 @@ insert into public.workshop_administrations (
 );
 ```
 
-The `unique (workshop_slug, section, week_of)` constraint prevents opening the same section twice for the same week.
+**Or via SQL (FIN 3610, no section):**
+```sql
+insert into public.workshop_administrations (
+  workshop_slug, course_slug, section, week_of, instructor_id,
+  opens_at, closes_at,
+  required_lat, required_lng, required_radius_meters,
+  notes
+) values (
+  'fin-3610-unit-2-time-money', 'fin-3610', null, '2027-03-15',
+  (select id from auth.users where email = 'you@baruch.cuny.edu'),
+  '2027-03-15 22:00:00+00', '2027-03-15 23:30:00+00',
+  40.7411, -73.9837, 200,
+  'Bring laptops. Form groups of 3-4.'
+);
+```
+
+Two partial unique indexes enforce no-duplicates per mode:
+- `(workshop_slug, section, week_of) where section is not null` — ECO can't double-open the same section in the same week.
+- `(workshop_slug, week_of) where section is null` — FIN can't double-open the same workshop in the same week.
 
 ### Querying who stamped in
 

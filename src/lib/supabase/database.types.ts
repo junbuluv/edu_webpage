@@ -120,7 +120,7 @@ export type Database = {
           id: string;
           workshop_slug: string;
           course_slug: string;
-          section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of: string;
           instructor_id: string;
           opens_at: string;
@@ -135,7 +135,7 @@ export type Database = {
           id?: string;
           workshop_slug: string;
           course_slug: string;
-          section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          section?: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of: string;
           instructor_id: string;
           opens_at: string;
@@ -149,7 +149,7 @@ export type Database = {
           id?: string;
           workshop_slug?: string;
           course_slug?: string;
-          section?: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          section?: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of?: string;
           instructor_id?: string;
           opens_at?: string;

@@ -32,7 +32,6 @@ const nowIso = new Date().toISOString();
 type AdminRow = {
   id: string;
   workshop_slug: string;
-  section: 'CML' | 'CTL' | 'CWL' | 'CRL';
   opens_at: string;
   closes_at: string;
   week_of: string;
@@ -41,7 +40,7 @@ let admins: AdminRow[] = [];
 if (allowed && supabase) {
   const { data } = await supabase
     .from('workshop_administrations')
-    .select('id, workshop_slug, section, opens_at, closes_at, week_of')
+    .select('id, workshop_slug, opens_at, closes_at, week_of')
     .eq('course_slug', 'fin-3610')
     .gt('closes_at', nowIso)
     .order('opens_at', { ascending: true });
@@ -67,10 +66,8 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
     <p class="text-xs uppercase tracking-wide text-accent font-medium">FIN 3610</p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">Workshops</h1>
     <p class="mt-3 text-ink-muted">
-      Weekly small-group discussion sessions, one per FIN 3610 unit. Four
-      weekly sections: <code>CML</code> (Mon), <code>CTL</code> (Tue),
-      <code>CWL</code> (Wed), <code>CRL</code> (Thu). Stamp in during
-      class to record participation.
+      Weekly small-group discussion sessions, one per FIN 3610 unit. Stamp
+      in during class to record participation.
     </p>
 
     {!allowed && (
@@ -104,7 +101,7 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
 
               {wAdmins.length === 0 ? (
                 <p class="mt-3 rounded bg-slate-50 px-3 py-2 text-xs text-ink-muted">
-                  No section windows scheduled. Your instructor will open them at meeting times.
+                  No workshop windows scheduled. Your instructor will open them at meeting times.
                 </p>
               ) : (
                 <ul class="mt-3 space-y-1">
@@ -113,7 +110,7 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
                     return (
                       <li class="flex items-center justify-between gap-3 rounded bg-slate-50 px-3 py-1.5 text-xs">
                         <span>
-                          Section <strong>{a.section}</strong> · week of {new Date(a.week_of).toLocaleDateString()}
+                          Week of {new Date(a.week_of).toLocaleDateString()}
                         </span>
                         <span
                           class={`rounded px-1.5 py-0.5 font-semibold uppercase ${

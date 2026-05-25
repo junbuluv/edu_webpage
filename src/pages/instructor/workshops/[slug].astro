@@ -46,7 +46,7 @@ if (Astro.url.searchParams.get('format') === 'csv') {
   for (const r of attendance) {
     const a = adminById.get(r.administration_id);
     if (!a) continue;
-    lines.push([r.administration_id, a.section, a.week_of, r.user_id, r.stamped_at].join(','));
+    lines.push([r.administration_id, a.section ?? '', a.week_of, r.user_id, r.stamped_at].join(','));
   }
   return new Response(lines.join('\n'), {
     status: 200,
@@ -93,8 +93,10 @@ function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed'
 }
 
 const SECTIONS = ['CML', 'CTL', 'CWL', 'CRL'] as const;
+const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
+const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
 
-// Default values for the "Open a new section" form.
+// Default values for the "Open a new window" form.
 const todayLocal = new Date().toISOString().slice(0, 10);
 const defaultOpensAt = new Date().toISOString().slice(0, 16);
 const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 16);
@@ -109,17 +111,21 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
     <p class="mt-3 text-ink-muted">{workshop.data.summary}</p>
 
     <section class="mt-10 rounded-lg border border-slate-200 p-5">
-      <h2 class="text-lg font-semibold">Open a new section window</h2>
+      <h2 class="text-lg font-semibold">
+        {courseUsesSections ? 'Open a new section window' : 'Open a new workshop window'}
+      </h2>
       <form method="POST" action="/api/instructor/workshops/open" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
         <input type="hidden" name="workshop_slug" value={workshop.data.slug} />
         <input type="hidden" name="course_slug" value={workshop.data.course} />
 
-        <label class="text-sm">
-          <span class="font-medium">Section</span>
-          <select name="section" required class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5">
-            {SECTIONS.map((s) => <option value={s}>{s}</option>)}
-          </select>
-        </label>
+        {courseUsesSections && (
+          <label class="text-sm">
+            <span class="font-medium">Section</span>
+            <select name="section" required class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5">
+              {SECTIONS.map((s) => <option value={s}>{s}</option>)}
+            </select>
+          </label>
+        )}
 
         <label class="text-sm">
           <span class="font-medium">Week of (Monday)</span>
@@ -149,7 +155,7 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
 
         <div class="md:col-span-2">
           <button type="submit" class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-            Open section window
+            {courseUsesSections ? 'Open section window' : 'Open workshop window'}
           </button>
         </div>
       </form>
@@ -157,7 +163,9 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
 
     <section class="mt-10">
       <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Section windows & rosters</h2>
+        <h2 class="text-lg font-semibold">
+          {courseUsesSections ? 'Section windows & rosters' : 'Workshop windows & rosters'}
+        </h2>
         {(admins?.length ?? 0) > 0 && (
           <a
             href={`/instructor/workshops/${slug}?format=csv`}
@@ -169,7 +177,11 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
       </div>
 
       {(admins?.length ?? 0) === 0 && (
-        <p class="mt-3 text-sm text-ink-muted">No section windows opened yet. Use the form above.</p>
+        <p class="mt-3 text-sm text-ink-muted">
+          {courseUsesSections
+            ? 'No section windows opened yet. Use the form above.'
+            : 'No workshop windows opened yet. Use the form above.'}
+        </p>
       )}
 
       {(admins?.length ?? 0) > 0 && (
@@ -182,7 +194,8 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="text-sm font-medium">
-                      Section {a.section} · week of {new Date(a.week_of).toLocaleDateString()}
+                      {a.section ? <>Section {a.section} · </> : null}
+                      week of {new Date(a.week_of).toLocaleDateString()}
                     </p>
                     <p class="mt-1 text-xs text-ink-muted">
                       Open {new Date(a.opens_at).toLocaleString()} —{' '}
