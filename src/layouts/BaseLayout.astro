@@ -37,7 +37,10 @@ const activeCourseSlug = profile?.active_course_slug ?? null;
   <body class="min-h-screen flex flex-col">
     <header class="border-b border-slate-200 bg-white">
       <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-        <a href="/" class="font-semibold text-lg tracking-tight">Baruch Econ & Finance Studio</a>
+        <a href="/" class="font-semibold text-lg tracking-tight">
+          <span class="sm:hidden">Baruch Studio</span>
+          <span class="hidden sm:inline">Baruch Econ &amp; Finance Studio</span>
+        </a>
         <nav class="flex items-center gap-4 text-sm">
           <a href="/eco-1002" class="text-ink-muted hover:text-ink">ECO 1002</a>
           <a href="/fin-3610" class="text-ink-muted hover:text-ink">FIN 3610</a>
