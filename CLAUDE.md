@@ -24,19 +24,15 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Visualizations: `src/components/viz/`
 - Quiz engine: `src/components/quiz/Quiz.tsx`
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
-- Proctored exams: content `src/content/exams/<slug>.json`, React island
-  `src/components/exam/ExamRunner.tsx`, listing/runner pages
-  `src/pages/exams/{index,[admin]}.astro`, server APIs
-  `src/pages/api/exams/{start,submit}.ts`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
-- Workshops (ECO 1002 only): content `src/content/workshops/<slug>.json`,
-  schema narrowed via `z.literal('eco-1002')`; React island
+- Workshops (both courses): content `src/content/workshops/<slug>.json`,
+  schema gated by `courseEnum`; React island
   `src/components/workshop/StampInButton.tsx`; student page
-  `src/pages/workshops/[slug].astro`; per-course index
-  `src/pages/eco-1002/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
-- Instructor management hub: `src/pages/instructor/{index,workshops,exams}/...`;
-  form-handler APIs `src/pages/api/instructor/{workshops,exams}/{open,close}.ts`
+  `src/pages/workshops/[slug].astro`; per-course indexes
+  `src/pages/{eco-1002,fin-3610}/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
+- Instructor management hub: `src/pages/instructor/{index,workshops}/...`;
+  form-handler APIs `src/pages/api/instructor/workshops/{open,close}.ts`
 - Course primitives: `src/lib/courses.ts` (slug tuple),
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
@@ -162,25 +158,26 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   checklist.
 - **New workshop**: drop a JSON under `src/content/workshops/` matching
   the `workshops` collection schema in `config.ts` (5–7 questions, course
-  must be `eco-1002`). Visible at `/workshops/<slug>` and
-  `/eco-1002/workshops` to enrolled students (admin view-as also works).
+  must be one of `eco-1002` / `fin-3610`). Visible at `/workshops/<slug>`
+  and the per-course index `/{course}/workshops` to enrolled students
+  (admin view-as also works).
 - **Open a workshop window**: as a staff user, visit
   `/instructor/workshops/<slug>` and use the section/time/geofence form.
-  For an exam window, `/instructor/exams/<slug>`. Both also support SQL
-  inserts; see `CONTRIBUTING.md`.
+  Also supports SQL inserts; see `CONTRIBUTING.md`.
 - **Promote a user**: in Supabase SQL Editor,
   ```sql
   update public.profiles set role = '<student|instructor|ta|admin>'
    where id = (select id from auth.users where email = '<them>');
   ```
   No in-app promotion path by design — admins designated via SQL by the
-  project owner.
+  project owner. **Pending promotion** (account not yet created):
+  `konstantin.kucheryavyy@baruch.cuny.edu` → `admin` after first signup.
 - **Bootstrap a fresh Supabase project for dev/test**: run the full
   `supabase/schema.sql` once, sign up via `/auth/signup`, then in SQL Editor:
   `update auth.users set email_confirmed_at = now() where email = '<you>';`
   If signup pre-dated the schema, also:
   `insert into public.profiles (id, role) select id, 'student' from auth.users where email = '<you>' on conflict do nothing;`
-  Then promote, enroll, and open an exam administration per the examples
+  Then promote, enroll, and open a workshop administration per the examples
   in `CONTRIBUTING.md`.
 
 ## Verifying before declaring done
