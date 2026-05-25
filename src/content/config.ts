@@ -73,6 +73,9 @@ const instructors = defineCollection({
     email: z.string().email().optional(),
     office: z.string().optional(),
     courses: z.array(courseEnum).default([]),
+    // Public-asset path to a headshot, e.g. "/instructors/jun-yoo.jpeg".
+    // Optional; profile pages render a plain header when absent.
+    photoPath: z.string().optional(),
     researchInterests: z.array(z.string()).default([]),
     selectedPublications: z
       .array(
