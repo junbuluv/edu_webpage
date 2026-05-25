@@ -16,6 +16,8 @@ quizSlug: "fin-3610-sensitivity-and-scenario"
 draft: false
 ---
 
+import Figure from '@components/mdx/Figure';
+
 ## Why a single NPV is misleading
 
 A project model takes a dozen inputs (revenue, growth, margin, tax
@@ -27,6 +29,14 @@ input values in advance.
 Real-world capital-budgeting practice treats the point-estimate NPV
 as a *starting* point, then asks: how sensitive is it to my
 assumptions, and which assumptions matter most?
+
+<Figure
+  src="/figures/fin-3610/sensitivity-and-scenario/wti-crude-2000-2024.png"
+  alt="WTI crude oil spot price, daily, 2000 to 2024."
+  caption="WTI crude oil price since 2000 — an example of a single input that wrecks NPVs when modeled as a constant. From the 2008 spike above $140, through the 2014–2016 collapse, the 2020 sub-zero crash, and the 2022 rebound above $120, no point-estimate has been reliable for more than a year or two. For any project where oil is an input (transport, plastics, fertilizer, refining), the right question isn't 'what's oil worth?' — it's 'how does NPV respond across the realistic range?'"
+  credit="FRED, St. Louis Fed (DCOILWTICO)"
+  creditHref="https://fred.stlouisfed.org/series/DCOILWTICO"
+/>
 
 Three techniques in increasing order of sophistication.
 

@@ -17,6 +17,8 @@ quizSlug: "fin-3610-valuing-stocks"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## What is a stock worth?
 
 A share of stock is a claim on the future dividends the firm chooses
@@ -54,6 +56,29 @@ $$
 Coca-Cola actually trades around \$60-70 per share in 2025-2026. The
 Gordon model gets us in the ballpark precisely because Coke is the
 kind of company it was designed for.
+
+<BarFigure
+  client:load
+  data={[
+    { fy: 'FY14', dps: 1.12 },
+    { fy: 'FY15', dps: 1.24 },
+    { fy: 'FY16', dps: 1.44 },
+    { fy: 'FY17', dps: 1.56 },
+    { fy: 'FY18', dps: 1.72 },
+    { fy: 'FY19', dps: 1.84 },
+    { fy: 'FY20', dps: 2.04 },
+    { fy: 'FY21', dps: 2.24 },
+    { fy: 'FY22', dps: 2.48 },
+    { fy: 'FY23', dps: 2.72 },
+    { fy: 'FY24', dps: 3.00 },
+  ]}
+  xKey="fy"
+  series={[{ key: 'dps', name: 'Dividend per share ($)', color: '#4572a7' }]}
+  yAxisLabel="USD per share"
+  caption="Microsoft's annual dividend per share, fiscal years 2014–2024 (Microsoft's FY ends June 30; no stock splits since 2003 so the series is directly comparable). The compound annual growth rate from FY14 to FY24 is about 10.4% — the kind of stable, growing dividend stream the Gordon model is designed for, even if Microsoft's actual cost of equity makes the formula non-trivial."
+  credit="Microsoft Corp. 10-K filings via SEC EDGAR"
+  creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000789019&type=10-K"
+/>
 
 ## When Gordon breaks
 
