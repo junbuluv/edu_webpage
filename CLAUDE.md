@@ -30,6 +30,25 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/pages/api/exams/{start,submit}.ts`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
+- Workshops (ECO 1002 only): content `src/content/workshops/<slug>.json`,
+  schema narrowed via `z.literal('eco-1002')`; React island
+  `src/components/workshop/StampInButton.tsx`; student page
+  `src/pages/workshops/[slug].astro`; per-course index
+  `src/pages/eco-1002/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
+- Instructor management hub: `src/pages/instructor/{index,workshops,exams}/...`;
+  form-handler APIs `src/pages/api/instructor/{workshops,exams}/{open,close}.ts`
+- Course primitives: `src/lib/courses.ts` (slug tuple),
+  `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
+  (active-course resolution + per-course data loader),
+  `src/components/course/CourseSwitcher.tsx` (global header dropdown)
+- Role helpers: `src/lib/roles.ts` — `isStaff`, `isAdmin`, `roleLabel`.
+  Use these instead of inline equality checks
+- Device cookie: `src/lib/device.ts` — middleware issues a `device_id`
+  UUID cookie used by the workshop stamp uniqueness constraint
+- Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
+  tween honoring `prefers-reduced-motion`); MDX components
+  `src/components/mdx/{ScenarioPlayer,CompareScenarios}.tsx`
+- Per-chart presets + URL state: `src/lib/{islm,adas,bonds}/{presets,url-state}.ts`
 
 ## Repository workflow
 
@@ -90,6 +109,17 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     `cookies.headers()`, which is outgoing Set-Cookie). In `setAll`, local
     `COOKIE_OPTIONS` are spread *after* Supabase's defaults so `secure: false`
     sticks on http://localhost in dev — don't invert that merge order.
+12. **Use `isStaff(role)` / `isAdmin(role)` from `@lib/roles`** for any
+    staff/admin gate — never inline `role === 'instructor' || role === 'admin'`.
+    The `user_role` enum now has four values: `student`, `instructor`,
+    `ta`, `admin`. New TA-equivalent permissions land for free when checks
+    go through `isStaff`.
+13. **`<ClientRouter />` is mounted in `BaseLayout`.** Cross-page nav
+    uses Astro View Transitions. If a React island appears unresponsive
+    after navigation, suspect stale DOM references in test/debug code
+    rather than a hydration failure — confirm by checking the island
+    element directly (`document.querySelector('astro-island')` should
+    not have an `ssr` attribute after hydration).
 
 ## Hosted Supabase gotchas
 
@@ -109,11 +139,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   spam filters (cuny.edu). For dev, manually confirm via SQL:
   `update auth.users set email_confirmed_at = now() where email = '...';`
   For prod, configure custom SMTP (Resend / Postmark / SES).
+- **Adding values to `user_role`** uses `alter type user_role add value if
+  not exists '<value>';`. This statement cannot run inside an explicit
+  transaction block. Supabase SQL Editor runs statements outside one by
+  default; if you ever see "ALTER TYPE … ADD cannot run inside a
+  transaction block," run the ALTER TYPE on its own first.
 
 ## Common tasks
 
-- **New macro lesson**: copy `src/content/lessons/macro/is-lm-intro.mdx` as
-  a template; pick a unique `order:` within the unit.
+- **New macro lesson**: copy `src/content/lessons/eco-1002/is-lm-intro.mdx`
+  as a template; pick a unique `order:` within the unit.
 - **New quiz**: add JSON under `src/content/quizzes/`. The slug must match
   `quizSlug:` in the lesson frontmatter to link them.
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
@@ -125,6 +160,21 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 - **Open a PR**: branch naming `feat/<slug>`, `fix/<slug>`, `lesson/<slug>`,
   `chore/<slug>`. The PR template is required reading — fill the verification
   checklist.
+- **New workshop**: drop a JSON under `src/content/workshops/` matching
+  the `workshops` collection schema in `config.ts` (5–7 questions, course
+  must be `eco-1002`). Visible at `/workshops/<slug>` and
+  `/eco-1002/workshops` to enrolled students (admin view-as also works).
+- **Open a workshop window**: as a staff user, visit
+  `/instructor/workshops/<slug>` and use the section/time/geofence form.
+  For an exam window, `/instructor/exams/<slug>`. Both also support SQL
+  inserts; see `CONTRIBUTING.md`.
+- **Promote a user**: in Supabase SQL Editor,
+  ```sql
+  update public.profiles set role = '<student|instructor|ta|admin>'
+   where id = (select id from auth.users where email = '<them>');
+  ```
+  No in-app promotion path by design — admins designated via SQL by the
+  project owner.
 - **Bootstrap a fresh Supabase project for dev/test**: run the full
   `supabase/schema.sql` once, sign up via `/auth/signup`, then in SQL Editor:
   `update auth.users set email_confirmed_at = now() where email = '<you>';`
