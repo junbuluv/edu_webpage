@@ -21,6 +21,7 @@ export type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>
 export function createSupabaseServerClient(
   cookies: AstroCookies,
   headers: Headers,
+  request: Request,
 ) {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -32,9 +33,9 @@ export function createSupabaseServerClient(
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        return Array.from(cookies.headers()).flatMap(([name, value]) =>
-          name === 'cookie' ? parseCookieHeader(value) : [],
-        );
+        // Read INCOMING cookies from the request's Cookie header.
+        // (cookies.headers() returns outgoing Set-Cookie, not incoming.)
+        return parseCookieHeader(request.headers.get('cookie') ?? '');
       },
       setAll(
         cookiesToSet: Array<{
@@ -44,11 +45,12 @@ export function createSupabaseServerClient(
         }>,
       ) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          cookies.set(name, value, { ...COOKIE_OPTIONS, ...options });
-          headers.append(
-            'Set-Cookie',
-            serializeCookie(name, value, { ...COOKIE_OPTIONS, ...options }),
-          );
+          // Our COOKIE_OPTIONS must win over Supabase's defaults so that
+          // secure=false sticks on http://localhost in dev. Otherwise the
+          // browser silently rejects the session cookie.
+          const merged = { ...options, ...COOKIE_OPTIONS };
+          cookies.set(name, value, merged);
+          headers.append('Set-Cookie', serializeCookie(name, value, merged));
         });
       },
     },
