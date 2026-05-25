@@ -6,7 +6,7 @@ import InstructorProfile from '@components/instructor/InstructorProfile.astro';
 const { slug } = Astro.params;
 if (!slug) return new Response(null, { status: 404 });
 const instructor = await getEntry('instructors', slug);
-if (!instructor || !instructor.data.courses.includes('eco-1002')) {
+if (!instructor || !instructor.data.courses.includes('fin-3610')) {
   return new Response(null, { status: 404 });
 }
 ---
@@ -14,7 +14,7 @@ if (!instructor || !instructor.data.courses.includes('eco-1002')) {
 <BaseLayout title={`${instructor.data.fullName} — Instructor profile`}>
   <InstructorProfile
     instructor={instructor}
-    courseCode="ECO 1002"
-    backHref="/eco-1002/instructors"
+    courseCode="FIN 3610"
+    backHref="/fin-3610/instructors"
   />
 </BaseLayout>
