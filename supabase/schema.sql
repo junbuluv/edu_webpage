@@ -255,7 +255,10 @@ create policy "enrollments_admin_read"
 -- We assume quiz_slug encodes the course as a prefix like "macro-..."; the
 -- application layer is responsible for ensuring enrollment + quiz course
 -- prefixes align. For now we scope by student-instructor relationship only.
+-- Drop both the legacy short name and the current name so this block
+-- is idempotent regardless of which version a project was last on.
 drop policy if exists "quiz_attempts_instructor_read" on public.quiz_attempts;
+drop policy if exists "quiz_attempts_instructor_read_scoped" on public.quiz_attempts;
 create policy "quiz_attempts_instructor_read_scoped"
   on public.quiz_attempts for select
   using (
