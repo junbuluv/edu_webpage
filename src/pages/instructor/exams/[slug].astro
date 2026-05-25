@@ -1,0 +1,362 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getEntry } from 'astro:content';
+import { isAdmin } from '@lib/roles';
+
+const user = Astro.locals.user!;
+const supabase = Astro.locals.supabase!;
+const role = Astro.locals.profile?.role ?? 'student';
+
+const { slug } = Astro.params;
+if (!slug) return new Response(null, { status: 404 });
+
+const exam = await getEntry('exams', slug);
+if (!exam) return new Response(null, { status: 404 });
+
+// Authorize: admin sees anything; instructor must teach the course.
+const { data: rosterRow } = await supabase
+  .from('enrollments')
+  .select('user_id')
+  .eq('instructor_id', user.id)
+  .eq('course_slug', exam.data.course)
+  .maybeSingle();
+const canManage = isAdmin(role) || !!rosterRow;
+if (!canManage) return new Response(null, { status: 403 });
+
+// CSV export branch
+if (Astro.url.searchParams.get('format') === 'csv') {
+  const { data: admins } = await supabase
+    .from('exam_administrations')
+    .select('id, semester, opens_at, closes_at')
+    .eq('exam_slug', slug)
+    .order('opens_at', { ascending: false });
+  const adminIds = (admins ?? []).map((a) => a.id);
+  let attempts: Array<{
+    administration_id: string;
+    user_id: string;
+    score: number | null;
+    max_score: number | null;
+    submitted_at: string | null;
+    started_at: string;
+  }> = [];
+  if (adminIds.length > 0) {
+    const { data } = await supabase
+      .from('exam_attempts')
+      .select('administration_id, user_id, score, max_score, submitted_at, started_at')
+      .in('administration_id', adminIds);
+    attempts = data ?? [];
+  }
+  const adminById = new Map((admins ?? []).map((a) => [a.id, a]));
+  const lines = [
+    'administration_id,semester,user_id,started_at,submitted_at,score,max_score,percent',
+  ];
+  for (const r of attempts) {
+    const a = adminById.get(r.administration_id);
+    if (!a) continue;
+    const pct =
+      r.max_score && r.max_score > 0 && r.score != null
+        ? ((r.score as number) / (r.max_score as number)).toFixed(4)
+        : '';
+    lines.push(
+      [
+        r.administration_id,
+        a.semester,
+        r.user_id,
+        r.started_at,
+        r.submitted_at ?? '',
+        r.score ?? '',
+        r.max_score ?? '',
+        pct,
+      ].join(','),
+    );
+  }
+  return new Response(lines.join('\n'), {
+    status: 200,
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition': `attachment; filename="${slug}-attempts.csv"`,
+    },
+  });
+}
+
+const { data: admins } = await supabase
+  .from('exam_administrations')
+  .select(
+    'id, semester, opens_at, closes_at, required_lat, required_lng, required_radius_meters, duration_minutes, notes',
+  )
+  .eq('exam_slug', slug)
+  .order('opens_at', { ascending: false });
+
+const adminIds = (admins ?? []).map((a) => a.id);
+type AttemptRow = {
+  administration_id: string;
+  user_id: string;
+  score: number | null;
+  max_score: number | null;
+  submitted_at: string | null;
+  started_at: string;
+};
+let attempts: AttemptRow[] = [];
+if (adminIds.length > 0) {
+  const { data } = await supabase
+    .from('exam_attempts')
+    .select('administration_id, user_id, score, max_score, submitted_at, started_at')
+    .in('administration_id', adminIds)
+    .order('submitted_at', { ascending: false });
+  attempts = data ?? [];
+}
+
+const byAdmin = new Map<string, AttemptRow[]>();
+for (const r of attempts) {
+  const arr = byAdmin.get(r.administration_id) ?? [];
+  arr.push(r);
+  byAdmin.set(r.administration_id, arr);
+}
+
+function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed' {
+  const now = Date.now();
+  if (now < Date.parse(opens)) return 'upcoming';
+  if (now > Date.parse(closes)) return 'closed';
+  return 'open';
+}
+
+// Form defaults.
+const defaultOpensAt = new Date().toISOString().slice(0, 16);
+const defaultClosesAt = new Date(Date.now() + 2 * 60 * 60 * 1000)
+  .toISOString()
+  .slice(0, 16);
+---
+
+<BaseLayout title={`Manage: ${exam.data.title}`}>
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      {exam.data.course} · Instructor
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">{exam.data.title}</h1>
+    <p class="mt-3 text-ink-muted">{exam.data.description}</p>
+    <p class="mt-2 text-xs text-ink-muted">
+      {exam.data.questions.length} questions · {exam.data.durationMinutes} min ·
+      pass {Math.round(exam.data.passingScore * 100)}%
+    </p>
+
+    <section class="mt-10 rounded-lg border border-slate-200 p-5">
+      <h2 class="text-lg font-semibold">Open a new exam window</h2>
+      <form
+        method="POST"
+        action="/api/instructor/exams/open"
+        class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"
+      >
+        <input type="hidden" name="exam_slug" value={exam.data.slug} />
+        <input type="hidden" name="course_slug" value={exam.data.course} />
+
+        <label class="text-sm">
+          <span class="font-medium">Semester</span>
+          <input
+            type="text"
+            name="semester"
+            required
+            placeholder="spring-2027"
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+          <span class="text-xs text-ink-muted">
+            Free-text label. Must match the enrollment row's <code>semester</code> for visibility on <code>/exams</code>.
+          </span>
+        </label>
+
+        <label class="text-sm">
+          <span class="font-medium">Duration (minutes)</span>
+          <input
+            type="number"
+            name="duration_minutes"
+            min="5"
+            max="300"
+            value={exam.data.durationMinutes}
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+        </label>
+
+        <label class="text-sm">
+          <span class="font-medium">Opens at (local)</span>
+          <input
+            type="datetime-local"
+            name="opens_at"
+            required
+            value={defaultOpensAt}
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+        </label>
+
+        <label class="text-sm">
+          <span class="font-medium">Closes at (local)</span>
+          <input
+            type="datetime-local"
+            name="closes_at"
+            required
+            value={defaultClosesAt}
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+        </label>
+
+        <label class="text-sm">
+          <span class="font-medium">Geofence radius (m)</span>
+          <input
+            type="number"
+            name="required_radius_meters"
+            min="10"
+            max="50000"
+            value="200"
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+          <span class="text-xs text-ink-muted">
+            Around 55 Lexington Ave (40.7411, -73.9837).
+          </span>
+        </label>
+
+        <label class="text-sm md:col-span-2">
+          <span class="font-medium">Notes (optional)</span>
+          <input
+            type="text"
+            name="notes"
+            maxlength="200"
+            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+          />
+        </label>
+
+        <div class="md:col-span-2">
+          <button
+            type="submit"
+            class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Open exam window
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="mt-10">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Exam windows & attempts</h2>
+        {(admins?.length ?? 0) > 0 && (
+          <a
+            href={`/instructor/exams/${slug}?format=csv`}
+            class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
+          >
+            Download CSV
+          </a>
+        )}
+      </div>
+
+      {(admins?.length ?? 0) === 0 && (
+        <p class="mt-3 text-sm text-ink-muted">No exam windows opened yet. Use the form above.</p>
+      )}
+
+      {(admins?.length ?? 0) > 0 && (
+        <ul class="mt-4 space-y-4">
+          {(admins ?? []).map((a) => {
+            const status = statusOf(a.opens_at, a.closes_at);
+            const rows = byAdmin.get(a.id) ?? [];
+            const submitted = rows.filter((r) => r.submitted_at);
+            const inProgress = rows.length - submitted.length;
+            const scored = submitted.filter(
+              (r) => r.max_score != null && r.max_score > 0 && r.score != null,
+            );
+            const avgPct =
+              scored.length > 0
+                ? scored.reduce(
+                    (s, r) => s + (r.score as number) / (r.max_score as number),
+                    0,
+                  ) / scored.length
+                : null;
+            return (
+              <li class="rounded-lg border border-slate-200 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-medium">
+                      Semester <strong>{a.semester}</strong>
+                    </p>
+                    <p class="mt-1 text-xs text-ink-muted">
+                      Open {new Date(a.opens_at).toLocaleString()} —{' '}
+                      {new Date(a.closes_at).toLocaleString()}
+                    </p>
+                    <p class="mt-0.5 text-xs text-ink-muted">
+                      Duration {a.duration_minutes} min · Geofence within{' '}
+                      {a.required_radius_meters} m
+                    </p>
+                    {a.notes && <p class="mt-1 text-xs text-ink-muted">{a.notes}</p>}
+                  </div>
+                  <div class="text-right">
+                    <span
+                      class={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold uppercase ${
+                        status === 'open'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : status === 'upcoming'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {status}
+                    </span>
+                    <p class="mt-1 text-xs text-ink-muted">
+                      {submitted.length} submitted · {inProgress} in progress
+                      {avgPct != null && (
+                        <> · avg {Math.round(avgPct * 100)}%</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {status !== 'closed' && (
+                  <form method="POST" action="/api/instructor/exams/close" class="mt-3">
+                    <input type="hidden" name="administration_id" value={a.id} />
+                    <button
+                      type="submit"
+                      class="rounded border border-rose-300 px-2 py-1 text-xs text-rose-800 hover:bg-rose-50"
+                    >
+                      Close window now
+                    </button>
+                  </form>
+                )}
+
+                {rows.length > 0 && (
+                  <details class="mt-3 text-sm">
+                    <summary class="cursor-pointer text-ink-muted">
+                      Show roster ({rows.length})
+                    </summary>
+                    <ul class="mt-2 divide-y divide-slate-200 rounded border border-slate-200">
+                      {rows.map((r) => {
+                        const pct =
+                          r.max_score && r.max_score > 0 && r.score != null
+                            ? Math.round(((r.score as number) / (r.max_score as number)) * 100)
+                            : null;
+                        return (
+                          <li class="flex flex-wrap justify-between gap-2 px-3 py-2 text-xs">
+                            <code class="truncate text-ink-muted">{r.user_id}</code>
+                            <span>
+                              {r.submitted_at ? (
+                                <>
+                                  {r.score} / {r.max_score}
+                                  {pct != null && <span class="text-ink-muted"> · {pct}%</span>}
+                                </>
+                              ) : (
+                                <span class="text-amber-700">in progress</span>
+                              )}
+                            </span>
+                            <span class="text-ink-muted">
+                              {r.submitted_at
+                                ? new Date(r.submitted_at).toLocaleString()
+                                : `started ${new Date(r.started_at).toLocaleString()}`}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  </div>
+</BaseLayout>
