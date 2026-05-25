@@ -58,9 +58,15 @@ export default function CourseSwitcher({ courses, activeSlug }: Props) {
         ok: boolean;
         redirectTo?: string;
         reason?: string;
+        detail?: string;
       };
       if (!data.ok || !data.redirectTo) {
-        setError(data.reason ?? 'Could not switch course.');
+        // Prefer the detail field (real server error text); fall back to
+        // the high-level reason.
+        const msg = data.detail
+          ? `${data.reason ?? 'Failed'}: ${data.detail}`
+          : (data.reason ?? 'Could not switch course.');
+        setError(msg);
         setSubmitting(null);
         return;
       }
@@ -113,11 +119,6 @@ export default function CourseSwitcher({ courses, activeSlug }: Props) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{c.code}</span>
-                    {c.enrolled && (
-                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-800">
-                        Enrolled
-                      </span>
-                    )}
                     {isActive && (
                       <span className="text-xs text-ink-muted">(current)</span>
                     )}
