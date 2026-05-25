@@ -1,0 +1,213 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+
+// Enrollment gate: only show this page to students enrolled in FIN 3610.
+let enrolled = false;
+if (user && supabase) {
+  const { data } = await supabase
+    .from('enrollments')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .eq('course_slug', 'fin-3610')
+    .maybeSingle();
+  enrolled = !!data;
+}
+
+if (!user) {
+  return Astro.redirect(`/auth/login?next=${encodeURIComponent('/fin-3610/quizzes')}`);
+}
+
+// Load FIN 3610 quiz content (the geofenced timed assessments, stored in
+// the `exams` collection — labeled "quizzes" in this UI).
+const quizContent = (await getCollection('exams', (e) => e.data.course === 'fin-3610'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+// Map of slug -> administration row so we can show open/upcoming/closed
+// status next to each quiz. Only loaded if enrolled (RLS would block
+// anyway, but skip the query if we know we'll hide the page).
+type AdminRow = {
+  id: string;
+  exam_slug: string;
+  opens_at: string;
+  closes_at: string;
+  required_radius_meters: number;
+  duration_minutes: number;
+  notes: string | null;
+};
+let admins: AdminRow[] = [];
+if (enrolled && supabase) {
+  const { data } = await supabase
+    .from('exam_administrations')
+    .select(
+      'id, exam_slug, opens_at, closes_at, required_radius_meters, duration_minutes, notes',
+    )
+    .eq('course_slug', 'fin-3610');
+  admins = (data ?? []) as AdminRow[];
+}
+const adminsBySlug = new Map<string, AdminRow[]>();
+for (const a of admins) {
+  const arr = adminsBySlug.get(a.exam_slug) ?? [];
+  arr.push(a);
+  adminsBySlug.set(a.exam_slug, arr);
+}
+
+// Pre-fetch submitted attempts so we can suppress 'Take' on completed ones.
+type AttemptRow = { administration_id: string; submitted_at: string | null };
+let attempts: AttemptRow[] = [];
+if (enrolled && supabase) {
+  const { data } = await supabase
+    .from('exam_attempts')
+    .select('administration_id, submitted_at')
+    .eq('user_id', user.id);
+  attempts = (data ?? []) as AttemptRow[];
+}
+const submittedSet = new Set(
+  attempts.filter((a) => a.submitted_at).map((a) => a.administration_id),
+);
+
+function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed' {
+  const now = Date.now();
+  if (now < Date.parse(opens)) return 'upcoming';
+  if (now > Date.parse(closes)) return 'closed';
+  return 'open';
+}
+
+// Pick the "best" administration to highlight per quiz: open > upcoming > closed.
+function bestAdmin(rows: AdminRow[]): AdminRow | null {
+  if (rows.length === 0) return null;
+  const open = rows.find((a) => statusOf(a.opens_at, a.closes_at) === 'open');
+  if (open) return open;
+  const upcoming = rows
+    .filter((a) => statusOf(a.opens_at, a.closes_at) === 'upcoming')
+    .sort((a, b) => Date.parse(a.opens_at) - Date.parse(b.opens_at))[0];
+  if (upcoming) return upcoming;
+  return rows.sort((a, b) => Date.parse(b.closes_at) - Date.parse(a.closes_at))[0];
+}
+---
+
+<BaseLayout title="FIN 3610 — Quizzes">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">FIN 3610</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Quizzes</h1>
+    <p class="mt-3 text-ink-muted">
+      Proctored, time-windowed, location-gated assessments for FIN 3610.
+      Closed book. Single attempt per administration. You must be at the
+      location your instructor specifies for the duration of the quiz.
+    </p>
+
+    {!enrolled && (
+      <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        <p class="font-medium">You're not enrolled in FIN 3610.</p>
+        <p class="mt-2">
+          The quiz schedule is only visible to enrolled students. Ask your
+          instructor to add you to the roster.
+        </p>
+      </div>
+    )}
+
+    {enrolled && quizContent.length === 0 && (
+      <p class="mt-8 text-ink-muted">No quizzes have been authored for this course yet.</p>
+    )}
+
+    {enrolled && quizContent.length > 0 && (
+      <ul class="mt-8 space-y-4">
+        {quizContent.map((quiz) => {
+          const admin = bestAdmin(adminsBySlug.get(quiz.data.slug) ?? []);
+          const status = admin ? statusOf(admin.opens_at, admin.closes_at) : null;
+          const submitted = admin ? submittedSet.has(admin.id) : false;
+          const passPct = Math.round(quiz.data.passingScore * 100);
+
+          return (
+            <li class="rounded-lg border border-slate-200 p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-semibold">{quiz.data.title}</h2>
+                  <p class="mt-2 text-sm">{quiz.data.description}</p>
+                  <dl class="mt-3 grid grid-cols-2 gap-y-1 text-xs text-ink-muted sm:grid-cols-3">
+                    <dt class="font-medium">Duration</dt>
+                    <dd>{quiz.data.durationMinutes} minutes</dd>
+                    <dt class="font-medium">Questions</dt>
+                    <dd>{quiz.data.questions.length}</dd>
+                    <dt class="font-medium">Pass threshold</dt>
+                    <dd>{passPct}%</dd>
+                  </dl>
+                </div>
+                {status && (
+                  <span
+                    class={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold uppercase ${
+                      status === 'open'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : status === 'upcoming'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {status}
+                  </span>
+                )}
+              </div>
+
+              <div class="mt-4 border-t border-slate-200 pt-3 text-sm">
+                {!admin && (
+                  <p class="text-ink-muted">
+                    <span class="font-medium">Not currently scheduled.</span>{' '}
+                    Your instructor will open the quiz window when it's time.
+                  </p>
+                )}
+                {admin && status === 'open' && !submitted && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-ink-muted">
+                      <div>
+                        Open until <strong>{new Date(admin.closes_at).toLocaleString()}</strong>
+                      </div>
+                      <div>Geofence: within {admin.required_radius_meters} m of the location</div>
+                    </div>
+                    <a
+                      href={`/exams/${admin.id}`}
+                      class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      Take quiz →
+                    </a>
+                  </div>
+                )}
+                {admin && status === 'upcoming' && (
+                  <p class="text-ink-muted">
+                    Opens{' '}
+                    <strong>{new Date(admin.opens_at).toLocaleString()}</strong>{' '}
+                    · closes{' '}
+                    <strong>{new Date(admin.closes_at).toLocaleString()}</strong>
+                  </p>
+                )}
+                {admin && status === 'closed' && (
+                  <p class="text-ink-muted">
+                    Window closed{' '}
+                    <strong>{new Date(admin.closes_at).toLocaleString()}</strong>
+                    . Contact your instructor about make-ups.
+                  </p>
+                )}
+                {admin && submitted && (
+                  <p class="text-ink-muted">
+                    You've already submitted this quiz. Results will be
+                    released by your instructor.
+                  </p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+
+    <p class="mt-10 text-xs text-ink-muted">
+      <strong>On proctoring.</strong> Browser geolocation is a soft
+      barrier — it can be spoofed with developer tools. The location
+      requirement is intended to keep honest students honest; it is{' '}
+      <em>not</em> a substitute for in-person proctoring. Your
+      instructor may require additional verification.
+    </p>
+  </div>
+</BaseLayout>

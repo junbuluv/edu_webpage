@@ -2,6 +2,9 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+
 const lessons = (await getCollection('lessons', (l) => !l.data.draft && l.data.course === 'fin-3610'))
   .sort((a, b) => a.data.order - b.data.order);
 
@@ -10,6 +13,32 @@ for (const l of lessons) {
   const arr = byUnit.get(l.data.unit) ?? [];
   arr.push(l);
   byUnit.set(l.data.unit, arr);
+}
+
+// Enrollment-gated quiz teaser.
+let enrolled = false;
+let openQuizCount = 0;
+let totalQuizCount = 0;
+if (user && supabase) {
+  const { data: enrollment } = await supabase
+    .from('enrollments')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .eq('course_slug', 'fin-3610')
+    .maybeSingle();
+  enrolled = !!enrollment;
+  if (enrolled) {
+    const quizContent = await getCollection('exams', (e) => e.data.course === 'fin-3610');
+    totalQuizCount = quizContent.length;
+    const nowIso = new Date().toISOString();
+    const { data: openAdmins } = await supabase
+      .from('exam_administrations')
+      .select('id')
+      .eq('course_slug', 'fin-3610')
+      .lte('opens_at', nowIso)
+      .gt('closes_at', nowIso);
+    openQuizCount = (openAdmins ?? []).length;
+  }
 }
 ---
 
@@ -45,6 +74,31 @@ for (const l of lessons) {
 
     {lessons.length === 0 && (
       <p class="mt-10 text-ink-muted">No lessons published yet.</p>
+    )}
+
+    {enrolled && totalQuizCount > 0 && (
+      <section class="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold">Quizzes</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+              {totalQuizCount} proctored quiz{totalQuizCount === 1 ? '' : 'zes'} for
+              this course. Time-windowed and location-gated.
+              {openQuizCount > 0 && (
+                <span class="ml-1 font-medium text-emerald-700">
+                  {openQuizCount} open right now.
+                </span>
+              )}
+            </p>
+          </div>
+          <a
+            href="/fin-3610/quizzes"
+            class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            See all quizzes →
+          </a>
+        </div>
+      </section>
     )}
   </div>
 </BaseLayout>
