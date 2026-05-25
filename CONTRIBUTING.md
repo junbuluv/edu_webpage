@@ -134,6 +134,68 @@ If you need a new question type, **extend the union and the renderer in
 5. Avoid pulling in a new charting library. Recharts handles most cases;
    Plotly is already wired for the heavy ones.
 
+## Adding a lesson figure
+
+Lessons can carry static figures alongside interactive viz: the figure
+shows the *empirical record* (what the world has looked like), the viz
+shows the *parameter exploration* (what happens when you change the
+inputs). Both jobs per lesson where it fits.
+
+Two MDX components in `src/components/mdx/`:
+
+- **`<Figure>`** — wrapper around an `<img>` with caption + source
+  credit. Use for any pre-rendered chart (FRED PNG, downloaded chart,
+  SVG diagram). Props: `src`, `alt`, `caption`, `credit`, `creditHref`.
+- **`<BarFigure>`** — Recharts bar chart for hand-curated data. Use
+  when you have annual / cross-section data points and don't have a
+  ready-made image. Props: `data`, `xKey`, `series`, `yAxisLabel`,
+  `caption`, `credit`, `creditHref`. Render as a React island with
+  `client:load`.
+
+### Sanctioned sources
+
+In rough preference order:
+
+1. **FRED** (`fredgraph.png?id=SERIES1,SERIES2&cosd=...&coed=...`) for
+   any US macro / market / rate / yield / commodity series. Public-
+   domain US government data. Download once, commit the PNG under
+   `public/figures/<course>/<lesson-slug>/<name>.png`. Don't hot-link
+   in production — FRED can change URLs or rate-limit.
+2. **SEC EDGAR** for company-specific data (revenue, EPS, dividends,
+   buybacks, OCF, CapEx). Hand-transcribe the numbers from 10-K
+   filings into an inline `BarFigure` data array. Credit the company's
+   10-K filings with a link to EDGAR.
+3. **Damodaran (NYU Stern)** for sector multiples and cross-asset
+   returns. Free academic dataset, citation expected.
+4. **Ken French Data Library** for Fama-French factor returns.
+5. **Wikimedia Commons** for diagrams (PR-licensed CC-BY-SA or public-
+   domain). Vet the license on the file's description page.
+
+### Off-limits
+
+- Textbook scans, screenshots, or production source files (the
+  `materials/` folder is gitignored for this reason — see "Materials
+  folder" below).
+- Bloomberg / Refinitiv terminal screenshots (paid-data EULA).
+- Any chart whose source you can't link to and credit explicitly.
+
+### Captioning
+
+Lead with the equation / model the figure illustrates; the caption
+should make the figure's pedagogical point in 1–3 sentences. Always
+include the FRED series ID, EDGAR CIK, or other lookup key in the
+credit so a future maintainer can refresh the data.
+
+## Materials folder
+
+The `materials/` directory at the repo root is in `.gitignore` and
+contains instructor-only artifacts (textbook chapter drafts, publisher
+`.docx` files, instructor headshot originals). The repo is public; the
+contents include third-party copyrighted material. **Do not add it to
+git** and don't suggest removing the `.gitignore` entry. If you need
+version control for course materials, set up a separate private
+sibling repo or use Git LFS on a private branch.
+
 ## Opening a workshop section
 
 Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is tracked via stamp-in with three barriers: open/close window, geofence, and one-stamp-per-device.
@@ -396,11 +458,31 @@ If yes-no-yes, it's probably fine. Otherwise expect pushback.
 
 ## CI
 
-GitHub Actions runs on every PR (see `.github/workflows/ci.yml`):
+GitHub Actions runs two jobs on every PR (see `.github/workflows/ci.yml`):
+
+**`verify`** (required by branch protection):
 
 - `npm ci`
 - `npm run typecheck`
 - `npm run build`
 
-A red CI blocks merge. If CI is broken in `main`, fix forward immediately —
-do not stack new PRs on a broken `main`.
+**`schema-roundtrip`** (advisory, not required):
+
+- Spins up Postgres 15 as a service container with a minimal `auth`
+  stub (`anon` / `authenticated` / `service_role` roles, `auth.users`
+  table, `auth.uid()` function).
+- Applies `supabase/schema.sql` twice via `psql -v ON_ERROR_STOP=1`.
+- The second apply is what catches idempotency regressions —
+  drop/create policy name mismatches, ALTER TYPE + use-in-same-txn
+  errors, and similar bugs that only surface on a re-paste.
+
+A red `verify` blocks merge. A red `schema-roundtrip` is a strong
+signal that re-running `schema.sql` against an existing project
+will fail — investigate before merging even though it's not blocking.
+
+To make `schema-roundtrip` required, update the ruleset to include it
+in `required_status_checks` (same `gh api -X PUT` flow as for any other
+required check).
+
+If CI is broken in `main`, fix forward immediately — do not stack new
+PRs on a broken `main`.

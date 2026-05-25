@@ -42,8 +42,12 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Device cookie: `src/lib/device.ts` — middleware issues a `device_id`
   UUID cookie used by the workshop stamp uniqueness constraint
 - Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
-  tween honoring `prefers-reduced-motion`); MDX components
-  `src/components/mdx/{ScenarioPlayer,CompareScenarios}.tsx`
+  tween honoring `prefers-reduced-motion`)
+- MDX components in `src/components/mdx/`: `ScenarioPlayer`,
+  `CompareScenarios`, `Figure` (static images with caption + source
+  credit), `BarFigure` (Recharts wrapper for hand-curated tabular data)
+- Lesson figures: `public/figures/<course>/<lesson-slug>/<name>.png`
+  for committed images; `BarFigure` data lives inline in MDX
 - Per-chart presets + URL state: `src/lib/{islm,adas,bonds}/{presets,url-state}.ts`
 
 ## Repository workflow
@@ -60,9 +64,18 @@ public-repo path):
   a second person is in the repo — see "When teammates join" in
   `CONTRIBUTING.md`.
 
-CI config: `.github/workflows/ci.yml`. Status check name to keep in sync with
-the ruleset: `verify`. If the workflow job name ever changes, update the
-ruleset via:
+CI config: `.github/workflows/ci.yml`. Two jobs:
+
+- **`verify`** (typecheck + build) — **required** by branch protection.
+  Status check name in sync with the ruleset.
+- **`schema-roundtrip`** — applies `supabase/schema.sql` twice against a
+  stock Postgres 15 service container with a minimal `auth` stub (roles
+  + `auth.users` + `auth.uid()`). Catches idempotency regressions
+  (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
+  Currently **advisory**, not blocking — flip to required in the ruleset
+  when ready by adding `schema-roundtrip` to `required_status_checks`.
+
+If a job name changes, update the ruleset via:
 ```bash
 gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 ```
@@ -116,6 +129,14 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     rather than a hydration failure — confirm by checking the island
     element directly (`document.querySelector('astro-island')` should
     not have an `ssr` attribute after hydration).
+14. **Don't add `materials/` to git.** That folder is in `.gitignore`
+    and contains instructor-only artifacts (textbook chapter drafts,
+    publisher `.docx` files, instructor headshot originals). The repo
+    is public; the contents include third-party copyrighted material.
+    If you find yourself considering `git add materials/` or removing
+    the `.gitignore` entry, stop and ask the project owner. Lesson
+    figures sourced from there are off-limits — see "New lesson figure"
+    under Common tasks for the sanctioned sources.
 
 ## Hosted Supabase gotchas
 
@@ -159,6 +180,15 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
   self-contained, accept props for any tunable parameters, default to a
   calibrated baseline, include a "Reset" affordance for sliders.
+- **New lesson figure**: pick a source — for empirical charts default to
+  FRED (`fredgraph.png?id=SERIES`, US public-domain), download under
+  `public/figures/<course>/<slug>/`, embed via the `Figure` MDX component
+  with `src`, `alt`, `caption`, and `credit`. For company-specific data,
+  hand-curate from SEC EDGAR filings into a `BarFigure` with inline
+  `data={[...]}`. **Avoid textbook scans, Bloomberg screenshots, or
+  third-party paid charts** — the repo is public and copyright risk is
+  real. Use Wikimedia Commons as a backup for diagrams; never use the
+  `materials/` folder.
 - **Schema change**: edit `supabase/schema.sql` (idempotent, always re-runnable),
   apply in Supabase SQL editor, rerun `npm run supabase:types`, commit both
   the SQL and the regenerated `database.types.ts`.
