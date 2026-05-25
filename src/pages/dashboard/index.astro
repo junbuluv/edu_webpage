@@ -3,11 +3,14 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import CourseHeaderCard from '@components/course/CourseHeaderCard.astro';
 import LessonProgressList from '@components/course/LessonProgressList.astro';
 import DashboardCourseTabs from '@components/course/DashboardCourseTabs.astro';
+import StaffCourseManagement from '@components/dashboard/StaffCourseManagement.astro';
 import {
   resolveActiveCourse,
   listAvailableCourses,
   getDashboardData,
 } from '@lib/dashboard';
+import { loadStaffMetrics, parseRange } from '@lib/staff-dashboard';
+import { isStaff } from '@lib/roles';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
@@ -22,6 +25,15 @@ if (resolution.kind === 'redirect') {
 const activeSlug = resolution.courseSlug;
 const availableCourses = await listAvailableCourses(supabase, user.id);
 const data = activeSlug ? await getDashboardData(supabase, user.id, activeSlug) : null;
+
+// Staff section: only renders for instructor / ta / admin AND when a
+// course is active. Range comes from ?range= param (default = week).
+const viewerIsStaff = isStaff(Astro.locals.profile?.role);
+const range = parseRange(Astro.url.searchParams.get('range'));
+const staffMetrics =
+  viewerIsStaff && activeSlug && data
+    ? await loadStaffMetrics(supabase, activeSlug, range)
+    : null;
 ---
 
 <BaseLayout title="Dashboard">
@@ -37,6 +49,14 @@ const data = activeSlug ? await getDashboardData(supabase, user.id, activeSlug) 
 
     {data && (
       <div class="mt-8 space-y-10">
+        {viewerIsStaff && staffMetrics && activeSlug && (
+          <StaffCourseManagement
+            metrics={staffMetrics}
+            courseSlug={activeSlug}
+            courseCode={data.course.data.code}
+            range={range}
+          />
+        )}
         {data.enrolledSemester === null && (
           <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
             <p>

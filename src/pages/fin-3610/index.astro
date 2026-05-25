@@ -58,29 +58,8 @@ const showQuizTeaser = enrolled || viewerIsAdmin;
       pricing, CAPM, WACC, and project-cashflow visualizations.
     </p>
 
-    {[...byUnit.entries()].map(([unit, items]) => (
-      <section class="mt-10">
-        <h2 class="text-xl font-semibold">{unit}</h2>
-        <ol class="mt-4 space-y-2">
-          {items.map((l) => (
-            <li>
-              <a href={`/lessons/${l.slug}`}
-                 class="flex items-baseline justify-between rounded border border-slate-200 px-4 py-3 hover:border-accent">
-                <span class="font-medium">{l.data.title}</span>
-                <span class="text-sm text-ink-muted">⏱ {l.data.estimatedMinutes} min</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </section>
-    ))}
-
-    {lessons.length === 0 && (
-      <p class="mt-10 text-ink-muted">No lessons published yet.</p>
-    )}
-
     {showQuizTeaser && totalQuizCount > 0 && (
-      <section class="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5">
+      <section class="mt-10 rounded-lg border border-slate-200 bg-slate-50 p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 class="text-xl font-semibold">Quizzes</h2>
@@ -105,6 +84,27 @@ const showQuizTeaser = enrolled || viewerIsAdmin;
           </a>
         </div>
       </section>
+    )}
+
+    {[...byUnit.entries()].map(([unit, items]) => (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">{unit}</h2>
+        <ol class="mt-4 space-y-2">
+          {items.map((l) => (
+            <li>
+              <a href={`/lessons/${l.slug}`}
+                 class="flex items-baseline justify-between rounded border border-slate-200 px-4 py-3 hover:border-accent">
+                <span class="font-medium">{l.data.title}</span>
+                <span class="text-sm text-ink-muted">⏱ {l.data.estimatedMinutes} min</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+
+    {lessons.length === 0 && (
+      <p class="mt-10 text-ink-muted">No lessons published yet.</p>
     )}
   </div>
 </BaseLayout>
