@@ -48,12 +48,28 @@ const stats = courses.map((c) => ({
         designed for undergraduate econ and finance courses. Drag a slider,
         watch the curves move, then test yourself.
       </p>
-      <div class="mt-8 flex justify-center gap-3">
-        <a href="/eco-1002" class="rounded bg-accent px-5 py-2.5 font-medium text-white">
-          Start with ECO 1002
+      <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
+        <a
+          href="/eco-1002"
+          class="rounded-lg bg-accent px-5 py-3 text-left text-white shadow-sm transition hover:bg-blue-700 sm:min-w-[18rem]"
+        >
+          <span class="block text-xs uppercase tracking-wide opacity-80">
+            Start with
+          </span>
+          <span class="block text-base font-semibold">
+            ECO 1002: Introduction to Macroeconomics
+          </span>
         </a>
-        <a href="/practice" class="rounded border border-slate-300 px-5 py-2.5 font-medium">
-          Browse practice
+        <a
+          href="/fin-3610"
+          class="rounded-lg border border-slate-300 px-5 py-3 text-left shadow-sm transition hover:border-accent hover:text-accent sm:min-w-[18rem]"
+        >
+          <span class="block text-xs uppercase tracking-wide text-ink-muted">
+            Start with
+          </span>
+          <span class="block text-base font-semibold">
+            FIN 3610: Corporate Finance
+          </span>
         </a>
       </div>
     </div>
