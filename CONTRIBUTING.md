@@ -27,6 +27,60 @@ Open <http://localhost:4321>.
 - The PR template asks for **how to verify** — fill it in. A reviewer who
   can't reproduce the change won't merge it.
 
+## When teammates join
+
+Onboarding playbook for the project owner adding a developer collaborator. Order matters; the collaborator can't complete their checklist until the owner has finished their part.
+
+### Owner steps (~15 min)
+
+1. **GitHub repo access.** Settings → Collaborators → **Add people** → username/email → role **Write**. The invite expires in 7 days; remind them to accept.
+2. **Bump branch protection to require 1 review.** Settings → Rules → Rulesets → click the `main` ruleset → **Required approvals = 1**. Save. (Until now you've been self-merging; you stop being able to as soon as this lands. Open a draft PR and they approve when ready — same now applies to them.)
+3. **Decide on database access.** Two paths:
+   - **Recommended:** they create their own free Supabase project at <https://supabase.com>, run `supabase/schema.sql` in their SQL Editor. They never touch prod data.
+   - **Co-maintainer only:** Supabase Dashboard → Project Settings → **Team** → invite by email → role **Developer**. They can read all user data, mutate with service-role. Only do this for someone you'd give a server password to.
+4. **Vercel access.** Skip unless they need to deploy themselves. You can still merge their PRs and your existing deploys keep working.
+5. **Send them the collaborator checklist (next section) verbatim.**
+6. **Save the recovery items.** If they ever stop being a collaborator: rotate `PII_HMAC_SECRET` (see "Security primitives → PII HMAC → Rotation"), rotate the Supabase service-role key (Project Settings → API → Generate new), remove them from GitHub collaborators and Supabase Team. Their old PRs and history stay.
+
+### Collaborator's first day (~20 min)
+
+Email this verbatim to a new collaborator:
+
+```text
+1.  Accept the GitHub invite (email link, or visit github.com/junbuluv/edu_webpage).
+2.  git clone https://github.com/junbuluv/edu_webpage.git
+3.  cd edu_webpage && npm install
+4.  Node 22+ required. Check with `node -v`.
+5.  Create your own free Supabase project at supabase.com.
+6.  In your Supabase SQL Editor, paste the entire supabase/schema.sql and Run.
+7.  cp .env.example .env, then fill in:
+      - PUBLIC_SUPABASE_URL          your Supabase project URL
+      - PUBLIC_SUPABASE_ANON_KEY     your project's anon key
+      - SUPABASE_SERVICE_ROLE_KEY    your project's service-role key
+      - PII_HMAC_SECRET              generate with: openssl rand -hex 32
+      - PUBLIC_SITE_URL              http://localhost:4321
+8.  In your Supabase SQL Editor, run:
+      alter database postgres set app.pii_hmac_secret = '<same as PII_HMAC_SECRET>';
+    (If Supabase rejects this, it's the hosted-Postgres permission case — the
+    trigger gracefully falls back to NULL email_hmac. Proceed.)
+9.  npm run dev
+10. http://localhost:4321 should load. Hero typing effect should run.
+11. Sign up at /auth/signup; if Supabase's email goes to spam, confirm via SQL:
+      update auth.users set email_confirmed_at = now() where email = 'you@example.com';
+12. Read CLAUDE.md (especially the numbered Conventions list and "Hosted
+    Supabase gotchas") and the rest of this CONTRIBUTING.md.
+13. Pick a starter task. Branch names: feat/<slug>, fix/<slug>, lesson/<slug>,
+    chore/<slug>. One topic per PR. Branch protection requires 1 review and
+    passing CI before merge.
+```
+
+### Norms once you have a collaborator
+
+- **PRs require a review.** Both parties need an approver. Draft PRs for early signal; mark ready when CI is green.
+- **Style nits go in real-time chat, not PR threads.** Reserve review comments for substantive issues.
+- **One topic per PR**, including this one. Schema changes get the `db:` title prefix so reviewers check RLS.
+- **Secrets never appear in commits, PR descriptions, or chat.** 1Password shared vault or Signal disappearing messages for transit.
+
 ## Adding a lesson
 
 1. Pick the course folder under `src/content/lessons/`.
