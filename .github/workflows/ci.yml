@@ -38,3 +38,59 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: 'placeholder-service-role-key'
           PUBLIC_SITE_URL: 'http://localhost:4321'
           PII_HMAC_SECRET: 'ci-placeholder-secret-please-rotate-in-real-deploys'
+
+  # Apply supabase/schema.sql twice against a stock Postgres 15 to catch
+  # idempotency regressions: drop/create policy name mismatches, ALTER TYPE
+  # + use-in-same-txn (55P04), and similar bugs that only surface on a
+  # second apply against an existing project. Mirrors the convention
+  # documented in CLAUDE.md "Hosted Supabase gotchas".
+  schema-roundtrip:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # Minimal stand-ins for the Supabase Auth surface that schema.sql
+      # references via FK + trigger + policy. We don't run the trigger or
+      # exercise the policies — we just need the names to resolve.
+      - name: Create auth stub
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          create schema if not exists auth;
+          create table if not exists auth.users (
+            id uuid primary key default gen_random_uuid(),
+            email text,
+            last_sign_in_at timestamptz,
+            email_confirmed_at timestamptz
+          );
+          create or replace function auth.uid() returns uuid
+            language sql stable as $$ select null::uuid $$;
+          SQL
+
+      - name: Apply schema.sql (first run)
+        run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+      - name: Apply schema.sql (second run, should be a no-op)
+        run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql

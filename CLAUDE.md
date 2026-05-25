@@ -136,10 +136,19 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   `update auth.users set email_confirmed_at = now() where email = '...';`
   For prod, configure custom SMTP (Resend / Postmark / SES).
 - **Adding values to `user_role`** uses `alter type user_role add value if
-  not exists '<value>';`. This statement cannot run inside an explicit
-  transaction block. Supabase SQL Editor runs statements outside one by
-  default; if you ever see "ALTER TYPE … ADD cannot run inside a
-  transaction block," run the ALTER TYPE on its own first.
+  not exists '<value>';`. Postgres enforces two related restrictions
+  around enum value additions, and Supabase SQL Editor (which wraps the
+  whole paste in one transaction) can trip either:
+  - `25001: ALTER TYPE … ADD cannot run inside a transaction block` —
+    the `ALTER TYPE` statement itself is rejected. Run it alone in its
+    own query, then re-paste the rest of `schema.sql`.
+  - `55P04: unsafe use of new value "X" of enum type … New enum values
+    must be committed before they can be used` — the `ALTER TYPE`
+    succeeded but a later statement in the same transaction (a
+    `CHECK`, RLS policy, or `WHERE … in (...)` literal) referenced the
+    new value before the implicit commit. Same fix: run the `ALTER
+    TYPE` standalone first; on the re-paste it becomes a no-op (since
+    the value now exists) and the rest runs cleanly.
 
 ## Common tasks
 
