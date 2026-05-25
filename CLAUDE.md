@@ -24,6 +24,10 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Visualizations: `src/components/viz/`
 - Quiz engine: `src/components/quiz/Quiz.tsx`
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
+- Proctored exams: content `src/content/exams/<slug>.json`, React island
+  `src/components/exam/ExamRunner.tsx`, listing/runner pages
+  `src/pages/exams/{index,[admin]}.astro`, server APIs
+  `src/pages/api/exams/{start,submit}.ts`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
 
@@ -81,6 +85,30 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 10. **Audit log writes go through `src/lib/audit.ts`.** Don't insert into
     `audit_log` directly from a page — always call `logDisclosure(ctx)`
     so IP/UA are HMAC'd consistently and the service-role client is used.
+11. **`createSupabaseServerClient(cookies, headers, request)` needs all three
+    args.** `getAll()` reads the *incoming* Cookie header from `request` (not
+    `cookies.headers()`, which is outgoing Set-Cookie). In `setAll`, local
+    `COOKIE_OPTIONS` are spread *after* Supabase's defaults so `secure: false`
+    sticks on http://localhost in dev — don't invert that merge order.
+
+## Hosted Supabase gotchas
+
+- **Paste `supabase/schema.sql` end-to-end**, not in chunks. Supabase SQL
+  Editor wraps the script in a single transaction; partial runs abort with
+  cryptic "relation X does not exist" cascade errors. The file is idempotent
+  (safe to re-run on top of itself).
+- **`pg_cron` must be enabled via Dashboard → Database → Extensions** before
+  SQL `create extension` succeeds. The schema wraps the call in a do-block so
+  absence doesn't abort the migration; retention jobs simply won't schedule
+  until enabled.
+- **`alter database postgres set app.pii_hmac_secret = ...` is rejected**
+  (`42501: permission denied`). The trigger gracefully falls back to NULL
+  `email_hmac`. Long-term fix is Supabase Vault or a per-call parameter;
+  for now, email dedup-by-hash is a no-op on hosted projects.
+- **Free-tier email is rate-limited and frequently blocked** by university
+  spam filters (cuny.edu). For dev, manually confirm via SQL:
+  `update auth.users set email_confirmed_at = now() where email = '...';`
+  For prod, configure custom SMTP (Resend / Postmark / SES).
 
 ## Common tasks
 
@@ -97,18 +125,26 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 - **Open a PR**: branch naming `feat/<slug>`, `fix/<slug>`, `lesson/<slug>`,
   `chore/<slug>`. The PR template is required reading — fill the verification
   checklist.
+- **Bootstrap a fresh Supabase project for dev/test**: run the full
+  `supabase/schema.sql` once, sign up via `/auth/signup`, then in SQL Editor:
+  `update auth.users set email_confirmed_at = now() where email = '<you>';`
+  If signup pre-dated the schema, also:
+  `insert into public.profiles (id, role) select id, 'student' from auth.users where email = '<you>' on conflict do nothing;`
+  Then promote, enroll, and open an exam administration per the examples
+  in `CONTRIBUTING.md`.
 
 ## Verifying before declaring done
 
 1. `npm run typecheck` — must pass.
-2. `npm run build` — must compile cleanly. Build env needs at minimum:
+2. `npm run format` — auto-fixes whitespace/import order via Prettier.
+3. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
    PUBLIC_SUPABASE_ANON_KEY=placeholder \
    PUBLIC_SITE_URL=http://localhost:4321 \
    npm run build
    ```
-3. `npm run dev` and exercise the affected lesson/quiz in a browser.
+4. `npm run dev` and exercise the affected lesson/quiz in a browser.
 
 If you touched anything Supabase-related, also re-run `supabase/schema.sql`
 in a scratch project and confirm RLS still blocks cross-user reads.

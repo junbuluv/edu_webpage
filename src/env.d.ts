@@ -12,6 +12,7 @@ declare global {
       profile: {
         role: 'student' | 'instructor' | 'admin';
         display_name: string | null;
+        active_course_slug: string | null;
       } | null;
     }
   }

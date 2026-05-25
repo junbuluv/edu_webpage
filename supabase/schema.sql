@@ -44,6 +44,7 @@ create table if not exists public.profiles (
 alter table public.profiles drop column if exists email;
 alter table public.profiles add column if not exists email_hmac text;
 alter table public.profiles add column if not exists tos_accepted_at timestamptz;
+alter table public.profiles add column if not exists active_course_slug text;
 
 create unique index if not exists profiles_email_hmac_uq
   on public.profiles (email_hmac);
@@ -395,7 +396,14 @@ grant execute on function public.log_disclosure(text, uuid, text, jsonb) to auth
 -- the function definitions still install and can be invoked manually.
 -- =========================================================================
 
-create extension if not exists pg_cron;
+-- pg_cron must be enabled in Supabase Dashboard (Database -> Extensions).
+-- Wrapping in a do-block so absence doesn't abort this whole migration;
+-- the cron.schedule(...) calls below have their own per-block guards.
+do $$ begin
+  create extension if not exists pg_cron;
+exception when others then
+  raise notice 'Could not enable pg_cron from SQL (likely a permissions issue on hosted Postgres). Enable it via Dashboard -> Database -> Extensions, then re-run this script. Continuing without it.';
+end $$;
 
 create or replace function public.purge_inactive_accounts(p_months integer default 24)
 returns integer

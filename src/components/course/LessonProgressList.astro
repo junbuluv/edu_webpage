@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lessons: Array<CollectionEntry<'lessons'>>;
+  progressBySlug: Map<string, 'started' | 'completed'>;
+}
+
+const { lessons, progressBySlug } = Astro.props;
+
+// Group by unit, preserving the incoming order (which is already
+// sorted by unit then lesson order in the caller).
+const grouped = new Map<string, Array<CollectionEntry<'lessons'>>>();
+for (const lesson of lessons) {
+  const unit = lesson.data.unit;
+  if (!grouped.has(unit)) grouped.set(unit, []);
+  grouped.get(unit)!.push(lesson);
+}
+---
+
+{lessons.length === 0 ? (
+  <p class="text-ink-muted">No lessons published for this course yet.</p>
+) : (
+  <div class="space-y-6">
+    {Array.from(grouped.entries()).map(([unit, items]) => (
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+          {unit}
+        </h3>
+        <ul class="mt-2 divide-y divide-slate-200 rounded border border-slate-200">
+          {items.map((lesson) => {
+            const status = progressBySlug.get(lesson.slug) ?? null;
+            return (
+              <li class="flex items-baseline justify-between gap-3 px-4 py-3">
+                <a
+                  href={`/lessons/${lesson.slug}`}
+                  class="text-sm text-accent underline"
+                >
+                  {lesson.data.title}
+                </a>
+                {status === 'completed' && (
+                  <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                    Completed
+                  </span>
+                )}
+                {status === 'started' && (
+                  <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    In progress
+                  </span>
+                )}
+                {status === null && (
+                  <span class="text-xs text-ink-muted">Not started</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </div>
+)}

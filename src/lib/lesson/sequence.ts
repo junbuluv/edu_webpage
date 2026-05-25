@@ -28,10 +28,6 @@ const UNIT_ORDER: Record<Course, string[]> = {
     'Capital structure and payout',
     'Options and special topics',
   ],
-  macro: [],
-  micro: [],
-  finance: [],
-  derivatives: [],
 };
 
 function unitIndex(course: Course, unit: string): number {

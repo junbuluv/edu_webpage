@@ -1,6 +1,8 @@
 ---
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import CourseSwitcher from '@components/course/CourseSwitcher';
+import { listAvailableCourses } from '@lib/dashboard';
 
 interface Props {
   title: string;
@@ -9,6 +11,18 @@ interface Props {
 
 const { title, description = 'Interactive Economics & Finance lessons for undergraduates.' } = Astro.props;
 const user = Astro.locals.user;
+const profile = Astro.locals.profile;
+const supabase = Astro.locals.supabase;
+
+const switcherCourses =
+  user && supabase ? await listAvailableCourses(supabase, user.id) : [];
+const switcherProps = switcherCourses.map((c) => ({
+  slug: c.slug,
+  code: c.code,
+  title: c.title,
+  enrolled: c.enrolled,
+}));
+const activeCourseSlug = profile?.active_course_slug ?? null;
 ---
 <!doctype html>
 <html lang="en">
@@ -29,6 +43,13 @@ const user = Astro.locals.user;
           <a href="/fin-3610" class="text-ink-muted hover:text-ink">FIN 3610</a>
           {user ? (
             <>
+              {switcherProps.length > 0 && (
+                <CourseSwitcher
+                  client:load
+                  courses={switcherProps}
+                  activeSlug={activeCourseSlug}
+                />
+              )}
               <a href="/dashboard" class="text-ink-muted hover:text-ink">Dashboard</a>
               <form method="POST" action="/api/auth/signout" class="inline">
                 <button class="text-ink-muted hover:text-ink" type="submit">

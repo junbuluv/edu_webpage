@@ -20,6 +20,7 @@ export type Database = {
           display_name: string | null;
           role: 'student' | 'instructor' | 'admin';
           tos_accepted_at: string | null;
+          active_course_slug: string | null;
           created_at: string;
         };
         Insert: {
@@ -28,6 +29,7 @@ export type Database = {
           display_name?: string | null;
           role?: 'student' | 'instructor' | 'admin';
           tos_accepted_at?: string | null;
+          active_course_slug?: string | null;
         };
         Update: {
           id?: string;
@@ -35,6 +37,7 @@ export type Database = {
           display_name?: string | null;
           role?: 'student' | 'instructor' | 'admin';
           tos_accepted_at?: string | null;
+          active_course_slug?: string | null;
         };
         Relationships: [];
       };

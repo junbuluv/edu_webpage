@@ -1,10 +1,13 @@
 import { defineCollection, z } from 'astro:content';
+import { COURSE_SLUGS } from '@lib/courses';
+
+const courseEnum = z.enum(COURSE_SLUGS);
 
 const lessons = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
+    course: courseEnum,
     unit: z.string(),
     order: z.number(),
     summary: z.string(),
@@ -69,7 +72,7 @@ const instructors = defineCollection({
     profileUrl: z.string().url().optional(),
     email: z.string().email().optional(),
     office: z.string().optional(),
-    courses: z.array(z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives'])).default([]),
+    courses: z.array(courseEnum).default([]),
     researchInterests: z.array(z.string()).default([]),
     selectedPublications: z
       .array(
@@ -98,7 +101,7 @@ const quizzes = defineCollection({
   schema: z.object({
     slug: z.string(),
     title: z.string(),
-    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
+    course: courseEnum,
     lessonSlug: z.string().optional(),
     questions: z.array(QuestionSchema).min(1),
     passingScore: z.number().min(0).max(1).default(0.7),
@@ -119,7 +122,7 @@ const exams = defineCollection({
   schema: z.object({
     slug: z.string(),
     title: z.string(),
-    course: z.enum(['eco-1002', 'fin-3610', 'macro', 'micro', 'finance', 'derivatives']),
+    course: courseEnum,
     description: z.string(),
     durationMinutes: z.number().int().positive(),
     questions: z.array(QuestionSchema).min(1),
@@ -127,5 +130,20 @@ const exams = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes, instructors, exams };
+const courses = defineCollection({
+  type: 'data',
+  schema: z.object({
+    slug: courseEnum,
+    code: z.string(),
+    title: z.string(),
+    description: z.string(),
+    accentColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, 'accentColor must be a 6-digit hex (#rrggbb)'),
+    order: z.number().int().nonnegative(),
+    defaultSemester: z.string(),
+  }),
+});
+
+export const collections = { lessons, quizzes, instructors, exams, courses };
 export type QuestionT = z.infer<typeof QuestionSchema>;
