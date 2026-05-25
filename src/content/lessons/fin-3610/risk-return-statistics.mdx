@@ -16,6 +16,8 @@ quizSlug: "fin-3610-risk-return-statistics"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## What we mean by "return"
 
 A holding-period return on an asset over a single period is:
@@ -75,6 +77,27 @@ A useful framing: the average annual return of US stocks is around
 realization — annual returns range from -40% to +50% in the historical
 record. The 10% is what you earn *on average over decades*, not next
 year.
+
+<BarFigure
+  client:load
+  data={[
+    { decade: '1930s', cagr: -0.1 },
+    { decade: '1940s', cagr: 9.2 },
+    { decade: '1950s', cagr: 19.4 },
+    { decade: '1960s', cagr: 7.8 },
+    { decade: '1970s', cagr: 5.9 },
+    { decade: '1980s', cagr: 17.6 },
+    { decade: '1990s', cagr: 18.2 },
+    { decade: '2000s', cagr: -0.9 },
+    { decade: '2010s', cagr: 13.6 },
+    { decade: '2020s (to date)', cagr: 12.8 },
+  ]}
+  xKey="decade"
+  series={[{ key: 'cagr', name: 'S&P 500 nominal CAGR (%)', color: '#4572a7' }]}
+  yAxisLabel="Annualized return (%)"
+  caption="S&P 500 nominal compound annual growth rate by decade. The ~10% long-run average hides enormous decade-to-decade variation: -0.9% per year through the 2000s, +19% per year through the 1950s and 1990s. The summary statistic is real; the path you actually experience depends heavily on when you started."
+  credit="Compiled from S&P 500 total return series; standard pedagogical decadal compilation"
+/>
 
 ## Diversification: the only free lunch
 
