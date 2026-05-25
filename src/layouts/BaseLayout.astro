@@ -3,6 +3,7 @@ import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import CourseSwitcher from '@components/course/CourseSwitcher';
 import { listAvailableCourses } from '@lib/dashboard';
+import { isStaff } from '@lib/roles';
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ const switcherProps = switcherCourses.map((c) => ({
   enrolled: c.enrolled,
 }));
 const activeCourseSlug = profile?.active_course_slug ?? null;
+const viewerIsStaff = isStaff(profile?.role);
 ---
 <!doctype html>
 <html lang="en">
@@ -54,6 +56,9 @@ const activeCourseSlug = profile?.active_course_slug ?? null;
                 />
               )}
               <a href="/dashboard" class="text-ink-muted hover:text-ink">Dashboard</a>
+              {viewerIsStaff && (
+                <a href="/instructor" class="text-ink-muted hover:text-ink">Manage</a>
+              )}
               <form method="POST" action="/api/auth/signout" class="inline">
                 <button class="text-ink-muted hover:text-ink" type="submit">
                   Sign out

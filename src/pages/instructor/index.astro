@@ -1,38 +1,134 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { isAdmin, roleLabel } from '@lib/roles';
 
 const user = Astro.locals.user!;
-const profile = Astro.locals.profile!;
 const supabase = Astro.locals.supabase!;
+const role = Astro.locals.profile?.role ?? 'student';
 
-const { data: rosters } = await supabase
-  .from('enrollments')
-  .select('course_slug, semester, user_id')
-  .order('semester', { ascending: false });
+// Admins see all courses; instructor/ta see courses where they have at
+// least one enrollments row with instructor_id = self.
+let instructorCourses = new Set<string>();
+if (isAdmin(role)) {
+  const allCourses = await getCollection('courses');
+  for (const c of allCourses) instructorCourses.add(c.data.slug);
+} else {
+  const { data: rows } = await supabase
+    .from('enrollments')
+    .select('course_slug')
+    .eq('instructor_id', user.id);
+  for (const r of rows ?? []) instructorCourses.add(r.course_slug);
+}
+
+const workshops = (await getCollection('workshops')).filter((w) =>
+  instructorCourses.has(w.data.course),
+);
+const exams = (await getCollection('exams')).filter((e) =>
+  instructorCourses.has(e.data.course),
+);
+
+const nowIso = new Date().toISOString();
+const { data: openWorkshops } = await supabase
+  .from('workshop_administrations')
+  .select('workshop_slug')
+  .lte('opens_at', nowIso)
+  .gt('closes_at', nowIso);
+const { data: openExams } = await supabase
+  .from('exam_administrations')
+  .select('exam_slug')
+  .lte('opens_at', nowIso)
+  .gt('closes_at', nowIso);
+
+const roleDisplay = roleLabel(role);
+const signedInAs = Astro.locals.profile?.display_name ?? user.email;
 ---
 
-<BaseLayout title="Instructor">
-  <div class="mx-auto max-w-3xl px-4 py-12">
-    <p class="text-xs uppercase tracking-wide text-accent font-medium">Instructor</p>
-    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Your classes</h1>
+<BaseLayout title="Instructor hub">
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">{roleDisplay}</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Manage</h1>
     <p class="mt-3 text-ink-muted">
-      Signed in as {profile.display_name ?? user.email}.
+      Open and close session windows, set timing and geofences, and
+      export attendance / attempt rosters. Signed in as {signedInAs}.
     </p>
 
-    {rosters && rosters.length > 0 ? (
-      <ul class="mt-8 divide-y divide-slate-200 rounded border border-slate-200">
-        {rosters.map((r) => (
-          <li class="px-4 py-3">
-            <div class="font-medium">{r.course_slug}</div>
-            <div class="text-sm text-ink-muted">{r.semester} · student id {r.user_id}</div>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p class="mt-8 text-ink-muted">
-        No rosters yet. An admin can seed them via SQL or you can upload one
-        once the roster-upload UI ships.
+    {instructorCourses.size === 0 && (
+      <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        You're not listed as the instructor for any course yet. Ask an
+        admin to add an enrollment row with your user id as the
+        <code>instructor_id</code> for the courses you teach.
       </p>
     )}
+
+    {instructorCourses.size > 0 && (
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        <section class="rounded-lg border border-slate-200 p-5">
+          <h2 class="text-xl font-semibold">Workshops</h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            ECO 1002 weekly small-group sessions. Open one window per
+            section (CML / CTL / CWL / CRL) per week. Geofenced stamp-in
+            attendance.
+          </p>
+          <p class="mt-3 text-xs text-ink-muted">
+            <strong>{workshops.length}</strong> workshop{workshops.length === 1 ? '' : 's'} in your courses ·
+            <strong> {openWorkshops?.length ?? 0}</strong> open right now
+          </p>
+          <div class="mt-4">
+            <a
+              href="/instructor/workshops"
+              class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Manage workshops →
+            </a>
+          </div>
+        </section>
+
+        <section class="rounded-lg border border-slate-200 p-5">
+          <h2 class="text-xl font-semibold">Exams</h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            Proctored, time-windowed, location-gated assessments. One
+            administration per exam per semester.
+          </p>
+          <p class="mt-3 text-xs text-ink-muted">
+            <strong>{exams.length}</strong> exam{exams.length === 1 ? '' : 's'} in your courses ·
+            <strong> {openExams?.length ?? 0}</strong> open right now
+          </p>
+          <div class="mt-4">
+            <a
+              href="/instructor/exams"
+              class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Manage exams →
+            </a>
+          </div>
+        </section>
+      </div>
+    )}
+
+    <section class="mt-12 border-t border-slate-200 pt-6 text-sm">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+        Reference
+      </h2>
+      <ul class="mt-3 space-y-1">
+        <li>
+          <a href="/dashboard" class="text-accent underline">
+            Your personal dashboard
+          </a>{' '}
+          <span class="text-ink-muted">— per-course stats and your own progress.</span>
+        </li>
+        <li>
+          <a
+            href="https://github.com/junbuluv/edu_webpage/blob/main/CONTRIBUTING.md"
+            class="text-accent underline"
+            target="_blank"
+            rel="noopener"
+          >
+            CONTRIBUTING.md
+          </a>{' '}
+          <span class="text-ink-muted">— workshop/exam SQL examples, role promotion, secret rotation.</span>
+        </li>
+      </ul>
+    </section>
   </div>
 </BaseLayout>
