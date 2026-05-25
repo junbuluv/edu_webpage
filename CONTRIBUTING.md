@@ -486,3 +486,106 @@ required check).
 
 If CI is broken in `main`, fix forward immediately — do not stack new
 PRs on a broken `main`.
+
+## Deployment to Vercel
+
+The site deploys to Vercel via the `@astrojs/vercel` adapter. There's no
+`vercel.json` — all configuration lives in Vercel's UI. The Astro config
+in `astro.config.mjs` is the canonical place for build-time settings.
+
+### First-time setup (per Vercel project)
+
+1. Vercel dashboard → **Add New → Project** → import `junbuluv/edu_webpage`.
+2. Framework preset auto-detects as **Astro**. Accept defaults.
+3. Project Settings → **Environment Variables** → add the following five with
+   **all three environment scopes** (Production, Preview, Development)
+   checked. The "all three scopes" detail is critical — if Production isn't
+   checked on a Supabase var, the prod runtime gets `undefined` and every
+   authenticated request redirects to `/auth/setup-required`:
+
+   | Variable | Value | Notes |
+   |---|---|---|
+   | `PUBLIC_SUPABASE_URL` | Supabase project URL | From Supabase → Settings → API |
+   | `PUBLIC_SUPABASE_ANON_KEY` | anon public JWT (`eyJ...`) | Same panel |
+   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`) | Mark as Sensitive |
+   | `PUBLIC_SITE_URL` | `https://<your-deploy>.vercel.app` | Update for custom domains |
+   | `PII_HMAC_SECRET` | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive |
+
+4. Update Supabase Authentication → **URL Configuration**:
+   - **Site URL**: same as `PUBLIC_SITE_URL`
+   - **Redirect URLs**: add `<site>/auth/callback`
+
+5. Push to `main` (or trigger a manual deploy) → Vercel builds and
+   deploys ~30–90 s.
+
+6. End-to-end verify with `curl`:
+   ```bash
+   SITE=https://<your-deploy>.vercel.app
+   curl -s -o /dev/null -w "/auth/signin: %{http_code}\n" $SITE/auth/signin
+   # Expect 200
+
+   curl -s -X POST -H "Origin: $SITE" \
+     -d "email=x@x.com&password=wrong" \
+     -D - $SITE/api/auth/signin 2>&1 | grep -iE "^(HTTP|location)"
+   # Expect: HTTP/2 302, location: /auth/signin?next=/&error=Invalid+login+credentials
+   # NOT:    location: /auth/setup-required  (env vars wrong)
+   # NOT:    403 Cross-site POST...           (Astro CSRF still on, see below)
+   ```
+
+### Subsequent deploys
+
+Pushes to `main` should auto-deploy via the GitHub integration, but in
+practice this has been unreliable — several merges have failed to fire
+a production deploy. Verify with:
+
+```bash
+# Did Vercel actually deploy the latest main commit?
+gh api repos/junbuluv/edu_webpage/commits/$(git rev-parse main)/check-runs \
+  --jq '.check_runs[] | select(.name | startswith("Vercel"))'
+```
+
+If empty: Vercel didn't pick up the push. Force a redeploy via Vercel UI:
+**Deployments → `⋯` menu on latest → Redeploy → uncheck "Use existing
+Build Cache" → Redeploy**. Takes ~60–90 s.
+
+### Astro CSRF check
+
+`astro.config.mjs` sets `security: { checkOrigin: false }`. Astro 5's
+default-true setting compares request `Origin` to a URL Astro derives
+from `Host` headers, which Vercel's edge layer doesn't preserve reliably
+— every legitimate same-origin POST gets 403 "Cross-site POST form
+submissions are forbidden." SameSite=Lax cookies remain the actual CSRF
+defense. Re-enable if/when the upstream Astro/Vercel header-source issue
+is fixed.
+
+### Auth URL convention
+
+The sign-in page is `/auth/signin` (canonical). `/auth/login` is a 301
+redirect, preserved only for old bookmarks. Don't reference `/auth/login`
+in any new internal links, Supabase config, or external documentation —
+point at `/auth/signin`. The same applies to anything you put in an email
+or syllabus: use the canonical URL so future renames don't break it.
+
+### Custom domain
+
+When moving from `*.vercel.app` to a real domain (e.g., a CUNY-managed
+`econ.baruch.cuny.edu` via BCTC, or a self-managed domain):
+
+1. Add the domain in Vercel: Project Settings → **Domains → Add**.
+2. Update DNS per Vercel's instructions:
+   - **Subdomain** (e.g., `econ.baruch.cuny.edu`): `CNAME` to
+     `cname.vercel-dns.com.`. For `*.baruch.cuny.edu` hosts, submit a
+     BCTC ticket; for self-managed, edit at your registrar.
+   - **Apex** (e.g., `econstudio.com`): `A` record to `76.76.21.21` (or
+     `ALIAS`/`ANAME` if your DNS provider supports it).
+3. Update `PUBLIC_SITE_URL` env var to the new domain.
+4. Update `site:` in `astro.config.mjs` to the new domain (single-line
+   PR through normal CI).
+5. Update Supabase Authentication → URL Configuration: Site URL and
+   Redirect URLs to the new domain.
+6. Redeploy.
+
+Vercel auto-provisions Let's Encrypt certificates for added domains; the
+cert renews automatically every ~60 days. If DNS pointing at Vercel is
+ever removed, renewal fails silently — check the Domains panel says
+"Valid Configuration" after any DNS change.
