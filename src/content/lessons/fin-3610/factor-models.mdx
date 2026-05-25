@@ -16,6 +16,8 @@ quizSlug: "fin-3610-factor-models"
 draft: false
 ---
 
+import BarFigure from '@components/mdx/BarFigure';
+
 ## The CAPM puzzles
 
 When Eugene Fama and others tested CAPM empirically in the 1970s
@@ -68,6 +70,24 @@ Fama and French extended the model with two more factors:
 The five-factor model dominates the three-factor model in modern
 data. It still doesn't fully explain momentum, leading to a
 separate Carhart **MOM** factor.
+
+<BarFigure
+  client:load
+  data={[
+    { factor: 'Mkt-Rf', premium: 8.5 },
+    { factor: 'SMB', premium: 2.4 },
+    { factor: 'HML', premium: 3.4 },
+    { factor: 'MOM', premium: 7.6 },
+    { factor: 'RMW', premium: 3.3 },
+    { factor: 'CMA', premium: 3.4 },
+  ]}
+  xKey="factor"
+  series={[{ key: 'premium', name: 'Annualized factor premium (%)', color: '#4572a7' }]}
+  yAxisLabel="Annualized excess return (%)"
+  caption="Long-run annualized premia for the standard factors from Ken French's data library (Mkt-Rf, SMB, HML, MOM are from 1927; RMW, CMA from 1963). The market factor remains the largest premium, but each of the others is statistically distinct from zero over the long sample. These numbers are what the lesson means by 'positive long-run premium' for each factor."
+  credit="Ken French Data Library, Tuck School of Business"
+  creditHref="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html"
+/>
 
 ## What this means for cost of capital
 

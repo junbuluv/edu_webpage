@@ -16,6 +16,8 @@ quizSlug: "fin-3610-cost-of-capital"
 draft: false
 ---
 
+import Figure from '@components/mdx/Figure';
+
 ## Three discount rates that get confused
 
 When valuing things you'll use one of three discount rates:
@@ -100,6 +102,14 @@ rating table widely used in practice.
 artifact, not the market's current view. If a firm issued a 3%
 bond in 2020 but trades at 6% YTM today, 6% is what new debt would
 cost.
+
+<Figure
+  src="/figures/fin-3610/cost-of-capital/aaa-baa-dgs10-1962-2024.png"
+  alt="Moody's seasoned AAA corporate bond yield, Moody's seasoned BAA corporate bond yield, and the 10-year US Treasury constant maturity yield, monthly, 1962 to 2024."
+  caption="Cost of debt across credit qualities since 1962: 10-year Treasury (green) is the risk-free benchmark, AAA corporates (blue) trade ~50–100 bps above Treasuries, BAA corporates (red) trade 100–300 bps above. The gap between BAA and AAA — the credit spread — widens sharply in recessions (1981, 2008, 2020) when investors demand more compensation for default risk. A firm's cost of debt is its own YTM on this same chart: somewhere above Treasuries by an amount that depends on its rating."
+  credit="FRED, St. Louis Fed (AAA, BAA, DGS10)"
+  creditHref="https://fred.stlouisfed.org/graph/?id=AAA,BAA,DGS10"
+/>
 
 **Pre-tax vs after-tax.** The after-tax cost of debt is
 

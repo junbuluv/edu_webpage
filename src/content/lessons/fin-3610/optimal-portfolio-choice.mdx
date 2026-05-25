@@ -16,6 +16,8 @@ quizSlug: "fin-3610-optimal-portfolio-choice"
 draft: false
 ---
 
+import Figure from '@components/mdx/Figure';
+
 ## Two risky assets, one decision
 
 Last lesson we computed portfolio mean and variance for any
@@ -34,6 +36,14 @@ For two assets, as we vary $w_1$ from 0 to 1:
 Lower $\rho_{12}$ means the curve bows further to the left (lower
 risk for a given return). At $\rho = -1$ the curve is a kink that
 can reach $\sigma = 0$.
+
+<Figure
+  src="/figures/fin-3610/optimal-portfolio-choice/vix-1990-2024.png"
+  alt="CBOE Volatility Index (VIX), daily, 1990 to 2024."
+  caption="The VIX — the market's forward-looking estimate of S&P 500 standard deviation — since 1990. The mean-variance framework treats σ as a single number per asset, but VIX shows that the σ of 'the market' moves through regimes: long stretches near 15, sharp spikes above 40 during the 2008 financial crisis and the March 2020 COVID shock, brief incidents above 80. The risk you're optimizing against tomorrow is rarely the risk you optimized against last year."
+  credit="FRED, St. Louis Fed (VIXCLS)"
+  creditHref="https://fred.stlouisfed.org/series/VIXCLS"
+/>
 
 ## The efficient frontier with many assets
 
