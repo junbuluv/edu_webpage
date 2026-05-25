@@ -17,6 +17,7 @@ draft: false
 ---
 
 import WACCVisualizer from '@components/viz/WACCVisualizer';
+import BarFigure from '@components/mdx/BarFigure';
 
 ## The tax shield
 
@@ -127,6 +128,28 @@ That's not nothing — for a \$10B firm, it's \$600M of value. But
 it's also not enormous, which is why the *full* capital-structure
 story has to include distress costs and other frictions, not just
 tax shields.
+
+<BarFigure
+  client:load
+  data={[
+    { year: '1940', rate: 24 },
+    { year: '1950', rate: 42 },
+    { year: '1960', rate: 52 },
+    { year: '1970', rate: 48 },
+    { year: '1980', rate: 46 },
+    { year: '1987', rate: 40 },
+    { year: '1988', rate: 34 },
+    { year: '1993', rate: 35 },
+    { year: '2017', rate: 35 },
+    { year: '2018', rate: 21 },
+    { year: '2024', rate: 21 },
+  ]}
+  xKey="year"
+  series={[{ key: 'rate', name: 'US federal statutory corporate tax rate (%)', color: '#4572a7' }]}
+  yAxisLabel="Tax rate (%)"
+  caption="The US federal statutory corporate income tax rate at selected inflection points. The Tax Reform Act of 1986 cut it from 46% to 34%; the Tax Cuts and Jobs Act of 2017 cut it from 35% to 21% effective 2018. Today's tax-shield value (~6% of firm value at 30% leverage) was closer to 12-14% in the 1960s — half the empirical importance of debt in capital structure has been eroded by tax-rate cuts since."
+  credit="US Internal Revenue Code statutory rates (historical)"
+/>
 
 ## What the model misses
 
