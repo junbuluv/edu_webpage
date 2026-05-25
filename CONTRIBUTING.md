@@ -190,6 +190,49 @@ where a.administration_id = '<uuid>'
 order by a.submitted_at;
 ```
 
+## Opening a workshop section
+
+Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is tracked via stamp-in with three barriers: open/close window, geofence, and one-stamp-per-device.
+
+Sections are `CML` (Monday), `CTL` (Tuesday), `CWL` (Wednesday), `CRL` (Thursday). The instructor opens one administration per section per week.
+
+**From the instructor UI** (recommended):
+`/instructor/workshops/<slug>` — fill the form, choose section, set the open/close window, click "Open section window."
+
+**Or via SQL:**
+```sql
+insert into public.workshop_administrations (
+  workshop_slug, course_slug, section, week_of, instructor_id,
+  opens_at, closes_at,
+  required_lat, required_lng, required_radius_meters,
+  notes
+) values (
+  'eco-1002-is-lm-intro', 'eco-1002', 'CML', '2027-03-15',
+  (select id from auth.users where email = 'you@baruch.cuny.edu'),
+  '2027-03-15 22:00:00+00', '2027-03-15 23:30:00+00',
+  40.7411, -73.9837, 200,
+  'Bring laptops. Form groups of 3-4.'
+);
+```
+
+The `unique (workshop_slug, section, week_of)` constraint prevents opening the same section twice for the same week.
+
+### Querying who stamped in
+
+```sql
+select u.email, a.stamped_at, a.client_lat, a.client_lng
+from public.workshop_attendance a
+join auth.users u on u.id = a.user_id
+where a.administration_id = '<uuid>'
+order by a.stamped_at;
+```
+
+Or export the whole workshop as CSV: `/instructor/workshops/<slug>?format=csv`.
+
+### Honest caveat on the device check
+
+The `(administration_id, device_id)` unique constraint catches the common "Bob hands phone to Alice" or "Alice opens Bob's account on her own phone" pattern, because the device cookie predates the login. It does NOT catch students who clear cookies between sessions, use private browsing, or own two devices. Pair with an in-room headcount.
+
 ## Bootstrapping the first admin
 
 Admins are designated by the project owner via SQL. There is **no

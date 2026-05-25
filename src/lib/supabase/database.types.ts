@@ -206,6 +206,88 @@ export type Database = {
         };
         Relationships: [];
       };
+      workshop_administrations: {
+        Row: {
+          id: string;
+          workshop_slug: string;
+          course_slug: string;
+          section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          week_of: string;
+          instructor_id: string;
+          opens_at: string;
+          closes_at: string;
+          required_lat: number | null;
+          required_lng: number | null;
+          required_radius_meters: number;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          workshop_slug: string;
+          course_slug: string;
+          section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          week_of: string;
+          instructor_id: string;
+          opens_at: string;
+          closes_at: string;
+          required_lat?: number | null;
+          required_lng?: number | null;
+          required_radius_meters?: number;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          workshop_slug?: string;
+          course_slug?: string;
+          section?: 'CML' | 'CTL' | 'CWL' | 'CRL';
+          week_of?: string;
+          instructor_id?: string;
+          opens_at?: string;
+          closes_at?: string;
+          required_lat?: number | null;
+          required_lng?: number | null;
+          required_radius_meters?: number;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      workshop_attendance: {
+        Row: {
+          id: string;
+          administration_id: string;
+          user_id: string;
+          stamped_at: string;
+          device_id: string;
+          client_lat: number | null;
+          client_lng: number | null;
+          client_ip_hmac: string | null;
+          user_agent_hmac: string | null;
+        };
+        Insert: {
+          id?: string;
+          administration_id: string;
+          user_id: string;
+          stamped_at?: string;
+          device_id: string;
+          client_lat?: number | null;
+          client_lng?: number | null;
+          client_ip_hmac?: string | null;
+          user_agent_hmac?: string | null;
+        };
+        Update: {
+          id?: string;
+          administration_id?: string;
+          user_id?: string;
+          stamped_at?: string;
+          device_id?: string;
+          client_lat?: number | null;
+          client_lng?: number | null;
+          client_ip_hmac?: string | null;
+          user_agent_hmac?: string | null;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: string;

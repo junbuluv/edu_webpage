@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-is-lm-intro",
+  "title": "Workshop: IS-LM Shocks in the Real World",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/is-lm-intro",
+  "summary": "Small-group discussion of fiscal vs monetary shocks using IS-LM. Bring the chart from the lesson and use the four canonical presets as anchors.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Pick a recent macro headline (2023 onward). Argue which curve shifted and in which direction. Your group must agree on a single answer before moving on.",
+      "notes": "Instructor: nudge groups toward separating supply-side from demand-side stories. A common error is attributing inflation to AD when the trigger was a supply shock (e.g. 2022 oil)."
+    },
+    {
+      "id": "q2",
+      "prompt": "The Fed cuts the policy rate by 50 bp. Two groups split: which one finds the predicted (Y, r) effect using IS-LM, and which one finds it using AD-AS? Compare answers.",
+      "notes": "Bridges the two short-run models. IS-LM gives (Y up, r down). AD-AS gives (Y up, P up). The two are consistent because AD shifts right when r falls."
+    },
+    {
+      "id": "q3",
+      "prompt": "If Congress passes a $200B fiscal stimulus while the Fed simultaneously tightens by an equal real-purchasing-power amount, what happens to Y? To r? Are the two policies interchangeable?",
+      "notes": "Y effects can cancel; r unambiguously rises (both push it up). Borrowers (homebuyers, businesses, government itself) face higher rates than under either policy alone."
+    },
+    {
+      "id": "q4",
+      "prompt": "Identify one mechanism in your textbook that IS-LM is too simple to capture. How would you extend the model? (Examples: expectations, financial frictions, open economy.)",
+      "notes": "Encourages metacognition about model assumptions. Acceptable extensions: New Keynesian Phillips curve, financial accelerator, Mundell-Fleming, ZLB."
+    },
+    {
+      "id": "q5",
+      "prompt": "Group draws the post-2020 path of (Y, r) on a single IS-LM diagram, labeling each phase. Compare across groups.",
+      "notes": "2020-Q2 IS shifts left dramatically; Fed shifts LM right (ZLB). 2021 IS recovers fast (fiscal). 2022 LM shifts left (tightening). 2024 ambiguous."
+    },
+    {
+      "id": "q6",
+      "prompt": "What does 'crowding out' look like in IS-LM? Find the slider/preset combination that produces the most crowding out. What policy mix minimizes it?",
+      "notes": "High G + low M produces strong crowding out. High G + accommodative M (rises with G) minimizes it. Tie to actual Treasury-Fed coordination debates."
+    }
+  ]
+}

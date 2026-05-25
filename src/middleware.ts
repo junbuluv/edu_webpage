@@ -1,11 +1,17 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServerClient } from '@lib/supabase/server';
+import { ensureDeviceId } from '@lib/device';
 
-const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams'];
+const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams', '/workshops'];
 const ADMIN_PREFIXES = ['/admin'];
 const STAFF_PREFIXES = ['/instructor'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  // Issue a device_id cookie on first visit. Used by the workshop stamp
+  // flow to enforce one-stamp-per-device. Set early so it's available
+  // even for unauthenticated routes (the cookie predates login).
+  ensureDeviceId(context.cookies, import.meta.env.PROD);
+
   const headers = new Headers();
   const supabase = createSupabaseServerClient(
     context.cookies,

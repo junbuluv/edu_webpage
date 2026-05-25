@@ -145,5 +145,26 @@ const courses = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes, instructors, exams, courses };
+const workshops = defineCollection({
+  type: 'data',
+  schema: z.object({
+    slug: z.string(),
+    title: z.string(),
+    course: courseEnum,
+    lessonSlug: z.string(),
+    summary: z.string(),
+    questions: z
+      .array(
+        z.object({
+          id: z.string(),
+          prompt: z.string(),
+          notes: z.string().optional(),
+        }),
+      )
+      .min(5)
+      .max(7),
+  }),
+});
+
+export const collections = { lessons, quizzes, instructors, exams, courses, workshops };
 export type QuestionT = z.infer<typeof QuestionSchema>;
