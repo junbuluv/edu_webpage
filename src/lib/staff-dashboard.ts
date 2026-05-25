@@ -2,8 +2,8 @@ import type { SupabaseServerClient } from '@lib/supabase/server';
 import type { CourseSlug } from '@lib/courses';
 
 // Loader for the staff section on /dashboard. Returns per-course
-// management metrics: workshop stamps (ECO 1002) or exam attempts
-// (FIN 3610), filtered by a time range parsed from a query param.
+// workshop stamp metrics for both ECO 1002 and FIN 3610, filtered
+// by a time range parsed from a query param.
 
 export type TimeRange = 'week' | 'month' | 'all';
 
@@ -39,7 +39,7 @@ export interface WorkshopStaffMetrics {
   recent: Array<{
     administration_id: string;
     workshop_slug: string;
-    section: 'CML' | 'CTL' | 'CWL' | 'CRL';
+    section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
     user_id: string;
     stamped_at: string;
   }>;
@@ -55,8 +55,6 @@ export async function loadStaffMetrics(
 ): Promise<StaffMetrics> {
   const startISO = rangeStartISO(range);
 
-  // Both courses now use workshops; exam-based metrics retained as a
-  // helper in case a future course uses exams.
   if (courseSlug === 'eco-1002' || courseSlug === 'fin-3610') {
     return loadWorkshopMetrics(supabase, courseSlug, startISO);
   }
@@ -113,7 +111,7 @@ async function loadWorkshopMetrics(
       return {
         administration_id: s.administration_id,
         workshop_slug: a?.workshop_slug ?? '',
-        section: (a?.section ?? 'CML') as 'CML' | 'CTL' | 'CWL' | 'CRL',
+        section: (a?.section ?? null) as 'CML' | 'CTL' | 'CWL' | 'CRL' | null,
         user_id: s.user_id,
         stamped_at: s.stamped_at,
       };

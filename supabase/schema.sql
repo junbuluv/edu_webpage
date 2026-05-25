@@ -520,10 +520,13 @@ drop table if exists public.exam_administrations cascade;
 -- Workshops: weekly small-group sessions per lesson, with stamp-in
 -- attendance gated by time window + geofence + per-device uniqueness.
 --
--- workshop_administrations: one row per (workshop_slug, section, week).
---   Instructor opens 4 administrations per workshop per week (one per
---   section: CML/CTL/CWL/CRL). Each carries its own open/close window
---   and geofence.
+-- workshop_administrations: one row per workshop window.
+--   ECO 1002 runs four sections per week (CML/CTL/CWL/CRL = Mon/Tue/Wed/Thu),
+--   so an ECO row has `section` set and is keyed by
+--   (workshop_slug, section, week_of).
+--   FIN 3610 runs one workshop session per week (no per-day sections),
+--   so a FIN row has `section = null` and is keyed by (workshop_slug, week_of).
+--   The two cases are enforced by two partial unique indexes below.
 --
 -- workshop_attendance: one row per successful stamp. Two unique
 --   constraints: (administration_id, user_id) blocks self-double-stamp
@@ -539,7 +542,7 @@ create table if not exists public.workshop_administrations (
   id uuid primary key default gen_random_uuid(),
   workshop_slug text not null,
   course_slug text not null,
-  section workshop_section not null,
+  section workshop_section,
   week_of date not null,
   instructor_id uuid not null references public.profiles(id) on delete restrict,
   opens_at timestamptz not null,
@@ -550,9 +553,47 @@ create table if not exists public.workshop_administrations (
   notes text,
   created_at timestamptz not null default now(),
   check (closes_at > opens_at),
-  check (required_radius_meters > 0),
-  unique (workshop_slug, section, week_of)
+  check (required_radius_meters > 0)
 );
+
+-- Migration: section was originally `not null` (ECO-only model). Make it
+-- nullable so FIN 3610 rows can omit it. No-op on fresh installs.
+do $$ begin
+  alter table public.workshop_administrations
+    alter column section drop not null;
+exception when others then null; end $$;
+
+-- Migration: drop the legacy table-level unique that required all three
+-- columns set. The two partial indexes below replace it.
+do $$
+declare con_name text;
+begin
+  for con_name in
+    select conname from pg_constraint
+     where conrelid = 'public.workshop_administrations'::regclass
+       and contype = 'u'
+       and pg_get_constraintdef(oid)
+           = 'UNIQUE (workshop_slug, section, week_of)'
+  loop
+    execute format(
+      'alter table public.workshop_administrations drop constraint %I',
+      con_name
+    );
+  end loop;
+end $$;
+
+-- ECO 1002 partial unique: one row per (workshop, section, week) when
+-- section is set.
+create unique index if not exists workshop_admins_section_week_unique
+  on public.workshop_administrations (workshop_slug, section, week_of)
+  where section is not null;
+
+-- FIN 3610 partial unique: one row per (workshop, week) when section is
+-- null. This is what prevents a FIN instructor from accidentally opening
+-- the same workshop twice in the same week.
+create unique index if not exists workshop_admins_nosection_week_unique
+  on public.workshop_administrations (workshop_slug, week_of)
+  where section is null;
 
 create index if not exists workshop_admins_course_window_idx
   on public.workshop_administrations (course_slug, opens_at, closes_at);
