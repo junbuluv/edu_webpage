@@ -120,19 +120,6 @@ const quizzes = defineCollection({
   }),
 });
 
-const exams = defineCollection({
-  type: 'data',
-  schema: z.object({
-    slug: z.string(),
-    title: z.string(),
-    course: courseEnum,
-    description: z.string(),
-    durationMinutes: z.number().int().positive(),
-    questions: z.array(QuestionSchema).min(1),
-    passingScore: z.number().min(0).max(1).default(0.7),
-  }),
-});
-
 const courses = defineCollection({
   type: 'data',
   schema: z.object({
@@ -169,5 +156,5 @@ const workshops = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes, instructors, exams, courses, workshops };
+export const collections = { lessons, quizzes, instructors, courses, workshops };
 export type QuestionT = z.infer<typeof QuestionSchema>;
