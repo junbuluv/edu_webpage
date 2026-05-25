@@ -17,6 +17,7 @@ draft: false
 ---
 
 import TVMNPV from '@components/viz/TVMNPV';
+import Figure from '@components/mdx/Figure';
 
 ## A dollar today vs a dollar tomorrow
 
@@ -121,3 +122,11 @@ change; only the choice of which $r$ to plug in changes.
 The discipline: never write down a future cash flow without also
 writing down the date it occurs on. Date-mismatched cash flows are
 the source of nearly every preventable TVM mistake.
+
+<Figure
+  src="/figures/fin-3610/time-value-of-money/dgs10-1962-2024.png"
+  alt="10-year US Treasury constant maturity rate, daily, from 1962 to 2024."
+  caption="The 10-year US Treasury yield since 1962 — a sensible reference for the discount rate $r$ in long-horizon TVM problems. The Volcker-era peak above 15% (1981) and the post-2008 secular low under 1% (mid-2020) bracket the range you should expect to plug into a 10-year present-value calculation across different decades."
+  credit="FRED, St. Louis Fed (DGS10)"
+  creditHref="https://fred.stlouisfed.org/series/DGS10"
+/>
