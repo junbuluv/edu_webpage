@@ -49,7 +49,10 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     .maybeSingle();
 
   if (adminError) {
-    return json({ ok: false, reason: 'lookup_failed', detail: adminError.message }, 500);
+    // Log the raw DB error server-side; the client gets a generic detail
+    // so we don't leak schema info / index names / etc.
+    console.error('[workshops/stamp] lookup_failed', adminError);
+    return json({ ok: false, reason: 'lookup_failed' }, 500);
   }
   if (!administration) {
     return json({ ok: false, reason: 'not_found' }, 404);
@@ -93,11 +96,13 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       administration.required_lng,
     );
     if (dist > administration.required_radius_meters) {
+      // Don't disclose the distance or the required radius to the client —
+      // doing so is a roadmap for geofence spoofing tools.
       return json(
         {
           ok: false,
           reason: 'out_of_geofence',
-          detail: `You are ${Math.round(dist)} m away; required within ${administration.required_radius_meters} m.`,
+          detail: 'You appear to be outside the workshop location. Move closer and retry.',
         },
         403,
       );
@@ -122,33 +127,26 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     });
 
   if (insertError) {
-    // Distinguish the two unique violations by checking the constraint
-    // name in the error message.
+    // Distinguish the two unique violations server-side for analytics /
+    // instructor view (reason code), but show the *same* student-visible
+    // detail for both so the API doesn't disclose which dedupe key
+    // (user vs device cookie) triggered.
     if (insertError.code === '23505') {
-      if (insertError.message.includes('device_id')) {
-        return json(
-          {
-            ok: false,
-            reason: 'device_already_used',
-            detail:
-              'This device has already been used to stamp into this workshop. If this looks wrong, talk to your instructor.',
-          },
-          409,
-        );
-      }
+      const reason =
+        insertError.message.includes('device_id') ? 'device_already_used' : 'already_stamped';
       return json(
         {
           ok: false,
-          reason: 'already_stamped',
-          detail: 'You are already stamped in for this workshop.',
+          reason,
+          detail:
+            'You are already stamped in for this workshop. If this looks wrong, talk to your instructor.',
         },
         409,
       );
     }
-    return json(
-      { ok: false, reason: 'insert_failed', detail: insertError.message, code: insertError.code },
-      500,
-    );
+    // Log the raw DB error server-side; client gets generic detail.
+    console.error('[workshops/stamp] insert_failed', insertError);
+    return json({ ok: false, reason: 'insert_failed' }, 500);
   }
 
   return json({

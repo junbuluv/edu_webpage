@@ -74,7 +74,7 @@ export default function StampInButton({
       const dist = haversineMeters(lat, lng, requiredLat!, requiredLng!);
       if (dist > requiredRadiusMeters) {
         setError(
-          `You appear to be ${Math.round(dist)} m from the workshop location (within ${requiredRadiusMeters} m required). Move closer and retry.`,
+          'You appear to be outside the workshop location. Move closer and retry.',
         );
         setPhase('error');
         return;
