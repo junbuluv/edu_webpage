@@ -73,8 +73,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       # Minimal stand-ins for the Supabase Auth surface that schema.sql
-      # references via FK + trigger + policy. We don't run the trigger or
-      # exercise the policies — we just need the names to resolve.
+      # references via FK + trigger + policy + grant. We don't run the
+      # trigger or exercise the policies — we just need the names to
+      # resolve so DDL applies cleanly.
       - name: Create auth stub
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
@@ -87,6 +88,14 @@ jobs:
           );
           create or replace function auth.uid() returns uuid
             language sql stable as $$ select null::uuid $$;
+          -- Supabase-provided roles used in GRANT/REVOKE and policy TO
+          -- clauses. Vanilla Postgres has none of these.
+          do $$ begin create role anon nologin;
+            exception when duplicate_object then null; end $$;
+          do $$ begin create role authenticated nologin;
+            exception when duplicate_object then null; end $$;
+          do $$ begin create role service_role nologin;
+            exception when duplicate_object then null; end $$;
           SQL
 
       - name: Apply schema.sql (first run)
