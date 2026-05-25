@@ -1,7 +1,7 @@
 # AGENTS
 
 Conventions for AI agents (Claude Code, OpenClaw, etc.) collaborating on
-**Econ Studio**.
+**Baruch Econ & Finance Studio**.
 
 ## Identity
 

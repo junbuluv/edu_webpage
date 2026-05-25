@@ -1,4 +1,4 @@
-# Econ Studio
+# Baruch Econ & Finance Studio
 
 Interactive Economics & Finance lessons for undergraduate courses. Built with
 Astro + React islands + Supabase. Lessons are MDX with embedded simulations
