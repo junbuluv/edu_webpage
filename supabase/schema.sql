@@ -497,110 +497,24 @@ exception when others then
 end $$;
 
 -- =========================================================================
--- Proctored exams: time-gated + location-gated graded assessments
+-- Proctored exams: REMOVED.
 --
--- An `exam_administrations` row is created by an instructor (currently
--- via SQL) and opens a specific exam for a specific course/semester
--- during a specific window with a specific location requirement.
+-- The exam_administrations + exam_attempts tables were introduced when
+-- FIN 3610 carried a midterm/final flow. The entire UI surface
+-- (src/content/exams, src/pages/exams, src/pages/api/exams,
+-- ExamRunner.tsx, /instructor/exams) was deleted in PR #47 when the
+-- course switched to a workshops-only model. The tables themselves
+-- were left orphaned; this drop cleans them up.
 --
--- `exam_attempts` is append-only and stores the student's score, the
--- coordinates they reported at start/submit, and the answers. RLS scopes
--- per-student reads; instructor-of-record can read via enrollments.
---
--- IMPORTANT: client-side geolocation is trivially spoofable. The geo
--- check is a soft barrier. For real exam integrity, supplement with
--- in-person proctoring or native-app attestation. /privacy and
--- /CONTRIBUTING.md state this explicitly.
+-- `cascade` is intentional: any FK-dependent objects (indexes, policies,
+-- referencing rows) come along. No app code reads these tables anymore.
+-- Re-running this script on a fresh project is safe (`if exists` makes
+-- the drops no-ops); re-running on a previously-migrated project
+-- removes the orphans.
 -- =========================================================================
 
-create table if not exists public.exam_administrations (
-  id uuid primary key default gen_random_uuid(),
-  exam_slug text not null,
-  course_slug text not null,
-  semester text not null,
-  instructor_id uuid not null references public.profiles(id) on delete restrict,
-  opens_at timestamptz not null,
-  closes_at timestamptz not null,
-  required_lat numeric(8, 5),
-  required_lng numeric(8, 5),
-  required_radius_meters integer not null default 100,
-  duration_minutes integer not null default 60,
-  notes text,
-  created_at timestamptz not null default now(),
-  check (closes_at > opens_at),
-  check (required_radius_meters > 0)
-);
-
-create index if not exists exam_admins_course_window_idx
-  on public.exam_administrations (course_slug, opens_at, closes_at);
-create index if not exists exam_admins_instructor_idx
-  on public.exam_administrations (instructor_id);
-
-alter table public.exam_administrations enable row level security;
-
--- Any authenticated user can list administrations (so students can see
--- what's available); they can't write.
-drop policy if exists "exam_admins_authenticated_read" on public.exam_administrations;
-create policy "exam_admins_authenticated_read"
-  on public.exam_administrations for select
-  to authenticated
-  using (true);
-
--- No insert/update/delete policies => only the service-role client may
--- mutate. Instructors create administrations by running SQL via the
--- project owner, or via a future /api/instructor/exams endpoint.
-
-create table if not exists public.exam_attempts (
-  id uuid primary key default gen_random_uuid(),
-  administration_id uuid not null references public.exam_administrations(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  started_at timestamptz not null default now(),
-  submitted_at timestamptz,
-  client_lat_start numeric(8, 5),
-  client_lng_start numeric(8, 5),
-  client_lat_submit numeric(8, 5),
-  client_lng_submit numeric(8, 5),
-  score numeric,
-  max_score numeric,
-  answers jsonb,
-  unique (administration_id, user_id)
-);
-
-create index if not exists exam_attempts_user_idx
-  on public.exam_attempts (user_id, submitted_at desc);
-create index if not exists exam_attempts_admin_idx
-  on public.exam_attempts (administration_id, submitted_at desc);
-
-alter table public.exam_attempts enable row level security;
-
--- Student sees their own attempts.
-drop policy if exists "exam_attempts_self_read" on public.exam_attempts;
-create policy "exam_attempts_self_read"
-  on public.exam_attempts for select
-  using (auth.uid() = user_id);
-
--- Instructor sees attempts for administrations they own, but only for
--- students they have an enrollments record with (same scoping as
--- quiz_attempts).
-drop policy if exists "exam_attempts_instructor_read_scoped" on public.exam_attempts;
-create policy "exam_attempts_instructor_read_scoped"
-  on public.exam_attempts for select
-  using (
-    exists (
-      select 1
-      from public.exam_administrations a
-      join public.enrollments e
-        on e.user_id = exam_attempts.user_id
-       and e.course_slug = a.course_slug
-       and e.semester = a.semester
-       and e.instructor_id = auth.uid()
-      where a.id = exam_attempts.administration_id
-        and a.instructor_id = auth.uid()
-    )
-  );
-
--- Inserts and updates happen only via the service-role client (used by
--- /api/exams/start and /api/exams/submit), which bypasses RLS.
+drop table if exists public.exam_attempts cascade;
+drop table if exists public.exam_administrations cascade;
 
 -- =========================================================================
 -- Workshops: weekly small-group sessions per lesson, with stamp-in
@@ -684,7 +598,7 @@ create policy "workshop_attendance_self_read"
   using (auth.uid() = user_id);
 
 -- Instructor sees attendance for administrations they own, scoped by
--- enrollment so privacy mirrors quiz_attempts / exam_attempts.
+-- enrollment so privacy mirrors quiz_attempts.
 drop policy if exists "workshop_attendance_instructor_read_scoped" on public.workshop_attendance;
 create policy "workshop_attendance_instructor_read_scoped"
   on public.workshop_attendance for select
