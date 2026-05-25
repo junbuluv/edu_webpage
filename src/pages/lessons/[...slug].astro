@@ -1,21 +1,20 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 import LessonLayout from '@layouts/LessonLayout.astro';
 
-export const prerender = true;
+// SSR (not prerendered) so Astro.locals.user is populated by middleware
+// and the header renders the signed-in state. Tradeoff: each lesson
+// request hits Supabase via middleware. Acceptable for class-sized
+// traffic; revisit with a server island if scale demands.
 
-export async function getStaticPaths() {
-  const lessons = await getCollection('lessons', (l) => !l.data.draft);
-  return lessons.map((lesson) => ({
-    params: { slug: lesson.slug },
-    props: { lesson },
-  }));
+const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404 });
 }
-
-interface Props {
-  lesson: CollectionEntry<'lessons'>;
+const lesson = await getEntry('lessons', slug);
+if (!lesson || lesson.data.draft) {
+  return new Response(null, { status: 404 });
 }
-const { lesson } = Astro.props;
 const { Content } = await lesson.render();
 ---
 

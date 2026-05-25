@@ -2,22 +2,20 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Quiz from '@components/quiz/Quiz';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
-import { getCollection } from 'astro:content';
+import { getEntry } from 'astro:content';
 
-export const prerender = true;
+// SSR so Astro.locals.user is populated by middleware and the header
+// renders the signed-in state. Lookup the quiz by slug on each request.
 
-export async function getStaticPaths() {
-  const quizzes = await getCollection('quizzes');
-  return quizzes.map((q) => ({
-    params: { slug: q.data.slug },
-    props: { quiz: q.data },
-  }));
+const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404 });
 }
-
-interface Props {
-  quiz: Awaited<ReturnType<typeof getCollection<'quizzes'>>>[number]['data'];
+const entry = await getEntry('quizzes', slug);
+if (!entry) {
+  return new Response(null, { status: 404 });
 }
-const { quiz } = Astro.props;
+const quiz = entry.data;
 ---
 
 <BaseLayout title={quiz.title}>
