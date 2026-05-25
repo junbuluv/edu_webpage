@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
 
   if (error) {
     return redirect(
-      `/auth/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(error.message)}`,
+      `/auth/signin?next=${encodeURIComponent(next)}&error=${encodeURIComponent(error.message)}`,
     );
   }
   return redirect(next);

@@ -6,11 +6,11 @@ export const GET: APIRoute = async ({ url, redirect, locals }) => {
 
   const code = url.searchParams.get('code');
   const next = safeNext(url.searchParams.get('next'));
-  if (!code) return redirect('/auth/login?error=Missing+code');
+  if (!code) return redirect('/auth/signin?error=Missing+code');
 
   const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    return redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
+    return redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
   }
   return redirect(next);
 };

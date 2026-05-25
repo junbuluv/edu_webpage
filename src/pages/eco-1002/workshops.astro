@@ -7,7 +7,7 @@ const user = Astro.locals.user;
 const supabase = Astro.locals.supabase;
 
 if (!user) {
-  return Astro.redirect(`/auth/login?next=${encodeURIComponent('/eco-1002/workshops')}`);
+  return Astro.redirect(`/auth/signin?next=${encodeURIComponent('/eco-1002/workshops')}`);
 }
 
 const role = Astro.locals.profile?.role ?? 'student';
