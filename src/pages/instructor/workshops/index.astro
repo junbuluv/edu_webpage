@@ -1,0 +1,98 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const user = Astro.locals.user!;
+const supabase = Astro.locals.supabase!;
+
+// Instructor sees workshops in courses where they're an instructor on
+// at least one enrollment row. Middleware already enforces staff role
+// on /instructor/* so this scope check is just for listing relevance.
+const { data: rows } = await supabase
+  .from('enrollments')
+  .select('course_slug')
+  .eq('instructor_id', user.id);
+const instructorCourses = new Set((rows ?? []).map((r) => r.course_slug));
+
+const allWorkshops = await getCollection('workshops');
+const visible = allWorkshops.filter((w) => instructorCourses.has(w.data.course));
+
+// For each visible workshop, count this-week's open administrations.
+const nowIso = new Date().toISOString();
+const { data: openAdmins } = await supabase
+  .from('workshop_administrations')
+  .select('workshop_slug, section, opens_at, closes_at')
+  .lte('opens_at', nowIso)
+  .gt('closes_at', nowIso);
+
+const openCountBySlug = new Map<string, number>();
+for (const a of openAdmins ?? []) {
+  openCountBySlug.set(a.workshop_slug, (openCountBySlug.get(a.workshop_slug) ?? 0) + 1);
+}
+---
+
+<BaseLayout title="Instructor · Workshops">
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">Instructor</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Workshops</h1>
+    <p class="mt-3 text-ink-muted">
+      Open and close sectioned workshop windows for your courses, and
+      view attendance rosters. Each workshop has 4 weekly sections
+      (CML/CTL/CWL/CRL) which you open independently.
+    </p>
+
+    {instructorCourses.size === 0 && (
+      <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        You're not listed as the instructor for any course yet. Ask an
+        admin to add an enrollment row with your user id as the
+        <code>instructor_id</code> for the courses you teach.
+      </p>
+    )}
+
+    {visible.length > 0 && (
+      <ul class="mt-8 space-y-3">
+        {visible.map((w) => {
+          const openCount = openCountBySlug.get(w.data.slug) ?? 0;
+          return (
+            <li class="rounded-lg border border-slate-200 p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                  <p class="text-xs uppercase tracking-wide text-accent font-medium">
+                    {w.data.course}
+                  </p>
+                  <h2 class="mt-1 text-lg font-semibold">{w.data.title}</h2>
+                  <p class="mt-1 text-sm text-ink-muted">{w.data.summary}</p>
+                  <p class="mt-2 text-xs text-ink-muted">
+                    {w.data.questions.length} discussion questions ·
+                    lesson <code>{w.data.lessonSlug}</code>
+                  </p>
+                </div>
+                {openCount > 0 && (
+                  <span class="inline-block whitespace-nowrap rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold uppercase text-emerald-800">
+                    {openCount} open now
+                  </span>
+                )}
+              </div>
+              <div class="mt-3">
+                <a
+                  href={`/instructor/workshops/${w.data.slug}`}
+                  class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
+                >
+                  Manage →
+                </a>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+
+    {visible.length === 0 && instructorCourses.size > 0 && (
+      <p class="mt-10 text-ink-muted">
+        No workshop content authored for your courses yet. Drop a JSON
+        file under <code>src/content/workshops/</code> following the
+        schema in <code>src/content/config.ts</code>.
+      </p>
+    )}
+  </div>
+</BaseLayout>

@@ -1,0 +1,44 @@
+{
+  "slug": "fin-3610-bond-pricing-and-yield",
+  "title": "Workshop: Bond Pricing, Duration, and the YTM Curve",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/bond-pricing-and-yield",
+  "summary": "Hands-on with the price-yield curve. Pin a bond, change YTM, observe duration, and compare to Treasury benchmarks via the chart presets.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Two bonds: 5y 4% coupon and 30y 4% coupon. YTM rises from 4% to 5%. Which loses more value, and by how much? Predict first, then verify with the chart.",
+      "notes": "30y loses more — longer duration means greater interest-rate sensitivity. Rough estimate via modified duration: 30y ≈ -17%, 5y ≈ -4.5%."
+    },
+    {
+      "id": "q2",
+      "prompt": "A zero-coupon bond's Macaulay duration equals its maturity. Why? Walk through the formula step by step.",
+      "notes": "Single cash flow at maturity N means all PV-weight is at t = N. Macaulay D = Σ(t·PV)/P = N·P/P = N."
+    },
+    {
+      "id": "q3",
+      "prompt": "Pin the 'High-yield junk corporate' preset. Compare to the 'IG corporate' preset. What's the credit spread? Why isn't the high-yield bond priced higher (at the same coupon)?",
+      "notes": "Credit spread ≈ HY YTM minus IG YTM. HY trades below par because YTM > coupon — the market demands compensation for default risk."
+    },
+    {
+      "id": "q4",
+      "prompt": "If the yield curve is upward-sloping, does that mean rates will rise? Why or why not? (Hint: liquidity premium vs expectations hypothesis.)",
+      "notes": "Not necessarily. Pure expectations: yes. With liquidity premium: long rates carry a term premium even if short rates expected to stay flat. Both effects coexist in reality."
+    },
+    {
+      "id": "q5",
+      "prompt": "Reach a group consensus on which is riskier in the next 12 months: holding a 30y Treasury or holding a 1y T-bill rolled monthly. Argue with reference to interest-rate risk and reinvestment risk.",
+      "notes": "30y has interest-rate risk (mark-to-market loss if rates rise). T-bill has reinvestment risk (next month's rate may be lower). Time horizon matters: hold-to-maturity changes the answer."
+    },
+    {
+      "id": "q6",
+      "prompt": "A pension fund has a 15-year liability of $1M. Construct a bond portfolio that immunizes the liability — what's the duration target, and why?",
+      "notes": "Duration-match: portfolio Macaulay duration ≈ 15 years. This makes the portfolio value insensitive (to first order) to parallel yield shifts."
+    },
+    {
+      "id": "q7",
+      "prompt": "Why does the price-yield curve have positive convexity? Show graphically and argue: is convexity good or bad for the holder?",
+      "notes": "Second derivative of P w.r.t. y is positive. Convexity is good — gains from a rate fall exceed losses from an equal-sized rate rise. Investors pay for convexity (lower yields on more convex bonds)."
+    }
+  ]
+}

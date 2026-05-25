@@ -1,0 +1,39 @@
+{
+  "slug": "eco-1002-ad-as",
+  "title": "Workshop: AD-AS and Stagflation",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/ad-as",
+  "summary": "Group work on demand vs supply shocks using AD-AS. Compare 1973 oil, 2008 demand collapse, and 2020 pandemic via the chart presets.",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Define stagflation in one sentence. Which AD-AS shock produces it? Why is monetary policy in a bind during stagflation?",
+      "notes": "Stagflation = high P + low Y. Supply shock (SRAS left). Monetary policy fights one at the cost of worsening the other."
+    },
+    {
+      "id": "q2",
+      "prompt": "The 'Demand boom' preset: who benefits in the short run? In the long run, where does SRAS go and why?",
+      "notes": "Short run: workers (jobs), firms (sales). Long run: Pe rises, SRAS shifts left, P stays elevated, Y returns to Yn."
+    },
+    {
+      "id": "q3",
+      "prompt": "Compare 2008 to 2020 using the chart presets. Both are recessions, but the policy responses differed. Argue why the same response wouldn't have worked for both.",
+      "notes": "2008: pure AD shock; fiscal stimulus is correct. 2020: AD + supply chain disruption; pure AD stimulus risked inflation (and did, by 2022)."
+    },
+    {
+      "id": "q4",
+      "prompt": "Draw the AD-AS path of the U.S. economy from 2019 through today. Label each year's (Y, P) point and identify the dominant shock.",
+      "notes": "2019: baseline. 2020 Q2: AD/Yn both fall. 2021: AD recovers strongly. 2022: SRAS shifts left (supply). 2023-24: cooling AD."
+    },
+    {
+      "id": "q5",
+      "prompt": "If the natural rate of output Yn falls (long-Covid effects, retirement, lower TFP), what happens to inflation at the old AD? Tie this to the 'natural rate of unemployment' concept.",
+      "notes": "Falling Yn at constant AD raises P. Equivalent to a higher natural rate of unemployment — the economy can't sustain prior output without overheating."
+    },
+    {
+      "id": "q6",
+      "prompt": "Construct a policy scenario where AD-AS predicts no change in Y but a change in P. What's happening?",
+      "notes": "Equal-and-opposite AD shifts and SRAS shifts. E.g. AD right (stimulus) + SRAS left (supply shock) of matched magnitudes."
+    }
+  ]
+}

@@ -594,3 +594,106 @@ create policy "exam_attempts_instructor_read_scoped"
 
 -- Inserts and updates happen only via the service-role client (used by
 -- /api/exams/start and /api/exams/submit), which bypasses RLS.
+
+-- =========================================================================
+-- Workshops: weekly small-group sessions per lesson, with stamp-in
+-- attendance gated by time window + geofence + per-device uniqueness.
+--
+-- workshop_administrations: one row per (workshop_slug, section, week).
+--   Instructor opens 4 administrations per workshop per week (one per
+--   section: CML/CTL/CWL/CRL). Each carries its own open/close window
+--   and geofence.
+--
+-- workshop_attendance: one row per successful stamp. Two unique
+--   constraints: (administration_id, user_id) blocks self-double-stamp
+--   and (administration_id, device_id) blocks the friend-stamps-for-friend
+--   pattern on the same browser.
+-- =========================================================================
+
+do $$ begin
+  create type workshop_section as enum ('CML', 'CTL', 'CWL', 'CRL');
+exception when duplicate_object then null; end $$;
+
+create table if not exists public.workshop_administrations (
+  id uuid primary key default gen_random_uuid(),
+  workshop_slug text not null,
+  course_slug text not null,
+  section workshop_section not null,
+  week_of date not null,
+  instructor_id uuid not null references public.profiles(id) on delete restrict,
+  opens_at timestamptz not null,
+  closes_at timestamptz not null,
+  required_lat numeric(8, 5),
+  required_lng numeric(8, 5),
+  required_radius_meters integer not null default 200,
+  notes text,
+  created_at timestamptz not null default now(),
+  check (closes_at > opens_at),
+  check (required_radius_meters > 0),
+  unique (workshop_slug, section, week_of)
+);
+
+create index if not exists workshop_admins_course_window_idx
+  on public.workshop_administrations (course_slug, opens_at, closes_at);
+create index if not exists workshop_admins_instructor_idx
+  on public.workshop_administrations (instructor_id);
+
+alter table public.workshop_administrations enable row level security;
+
+drop policy if exists "workshop_admins_authenticated_read" on public.workshop_administrations;
+create policy "workshop_admins_authenticated_read"
+  on public.workshop_administrations for select
+  to authenticated
+  using (true);
+
+-- Inserts/updates/deletes via service-role only (instructor UI uses it
+-- under a verified instructor role server-side).
+
+create table if not exists public.workshop_attendance (
+  id uuid primary key default gen_random_uuid(),
+  administration_id uuid not null references public.workshop_administrations(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  stamped_at timestamptz not null default now(),
+  device_id text not null,
+  client_lat numeric(8, 5),
+  client_lng numeric(8, 5),
+  client_ip_hmac text,
+  user_agent_hmac text,
+  unique (administration_id, user_id),
+  unique (administration_id, device_id)
+);
+
+create index if not exists workshop_attendance_admin_idx
+  on public.workshop_attendance (administration_id, stamped_at desc);
+create index if not exists workshop_attendance_user_idx
+  on public.workshop_attendance (user_id, stamped_at desc);
+
+alter table public.workshop_attendance enable row level security;
+
+-- Student sees only their own attendance.
+drop policy if exists "workshop_attendance_self_read" on public.workshop_attendance;
+create policy "workshop_attendance_self_read"
+  on public.workshop_attendance for select
+  using (auth.uid() = user_id);
+
+-- Instructor sees attendance for administrations they own, scoped by
+-- enrollment so privacy mirrors quiz_attempts / exam_attempts.
+drop policy if exists "workshop_attendance_instructor_read_scoped" on public.workshop_attendance;
+create policy "workshop_attendance_instructor_read_scoped"
+  on public.workshop_attendance for select
+  using (
+    exists (
+      select 1
+      from public.workshop_administrations a
+      join public.enrollments e
+        on e.user_id = workshop_attendance.user_id
+       and e.course_slug = a.course_slug
+       and e.instructor_id = auth.uid()
+      where a.id = workshop_attendance.administration_id
+        and a.instructor_id = auth.uid()
+    )
+  );
+
+-- Inserts via service-role client through /api/workshops/stamp. The two
+-- unique constraints above are the substantive anti-cheating barrier;
+-- RLS is just a read-scoping layer.
