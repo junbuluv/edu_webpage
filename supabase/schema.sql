@@ -70,6 +70,29 @@ create policy "profiles_self_update"
 
 -- Auto-create profile row on new signup, computing email_hmac from
 -- auth.users.email using the session-level secret.
+--
+-- TODO (deferred): migrate the secret read from current_setting() to
+-- Supabase Vault. Hosted Supabase rejects `alter database postgres set
+-- app.pii_hmac_secret = ...` with 42501 permission denied, so the
+-- current_setting() call always returns NULL on hosted projects and
+-- email_hmac is therefore NULL for every new signup. No code currently
+-- reads email_hmac, so this is non-blocking — defer until a real need
+-- surfaces (duplicate-account detection, roster-by-email import, etc.).
+-- When that day comes:
+--   1. create extension if not exists pgsodium;
+--      create extension if not exists vault with schema vault;
+--   2. select vault.create_secret('<PII_HMAC_SECRET value>',
+--        'pii_hmac_secret', 'matches the env var in Vercel');
+--   3. Replace the current_setting block below (and in
+--      backfill_email_hmac) with:
+--        select decrypted_secret into v_secret
+--          from vault.decrypted_secrets where name = 'pii_hmac_secret'
+--          limit 1;
+--   4. select public.backfill_email_hmac();  -- one-time recompute
+--   5. The dedup index already exists (profiles_email_hmac_uq) — at
+--      that point it actually enforces something. Consider switching
+--      to a partial index `where email_hmac is not null` so legacy
+--      NULL rows don't collide.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
