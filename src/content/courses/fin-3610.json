@@ -1,0 +1,9 @@
+{
+  "slug": "fin-3610",
+  "code": "FIN 3610",
+  "title": "Corporate Finance",
+  "description": "Capital budgeting, capital structure, valuation, and risk-return tradeoffs.",
+  "accentColor": "#047857",
+  "order": 2,
+  "defaultSemester": "spring-2027"
+}

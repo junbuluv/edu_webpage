@@ -44,6 +44,7 @@ create table if not exists public.profiles (
 alter table public.profiles drop column if exists email;
 alter table public.profiles add column if not exists email_hmac text;
 alter table public.profiles add column if not exists tos_accepted_at timestamptz;
+alter table public.profiles add column if not exists active_course_slug text;
 
 create unique index if not exists profiles_email_hmac_uq
   on public.profiles (email_hmac);
