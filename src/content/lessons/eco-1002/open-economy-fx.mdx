@@ -22,6 +22,7 @@ furtherReading:
 ---
 
 import OpenEconomyFX from '@components/viz/OpenEconomyFX';
+import Figure from '@components/mdx/Figure';
 
 ## The fundamental identity
 
@@ -48,6 +49,14 @@ reducing $NX$.
 Equilibrium $\varepsilon^*$ is whatever value makes $NX(\varepsilon) =
 S - I$. If saving rises, the right-hand side rises, so $NX$ must rise,
 which requires $\varepsilon$ to fall — a weaker real dollar.
+
+<Figure
+  src="/figures/eco-1002/open-economy-fx/usd-broad-index-2006-2024.png"
+  alt="The nominal broad US dollar index, daily, from 2006 to 2024."
+  caption="The dollar against a basket of major trading-partner currencies since 2006 (index value, not a single bilateral rate). Notable moves: 2008–2009 flight-to-safety surge, 2014–2015 strong-dollar period as the Fed exited ZLB ahead of others, 2022 spike alongside the Fed's aggressive tightening, partial reversal through 2023. The model in this lesson is what determines this index in the long run."
+  credit="FRED, St. Louis Fed (DTWEXBGS)"
+  creditHref="https://fred.stlouisfed.org/series/DTWEXBGS"
+/>
 
 <OpenEconomyFX client:load />
 
