@@ -137,6 +137,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     the `.gitignore` entry, stop and ask the project owner. Lesson
     figures sourced from there are off-limits — see "New lesson figure"
     under Common tasks for the sanctioned sources.
+15. **Auth URL convention: `/auth/signin` is canonical.** The page
+    lives at `src/pages/auth/signin.astro` and matches the API handler
+    at `/api/auth/signin` for naming consistency.
+    `src/pages/auth/login.astro` is a 3-line frontmatter file that
+    issues a 301 to `/auth/signin` preserving the query string —
+    purely for old bookmarks and external references. **All internal
+    links should point at `/auth/signin`**, not `/auth/login`. Don't
+    add new code (links, redirect destinations, Supabase config) that
+    references `/auth/login` — the redirect exists to catch external
+    URLs, not internal ones.
 
 ## Hosted Supabase gotchas
 
@@ -170,6 +180,37 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     new value before the implicit commit. Same fix: run the `ALTER
     TYPE` standalone first; on the re-paste it becomes a no-op (since
     the value now exists) and the rest runs cleanly.
+
+## Vercel deployment gotchas
+
+- **Env vars must be set manually in Vercel UI.** The Supabase-Vercel
+  Integration is a separate install from the Supabase-GitHub Integration
+  and most setups have only the latter. Five vars need to exist in
+  Project Settings → Environment Variables, with **all three environment
+  scopes** (Production, Preview, Development) checked: `PUBLIC_SUPABASE_URL`,
+  `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PUBLIC_SITE_URL`,
+  `PII_HMAC_SECRET`. If Production scope is unchecked on any of them, the
+  prod runtime gets `undefined` and middleware redirects every authenticated
+  request to `/auth/setup-required`.
+- **Production auto-deploy from `main` is not reliable.** Several merges to
+  `main` have failed to trigger production deploys (only preview-on-PR fires
+  reliably). After merging an important change, verify a Vercel check-run
+  appears for that SHA via
+  `gh api repos/junbuluv/edu_webpage/commits/<sha>/check-runs --jq '.check_runs[] | select(.name | startswith("Vercel"))'`;
+  if empty, force-redeploy via Vercel UI: Deployments → `⋯` on latest →
+  Redeploy → uncheck "Use existing Build Cache".
+- **Astro 5's `security.checkOrigin` is disabled** in `astro.config.mjs`.
+  The default-true setting compares request `Origin` to a URL Astro derives
+  from `Host` headers, which Vercel's edge layer doesn't preserve reliably —
+  every legitimate same-origin POST gets 403 "Cross-site POST form
+  submissions are forbidden". `SameSite=Lax` session cookies remain the
+  actual CSRF defense for the auth flow. Re-enable if/when the upstream
+  Astro/Vercel header-source issue is fixed.
+- **`site:` in `astro.config.mjs` must match the deployed origin.** Currently
+  set to `https://edu-webpage-fawn.vercel.app`. Affects sitemap.xml URLs,
+  `<link rel="canonical">` tags, and `Astro.site`. Update when moving to a
+  custom domain (e.g., `econ.baruch.cuny.edu`) — single-line PR, plus
+  updating Supabase Auth URL Configuration + `PUBLIC_SITE_URL` env var.
 
 ## Common tasks
 
