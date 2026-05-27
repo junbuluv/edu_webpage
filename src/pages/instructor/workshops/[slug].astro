@@ -96,6 +96,30 @@ const SECTIONS = ['CML', 'CTL', 'CWL', 'CRL'] as const;
 const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
 const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
 
+// Status messages from the form-handler redirects (see api/instructor/workshops/open.ts).
+const okParam = Astro.url.searchParams.get('ok');
+const errorParam = Astro.url.searchParams.get('error');
+const errorDetail = Astro.url.searchParams.get('detail');
+
+const OK_MESSAGES: Record<string, string> = {
+  opened: 'Workshop window opened.',
+  closed: 'Window closed.',
+};
+
+const ERROR_MESSAGES: Record<string, string> = {
+  unauthenticated: 'You need to sign in to open workshop windows.',
+  forbidden: "You don't have permission to open workshop windows. Contact an admin if this looks wrong.",
+  invalid_input: 'Some required fields were missing or invalid. Please fill all fields and try again.',
+  not_course_instructor: "You're not listed as the instructor for this course. Ask an admin to add an enrollments row with you as instructor_id.",
+  already_opened: courseUsesSections
+    ? 'A window for this section and week is already open. Close it first, or pick a different section / week.'
+    : 'A window for this workshop and week is already open. Close it first, or pick a different week.',
+  insert_failed: "Couldn't open the window because of a server error. Try again, or check the server logs if the problem persists.",
+};
+
+const okMessage = okParam ? OK_MESSAGES[okParam] : null;
+const errorMessage = errorParam ? (ERROR_MESSAGES[errorParam] ?? `Unknown error: ${errorParam}`) : null;
+
 // Default values for the "Open a new window" form.
 const todayLocal = new Date().toISOString().slice(0, 10);
 const defaultOpensAt = new Date().toISOString().slice(0, 16);
@@ -109,6 +133,24 @@ const closeDefault = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().sli
     </p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">{workshop.data.title}</h1>
     <p class="mt-3 text-ink-muted">{workshop.data.summary}</p>
+
+    {okMessage && (
+      <div class="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900">
+        {okMessage}
+      </div>
+    )}
+
+    {errorMessage && (
+      <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p class="font-medium">{errorMessage}</p>
+        {errorDetail && (
+          <details class="mt-2">
+            <summary class="cursor-pointer text-xs">Server detail</summary>
+            <code class="mt-1 block whitespace-pre-wrap break-all text-xs">{errorDetail}</code>
+          </details>
+        )}
+      </div>
+    )}
 
     <section class="mt-10 rounded-lg border border-slate-200 p-5">
       <h2 class="text-lg font-semibold">
