@@ -19,11 +19,10 @@ const BARUCH_55_LEX = { lat: 40.7411, lng: -73.9837 };
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
-  if (!user) return redirectBack(request, 'unauthenticated');
-  if (!isStaff(role)) {
-    return redirectBack(request, 'forbidden');
-  }
 
+  // Parse the form up front so we have workshopSlug available for error
+  // redirects below — without it we'd have to bounce errors back to the
+  // API URL itself, which has no GET handler and would 404.
   const form = await request.formData();
   const workshopSlug = String(form.get('workshop_slug') ?? '');
   const courseSlug = String(form.get('course_slug') ?? '');
@@ -34,8 +33,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const radius = Number(form.get('required_radius_meters') ?? 200);
   const notes = String(form.get('notes') ?? '').trim() || null;
 
+  if (!user) return errorRedirect(workshopSlug, 'unauthenticated');
+  if (!isStaff(role)) return errorRedirect(workshopSlug, 'forbidden');
+
   if (!workshopSlug || !courseSlug || !weekOf || !opensAt || !closesAt) {
-    return redirectBack(request, 'invalid_input');
+    return errorRedirect(workshopSlug, 'invalid_input');
   }
 
   const courseUsesSections = COURSES_WITH_SECTIONS.has(courseSlug);
@@ -43,7 +45,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     ? (SECTIONS.has(rawSection) ? (rawSection as 'CML' | 'CTL' | 'CWL' | 'CRL') : null)
     : null;
   if (courseUsesSections && section == null) {
-    return redirectBack(request, 'invalid_input');
+    return errorRedirect(workshopSlug, 'invalid_input');
   }
 
   // Admin role: must be instructor for this course in some enrollment row.
@@ -55,7 +57,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .eq('instructor_id', user.id)
       .eq('course_slug', courseSlug)
       .maybeSingle();
-    if (!enr) return redirectBack(request, 'not_course_instructor');
+    if (!enr) return errorRedirect(workshopSlug, 'not_course_instructor');
   }
 
   const admin = getAdminClient();
@@ -77,7 +79,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // 23505 unique violation on whichever partial index applies (with-section
     // for ECO; no-section for FIN).
     const reason = error.code === '23505' ? 'already_opened' : 'insert_failed';
-    return redirectBack(request, reason, error.message);
+    return errorRedirect(workshopSlug, reason, error.message);
   }
 
   return new Response(null, {
@@ -86,14 +88,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 };
 
-function redirectBack(request: Request, reason: string, detail?: string): Response {
-  const url = new URL(request.url);
-  // Extract slug from form value to redirect to the right page.
-  // Falls back to the index if we can't tell.
+// Redirect back to the per-workshop manage *page* (not the API URL) with
+// the error encoded in the query string. Falls back to the workshops
+// index if the slug is missing (which can only happen on a malformed
+// request).
+function errorRedirect(workshopSlug: string, reason: string, detail?: string): Response {
+  const target = workshopSlug
+    ? `/instructor/workshops/${workshopSlug}`
+    : '/instructor/workshops';
+  const detailQs = detail ? `&detail=${encodeURIComponent(detail)}` : '';
   return new Response(null, {
     status: 303,
     headers: {
-      Location: `${url.pathname}?error=${encodeURIComponent(reason)}${detail ? `&detail=${encodeURIComponent(detail)}` : ''}`,
+      Location: `${target}?error=${encodeURIComponent(reason)}${detailQs}`,
     },
   });
 }
