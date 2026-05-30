@@ -16,11 +16,11 @@ for (const l of lessons) {
   byUnit.set(l.data.unit, arr);
 }
 
-// Enrollment-gated workshop teaser (admins also see it as view-as).
+// Workshop teaser: visible to everyone (including guests). Only the
+// live open-count number is gated to enrolled students + admins.
 const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
 let enrolled = false;
 let openWorkshopCount = 0;
-let totalWorkshopCount = 0;
 if (user && supabase) {
   const { data: enrollment } = await supabase
     .from('enrollments')
@@ -29,20 +29,20 @@ if (user && supabase) {
     .eq('course_slug', 'fin-3610')
     .maybeSingle();
   enrolled = !!enrollment;
-  if (enrolled || viewerIsAdmin) {
-    const workshopContent = await getCollection('workshops', (w) => w.data.course === 'fin-3610');
-    totalWorkshopCount = workshopContent.length;
-    const nowIso = new Date().toISOString();
-    const { data: openAdmins } = await supabase
-      .from('workshop_administrations')
-      .select('id')
-      .eq('course_slug', 'fin-3610')
-      .lte('opens_at', nowIso)
-      .gt('closes_at', nowIso);
-    openWorkshopCount = (openAdmins ?? []).length;
-  }
 }
-const showWorkshopTeaser = (enrolled || viewerIsAdmin) && totalWorkshopCount > 0;
+const workshopContent = await getCollection('workshops', (w) => w.data.course === 'fin-3610');
+const totalWorkshopCount = workshopContent.length;
+if ((enrolled || viewerIsAdmin) && supabase) {
+  const nowIso = new Date().toISOString();
+  const { data: openAdmins } = await supabase
+    .from('workshop_administrations')
+    .select('id')
+    .eq('course_slug', 'fin-3610')
+    .lte('opens_at', nowIso)
+    .gt('closes_at', nowIso);
+  openWorkshopCount = (openAdmins ?? []).length;
+}
+const showWorkshopTeaser = totalWorkshopCount > 0;
 ---
 
 <BaseLayout title="FIN 3610 — Corporate Finance">
