@@ -31,6 +31,13 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/components/workshop/StampInButton.tsx`; student page
   `src/pages/workshops/[slug].astro`; per-course indexes
   `src/pages/{eco-1002,fin-3610}/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
+- Workshop visibility tiers (set by PR #69): course pages + per-course
+  workshop list (`/{course}/workshops`) are public — titles, summaries,
+  lesson links, question counts visible to guests. Open-window status
+  (section / week / open|upcoming|closed) renders only for enrolled
+  students + admins. Per-workshop detail (`/workshops/<slug>`) is still
+  gated to signed-in users; stamp-in additionally requires enrolled +
+  within geofence.
 - Instructor management hub: `src/pages/instructor/{index,workshops}/...`;
   form-handler APIs `src/pages/api/instructor/workshops/{open,close}.ts`
 - Course primitives: `src/lib/courses.ts` (slug tuple),
@@ -147,6 +154,18 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     add new code (links, redirect destinations, Supabase config) that
     references `/auth/login` — the redirect exists to catch external
     URLs, not internal ones.
+16. **Form-handler error redirects target the page, not the API.**
+    When a POST handler under `src/pages/api/...` needs to redirect on
+    error (e.g., 23505 unique violation), the `Location:` header must
+    point at the page that originated the form (e.g.,
+    `/instructor/workshops/<slug>?error=already_opened`), **not** the
+    API URL itself. The API route has no GET handler; if you redirect
+    to `url.pathname` the browser follows via GET and lands on a
+    Vercel 404. Pair this with the page reading `?error=` and `?ok=`
+    from the query string and rendering a banner — the established
+    pattern lives in `src/pages/instructor/workshops/[slug].astro`
+    (after PR #68). Workshop slug or other form-derived ID can be
+    pulled from `formData()` to build the right target.
 
 ## Hosted Supabase gotchas
 

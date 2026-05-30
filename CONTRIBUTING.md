@@ -589,3 +589,97 @@ Vercel auto-provisions Let's Encrypt certificates for added domains; the
 cert renews automatically every ~60 days. If DNS pointing at Vercel is
 ever removed, renewal fails silently — check the Domains panel says
 "Valid Configuration" after any DNS change.
+
+## Custom SMTP for Supabase Auth
+
+Supabase's free-tier email sends from a shared domain that gets blocked
+aggressively by university spam filters — Outlook / `*.baruch.cuny.edu`
+especially. Signups appear to succeed but the confirmation email never
+arrives, and Microsoft drops the message server-side without bouncing,
+so there's no visible failure. Configure custom SMTP through a real
+sending provider before any student-facing launch.
+
+### Domain ownership prerequisite
+
+The "from" address must be on a domain where you control DNS records.
+This is a separate concern from Vercel's web hosting — Vercel handles
+HTTP traffic for the domain, the SMTP provider handles email from the
+domain. Both use the same domain via different DNS record types.
+
+Three sub-cases:
+
+| Situation | Action | Effort |
+|---|---|---|
+| You own a personal domain already (e.g., `<yourname>.com`) | Use it. The web side keeps pointing at `*.vercel.app`; only email records get added. | Free, 10 min |
+| You don't own a domain | Register one — Cloudflare Registrar (~$10/yr, at-cost), Namecheap, Porkbun. | ~$10/yr, 5 min |
+| You want `noreply@econ.baruch.cuny.edu` | BCTC ticket for both the subdomain AND authorization for an external sender to send mail from it. Highest deliverability long-term; not blocking for the immediate launch. | Days–weeks, $0 |
+
+### Setup via Resend (recommended provider)
+
+Resend's free tier is 100 emails/day, 3,000/month — comfortable for
+ECO 1002 + FIN 3610 combined. Has explicit Supabase Auth integration
+guides.
+
+1. **Sign up at <https://resend.com>** (no credit card required).
+2. **Add and verify your domain.** Resend Dashboard → Domains → Add →
+   enter the domain. Resend shows 3–4 DNS records to add at your
+   registrar:
+   - `SPF` (TXT): `v=spf1 include:_spf.resend.com ~all`
+   - `DKIM` (CNAME or TXT, multiple records)
+   - `DMARC` (TXT): `v=DMARC1; p=none; rua=mailto:...` —
+     start with `p=none` for monitoring; tighten to `p=quarantine` or
+     `p=reject` after a few weeks of clean reports.
+   Add them, click Verify, status flips pending → verified within
+   5–30 minutes (often instant).
+3. **Create an API key.** Resend Dashboard → API Keys → Create →
+   "Sending access" permission → Create. Copy the `re_...` key
+   immediately; it isn't shown again.
+4. **Configure Supabase Auth → SMTP Settings.** Supabase Dashboard →
+   your project → Authentication → SMTP Settings → Enable Custom SMTP:
+   - Sender email: `noreply@yourdomain.com` (any address on the
+     verified Resend domain — doesn't need to exist as a mailbox)
+   - Sender name: e.g., "Baruch Econ & Finance Studio"
+   - Host: `smtp.resend.com`
+   - Port: `587` (STARTTLS) or `465` (TLS)
+   - Username: `resend`
+   - Password: your Resend API key
+5. **Test end-to-end** in an incognito window: sign up with a real
+   Outlook / Baruch email; confirmation should arrive within 30s from
+   `noreply@yourdomain.com`. First email from a brand-new domain may
+   land in spam — mark as not-spam; future deliveries hit the inbox.
+
+### Immediate workaround (for development / one-off reviewers)
+
+Before SMTP is set up, you can manually confirm individual signups via
+SQL when the email doesn't arrive:
+
+```sql
+update auth.users
+   set email_confirmed_at = now()
+ where email = 'reviewer@baruch.cuny.edu';
+```
+
+This works for ~5 users; doesn't scale to a class. Use only as a bridge
+before Resend is wired up, or for occasional out-of-band confirmations
+(e.g., a TA's address that legitimately fails delivery).
+
+### Rotation
+
+API keys are sensitive (anyone with the key can send mail from your
+verified domain). Rotate annually or on suspected compromise:
+
+1. Resend Dashboard → API Keys → Create a new key.
+2. Supabase Dashboard → Auth → SMTP Settings → Replace the Password
+   field with the new key → Save.
+3. Resend Dashboard → revoke the old key.
+
+No app redeploy required — Supabase reads SMTP creds at runtime.
+
+### Email template customization
+
+Supabase's default confirmation emails say generic things. Customize
+under Auth → Email Templates:
+- Subject: e.g., "Confirm your Baruch Econ & Finance Studio account"
+- Body: use `{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .Token }}`
+  placeholders. Branded text helps deliverability further; some
+  filters score generic SaaS auth emails as suspicious by default.
