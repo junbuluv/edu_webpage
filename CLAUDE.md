@@ -40,6 +40,14 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   within geofence.
 - Instructor management hub: `src/pages/instructor/{index,workshops}/...`;
   form-handler APIs `src/pages/api/instructor/workshops/{open,close}.ts`
+- Instructor class management (PR #72): routes
+  `src/pages/instructor/classes/{index,[course],import}.astro`; loaders
+  `src/lib/instructor/class-roster.ts` (roster + per-student monitoring +
+  at-risk flags + CSV export) and `roster-import.ts` (bulk CSV enrollment
+  import with ownership gate); pure alias-free helpers
+  `src/lib/progress-aggregate.ts` + `src/lib/instructor/roster-csv.ts`
+  (unit-tested — see "Verifying"); read-only audit-log viewer on
+  `src/pages/admin/index.astro`
 - Course primitives: `src/lib/courses.ts` (slug tuple),
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
@@ -105,6 +113,15 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 6. **RLS is the source of truth for access control.** When adding a table,
    add policies in `supabase/schema.sql` and regenerate types via
    `npm run supabase:types`. Tag the PR title with `db:` so reviewers check RLS.
+   **Sanctioned exception:** instructor-facing data access (reads *and* writes)
+   goes through the service-role admin client (`@lib/supabase/admin`) + an
+   app-side ownership / `isStaff` check, NOT RLS — see
+   `api/instructor/workshops/*.ts` and
+   `src/lib/instructor/{class-roster,roster-import}.ts`. Required because
+   student email lives in `auth.users` (profiles holds only `email_hmac`),
+   unreadable by any instructor RLS policy. Keep new instructor data access on
+   this pattern; enforce ownership in app code (don't reassign another
+   instructor's rows).
 7. **Keep lessons calibrated.** If a slider is added, pick parameter ranges
    where students see textbook intuitions (e.g. fiscal expansion raises both Y
    and r). Document the parameter choice in a small caption.
@@ -182,9 +199,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   `email_hmac`. Long-term fix is Supabase Vault or a per-call parameter;
   for now, email dedup-by-hash is a no-op on hosted projects.
 - **Free-tier email is rate-limited and frequently blocked** by university
-  spam filters (cuny.edu). For dev, manually confirm via SQL:
+  spam filters (cuny.edu runs Microsoft 365 / EOP, which drops Supabase's
+  built-in confirmation email server-side with no bounce). For dev, manually
+  confirm via SQL:
   `update auth.users set email_confirmed_at = now() where email = '...';`
-  For prod, configure custom SMTP (Resend / Postmark / SES).
+  For prod, configure custom SMTP (Resend / Postmark / SES) — full runbook in
+  `CONTRIBUTING.md`. **Interim (PR #74):** `gmail.com` is an accepted signup
+  domain (`src/lib/auth/email-allowlist.ts`) so students can fall back to
+  Gmail when Baruch confirmation is dropped. Verified: built-in email *does*
+  reach Gmail, so the failure is recipient-side Microsoft filtering. Custom
+  SMTP + domain registration is deferred to **Aug 2026** (before fall term).
 - **Adding values to `user_role`** uses `alter type user_role add value if
   not exists '<value>';`. Postgres enforces two related restrictions
   around enum value additions, and Supabase SQL Editor (which wraps the
@@ -218,6 +242,12 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   `gh api repos/junbuluv/edu_webpage/commits/<sha>/check-runs --jq '.check_runs[] | select(.name | startswith("Vercel"))'`;
   if empty, force-redeploy via Vercel UI: Deployments → `⋯` on latest →
   Redeploy → uncheck "Use existing Build Cache".
+- **Deploying via CLI works and is the reliable path.** The repo is linked
+  (gitignored `.vercel/`) to the canonical project **`edu-webpage`** (prod
+  alias `edu-webpage-fawn.vercel.app`); `vercel deploy --prod --yes` ships the
+  current `main` from your machine. A duplicate auto-created project
+  (`edu-webpage-m3av`) was deleted — if a second project reappears wired to
+  this same repo it double-deploys every push; remove it.
 - **Astro 5's `security.checkOrigin` is disabled** in `astro.config.mjs`.
   The default-true setting compares request `Origin` to a URL Astro derives
   from `Host` headers, which Vercel's edge layer doesn't preserve reliably —
@@ -282,15 +312,28 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 ## Verifying before declaring done
 
 1. `npm run typecheck` — must pass.
-2. `npm run format` — auto-fixes whitespace/import order via Prettier.
-3. `npm run build` — must compile cleanly. Build env needs at minimum:
+2. **Do NOT run `npm run format` ad hoc.** `prettier` and `prettier-plugin-astro`
+   are installed but there is no `.prettierrc`, so the script runs with bare
+   defaults: it errors on every `.astro` file ("No parser could be inferred")
+   and rewrites the whole `src` tree's quote style (single→double). Match
+   surrounding style by hand. (To make it safe you'd add a `.prettierrc` with
+   `singleQuote: true` + the astro plugin — but measured impact is a one-time
+   reformat of ~155/202 files, so treat that as a deliberate normalization PR,
+   not a casual step.)
+3. `node --test 'src/lib/**/*.test.ts'` — unit tests for pure logic
+   (aggregation, at-risk rules, CSV parsing). `node --test` strips TS types
+   but does NOT resolve `@lib/*` path aliases, so anything it tests must be
+   alias-free — that's why pure logic is split into `progress-aggregate.ts` /
+   `roster-csv.ts`, separate from the `@lib`-importing service-role modules.
+   Keep that split when adding testable logic.
+4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
    PUBLIC_SUPABASE_ANON_KEY=placeholder \
    PUBLIC_SITE_URL=http://localhost:4321 \
    npm run build
    ```
-4. `npm run dev` and exercise the affected lesson/quiz in a browser.
+5. `npm run dev` and exercise the affected lesson/quiz in a browser.
 
 If you touched anything Supabase-related, also re-run `supabase/schema.sql`
 in a scratch project and confirm RLS still blocks cross-user reads.
