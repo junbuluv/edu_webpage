@@ -56,6 +56,16 @@
       "correctIndices": [0, 1, 3],
       "explanation": "Comparables \u2192 unlever \u2192 average \u2192 re-lever is the standard recipe. A private firm has no public price history, so direct regression isn't possible.",
       "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "A firm is financed 60% equity, 40% debt. Cost of equity is 12%, pre-tax cost of debt is 8%, tax rate 25%. What is the WACC, in percent? (r_wacc = (E/V)r_E + (D/V)r_D(1\u2212t).)",
+      "answer": 9.6,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "WACC = 0.60(12%) + 0.40(8%)(1\u22120.25) = 7.2% + 0.40(6%) = 7.2% + 2.4% = 9.6%. The debt term uses the after-tax rate because interest is tax-deductible.",
+      "points": 2
     }
   ],
   "furtherReading": {
