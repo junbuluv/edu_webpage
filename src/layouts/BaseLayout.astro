@@ -3,7 +3,7 @@ import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import CourseSwitcher from '@components/course/CourseSwitcher';
 import { listAvailableCourses } from '@lib/dashboard';
-import { isStaff } from '@lib/roles';
+import { isStaff, isAdmin } from '@lib/roles';
 
 interface Props {
   title: string;
@@ -25,6 +25,7 @@ const switcherProps = switcherCourses.map((c) => ({
 }));
 const activeCourseSlug = profile?.active_course_slug ?? null;
 const viewerIsStaff = isStaff(profile?.role);
+const viewerIsAdmin = isAdmin(profile?.role);
 ---
 <!doctype html>
 <html lang="en">
@@ -46,6 +47,7 @@ const viewerIsStaff = isStaff(profile?.role);
         <nav class="flex items-center gap-4 text-sm">
           <a href="/eco-1002" class="text-ink-muted hover:text-ink">ECO 1002</a>
           <a href="/fin-3610" class="text-ink-muted hover:text-ink">FIN 3610</a>
+          <a href="/practice" class="text-ink-muted hover:text-ink">Practice</a>
           {user ? (
             <>
               {switcherProps.length > 0 && (
@@ -58,6 +60,9 @@ const viewerIsStaff = isStaff(profile?.role);
               <a href="/dashboard" class="text-ink-muted hover:text-ink">Dashboard</a>
               {viewerIsStaff && (
                 <a href="/instructor" class="text-ink-muted hover:text-ink">Manage</a>
+              )}
+              {viewerIsAdmin && (
+                <a href="/admin" class="text-ink-muted hover:text-ink">Admin</a>
               )}
               <form method="POST" action="/api/auth/signout" class="inline">
                 <button class="text-ink-muted hover:text-ink" type="submit">

@@ -3,6 +3,10 @@ import { createSupabaseServerClient } from '@lib/supabase/server';
 import { ensureDeviceId } from '@lib/device';
 import { isAdmin as isAdminRole, isStaff as isStaffRole } from '@lib/roles';
 
+// '/exams' is reserved for the upcoming proctored-exams feature (see the
+// feat/proctored-exams branch). No route exists under it yet, so it only
+// gates-then-404s if visited directly — and nothing links to it. Keep the
+// prefix so the gate is in place the moment exams ship.
 const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams', '/workshops'];
 const ADMIN_PREFIXES = ['/admin'];
 const STAFF_PREFIXES = ['/instructor'];
