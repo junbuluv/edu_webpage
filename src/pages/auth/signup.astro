@@ -23,7 +23,9 @@ const allowedList = allowedDomainsHumanList();
       For Baruch College students, faculty, and staff.
     </p>
     <p class="text-sm text-ink-muted mb-6">
-      Use your Baruch email: <strong>{allowedList}</strong>.
+      Use your Baruch email. If the confirmation email doesn't arrive
+      (CUNY's spam filter sometimes blocks it), you can sign up with a
+      personal Gmail instead. Accepted: <strong>{allowedList}</strong>.
     </p>
 
     {error && (
@@ -35,14 +37,14 @@ const allowedList = allowedDomainsHumanList();
     <form method="POST" action="/api/auth/signup" class="space-y-4">
       <input type="hidden" name="next" value={next} />
       <label class="block">
-        <span class="text-sm font-medium">Baruch email</span>
+        <span class="text-sm font-medium">Email</span>
         <input
           name="email"
           type="email"
           required
           autocomplete="email"
           pattern={emailPattern}
-          title={`Must be a Baruch College address (${allowedList}).`}
+          title={`Must be one of: ${allowedList}.`}
           placeholder="firstname.lastname@baruchmail.cuny.edu"
           class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
         />
