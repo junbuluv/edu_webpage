@@ -238,6 +238,13 @@ create table if not exists public.enrollments (
   primary key (user_id, course_slug, semester)
 );
 
+-- Roster identity (Phase 2 bulk import): registrar-provided name + section.
+-- Nullable; populated by roster import. student_name is the authoritative
+-- display name for instructor-facing roster views (it falls back to
+-- profiles.display_name when null). section is the registrar section, if any.
+alter table public.enrollments add column if not exists student_name text;
+alter table public.enrollments add column if not exists section text;
+
 create index if not exists enrollments_instructor_idx
   on public.enrollments (instructor_id, semester);
 create index if not exists enrollments_course_idx

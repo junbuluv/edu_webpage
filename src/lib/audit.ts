@@ -7,6 +7,7 @@ export type DisclosureAction =
   | 'read_student_attempts'
   | 'read_class_roster'
   | 'export_student_data'
+  | 'import_roster'
   | 'delete_user'
   | 'promote_role';
 
@@ -48,5 +49,28 @@ export async function logDisclosure(ctx: DisclosureContext): Promise<void> {
       error: error.message,
     });
     throw new Error('audit write failed');
+  }
+}
+
+/**
+ * Fail-open variant: records the disclosure but never throws. Use at call
+ * sites where a transient audit-write failure must NOT block the user's
+ * action (e.g. a roster CSV download or a roster import) — the failure is
+ * logged server-side instead. Returns true if the audit row was written.
+ *
+ * This is a deliberate availability-over-strictness tradeoff for a
+ * trusted-instructor teaching app; switch a call site back to
+ * `logDisclosure` (which throws) if an action must fail closed.
+ */
+export async function logDisclosureSafe(ctx: DisclosureContext): Promise<boolean> {
+  try {
+    await logDisclosure(ctx);
+    return true;
+  } catch (err) {
+    console.error('[audit] logDisclosureSafe swallowed error', {
+      action: ctx.action,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
   }
 }

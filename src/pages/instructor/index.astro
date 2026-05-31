@@ -54,7 +54,24 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
     )}
 
     {instructorCourses.size > 0 && (
-      <div class="mt-10">
+      <div class="mt-10 space-y-6">
+        <section class="rounded-lg border border-slate-200 p-5">
+          <h2 class="text-xl font-semibold">Classes</h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            Your rosters by course and semester. Per-student lesson
+            progress, quiz performance, workshop attendance, and at-risk
+            flags. Export a roster CSV.
+          </p>
+          <div class="mt-4">
+            <a
+              href="/instructor/classes"
+              class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              View classes →
+            </a>
+          </div>
+        </section>
+
         <section class="rounded-lg border border-slate-200 p-5">
           <h2 class="text-xl font-semibold">Workshops</h2>
           <p class="mt-1 text-sm text-ink-muted">
