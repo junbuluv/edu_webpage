@@ -103,3 +103,19 @@ jobs:
 
       - name: Apply schema.sql (second run, should be a no-op)
         run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+  # Deterministic copyright gate over lesson MDX + quiz JSON: missing figure
+  # credit, external/hotlinked images, references to the gitignored materials/
+  # folder, suspect sources. The mechanical subset of CLAUDE.md #14 + "New
+  # lesson figure". The deeper AI review is the on-demand /copyright-check
+  # skill. Currently ADVISORY (not in required_status_checks) — flip to
+  # required in the ruleset once it's proven quiet.
+  copyright-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Copyright check
+        run: node scripts/check-copyright.mjs
