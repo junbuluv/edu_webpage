@@ -8,11 +8,12 @@ learningObjectives:
   - 'Apply NPV, IRR, MIRR, and payback rules to a multi-period project.'
   - 'Identify when IRR misranks projects relative to NPV.'
   - 'Explain why NPV is the unambiguous best rule and which scenarios fool each alternative.'
+  - 'Use the profitability index to choose among projects when a single resource is constrained.'
 prerequisites:
   - 'NPV decision rule (Unit 1).'
   - 'Time value of money (Unit 2).'
 estimatedMinutes: 25
-tags: ['fin-3610', 'Berk-DeMarzo Ch 7', 'decision rules']
+tags: ['fin-3610', 'Berk-DeMarzo Ch 7', 'decision rules', 'capital rationing', 'profitability index']
 quizSlug: 'fin-3610-investment-decision-rules'
 draft: false
 ---
@@ -138,6 +139,41 @@ against.
 The disagreements arise in ranking mutually exclusive choices and
 in non-conventional CF profiles. Real-world capital budgeting hits
 those cases constantly. Use NPV.
+
+## Profitability index: choosing under a constraint
+
+NPV says take every positive-NPV project. Reality often imposes a
+limit: a fixed capital budget, one scarce engineering team, a single
+factory line. When one resource binds, ranking by NPV alone can
+overspend it. Rank instead by the **profitability index**, the value
+created per unit of the scarce resource:
+
+$$
+\text{PI} = \frac{\text{NPV}}{\text{Resource consumed}}.
+$$
+
+Take projects in descending PI order until the resource runs out.
+
+Worked example. A \$100M capital budget and three independent
+projects:
+
+| Project | Investment | NPV   | PI = NPV / Investment |
+| ------- | ---------- | ----- | --------------------- |
+| A       | \$100M     | \$40M | 0.40                  |
+| B       | \$50M      | \$30M | 0.60                  |
+| C       | \$50M      | \$25M | 0.50                  |
+
+Ranking by raw NPV grabs A first (\$40M NPV), which exhausts the
+budget for a total of \$40M. Ranking by PI takes B (0.60) then C
+(0.50), which also fits in \$100M but creates \$30M + \$25M = \$55M.
+The profitability index wins because it spends each scarce dollar
+where it produces the most value.
+
+The rule has limits. It assumes a single binding constraint and
+projects you can take whole. With two constraints at once, or
+lumpy all-or-nothing projects, PI ranking can mislead and you need
+explicit optimization. Within those limits it is the right tie-break
+when you cannot fund everything positive.
 
 ## Practical decision template
 
