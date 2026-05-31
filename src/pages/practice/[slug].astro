@@ -3,6 +3,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import Quiz from '@components/quiz/Quiz';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { getEntry } from 'astro:content';
+import { toPublicQuestions } from '@lib/quiz/public';
 
 // SSR so Astro.locals.user is populated by middleware and the header
 // renders the signed-in state. Lookup the quiz by slug on each request.
@@ -29,7 +30,7 @@ const quiz = entry.data;
       client:load
       slug={quiz.slug}
       title={quiz.title}
-      questions={quiz.questions}
+      questions={toPublicQuestions(quiz.questions)}
       passingScore={quiz.passingScore}
     />
 

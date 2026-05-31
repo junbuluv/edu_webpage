@@ -1,0 +1,82 @@
+{
+  "slug": "eco-1002-ad-as",
+  "title": "Aggregate Demand and Short-Run Supply",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/ad-as",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Which of the following correctly describes the AD curve and explains why it is downward-sloping?",
+      "choices": [
+        "AD is downward-sloping because higher output reduces expected prices.",
+        "AD is downward-sloping because higher prices reduce real money balances, raise interest rates, and reduce spending.",
+        "AD is downward-sloping because firms' costs rise with output, forcing prices down.",
+        "AD is downward-sloping because higher prices attract more foreign demand."
+      ],
+      "correctIndex": 1,
+      "explanation": "AD slopes downward through the real money balance channel: when P rises, M/P falls, pushing up the interest rate (via IS-LM), which reduces total spending and equilibrium output.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "In 2020, COVID lockdowns caused both output and inflation to fall sharply. Which type of shock does this represent, and why?",
+      "choices": [
+        "A supply shock, because prices fell.",
+        "A demand shock, because output and prices moved in the same direction.",
+        "A supply shock, because the shock originated in the goods market.",
+        "A demand shock, because lockdowns are exogenous to the firm."
+      ],
+      "correctIndex": 1,
+      "explanation": "When Y and P move in the same direction, it indicates a demand shock. The COVID lockdowns shifted AD left (reduced consumer spending and investment), lowering both output and prices together.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following would represent a supply shock in the AD-AS framework? Select all that apply.",
+      "choices": [
+        "A rise in oil prices that increases production costs at every level of output.",
+        "An increase in government spending that boosts aggregate demand.",
+        "A spike in wage expectations that shifts SRAS up/left.",
+        "A monetary expansion that increases the money supply."
+      ],
+      "correctIndices": [
+        0,
+        2
+      ],
+      "explanation": "Supply shocks shift SRAS directly. A rise in oil prices raises production costs at every level of output (option 0), and a spike in wage expectations raises the costs firms expect to pay, shifting SRAS up/left (option 2). Options 1 and 3 are demand shocks that shift AD.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "The 2022 energy spike after Russia's invasion of Ukraine caused output to slow while inflation accelerated. According to the AD-AS model diagnostic, what type of shock was this?",
+      "choices": [
+        "A demand shock, because inflation accelerated.",
+        "A supply shock, because output and inflation moved in opposite directions.",
+        "A demand shock, because output fell.",
+        "A supply shock that could have been offset by fiscal expansion."
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson's diagnostic rule applies: when Y and P move in opposite directions, it was a supply shock. The energy spike raised production costs, shifting SRAS left, raising prices while output fell.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "How do demand shocks and supply shocks differ in their policy implications?",
+      "choices": [
+        "Demand shocks require supply-side reforms; supply shocks can be offset by monetary policy.",
+        "Demand shocks are easy to respond to with monetary or fiscal policy; supply shocks are harder because expanding demand worsens inflation.",
+        "Supply shocks are costless to manage; demand shocks require painful recessions.",
+        "Both require the same policy response regardless of the shock's origin."
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson contrasts the two: demand shocks can be offset by shifting AD back via monetary or fiscal policy. Supply shocks force a trade-off because expanding AD to restore output only adds inflation on top of the cost-push effect.",
+      "points": 1
+    }
+  ]
+}
