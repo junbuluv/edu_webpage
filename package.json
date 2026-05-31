@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "astro check",
+    "check:copyright": "node scripts/check-copyright.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,astro,mdx,md,json,css}\"",
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_REF --schema public > src/lib/supabase/database.types.ts"
   },
