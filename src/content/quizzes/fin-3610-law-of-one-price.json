@@ -47,12 +47,7 @@
       "type": "multiple_choice",
       "id": "q4",
       "prompt": "EUR/USD = 1.10, USD/JPY = 110. What should EUR/JPY be (approximately) to avoid triangular arbitrage?",
-      "choices": [
-        "100",
-        "110",
-        "121",
-        "200"
-      ],
+      "choices": ["100", "110", "121", "200"],
       "correctIndex": 2,
       "explanation": "1 EUR \u00d7 1.10 USD/EUR \u00d7 110 JPY/USD = 121 JPY. Any other cross rate enables triangular arbitrage.",
       "points": 1

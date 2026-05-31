@@ -78,7 +78,10 @@ export function parseRosterCsv(text: string): ParseResult {
   const errors: string[] = [];
   const grid = tokenize(text).filter((r) => r.some((c) => c.trim() !== ''));
   if (grid.length === 0) {
-    return { rows: [], errors: ['No rows found. Paste a CSV with an "email" column.'] };
+    return {
+      rows: [],
+      errors: ['No rows found. Paste a CSV with an "email" column.'],
+    };
   }
 
   const header = grid[0].map((h) => h.trim().toLowerCase());
@@ -103,7 +106,8 @@ export function parseRosterCsv(text: string): ParseResult {
       continue;
     }
     const name = nameIdx === -1 ? null : (cells[nameIdx] ?? '').trim() || null;
-    const section = sectionIdx === -1 ? null : (cells[sectionIdx] ?? '').trim() || null;
+    const section =
+      sectionIdx === -1 ? null : (cells[sectionIdx] ?? '').trim() || null;
     byEmail.set(email, { email, name, section });
   }
 

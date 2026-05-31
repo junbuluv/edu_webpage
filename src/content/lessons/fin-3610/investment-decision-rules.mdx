@@ -1,19 +1,19 @@
 ---
-title: "Investment Decision Rules: NPV, IRR, Payback"
+title: 'Investment Decision Rules: NPV, IRR, Payback'
 course: fin-3610
-unit: "Valuing projects and firms"
+unit: 'Valuing projects and firms'
 order: 10
-summary: "A reference card for project-ranking rules. NPV is always right; IRR fails on non-conventional cash flows and mutually exclusive projects of different scale; payback ignores time value and tail cash flows."
+summary: 'A reference card for project-ranking rules. NPV is always right; IRR fails on non-conventional cash flows and mutually exclusive projects of different scale; payback ignores time value and tail cash flows.'
 learningObjectives:
-  - "Apply NPV, IRR, MIRR, and payback rules to a multi-period project."
-  - "Identify when IRR misranks projects relative to NPV."
-  - "Explain why NPV is the unambiguous best rule and which scenarios fool each alternative."
+  - 'Apply NPV, IRR, MIRR, and payback rules to a multi-period project.'
+  - 'Identify when IRR misranks projects relative to NPV.'
+  - 'Explain why NPV is the unambiguous best rule and which scenarios fool each alternative.'
 prerequisites:
-  - "NPV decision rule (Unit 1)."
-  - "Time value of money (Unit 2)."
+  - 'NPV decision rule (Unit 1).'
+  - 'Time value of money (Unit 2).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 7", "decision rules"]
-quizSlug: "fin-3610-investment-decision-rules"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 7', 'decision rules']
+quizSlug: 'fin-3610-investment-decision-rules'
 draft: false
 ---
 
@@ -21,12 +21,12 @@ import TVMNPV from '@components/viz/TVMNPV';
 
 ## The four rules in one table
 
-| Rule | Decision | Strength | Failure mode |
-|---|---|---|---|
-| NPV | Accept if NPV > 0; choose highest NPV among mutually exclusive | Always correct | Requires a discount rate |
-| IRR | Accept if IRR > cost of capital | Easy to communicate, useful diagnostic | Multiple IRRs for non-conventional CFs; misranks by scale and timing |
-| Payback | Accept if recouped within cutoff | Quick screen for liquidity | Ignores TVM; ignores cash flows after cutoff |
-| ARR | Accept if accounting return > hurdle | Aligns with financial reporting | Uses accounting income (not CFs); ignores timing |
+| Rule    | Decision                                                       | Strength                               | Failure mode                                                         |
+| ------- | -------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------- |
+| NPV     | Accept if NPV > 0; choose highest NPV among mutually exclusive | Always correct                         | Requires a discount rate                                             |
+| IRR     | Accept if IRR > cost of capital                                | Easy to communicate, useful diagnostic | Multiple IRRs for non-conventional CFs; misranks by scale and timing |
+| Payback | Accept if recouped within cutoff                               | Quick screen for liquidity             | Ignores TVM; ignores cash flows after cutoff                         |
+| ARR     | Accept if accounting return > hurdle                           | Aligns with financial reporting        | Uses accounting income (not CFs); ignores timing                     |
 
 You can apply all four to most projects, but the rankings can
 disagree. When they do, NPV wins.
@@ -53,7 +53,7 @@ flow sign changes more than once. Multiple IRRs exist. The IRR
 "rule" gives no unique answer.
 
 Example. Cash flows: $-100$, $+230$, $-132$. The NPV equation has
-*two* real roots — IRR = 10% and IRR = 20%. Both make NPV = 0. Which
+_two_ real roots — IRR = 10% and IRR = 20%. Both make NPV = 0. Which
 is "the" IRR? Neither. The NPV at a 15% cost of capital is $+0.38$;
 the project marginally creates value. NPV gives a clean answer; IRR
 doesn't.
@@ -79,9 +79,9 @@ the actual cost of capital.
 
 MIRR addresses failure 1 by:
 
-1. Discounting all *negative* cash flows back to time 0 at a
+1. Discounting all _negative_ cash flows back to time 0 at a
    finance rate.
-2. Compounding all *positive* cash flows to the horizon $T$ at a
+2. Compounding all _positive_ cash flows to the horizon $T$ at a
    reinvestment rate.
 3. Solving for the single growth rate that turns PV of negatives
    into FV of positives.
@@ -128,7 +128,7 @@ forward-looking project decisions.
 
 ## When NPV and IRR agree
 
-For a *single* conventional project (one negative cash flow then
+For a _single_ conventional project (one negative cash flow then
 all positives), NPV and IRR agree on accept/reject. Specifically,
 NPV > 0 if and only if IRR > cost of capital. So if you're choosing
 between accepting a single project and doing nothing, IRR is fine —
@@ -146,6 +146,6 @@ When facing a capital-budgeting decision:
 1. Forecast incremental free cash flows (next lesson).
 2. Discount at the appropriate cost of capital (Units 4-5).
 3. Compute NPV. If $> 0$, project is value-creating.
-4. Compute IRR as a *diagnostic* — useful for communicating with
+4. Compute IRR as a _diagnostic_ — useful for communicating with
    non-technical colleagues, but defer to NPV when they disagree.
 5. Skip payback unless a true liquidity constraint binds.

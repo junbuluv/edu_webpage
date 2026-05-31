@@ -22,7 +22,12 @@ export interface ADASPreset {
   blurb: string;
 }
 
-export const ADAS_BASELINE: ADASSnapshot = { G: 100, M: 600, Pe: 2.5, Yn: 1000 };
+export const ADAS_BASELINE: ADASSnapshot = {
+  G: 100,
+  M: 600,
+  Pe: 2.5,
+  Yn: 1000,
+};
 
 export const ADAS_PRESETS: ADASPreset[] = [
   {

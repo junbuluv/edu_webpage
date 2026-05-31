@@ -1,19 +1,19 @@
 ---
-title: "Valuing Stocks: DDM and FCFE"
+title: 'Valuing Stocks: DDM and FCFE'
 course: fin-3610
-unit: "Valuing projects and firms"
+unit: 'Valuing projects and firms'
 order: 13
-summary: "Two ways to value a share of stock — the dividend discount model and free-cash-flow-to-equity — and when each is preferred."
+summary: 'Two ways to value a share of stock — the dividend discount model and free-cash-flow-to-equity — and when each is preferred.'
 learningObjectives:
-  - "Apply the Gordon growth dividend discount model to a stable mature company."
-  - "Build a multi-stage DDM with an explicit forecast phase and a terminal phase."
-  - "Compute equity value via FCFE discounted at the cost of equity, and explain when this beats the DDM."
+  - 'Apply the Gordon growth dividend discount model to a stable mature company.'
+  - 'Build a multi-stage DDM with an explicit forecast phase and a terminal phase.'
+  - 'Compute equity value via FCFE discounted at the cost of equity, and explain when this beats the DDM.'
 prerequisites:
-  - "Gordon growth model (Unit 2)."
-  - "Free cash flow construction (prior lesson)."
+  - 'Gordon growth model (Unit 2).'
+  - 'Free cash flow construction (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 9", "stock valuation", "DDM", "FCFE"]
-quizSlug: "fin-3610-valuing-stocks"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 9', 'stock valuation', 'DDM', 'FCFE']
+quizSlug: 'fin-3610-valuing-stocks'
 draft: false
 ---
 
@@ -70,7 +70,7 @@ kind of company it was designed for.
     { fy: 'FY21', dps: 2.24 },
     { fy: 'FY22', dps: 2.48 },
     { fy: 'FY23', dps: 2.72 },
-    { fy: 'FY24', dps: 3.00 },
+    { fy: 'FY24', dps: 3.0 },
   ]}
   xKey="fy"
   series={[{ key: 'dps', name: 'Dividend per share ($)', color: '#4572a7' }]}
@@ -144,15 +144,15 @@ $$
 Per-share value = Equity value / shares outstanding.
 
 This is the right approach for non-dividend payers because what
-matters is the cash the firm *could* pay out, not the cash it
-*chooses* to pay out.
+matters is the cash the firm _could_ pay out, not the cash it
+_chooses_ to pay out.
 
 ## DDM vs FCFE: which when
 
-| Use DDM when | Use FCFE when |
-|---|---|
-| Firm has stable dividend policy | Firm pays little or no dividend |
-| Payout ratio is predictable | Payout is sporadic / opportunistic |
+| Use DDM when                                                         | Use FCFE when                            |
+| -------------------------------------------------------------------- | ---------------------------------------- |
+| Firm has stable dividend policy                                      | Firm pays little or no dividend          |
+| Payout ratio is predictable                                          | Payout is sporadic / opportunistic       |
 | You're valuing utility-like, consumer-staple, mature financial firms | You're valuing tech, growth, M&A targets |
 
 For most large public US firms today, FCFE is the more general tool.

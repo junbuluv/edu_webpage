@@ -43,11 +43,7 @@
         "Capital structure changes over time being ignored in WACC",
         "The three methods are fundamentally different and can't agree"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "In a consistent setup, all three methods give the same answer. Disagreement = inconsistent inputs, mixed CF definitions, or treating WACC as constant when capital structure varies.",
       "points": 2
     },

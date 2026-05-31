@@ -140,12 +140,13 @@ export default function ISLMChart() {
     setState((s) => ({ ...s, M: newM }));
   }
 
-  const activePresetId = ISLM_PRESETS.find(
-    (p) =>
-      Math.abs(p.state.G - state.G) < 0.5 &&
-      Math.abs(p.state.M - state.M) < 0.5 &&
-      Math.abs(p.state.A0 - state.A0) < 0.5,
-  )?.id ?? '';
+  const activePresetId =
+    ISLM_PRESETS.find(
+      (p) =>
+        Math.abs(p.state.G - state.G) < 0.5 &&
+        Math.abs(p.state.M - state.M) < 0.5 &&
+        Math.abs(p.state.A0 - state.A0) < 0.5,
+    )?.id ?? '';
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -210,15 +211,11 @@ export default function ISLMChart() {
         <span className="text-ink-muted">Equilibrium:</span>
         <span>
           <strong>Y* = {eq.Yeq.toFixed(1)}</strong>
-          {Math.abs(deltaY) > 0.1 && (
-            <DeltaBadge value={deltaY} unit="" />
-          )}
+          {Math.abs(deltaY) > 0.1 && <DeltaBadge value={deltaY} unit="" />}
         </span>
         <span>
           <strong>r* = {eq.req.toFixed(2)}%</strong>
-          {Math.abs(deltaR) > 0.01 && (
-            <DeltaBadge value={deltaR} unit="pp" />
-          )}
+          {Math.abs(deltaR) > 0.01 && <DeltaBadge value={deltaR} unit="pp" />}
         </span>
       </div>
 
@@ -297,18 +294,8 @@ export default function ISLMChart() {
             Positioned to roughly hug each curve label area on the right
             edge of the chart so they don't collide with the equilibrium
             dot in the middle. */}
-        <DragHandle
-          label="IS"
-          color="#2563eb"
-          top="20%"
-          onDrag={onDragIS}
-        />
-        <DragHandle
-          label="LM"
-          color="#dc2626"
-          top="65%"
-          onDrag={onDragLM}
-        />
+        <DragHandle label="IS" color="#2563eb" top="20%" onDrag={onDragIS} />
+        <DragHandle label="LM" color="#dc2626" top="65%" onDrag={onDragLM} />
       </div>
 
       {/* Pin & compare + share */}
@@ -360,12 +347,12 @@ export default function ISLMChart() {
       )}
 
       <p className="mt-4 text-xs text-ink-muted">
-        Closed-economy IS-LM. Parameters: c = 0.6, t = 0.2, b = 20, k = 0.5,
-        h = 10, P = 1. The IS curve slopes down (lower r ⇒ more investment
-        ⇒ higher Y). The LM curve slopes up (higher Y ⇒ more money demand
-        ⇒ higher r to clear the money market at fixed M). They cross at
-        equilibrium. Drag sliders, type values, drag the IS or LM label
-        directly, or pick a historical preset.
+        Closed-economy IS-LM. Parameters: c = 0.6, t = 0.2, b = 20, k = 0.5, h =
+        10, P = 1. The IS curve slopes down (lower r ⇒ more investment ⇒ higher
+        Y). The LM curve slopes up (higher Y ⇒ more money demand ⇒ higher r to
+        clear the money market at fixed M). They cross at equilibrium. Drag
+        sliders, type values, drag the IS or LM label directly, or pick a
+        historical preset.
       </p>
     </div>
   );

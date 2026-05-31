@@ -23,12 +23,7 @@
       "type": "multiple_choice",
       "id": "q2",
       "prompt": "A mining project has cash flows -100, +230, -132 (cleanup at end). How many real IRRs does this have?",
-      "choices": [
-        "Zero",
-        "One",
-        "Two",
-        "Three"
-      ],
+      "choices": ["Zero", "One", "Two", "Three"],
       "correctIndex": 2,
       "explanation": "Two sign changes \u2192 up to two IRRs. This project has IRR = 10% and IRR = 20% (both make NPV = 0). The IRR rule is ambiguous here; NPV is not.",
       "points": 1
@@ -43,10 +38,7 @@
         "Communicating intuition to non-technical stakeholders",
         "Definitive ranking when NPV and IRR disagree"
       ],
-      "correctIndices": [
-        0,
-        2
-      ],
+      "correctIndices": [0, 2],
       "explanation": "Payback is useful as a quick screen and for communication, never as the primary decision rule. It ignores TVM and tail cash flows.",
       "points": 2
     },

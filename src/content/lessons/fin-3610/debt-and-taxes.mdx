@@ -1,18 +1,18 @@
 ---
-title: "Debt and Taxes"
+title: 'Debt and Taxes'
 course: fin-3610
-unit: "Capital structure and payout"
+unit: 'Capital structure and payout'
 order: 21
-summary: "Once corporate taxes enter, interest is tax-deductible and debt creates a tax shield. Firm value rises with leverage by PV(tax shield); WACC declines with leverage."
+summary: 'Once corporate taxes enter, interest is tax-deductible and debt creates a tax shield. Firm value rises with leverage by PV(tax shield); WACC declines with leverage.'
 learningObjectives:
-  - "Compute the present value of the interest tax shield."
-  - "State MM with taxes: V_L = V_U + t·D."
-  - "Derive the WACC formula with the tax adjustment and explain why it declines with leverage."
+  - 'Compute the present value of the interest tax shield.'
+  - 'State MM with taxes: V_L = V_U + t·D.'
+  - 'Derive the WACC formula with the tax adjustment and explain why it declines with leverage.'
 prerequisites:
-  - "MM perfect market (prior lesson)."
+  - 'MM perfect market (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 15", "debt", "tax shield"]
-quizSlug: "fin-3610-debt-and-taxes"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 15', 'debt', 'tax shield']
+quizSlug: 'fin-3610-debt-and-taxes'
 draft: false
 ---
 
@@ -96,6 +96,7 @@ Same firm from the prior lesson: $r_U = 12\%$, perpetual EBIT
 \$100M. Add a 25% corporate tax rate.
 
 Unlevered value:
+
 $$
 V_U = \frac{100 \times (1 - 0.25)}{0.12} = \frac{75}{0.12} = \$625\text{M}.
 $$
@@ -103,11 +104,13 @@ $$
 (After-tax cash flows are smaller; value drops by 25%.)
 
 Now issue \$300M of perpetual debt at 5%. Tax-shield value:
+
 $$
 PV(\text{TS}) = 0.25 \times 300 = \$75\text{M}.
 $$
 
 Levered firm value:
+
 $$
 V_L = 625 + 75 = \$700\text{M}.
 $$
@@ -119,13 +122,14 @@ their face value).
 ## How big is the tax shield, really?
 
 For a typical US firm:
+
 - Average leverage ratio (D/V) ~ 30%.
 - Corporate tax rate ~ 21% (post-TCJA, pre-any reform).
 - So tax-shield value as a fraction of firm value is ~ 0.21 × 0.30
   = ~6% of firm value.
 
 That's not nothing — for a \$10B firm, it's \$600M of value. But
-it's also not enormous, which is why the *full* capital-structure
+it's also not enormous, which is why the _full_ capital-structure
 story has to include distress costs and other frictions, not just
 tax shields.
 
@@ -145,7 +149,13 @@ tax shields.
     { year: '2024', rate: 21 },
   ]}
   xKey="year"
-  series={[{ key: 'rate', name: 'US federal statutory corporate tax rate (%)', color: '#4572a7' }]}
+  series={[
+    {
+      key: 'rate',
+      name: 'US federal statutory corporate tax rate (%)',
+      color: '#4572a7',
+    },
+  ]}
   yAxisLabel="Tax rate (%)"
   caption="The US federal statutory corporate income tax rate at selected inflection points. The Tax Reform Act of 1986 cut it from 46% to 34%; the Tax Cuts and Jobs Act of 2017 cut it from 35% to 21% effective 2018. Today's tax-shield value (~6% of firm value at 30% leverage) was closer to 12-14% in the 1960s — half the empirical importance of debt in capital structure has been eroded by tax-rate cuts since."
   credit="US Internal Revenue Code statutory rates (historical)"

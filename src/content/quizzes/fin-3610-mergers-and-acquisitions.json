@@ -39,11 +39,7 @@
         "Synergy overestimation (especially revenue synergies)",
         "Acquirer's stock price always falls regardless of the deal"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Overpayment, integration risk, and synergy fantasies are the three big destroyers. Stock-price reactions vary by deal quality \u2014 they're not uniformly negative.",
       "points": 2
     },

@@ -28,16 +28,25 @@ if (!semester) {
 }
 
 const wantsCsv = Astro.url.searchParams.get('format') === 'csv';
-const result = await loadClassRoster(user.id, isAdmin, course, semester, Date.now());
+const result = await loadClassRoster(
+  user.id,
+  isAdmin,
+  course,
+  semester,
+  Date.now(),
+);
 
 if (result.kind === 'forbidden') return new Response(null, { status: 403 });
 if (result.kind === 'not_found') return Astro.redirect('/instructor/classes');
 if (result.kind === 'error') {
   // A real load error — distinct from an empty/non-existent class, which
   // would have been not_found. Don't masquerade the failure as "no class".
-  return new Response('Could not load this class right now — please try again shortly.', {
-    status: 503,
-  });
+  return new Response(
+    'Could not load this class right now — please try again shortly.',
+    {
+      status: 503,
+    },
+  );
 }
 const roster = result.roster;
 
@@ -108,7 +117,10 @@ await logDisclosureSafe({
   actorRole: role as 'instructor' | 'ta' | 'admin',
   action: 'read_class_roster',
   targetResource: `${course}:${semester}`,
-  metadata: { students: roster.students.length, withEmail: !roster.emailLookupFailed },
+  metadata: {
+    students: roster.students.length,
+    withEmail: !roster.emailLookupFailed,
+  },
   request: Astro.request,
 });
 
@@ -134,28 +146,36 @@ const importSummary =
 
 <BaseLayout title={`Roster: ${courseCode} · ${semester}`}>
   <div class="mx-auto max-w-4xl px-4 py-12">
-    <p class="text-xs uppercase tracking-wide text-accent font-medium">Instructor · Roster</p>
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      Instructor · Roster
+    </p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">
       {courseCode}
       <span class="ml-2 text-base font-normal text-ink-muted">{semester}</span>
     </h1>
     <p class="mt-2 text-sm text-ink-muted">
-      <a href="/instructor/classes" class="text-accent underline">← All classes</a>
+      <a href="/instructor/classes" class="text-accent underline"
+        >← All classes</a
+      >
     </p>
 
-    {importSummary && (
-      <div class="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900">
-        Import complete: <strong>{importSummary.enrolled}</strong> enrolled,
-        <strong> {importSummary.updated}</strong> updated,
-        <strong> {importSummary.skipped}</strong> skipped (no account yet).
-      </div>
-    )}
+    {
+      importSummary && (
+        <div class="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900">
+          Import complete: <strong>{importSummary.enrolled}</strong> enrolled,
+          <strong> {importSummary.updated}</strong> updated,
+          <strong> {importSummary.skipped}</strong> skipped (no account yet).
+        </div>
+      )
+    }
 
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
       <p class="text-sm text-ink-muted">
         <strong>{roster.students.length}</strong> students ·
         <strong> {roster.atRiskCount}</strong> at-risk ·
-        <strong> {roster.closedWindowCount}</strong> closed workshop window{roster.closedWindowCount === 1 ? '' : 's'}
+        <strong> {roster.closedWindowCount}</strong> closed workshop window{
+          roster.closedWindowCount === 1 ? '' : 's'
+        }
       </p>
       <div class="flex gap-2">
         <a
@@ -173,19 +193,24 @@ const importSummary =
       </div>
     </div>
 
-    {roster.emailLookupFailed && (
-      <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-        Couldn't load student emails this time (auth service lookup failed).
-        Names and progress are still accurate; emails show as "—".
-      </p>
-    )}
+    {
+      roster.emailLookupFailed && (
+        <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          Couldn't load student emails this time (auth service lookup failed).
+          Names and progress are still accurate; emails show as "—".
+        </p>
+      )
+    }
 
-    {roster.dataIncomplete && (
-      <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-        Some progress data couldn't be loaded just now, so lesson / quiz /
-        attendance figures (and at-risk flags) may be incomplete. Refresh to retry.
-      </p>
-    )}
+    {
+      roster.dataIncomplete && (
+        <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          Some progress data couldn't be loaded just now, so lesson / quiz /
+          attendance figures (and at-risk flags) may be incomplete. Refresh to
+          retry.
+        </p>
+      )
+    }
 
     <nav class="mt-6 flex gap-2 text-xs" aria-label="Filter">
       <a
@@ -193,7 +218,9 @@ const importSummary =
         aria-current={riskOnly ? undefined : 'page'}
         class:list={[
           'rounded-full border px-3 py-1 font-medium',
-          riskOnly ? 'border-slate-300 bg-white text-ink hover:border-accent' : 'border-accent bg-accent text-white',
+          riskOnly
+            ? 'border-slate-300 bg-white text-ink hover:border-accent'
+            : 'border-accent bg-accent text-white',
         ]}
       >
         All ({roster.students.length})
@@ -203,19 +230,28 @@ const importSummary =
         aria-current={riskOnly ? 'page' : undefined}
         class:list={[
           'rounded-full border px-3 py-1 font-medium',
-          riskOnly ? 'border-accent bg-accent text-white' : 'border-slate-300 bg-white text-ink hover:border-accent',
+          riskOnly
+            ? 'border-accent bg-accent text-white'
+            : 'border-slate-300 bg-white text-ink hover:border-accent',
         ]}
       >
         At-risk only ({roster.atRiskCount})
       </a>
     </nav>
 
-    {visibleStudents.length === 0 ? (
-      <p class="mt-8 text-sm text-ink-muted">
-        {riskOnly ? 'No at-risk students — nice.' : 'No students enrolled in this class yet.'}
-      </p>
-    ) : (
-      <RosterTable students={visibleStudents} lessonsTotal={roster.lessonsTotal} />
-    )}
+    {
+      visibleStudents.length === 0 ? (
+        <p class="mt-8 text-sm text-ink-muted">
+          {riskOnly
+            ? 'No at-risk students — nice.'
+            : 'No students enrolled in this class yet.'}
+        </p>
+      ) : (
+        <RosterTable
+          students={visibleStudents}
+          lessonsTotal={roster.lessonsTotal}
+        />
+      )
+    }
   </div>
 </BaseLayout>

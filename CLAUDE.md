@@ -312,14 +312,12 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 ## Verifying before declaring done
 
 1. `npm run typecheck` — must pass.
-2. **Do NOT run `npm run format` ad hoc.** `prettier` and `prettier-plugin-astro`
-   are installed but there is no `.prettierrc`, so the script runs with bare
-   defaults: it errors on every `.astro` file ("No parser could be inferred")
-   and rewrites the whole `src` tree's quote style (single→double). Match
-   surrounding style by hand. (To make it safe you'd add a `.prettierrc` with
-   `singleQuote: true` + the astro plugin — but measured impact is a one-time
-   reformat of ~155/202 files, so treat that as a deliberate normalization PR,
-   not a casual step.)
+2. `npm run format` — Prettier, configured in `.prettierrc.json` (single-quote,
+   semi, `trailingComma: all`, `printWidth: 80`, `proseWrap: preserve`, plus
+   `prettier-plugin-astro`). Safe and idempotent — the whole tree was
+   normalized when the config landed, so a run only touches what you changed.
+   `proseWrap: preserve` means lesson prose is never reflowed, and Prettier
+   leaves `$…$` math untouched. Run it before committing.
 3. `node --test 'src/lib/**/*.test.ts'` — unit tests for pure logic
    (aggregation, at-risk rules, CSV parsing). `node --test` strips TS types
    but does NOT resolve `@lib/*` path aliases, so anything it tests must be

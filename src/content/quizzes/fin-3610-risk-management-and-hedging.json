@@ -15,11 +15,7 @@
         "Stabilizing internal cash for funding positive-NPV investments without going to capital markets",
         "Making the firm worth more than the sum of its parts via MM I"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Tax convexity, distress avoidance, and investment-policy stability are the three financial-friction motives. MM I says hedging is irrelevant in a frictionless market \u2014 so violating it doesn't motivate hedging.",
       "points": 2
     },
@@ -61,11 +57,7 @@
         "Hedging an actual exposure to a level that costs more than the expected distress reduction",
         "Hedging the same exposure with both forwards and futures"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Speculation disguised, hedging phantom exposures, and over-hedging away NPV are the three classic abuses. Using both forwards AND futures for the same exposure is unusual but not inherently bad.",
       "points": 2
     }

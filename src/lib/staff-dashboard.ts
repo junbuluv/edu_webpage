@@ -25,7 +25,9 @@ function rangeStartISO(range: TimeRange): string | null {
     return monday.toISOString();
   }
   // month
-  const firstOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const firstOfMonth = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+  );
   return firstOfMonth.toISOString();
 }
 
@@ -118,4 +120,3 @@ async function loadWorkshopMetrics(
     }),
   };
 }
-

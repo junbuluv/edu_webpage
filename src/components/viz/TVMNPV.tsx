@@ -95,27 +95,62 @@ export default function TVMNPV() {
   return (
     <div className="my-8 grid gap-6 rounded-lg border border-slate-200 bg-white p-5 md:grid-cols-2">
       <div className="md:col-span-2 flex flex-wrap gap-6">
-        <Slider label="Initial outflow CF₀" v={s.cf0} min={-3000} max={0} step={50}
+        <Slider
+          label="Initial outflow CF₀"
+          v={s.cf0}
+          min={-3000}
+          max={0}
+          step={50}
           fmt={(v) => `$${v.toFixed(0)}`}
-          onChange={(v) => setS((x) => ({ ...x, cf0: v }))} />
-        <Slider label="Base annual CF" v={s.baseCF} min={0} max={1000} step={10}
+          onChange={(v) => setS((x) => ({ ...x, cf0: v }))}
+        />
+        <Slider
+          label="Base annual CF"
+          v={s.baseCF}
+          min={0}
+          max={1000}
+          step={10}
           fmt={(v) => `$${v.toFixed(0)}`}
-          onChange={(v) => setS((x) => ({ ...x, baseCF: v }))} />
-        <Slider label="Growth g" v={s.growth} min={-0.05} max={0.15} step={0.005}
+          onChange={(v) => setS((x) => ({ ...x, baseCF: v }))}
+        />
+        <Slider
+          label="Growth g"
+          v={s.growth}
+          min={-0.05}
+          max={0.15}
+          step={0.005}
           fmt={(v) => (v * 100).toFixed(1) + '%'}
-          onChange={(v) => setS((x) => ({ ...x, growth: v }))} />
-        <Slider label="Discount rate r" v={s.rate} min={0.01} max={0.30} step={0.005}
+          onChange={(v) => setS((x) => ({ ...x, growth: v }))}
+        />
+        <Slider
+          label="Discount rate r"
+          v={s.rate}
+          min={0.01}
+          max={0.3}
+          step={0.005}
           fmt={(v) => (v * 100).toFixed(1) + '%'}
-          onChange={(v) => setS((x) => ({ ...x, rate: v }))} />
-        <Slider label="Horizon T (years)" v={s.horizon} min={1} max={20} step={1}
+          onChange={(v) => setS((x) => ({ ...x, rate: v }))}
+        />
+        <Slider
+          label="Horizon T (years)"
+          v={s.horizon}
+          min={1}
+          max={20}
+          step={1}
           fmt={(v) => v.toFixed(0)}
-          onChange={(v) => setS((x) => ({ ...x, horizon: v }))} />
+          onChange={(v) => setS((x) => ({ ...x, horizon: v }))}
+        />
         <div className="self-end text-sm text-ink-muted">
-          NPV = <strong className={totalNPV >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
+          NPV ={' '}
+          <strong
+            className={totalNPV >= 0 ? 'text-emerald-700' : 'text-rose-700'}
+          >
             ${totalNPV.toFixed(0)}
           </strong>
           {irrVal !== null && (
-            <>, IRR ≈ <strong>{(irrVal * 100).toFixed(1)}%</strong></>
+            <>
+              , IRR ≈ <strong>{(irrVal * 100).toFixed(1)}%</strong>
+            </>
           )}
         </div>
       </div>
@@ -126,7 +161,15 @@ export default function TVMNPV() {
           <ResponsiveContainer>
             <BarChart data={cashflows}>
               <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
-              <XAxis dataKey="t" label={{ value: 'year', position: 'insideBottom', offset: -4, fontSize: 11 }} />
+              <XAxis
+                dataKey="t"
+                label={{
+                  value: 'year',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
               <YAxis />
               <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
               <Legend verticalAlign="top" height={24} />
@@ -138,23 +181,44 @@ export default function TVMNPV() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">NPV sensitivity to discount rate</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          NPV sensitivity to discount rate
+        </h4>
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={sensitivity}>
               <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
-              <XAxis dataKey="r" tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-                label={{ value: 'discount rate r', position: 'insideBottom', offset: -4, fontSize: 11 }} />
+              <XAxis
+                dataKey="r"
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'discount rate r',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
               <YAxis />
               <Tooltip
                 formatter={(v: number) => `$${v.toFixed(0)}`}
-                labelFormatter={(l: number) => `r = ${(l * 100).toFixed(1)}%`} />
+                labelFormatter={(l: number) => `r = ${(l * 100).toFixed(1)}%`}
+              />
               <ReferenceLine y={0} stroke="#94a3b8" />
               {irrVal !== null && irrVal > 0 && irrVal < 0.5 && (
-                <ReferenceLine x={irrVal} stroke="#dc2626" strokeDasharray="3 3"
-                  label={{ value: 'IRR', position: 'top', fontSize: 10 }} />
+                <ReferenceLine
+                  x={irrVal}
+                  stroke="#dc2626"
+                  strokeDasharray="3 3"
+                  label={{ value: 'IRR', position: 'top', fontSize: 10 }}
+                />
               )}
-              <Line type="monotone" dataKey="npv" name="NPV(r)" stroke="#2563eb" dot={false} />
+              <Line
+                type="monotone"
+                dataKey="npv"
+                name="NPV(r)"
+                stroke="#2563eb"
+                dot={false}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -164,15 +228,36 @@ export default function TVMNPV() {
 }
 
 function Slider({
-  label, v, min, max, step, fmt, onChange,
-}: { label: string; v: number; min: number; max: number; step: number; fmt: (v: number) => string; onChange: (v: number) => void; }) {
+  label,
+  v,
+  min,
+  max,
+  step,
+  fmt,
+  onChange,
+}: {
+  label: string;
+  v: number;
+  min: number;
+  max: number;
+  step: number;
+  fmt: (v: number) => string;
+  onChange: (v: number) => void;
+}) {
   return (
     <label className="flex flex-col text-sm">
       <span className="font-medium">
         {label}: <span className="text-accent">{fmt(v)}</span>
       </span>
-      <input type="range" min={min} max={max} step={step} value={v}
-        onChange={(e) => onChange(Number(e.target.value))} className="mt-1 w-44" />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={v}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1 w-44"
+      />
     </label>
   );
 }

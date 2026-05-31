@@ -39,10 +39,7 @@
         "Firm uses buybacks instead of dividends",
         "You want results identical to DDM under any payout policy"
       ],
-      "correctIndices": [
-        0,
-        2
-      ],
+      "correctIndices": [0, 2],
       "explanation": "FCFE handles non-payers and buyback users correctly. DDM is fine for stable dividend policy; under 100% payout they're identical.",
       "points": 2
     },

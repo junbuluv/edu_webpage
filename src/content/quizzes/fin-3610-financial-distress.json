@@ -15,11 +15,7 @@
         "Manager time absorbed by creditor negotiations",
         "Legal and bankruptcy attorney fees"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Direct = legal/accounting/court fees. Indirect = lost customers, fire sales, distracted management, employee defections, debt overhang. Indirect costs are typically much larger.",
       "points": 2
     },

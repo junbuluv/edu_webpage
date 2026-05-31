@@ -36,9 +36,7 @@ export default function CompareScenarios({
           {right}
         </div>
       </div>
-      {caption && (
-        <p className="mt-4 text-sm text-ink-muted">{caption}</p>
-      )}
+      {caption && <p className="mt-4 text-sm text-ink-muted">{caption}</p>}
     </section>
   );
 }

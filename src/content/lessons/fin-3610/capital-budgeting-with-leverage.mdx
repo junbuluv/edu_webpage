@@ -1,18 +1,18 @@
 ---
-title: "Capital Budgeting with Leverage"
+title: 'Capital Budgeting with Leverage'
 course: fin-3610
-unit: "Capital structure and payout"
+unit: 'Capital structure and payout'
 order: 24
-summary: "Three equivalent methods for valuing a levered project — WACC, Adjusted Present Value (APV), and Flow to Equity (FTE). When each is most convenient."
+summary: 'Three equivalent methods for valuing a levered project — WACC, Adjusted Present Value (APV), and Flow to Equity (FTE). When each is most convenient.'
 learningObjectives:
-  - "Value a project using the WACC method."
-  - "Value the same project using APV and FTE; show that all three give identical answers in a frictionless setting."
+  - 'Value a project using the WACC method.'
+  - 'Value the same project using APV and FTE; show that all three give identical answers in a frictionless setting.'
   - "Choose the appropriate method based on capital-structure dynamics over the project's life."
 prerequisites:
-  - "Debt and taxes, payout policy, cost of capital (Units 4 and 5)."
+  - 'Debt and taxes, payout policy, cost of capital (Units 4 and 5).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 18", "WACC", "APV", "FTE"]
-quizSlug: "fin-3610-capital-budgeting-with-leverage"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 18', 'WACC', 'APV', 'FTE']
+quizSlug: 'fin-3610-capital-budgeting-with-leverage'
 draft: false
 ---
 
@@ -23,11 +23,11 @@ three internally consistent ways to compute its value. All three
 give the **same** number when applied correctly. They differ in
 which inputs you need and how natural the calculation feels.
 
-| Method | Discount rate | Cash flow | When to use |
-|---|---|---|---|
-| **WACC** | After-tax WACC | FCF (project) | Stable capital structure |
-| **APV** | Unlevered cost of capital | FCF + separately, tax shield | Changing capital structure |
-| **FTE** | Cost of equity | FCF to equity | Want equity value directly |
+| Method   | Discount rate             | Cash flow                    | When to use                |
+| -------- | ------------------------- | ---------------------------- | -------------------------- |
+| **WACC** | After-tax WACC            | FCF (project)                | Stable capital structure   |
+| **APV**  | Unlevered cost of capital | FCF + separately, tax shield | Changing capital structure |
+| **FTE**  | Cost of equity            | FCF to equity                | Want equity value directly |
 
 ## Method 1: WACC
 
@@ -67,7 +67,7 @@ that are known in advance. You can model each year's specific
 debt balance and tax shield without averaging.
 
 **Why some practitioners prefer it:** APV separates the operating
-value from the financing value. Useful for understanding *where*
+value from the financing value. Useful for understanding _where_
 value comes from.
 
 ## Method 3: Flow to Equity (FTE)
@@ -110,12 +110,14 @@ per year, financed with \$40M of debt at 5% (constant). Tax rate
 25%. Unlevered cost of capital $r_U = 11\%$.
 
 **WACC method**:
+
 - $r_E$ (re-levered): \$11 + (D/E)(1-t)(11-5)$. We need $E$ first.
 - Iterate: $V = FCF / WACC$. WACC depends on $E/V$, which depends
   on $V$.
 - Easier: use APV first.
 
 **APV method**:
+
 - $V_U = 10 / 0.11 = \$90.9M$.
 - $PV(TS) = 0.25 \times 40 = \$10M$.
 - $V = 90.9 + 10 = \$100.9M$.
@@ -123,11 +125,13 @@ per year, financed with \$40M of debt at 5% (constant). Tax rate
 - $D/E = 40/60.9 = 0.657$.
 
 **WACC re-check**:
+
 - $r_E = 0.11 + 0.657 \times (1 - 0.25) \times (0.11 - 0.05) = 0.11 + 0.0296 = 13.96\%$.
 - $WACC = (60.9/100.9)(0.1396) + (40/100.9)(0.05)(0.75) = 0.0843 + 0.0149 = 9.92\%$.
 - $V_{WACC} = 10 / 0.0992 = \$100.8M$ ✓ (matches APV within rounding).
 
 **FTE method**:
+
 - After-tax interest = \$40 × 0.05 × 0.75 = \$1.5M$.
 - $FCFE = FCF - \text{interest after tax} = 10 - 1.5 = \$8.5M$ (perpetual debt, no net borrowing/repayment).
 - $\text{Equity} = 8.5 / 0.1396 = \$60.9M$ ✓.

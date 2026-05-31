@@ -12,7 +12,11 @@
 // server libs only.
 
 import { getCollection } from 'astro:content';
-import { getAdminClient, listAllAuthUsers, selectAllRows } from '@lib/supabase/admin';
+import {
+  getAdminClient,
+  listAllAuthUsers,
+  selectAllRows,
+} from '@lib/supabase/admin';
 import { type CourseSlug, isCourseSlug } from '@lib/courses';
 import {
   computeAvgBestScore,
@@ -149,25 +153,37 @@ export async function loadClassRoster(
   // Registrar-provided name (from roster import) is authoritative; it
   // falls back to profiles.display_name below.
   const registrarNameById = new Map<string, string | null>();
-  for (const r of roster) registrarNameById.set(r.user_id, r.student_name ?? null);
+  for (const r of roster)
+    registrarNameById.set(r.user_id, r.student_name ?? null);
 
   // 2. Course-level facts + per-student source rows, in parallel. Each
   // table read is paginated past the 1000-row PostgREST cap so a large
   // class isn't silently truncated.
   const [lessonEntries, profileRes, progressRes, quizRes, adminRes, emailById] =
     await Promise.all([
-      getCollection('lessons', (l) => !l.data.draft && l.data.course === course),
-      selectAllRows<{ id: string; display_name: string | null }>((from, to) =>
-        admin.from('profiles').select('id, display_name').in('id', userIds).range(from, to),
+      getCollection(
+        'lessons',
+        (l) => !l.data.draft && l.data.course === course,
       ),
-      selectAllRows<{ user_id: string; lesson_slug: string; status: string; updated_at: string }>(
-        (from, to) =>
-          admin
-            .from('lesson_progress')
-            .select('user_id, lesson_slug, status, updated_at')
-            .in('user_id', userIds)
-            .like('lesson_slug', `${course}/%`)
-            .range(from, to),
+      selectAllRows<{ id: string; display_name: string | null }>((from, to) =>
+        admin
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', userIds)
+          .range(from, to),
+      ),
+      selectAllRows<{
+        user_id: string;
+        lesson_slug: string;
+        status: string;
+        updated_at: string;
+      }>((from, to) =>
+        admin
+          .from('lesson_progress')
+          .select('user_id, lesson_slug, status, updated_at')
+          .in('user_id', userIds)
+          .like('lesson_slug', `${course}/%`)
+          .range(from, to),
       ),
       selectAllRows<{
         user_id: string;
@@ -184,7 +200,11 @@ export async function loadClassRoster(
           .range(from, to),
       ),
       selectAllRows<{ id: string; closes_at: string }>((from, to) =>
-        admin.from('workshop_administrations').select('id, closes_at').eq('course_slug', course).range(from, to),
+        admin
+          .from('workshop_administrations')
+          .select('id, closes_at')
+          .eq('course_slug', course)
+          .range(from, to),
       ),
       withEmail ? fetchEmails() : Promise.resolve(null),
     ]);
@@ -201,67 +221,102 @@ export async function loadClassRoster(
   // 3. Attendance: stamps in this course's windows, counted per student.
   const adminRows = adminRes.rows;
   const adminIds = adminRows.map((a) => a.id);
-  const closedWindowCount = adminRows.filter((a) => Date.parse(a.closes_at) < nowMs).length;
+  const closedWindowCount = adminRows.filter(
+    (a) => Date.parse(a.closes_at) < nowMs,
+  ).length;
 
   const attendanceByUser = new Map<string, number>();
   let attendanceError: string | null = null;
   if (adminIds.length > 0) {
-    const stampsRes = await selectAllRows<{ user_id: string; administration_id: string }>(
-      (from, to) =>
-        admin
-          .from('workshop_attendance')
-          .select('user_id, administration_id')
-          .in('administration_id', adminIds)
-          .range(from, to),
+    const stampsRes = await selectAllRows<{
+      user_id: string;
+      administration_id: string;
+    }>((from, to) =>
+      admin
+        .from('workshop_attendance')
+        .select('user_id, administration_id')
+        .in('administration_id', adminIds)
+        .range(from, to),
     );
     attendanceError = stampsRes.error;
     for (const s of stampsRes.rows) {
       if (!userIdSet.has(s.user_id)) continue;
-      attendanceByUser.set(s.user_id, (attendanceByUser.get(s.user_id) ?? 0) + 1);
+      attendanceByUser.set(
+        s.user_id,
+        (attendanceByUser.get(s.user_id) ?? 0) + 1,
+      );
     }
   }
 
   const dataIncomplete = Boolean(
-    profileRes.error || progressRes.error || quizRes.error || adminRes.error || attendanceError,
+    profileRes.error ||
+    progressRes.error ||
+    quizRes.error ||
+    adminRes.error ||
+    attendanceError,
   );
 
   // 4. Group lesson + quiz rows per student. lastActive folds in both lesson
   // activity (updated_at) and quiz activity (submitted_at).
-  type LessonAgg = { completed: number; started: number; lastActive: string | null };
+  type LessonAgg = {
+    completed: number;
+    started: number;
+    lastActive: string | null;
+  };
   const lessonByUser = new Map<string, LessonAgg>();
   for (const row of progressRes.rows) {
     if (!publishedSlugs.has(row.lesson_slug)) continue;
-    const agg = lessonByUser.get(row.user_id) ?? { completed: 0, started: 0, lastActive: null };
+    const agg = lessonByUser.get(row.user_id) ?? {
+      completed: 0,
+      started: 0,
+      lastActive: null,
+    };
     agg.started += 1;
     if (row.status === 'completed') agg.completed += 1;
-    if (row.updated_at && (agg.lastActive == null || row.updated_at > agg.lastActive)) {
+    if (
+      row.updated_at &&
+      (agg.lastActive == null || row.updated_at > agg.lastActive)
+    ) {
       agg.lastActive = row.updated_at;
     }
     lessonByUser.set(row.user_id, agg);
   }
 
-  const quizByUser = new Map<string, Array<{ quiz_slug: string; score: number; max_score: number }>>();
+  const quizByUser = new Map<
+    string,
+    Array<{ quiz_slug: string; score: number; max_score: number }>
+  >();
   const quizLastActive = new Map<string, string>();
   for (const row of quizRes.rows) {
     const arr = quizByUser.get(row.user_id) ?? [];
-    arr.push({ quiz_slug: row.quiz_slug, score: row.score, max_score: row.max_score });
+    arr.push({
+      quiz_slug: row.quiz_slug,
+      score: row.score,
+      max_score: row.max_score,
+    });
     quizByUser.set(row.user_id, arr);
     if (row.submitted_at) {
       const prev = quizLastActive.get(row.user_id);
-      if (prev == null || row.submitted_at > prev) quizLastActive.set(row.user_id, row.submitted_at);
+      if (prev == null || row.submitted_at > prev)
+        quizLastActive.set(row.user_id, row.submitted_at);
     }
   }
 
   // 5. Assemble per-student rows + risk.
   const students: RosterStudent[] = userIds.map((id) => {
-    const lessons = lessonByUser.get(id) ?? { completed: 0, started: 0, lastActive: null };
+    const lessons = lessonByUser.get(id) ?? {
+      completed: 0,
+      started: 0,
+      lastActive: null,
+    };
     const attempts = quizByUser.get(id) ?? [];
     const attendanceCount = attendanceByUser.get(id) ?? 0;
     const avgBestScore = computeAvgBestScore(attempts);
 
     const quizLast = quizLastActive.get(id) ?? null;
     let lastActiveAt = lessons.lastActive;
-    if (quizLast && (lastActiveAt == null || quizLast > lastActiveAt)) lastActiveAt = quizLast;
+    if (quizLast && (lastActiveAt == null || quizLast > lastActiveAt))
+      lastActiveAt = quizLast;
 
     const risk = evaluateRisk(
       {

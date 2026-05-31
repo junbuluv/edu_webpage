@@ -57,7 +57,9 @@ interface Props {
 export default function GuidedReader({ lessonSlug, steps }: Props) {
   const [idx, setIdx] = useState(0);
   const [checkAnswers, setCheckAnswers] = useState<Record<number, number>>({});
-  const [checkRevealed, setCheckRevealed] = useState<Record<number, boolean>>({});
+  const [checkRevealed, setCheckRevealed] = useState<Record<number, boolean>>(
+    {},
+  );
   const total = steps.length;
   const step = steps[idx];
   const progressKey = `edu_web:guided:${lessonSlug}`;
@@ -171,7 +173,11 @@ export default function GuidedReader({ lessonSlug, steps }: Props) {
               onClick={() => setIdx(i)}
               aria-label={`Go to step ${i + 1}`}
               className={`h-2 w-2 rounded-full transition ${
-                i === idx ? 'bg-accent' : i < idx ? 'bg-slate-400' : 'bg-slate-200'
+                i === idx
+                  ? 'bg-accent'
+                  : i < idx
+                    ? 'bg-slate-400'
+                    : 'bg-slate-200'
               }`}
             />
           ))}
@@ -240,7 +246,9 @@ function CheckBlock({
       </ul>
       {revealed && (
         <p className="mt-3 text-sm text-ink-muted">
-          <strong>{selected === question.correctIndex ? 'Correct.' : 'Not quite.'}</strong>{' '}
+          <strong>
+            {selected === question.correctIndex ? 'Correct.' : 'Not quite.'}
+          </strong>{' '}
           {question.explanation}
         </p>
       )}

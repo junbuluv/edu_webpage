@@ -15,10 +15,7 @@
         "Cannibalization effect on existing product sales",
         "Interest expense on debt used to finance the project"
       ],
-      "correctIndices": [
-        0,
-        2
-      ],
+      "correctIndices": [0, 2],
       "explanation": "Opportunity costs and cannibalization are real incremental effects. Sunk costs are gone regardless of the decision. Interest is excluded from FCF because it's captured in the discount rate; including it double-counts.",
       "points": 2
     },

@@ -3,7 +3,10 @@ import { getSupabaseBrowserClient } from './supabase/browser';
 const LS_PROGRESS = 'edu_web:lesson_progress';
 const LS_ATTEMPTS = 'edu_web:quiz_attempts';
 
-type ProgressMap = Record<string, { status: 'started' | 'completed'; updatedAt: string }>;
+type ProgressMap = Record<
+  string,
+  { status: 'started' | 'completed'; updatedAt: string }
+>;
 type AttemptLog = Array<{
   quizSlug: string;
   score: number;

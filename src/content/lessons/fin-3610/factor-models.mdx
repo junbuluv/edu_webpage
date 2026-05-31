@@ -1,18 +1,18 @@
 ---
-title: "Factor Models and Market Efficiency"
+title: 'Factor Models and Market Efficiency'
 course: fin-3610
-unit: "Risk and return"
+unit: 'Risk and return'
 order: 19
-summary: "Why CAPM falls short empirically; how Fama-French extends it with size, value, profitability, and momentum factors; the three forms of the Efficient Markets Hypothesis."
+summary: 'Why CAPM falls short empirically; how Fama-French extends it with size, value, profitability, and momentum factors; the three forms of the Efficient Markets Hypothesis.'
 learningObjectives:
-  - "State the Fama-French three-factor and five-factor models."
-  - "Describe the size, value, profitability, and momentum factors and what each represents."
-  - "Distinguish the weak, semi-strong, and strong forms of market efficiency."
+  - 'State the Fama-French three-factor and five-factor models.'
+  - 'Describe the size, value, profitability, and momentum factors and what each represents.'
+  - 'Distinguish the weak, semi-strong, and strong forms of market efficiency.'
 prerequisites:
-  - "CAPM and cost of capital (prior lessons)."
+  - 'CAPM and cost of capital (prior lessons).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 13", "factor models", "Fama-French", "EMH"]
-quizSlug: "fin-3610-factor-models"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 13', 'factor models', 'Fama-French', 'EMH']
+quizSlug: 'fin-3610-factor-models'
 draft: false
 ---
 
@@ -82,7 +82,9 @@ separate Carhart **MOM** factor.
     { factor: 'CMA', premium: 3.4 },
   ]}
   xKey="factor"
-  series={[{ key: 'premium', name: 'Annualized factor premium (%)', color: '#4572a7' }]}
+  series={[
+    { key: 'premium', name: 'Annualized factor premium (%)', color: '#4572a7' },
+  ]}
   yAxisLabel="Annualized excess return (%)"
   caption="Long-run annualized premia for the standard factors from Ken French's data library (Mkt-Rf, SMB, HML, MOM are from 1927; RMW, CMA from 1963). The market factor remains the largest premium, but each of the others is statistically distinct from zero over the long sample. These numbers are what the lesson means by 'positive long-run premium' for each factor."
   credit="Ken French Data Library, Tuck School of Business"
@@ -114,12 +116,12 @@ reflect all available information?
 
 Three forms of EMH:
 
-**Weak form**: prices reflect all *past* price and volume
+**Weak form**: prices reflect all _past_ price and volume
 information. You can't beat the market using only historical chart
 patterns. (Momentum slightly violates this — past returns predict
 future returns. But trading costs erode much of the gain.)
 
-**Semi-strong form**: prices reflect all *publicly available*
+**Semi-strong form**: prices reflect all _publicly available_
 information — financial statements, news, analyst reports.
 Fundamental analysis of public data can't yield consistent abnormal
 returns. (Mostly supported by event studies and mutual-fund
@@ -129,7 +131,7 @@ performance data.)
 private/inside information. (Empirically false — insider trading
 generates abnormal returns. That's why it's illegal.)
 
-The mainstream consensus in 2026: markets are *mostly* efficient in
+The mainstream consensus in 2026: markets are _mostly_ efficient in
 the semi-strong sense. Most active managers don't beat indexes after
 fees, consistent with semi-strong efficiency. Some persistent
 anomalies exist (small, value, momentum) but capturing them
@@ -151,7 +153,7 @@ EMH implies three useful things:
    reality is messier when issuance signals private information.)
 
 3. **Buybacks at market price don't enrich remaining shareholders.**
-   Same logic. Buybacks transfer value to *exiting* shareholders;
+   Same logic. Buybacks transfer value to _exiting_ shareholders;
    remaining holders are left whole.
 
 These results explain why basic corporate-finance theory is

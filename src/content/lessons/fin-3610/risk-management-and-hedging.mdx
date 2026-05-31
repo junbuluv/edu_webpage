@@ -1,18 +1,18 @@
 ---
-title: "Risk Management and Hedging"
+title: 'Risk Management and Hedging'
 course: fin-3610
-unit: "Options and special topics"
+unit: 'Options and special topics'
 order: 28
-summary: "Why firms hedge — tax convexity, financial-distress avoidance, managerial risk aversion. Tools — forwards, futures, swaps, options. The often-misunderstood cost-benefit of hedging."
+summary: 'Why firms hedge — tax convexity, financial-distress avoidance, managerial risk aversion. Tools — forwards, futures, swaps, options. The often-misunderstood cost-benefit of hedging.'
 learningObjectives:
-  - "List the economic motives for corporate hedging."
-  - "Compare forwards, futures, swaps, and options as hedging instruments."
-  - "Critique over-hedging and under-hedging with case examples."
+  - 'List the economic motives for corporate hedging.'
+  - 'Compare forwards, futures, swaps, and options as hedging instruments.'
+  - 'Critique over-hedging and under-hedging with case examples.'
 prerequisites:
-  - "Financial options (prior lesson)."
+  - 'Financial options (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 30", "hedging", "risk management"]
-quizSlug: "fin-3610-risk-management-and-hedging"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 30', 'hedging', 'risk management']
+quizSlug: 'fin-3610-risk-management-and-hedging'
 draft: false
 ---
 
@@ -21,7 +21,7 @@ import Figure from '@components/mdx/Figure';
 ## The textbook puzzle
 
 Most introductory finance says investors diversify away
-firm-specific risk on their own. So why would a *firm* hedge? Each
+firm-specific risk on their own. So why would a _firm_ hedge? Each
 shareholder can hedge their exposure individually if they want.
 
 The puzzle is real. In a frictionless MM world, hedging adds no
@@ -49,8 +49,7 @@ worthwhile.
 
 **2. Avoiding financial distress.** A firm levered to where a 30%
 revenue drop could trigger covenant breaches has strong reason to
-hedge against that drop. The expected cost of distress (from Unit
-5) is reduced.
+hedge against that drop. The expected cost of distress (from Unit 5) is reduced.
 
 **3. Investment-policy stability.** Firms with valuable internal
 investment opportunities want to fund them without going to capital
@@ -65,12 +64,12 @@ risk managers bear, which (via agency costs) the firm pays for.
 
 ## The hedging toolbox
 
-| Instrument | What it does | Cost | When best |
-|---|---|---|---|
-| **Forward** | Lock in a price for future delivery | None upfront; bilateral counterparty risk | Bespoke; one-off; relationship-banking |
-| **Futures** | Standardized exchange-traded forward | Margin requirements; mark-to-market | Liquid commodities, FX, rates |
-| **Swap** | Exchange one stream of payments for another (fixed-for-floating rates, FX, commodity) | Bilateral; cleared via ISDA | Multi-period exposures (interest rate, currency) |
-| **Option** | Asymmetric payoff: right but not obligation | Premium paid upfront | When you want to preserve upside |
+| Instrument  | What it does                                                                          | Cost                                      | When best                                        |
+| ----------- | ------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------ |
+| **Forward** | Lock in a price for future delivery                                                   | None upfront; bilateral counterparty risk | Bespoke; one-off; relationship-banking           |
+| **Futures** | Standardized exchange-traded forward                                                  | Margin requirements; mark-to-market       | Liquid commodities, FX, rates                    |
+| **Swap**    | Exchange one stream of payments for another (fixed-for-floating rates, FX, commodity) | Bilateral; cleared via ISDA               | Multi-period exposures (interest rate, currency) |
+| **Option**  | Asymmetric payoff: right but not obligation                                           | Premium paid upfront                      | When you want to preserve upside                 |
 
 **Forwards vs futures**: economically very similar; the
 distinction is plumbing (OTC vs exchange). Futures eliminate
@@ -106,6 +105,7 @@ premium, say \$0.10/gallon = \$50M. Caps cost at \$1.05B if oil
 spikes; preserves benefit if oil drops below \$2.00.
 
 Which is better? Depends on:
+
 - The firm's view on future oil prices.
 - The cost of distress at very high oil prices.
 - Whether shareholders want exposure to oil prices.

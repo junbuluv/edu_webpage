@@ -1,18 +1,18 @@
 ---
-title: "Sensitivity, Scenario, and Break-Even Analysis"
+title: 'Sensitivity, Scenario, and Break-Even Analysis'
 course: fin-3610
-unit: "Valuing projects and firms"
+unit: 'Valuing projects and firms'
 order: 12
-summary: "How to stress-test an NPV — one-variable sensitivity (tornado charts), multi-variable scenarios, break-even analysis, and the intuition behind Monte Carlo."
+summary: 'How to stress-test an NPV — one-variable sensitivity (tornado charts), multi-variable scenarios, break-even analysis, and the intuition behind Monte Carlo.'
 learningObjectives:
-  - "Construct a one-variable tornado chart from a project model."
-  - "Build best / base / worst-case scenarios and compute conditional NPVs."
-  - "Compute break-even thresholds for key drivers."
+  - 'Construct a one-variable tornado chart from a project model.'
+  - 'Build best / base / worst-case scenarios and compute conditional NPVs.'
+  - 'Compute break-even thresholds for key drivers.'
 prerequisites:
-  - "Capital budgeting cash flows (prior lesson)."
+  - 'Capital budgeting cash flows (prior lesson).'
 estimatedMinutes: 20
-tags: ["fin-3610", "Berk-DeMarzo Ch 8", "sensitivity", "scenario"]
-quizSlug: "fin-3610-sensitivity-and-scenario"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 8', 'sensitivity', 'scenario']
+quizSlug: 'fin-3610-sensitivity-and-scenario'
 draft: false
 ---
 
@@ -27,7 +27,7 @@ precise and entirely false in the sense that nobody knows the right
 input values in advance.
 
 Real-world capital-budgeting practice treats the point-estimate NPV
-as a *starting* point, then asks: how sensitive is it to my
+as a _starting_ point, then asks: how sensitive is it to my
 assumptions, and which assumptions matter most?
 
 <Figure
@@ -47,14 +47,14 @@ Record the NPV range. Sort by range size.
 
 Example. Base case NPV = \$40M. Sensitivity ranges:
 
-| Input | Low → High | NPV range |
-|---|---|---|
-| Revenue growth | 0% → 10% | $-20M to $+110M (range \$130M) |
-| Discount rate | 8% → 14% | $+80M to $-15M (range \$95M) |
-| Operating margin | 25% → 35% | $-5M to $+85M (range \$90M) |
-| Initial CapEx | \$800k → \$1.2M | $+60M to $+20M (range \$40M) |
-| Terminal growth | 1% → 4% | $+30M to $+55M (range \$25M) |
-| Tax rate | 20% → 30% | $+50M to $+30M (range \$20M) |
+| Input            | Low → High      | NPV range                      |
+| ---------------- | --------------- | ------------------------------ |
+| Revenue growth   | 0% → 10%        | $-20M to $+110M (range \$130M) |
+| Discount rate    | 8% → 14%        | $+80M to $-15M (range \$95M)   |
+| Operating margin | 25% → 35%       | $-5M to $+85M (range \$90M)    |
+| Initial CapEx    | \$800k → \$1.2M | $+60M to $+20M (range \$40M)   |
+| Terminal growth  | 1% → 4%         | $+30M to $+55M (range \$25M)   |
+| Tax rate         | 20% → 30%       | $+50M to $+30M (range \$20M)   |
 
 Plotted as a horizontal bar chart sorted by range, this is a
 **tornado chart**. The widest bar (revenue growth here) is the
@@ -73,14 +73,14 @@ and downside.
 Define 2-3 internally consistent scenarios with multiple inputs
 varying together:
 
-| Variable | Worst | Base | Best |
-|---|---|---|---|
-| Revenue growth | 0% | 5% | 8% |
-| Operating margin | 22% | 30% | 33% |
-| Working capital / sales | 15% | 10% | 8% |
-| Discount rate | 13% | 10% | 9% |
-| Terminal growth | 1% | 2% | 3% |
-| **NPV** | \$-25M | \$+40M | \$+150M |
+| Variable                | Worst  | Base   | Best    |
+| ----------------------- | ------ | ------ | ------- |
+| Revenue growth          | 0%     | 5%     | 8%      |
+| Operating margin        | 22%    | 30%    | 33%     |
+| Working capital / sales | 15%    | 10%    | 8%      |
+| Discount rate           | 13%    | 10%    | 9%      |
+| Terminal growth         | 1%     | 2%     | 3%      |
+| **NPV**                 | \$-25M | \$+40M | \$+150M |
 
 Scenarios respect correlations. They produce a small number of
 realistic outcomes managers can reason about. Assign rough
@@ -105,7 +105,7 @@ For each key driver, ask: at what value does NPV = 0?
 Break-even points are easy to communicate to non-technical
 audiences: "we need at least 2.5% revenue growth to break even."
 Pair them with management's confidence level — how likely is it
-that revenue growth ends up *below* break-even?
+that revenue growth ends up _below_ break-even?
 
 ## Monte Carlo, briefly
 
@@ -114,6 +114,7 @@ distributions for each input (with appropriate correlation
 structure), compute NPV for each, and plot the histogram.
 
 Outputs:
+
 - Mean / median NPV.
 - Probability that NPV > 0.
 - Tail risk (e.g., 5th percentile NPV).

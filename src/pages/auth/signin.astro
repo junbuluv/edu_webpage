@@ -12,11 +12,13 @@ const error = Astro.url.searchParams.get('error');
       Track your progress across courses and review past quiz attempts.
     </p>
 
-    {error && (
-      <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-        {decodeURIComponent(error)}
-      </div>
-    )}
+    {
+      error && (
+        <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          {decodeURIComponent(error)}
+        </div>
+      )
+    }
 
     <form method="POST" action="/api/auth/signin" class="space-y-4">
       <input type="hidden" name="next" value={next} />
@@ -51,7 +53,10 @@ const error = Astro.url.searchParams.get('error');
 
     <p class="mt-6 text-sm text-ink-muted">
       No account yet?
-      <a class="text-accent underline" href={`/auth/signup?next=${encodeURIComponent(next)}`}>Create one</a>
+      <a
+        class="text-accent underline"
+        href={`/auth/signup?next=${encodeURIComponent(next)}`}>Create one</a
+      >
     </p>
     <p class="mt-2 text-sm text-ink-muted">
       Forgot your password?

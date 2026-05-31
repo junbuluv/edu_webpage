@@ -2,7 +2,10 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseServerClient } from '@lib/supabase/server';
 import { COURSE_SLUGS, type CourseSlug, isCourseSlug } from '@lib/courses';
-import { computeAvgBestScore, countDistinctQuizzes } from '@lib/progress-aggregate';
+import {
+  computeAvgBestScore,
+  countDistinctQuizzes,
+} from '@lib/progress-aggregate';
 
 export type AvailableCourse = {
   slug: CourseSlug;
@@ -56,9 +59,7 @@ export async function resolveActiveCourse(
 ): Promise<ResolveResult> {
   const enrollments = await fetchEnrollments(supabase, user.id);
   const enrolledSlugs = new Set(
-    enrollments
-      .map((e) => e.course_slug)
-      .filter(isCourseSlug),
+    enrollments.map((e) => e.course_slug).filter(isCourseSlug),
   );
   const activitySlugs = await fetchActivityCourseSlugs(supabase, user.id);
   // Any slug that round-trips isCourseSlug is acceptable now (browse mode).
@@ -138,7 +139,10 @@ export async function getDashboardData(
 
   const [allLessons, allInstructors, progressRows, quizRows, enrollmentRows] =
     await Promise.all([
-      getCollection('lessons', (l) => !l.data.draft && l.data.course === courseSlug),
+      getCollection(
+        'lessons',
+        (l) => !l.data.draft && l.data.course === courseSlug,
+      ),
       getCollection('instructors', (i) => i.data.courses.includes(courseSlug)),
       supabase
         .from('lesson_progress')
@@ -160,7 +164,8 @@ export async function getDashboardData(
     ]);
 
   const lessons = [...allLessons].sort((a, b) => {
-    if (a.data.unit !== b.data.unit) return a.data.unit.localeCompare(b.data.unit);
+    if (a.data.unit !== b.data.unit)
+      return a.data.unit.localeCompare(b.data.unit);
     return a.data.order - b.data.order;
   });
 
@@ -213,7 +218,10 @@ async function fetchActivityCourseSlugs(
   userId: string,
 ): Promise<Set<CourseSlug>> {
   const [{ data: lessons }, { data: quizzes }] = await Promise.all([
-    supabase.from('lesson_progress').select('lesson_slug').eq('user_id', userId),
+    supabase
+      .from('lesson_progress')
+      .select('lesson_slug')
+      .eq('user_id', userId),
     supabase.from('quiz_attempts').select('quiz_slug').eq('user_id', userId),
   ]);
 

@@ -1,18 +1,18 @@
 ---
-title: "Optimal Portfolio Choice"
+title: 'Optimal Portfolio Choice'
 course: fin-3610
-unit: "Risk and return"
+unit: 'Risk and return'
 order: 16
-summary: "Two-asset mean-variance optimization; the efficient frontier with many assets; the tangent portfolio and the two-fund separation theorem."
+summary: 'Two-asset mean-variance optimization; the efficient frontier with many assets; the tangent portfolio and the two-fund separation theorem.'
 learningObjectives:
-  - "Derive the efficient frontier for two risky assets."
-  - "Explain the role of the risk-free asset in identifying the tangent portfolio."
-  - "State and interpret the two-fund separation theorem."
+  - 'Derive the efficient frontier for two risky assets.'
+  - 'Explain the role of the risk-free asset in identifying the tangent portfolio.'
+  - 'State and interpret the two-fund separation theorem.'
 prerequisites:
-  - "Risk and return statistics (prior lesson)."
+  - 'Risk and return statistics (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 11", "portfolio", "efficient frontier"]
-quizSlug: "fin-3610-optimal-portfolio-choice"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 11', 'portfolio', 'efficient frontier']
+quizSlug: 'fin-3610-optimal-portfolio-choice'
 draft: false
 ---
 
@@ -29,6 +29,7 @@ highest expected return. The set of weights that achieve this trade-
 off optimally traces out a curve in (risk, return) space.
 
 For two assets, as we vary $w_1$ from 0 to 1:
+
 - At $w_1 = 0$: portfolio is 100% asset 2; we sit at $(\sigma_2, E[R_2])$.
 - At $w_1 = 1$: portfolio is 100% asset 1; we sit at $(\sigma_1, E[R_1])$.
 - In between: a curve that depends on $\rho_{12}$.
@@ -72,7 +73,7 @@ with any risky portfolio $P$ at weights $w$ and $1-w$:
 - $\sigma_{\text{combined}} = (1-w) \sigma_P$ (since $\sigma_f = 0$)
 
 Eliminate $w$: $\frac{\sigma_{\text{combined}}}{\sigma_P} = 1 - w$,
-so combined return is a *linear* function of combined risk, starting
+so combined return is a _linear_ function of combined risk, starting
 at $R_f$ when $w = 1$.
 
 The line has slope $(E[R_P] - R_f) / \sigma_P$ — the **Sharpe ratio**
@@ -82,18 +83,18 @@ of portfolio $P$. Higher Sharpe = steeper line = better trade-off.
 
 Among all risky portfolios $P$ on the efficient frontier, one has
 the highest Sharpe ratio. The straight line from $R_f$ through that
-portfolio just *touches* (is tangent to) the efficient frontier.
+portfolio just _touches_ (is tangent to) the efficient frontier.
 
 That tangent portfolio $T$ is the unique best mix of risky assets
-— every investor should hold *some combination of* the risk-free
+— every investor should hold _some combination of_ the risk-free
 asset and the tangent portfolio, varying only the proportion based
 on their personal risk tolerance:
 
 - Conservative investors: more $R_f$, less $T$.
 - Aggressive investors: less $R_f$, more $T$. Possibly even
-  *borrow* at $R_f$ to hold *more* than 100% in $T$ (leverage).
+  _borrow_ at $R_f$ to hold _more_ than 100% in $T$ (leverage).
 
-But the *risky* portion is the same for everyone — it's $T$.
+But the _risky_ portion is the same for everyone — it's $T$.
 
 ## The two-fund separation theorem
 
@@ -112,12 +113,12 @@ and adjust your risk-free allocation to your taste.)
 
 In theory, $T$ is the portfolio every investor wants to hold. In
 equilibrium, the total dollars of every risky asset must be held by
-*someone*. So $T$ must equal the **value-weighted market portfolio**
+_someone_. So $T$ must equal the **value-weighted market portfolio**
 — every traded asset, weighted by its market capitalization.
 
 In practice, a broad index like the S&P 500 (large US stocks) or
 the MSCI ACWI (all-country world index) is a reasonable proxy for
-$T$. The S&P 500 isn't *exactly* the theoretical market portfolio
+$T$. The S&P 500 isn't _exactly_ the theoretical market portfolio
 (it excludes bonds, real estate, private equity, foreign stocks),
 but it's the most commonly used approximation.
 
@@ -125,7 +126,7 @@ but it's the most commonly used approximation.
 
 The cost of equity for a project or firm — the discount rate we'll
 use in DCFs going forward — comes from the asset's expected return
-*in equilibrium*. Because in equilibrium every investor holds the
+_in equilibrium_. Because in equilibrium every investor holds the
 market portfolio, the relevant risk for any single asset is its
 contribution to the market portfolio's variance — its
 **covariance with the market**. That's what CAPM (next lesson)

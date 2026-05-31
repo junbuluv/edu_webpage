@@ -33,16 +33,23 @@ const quiz = entry.data;
       passingScore={quiz.passingScore}
     />
 
-    {quiz.furtherReading && (
-      <FurtherReadingCard article={quiz.furtherReading} variant="quiz" />
-    )}
+    {
+      quiz.furtherReading && (
+        <FurtherReadingCard article={quiz.furtherReading} variant="quiz" />
+      )
+    }
 
-    {quiz.lessonSlug && (
-      <p class="mt-8">
-        <a href={`/lessons/${quiz.lessonSlug}`} class="text-sm text-accent underline">
-          ← Back to the lesson
-        </a>
-      </p>
-    )}
+    {
+      quiz.lessonSlug && (
+        <p class="mt-8">
+          <a
+            href={`/lessons/${quiz.lessonSlug}`}
+            class="text-sm text-accent underline"
+          >
+            ← Back to the lesson
+          </a>
+        </p>
+      )
+    }
   </div>
 </BaseLayout>

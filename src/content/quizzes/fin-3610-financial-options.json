@@ -39,11 +39,7 @@
         "Shrinks as expiration approaches (time decay)",
         "Negative for in-the-money options"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Time value is always non-negative, peaks at-the-money where uncertainty matters most, and decays toward zero at expiration. Even ITM options have non-negative time value.",
       "points": 2
     },

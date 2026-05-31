@@ -1,19 +1,19 @@
 ---
-title: "Financial Options: Calls and Puts"
+title: 'Financial Options: Calls and Puts'
 course: fin-3610
-unit: "Options and special topics"
+unit: 'Options and special topics'
 order: 25
-summary: "Payoff and profit diagrams for European calls and puts; put-call parity as a no-arbitrage relation; intrinsic value vs time value; binomial pricing intuition."
+summary: 'Payoff and profit diagrams for European calls and puts; put-call parity as a no-arbitrage relation; intrinsic value vs time value; binomial pricing intuition.'
 learningObjectives:
-  - "Draw payoff diagrams for long and short calls and puts."
-  - "State and apply put-call parity."
-  - "Price a one-period option in a two-state binomial model via replication."
+  - 'Draw payoff diagrams for long and short calls and puts.'
+  - 'State and apply put-call parity.'
+  - 'Price a one-period option in a two-state binomial model via replication.'
 prerequisites:
-  - "Law of One Price (Unit 1)."
-  - "Time value of money (Unit 2)."
+  - 'Law of One Price (Unit 1).'
+  - 'Time value of money (Unit 2).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 20", "options", "call", "put"]
-quizSlug: "fin-3610-financial-options"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 20', 'options', 'call', 'put']
+quizSlug: 'fin-3610-financial-options'
 draft: false
 ---
 
@@ -38,12 +38,12 @@ structure with one extra wrinkle.
 
 Let $S_T$ be the stock price at expiration. Payoff at expiration:
 
-| Position | Payoff |
-|---|---|
-| Long call | $\max(S_T - K, 0)$ |
+| Position   | Payoff              |
+| ---------- | ------------------- |
+| Long call  | $\max(S_T - K, 0)$  |
 | Short call | $-\max(S_T - K, 0)$ |
-| Long put | $\max(K - S_T, 0)$ |
-| Short put | $-\max(K - S_T, 0)$ |
+| Long put   | $\max(K - S_T, 0)$  |
+| Short put  | $-\max(K - S_T, 0)$ |
 
 Sketch on a $(S_T, \text{payoff})$ axis:
 
@@ -123,11 +123,13 @@ exactly replicates the call:
 - Down: $\Delta \cdot S_d + B(1+r_f) = C_d$.
 
 Solve:
+
 $$
 \Delta = \frac{C_u - C_d}{S_u - S_d}, \quad B = \frac{C_d - \Delta \cdot S_d}{1 + r_f}.
 $$
 
 By the Law of One Price, the call must cost:
+
 $$
 C_0 = \Delta \cdot S_0 + B.
 $$

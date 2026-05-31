@@ -15,11 +15,7 @@
         "Past 3-12 month winners continue outperforming",
         "Treasury bills earn the risk-free rate"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Size, value, and momentum are the three classic CAPM anomalies. T-bills earning R_f is exactly what CAPM predicts.",
       "points": 2
     },

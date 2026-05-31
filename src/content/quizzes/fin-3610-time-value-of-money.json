@@ -29,12 +29,7 @@
       "type": "multiple_choice",
       "id": "q3",
       "prompt": "Using the Rule of 72, approximately how long does an investment earning 9% per year take to double?",
-      "choices": [
-        "6 years",
-        "8 years",
-        "10 years",
-        "12 years"
-      ],
+      "choices": ["6 years", "8 years", "10 years", "12 years"],
       "correctIndex": 1,
       "explanation": "Rule of 72: doubling time \u2248 72 / r = 72 / 9 = 8 years. (Exact answer is ~8.04 years.)",
       "points": 1

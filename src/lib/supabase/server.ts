@@ -12,11 +12,13 @@ const COOKIE_OPTIONS: CookieOptionsWithName = {
 export function isSupabaseConfigured() {
   return Boolean(
     import.meta.env.PUBLIC_SUPABASE_URL &&
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
   );
 }
 
-export type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
+export type SupabaseServerClient = ReturnType<
+  typeof createSupabaseServerClient
+>;
 
 export function createSupabaseServerClient(
   cookies: AstroCookies,

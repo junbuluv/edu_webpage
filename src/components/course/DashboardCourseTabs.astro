@@ -9,33 +9,35 @@ interface Props {
 const { courses, activeSlug } = Astro.props;
 ---
 
-{courses.length > 1 && (
-  <nav class="border-b border-slate-200" aria-label="Course tabs">
-    <ul class="-mb-px flex flex-wrap gap-1">
-      {courses.map((c) => {
-        const isActive = c.slug === activeSlug;
-        return (
-          <li>
-            <a
-              href={`/dashboard?course=${c.slug}`}
-              aria-current={isActive ? 'page' : undefined}
-              class:list={[
-                'inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium',
-                isActive
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-ink-muted hover:border-slate-300 hover:text-ink',
-              ]}
-            >
-              <span>{c.code}</span>
-              {c.enrolled && (
-                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
-                  Enrolled
-                </span>
-              )}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </nav>
-)}
+{
+  courses.length > 1 && (
+    <nav class="border-b border-slate-200" aria-label="Course tabs">
+      <ul class="-mb-px flex flex-wrap gap-1">
+        {courses.map((c) => {
+          const isActive = c.slug === activeSlug;
+          return (
+            <li>
+              <a
+                href={`/dashboard?course=${c.slug}`}
+                aria-current={isActive ? 'page' : undefined}
+                class:list={[
+                  'inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium',
+                  isActive
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-ink-muted hover:border-slate-300 hover:text-ink',
+                ]}
+              >
+                <span>{c.code}</span>
+                {c.enrolled && (
+                  <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
+                    Enrolled
+                  </span>
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  )
+}

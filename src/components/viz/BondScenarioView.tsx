@@ -113,7 +113,9 @@ export default function BondScenarioView({ state }: Props) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded border border-slate-200 px-2 py-1">
-      <div className="text-[10px] uppercase tracking-wide text-ink-muted">{label}</div>
+      <div className="text-[10px] uppercase tracking-wide text-ink-muted">
+        {label}
+      </div>
       <div className="text-sm font-semibold">{value}</div>
     </div>
   );

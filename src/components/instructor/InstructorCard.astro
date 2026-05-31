@@ -14,28 +14,37 @@ const d = instructor.data;
   href={href}
   class="flex items-start gap-4 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-accent"
 >
-  {d.photoPath ? (
-    <img
-      src={d.photoPath}
-      alt={`${d.fullName} headshot`}
-      loading="lazy"
-      class="h-16 w-16 flex-none rounded-full border border-slate-200 object-cover"
-    />
-  ) : (
-    <div class="flex h-16 w-16 flex-none items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400">
-      <span aria-hidden="true" class="text-sm font-medium">
-        {d.fullName.split(' ').slice(0, 2).map((p) => p[0]).join('')}
-      </span>
-    </div>
-  )}
+  {
+    d.photoPath ? (
+      <img
+        src={d.photoPath}
+        alt={`${d.fullName} headshot`}
+        loading="lazy"
+        class="h-16 w-16 flex-none rounded-full border border-slate-200 object-cover"
+      />
+    ) : (
+      <div class="flex h-16 w-16 flex-none items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400">
+        <span aria-hidden="true" class="text-sm font-medium">
+          {d.fullName
+            .split(' ')
+            .slice(0, 2)
+            .map((p) => p[0])
+            .join('')}
+        </span>
+      </div>
+    )
+  }
   <div class="flex-1">
     <h2 class="text-lg font-semibold">{d.fullName}</h2>
     <p class="mt-0.5 text-sm text-accent">{d.title}</p>
     {d.department && <p class="mt-1 text-xs text-ink-muted">{d.department}</p>}
-    {d.researchInterests.length > 0 && (
-      <p class="mt-2 text-xs text-ink-muted">
-        <strong>Research:</strong> {d.researchInterests.slice(0, 3).join(', ')}
-      </p>
-    )}
+    {
+      d.researchInterests.length > 0 && (
+        <p class="mt-2 text-xs text-ink-muted">
+          <strong>Research:</strong>{' '}
+          {d.researchInterests.slice(0, 3).join(', ')}
+        </p>
+      )
+    }
   </div>
 </a>

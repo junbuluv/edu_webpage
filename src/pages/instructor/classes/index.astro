@@ -16,10 +16,18 @@ const now = Date.now();
 const atRiskByKey = new Map<string, number>();
 await Promise.all(
   classes.map(async (c) => {
-    const res = await loadClassRoster(user.id, isAdmin, c.course, c.semester, now, {
-      withEmail: false,
-    });
-    if (res.kind === 'ok') atRiskByKey.set(`${c.course}::${c.semester}`, res.roster.atRiskCount);
+    const res = await loadClassRoster(
+      user.id,
+      isAdmin,
+      c.course,
+      c.semester,
+      now,
+      {
+        withEmail: false,
+      },
+    );
+    if (res.kind === 'ok')
+      atRiskByKey.set(`${c.course}::${c.semester}`, res.roster.atRiskCount);
   }),
 );
 
@@ -32,54 +40,64 @@ const roleDisplay = roleLabel(role);
 
 <BaseLayout title="Instructor · Classes">
   <div class="mx-auto max-w-4xl px-4 py-12">
-    <p class="text-xs uppercase tracking-wide text-accent font-medium">{roleDisplay}</p>
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      {roleDisplay}
+    </p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">Classes</h1>
     <p class="mt-3 text-ink-muted">
-      Your class rosters by course and semester. Open one to see each
-      student's lesson progress, quiz performance, workshop attendance,
-      and an at-risk flag.
+      Your class rosters by course and semester. Open one to see each student's
+      lesson progress, quiz performance, workshop attendance, and an at-risk
+      flag.
     </p>
 
-    {classes.length === 0 && (
-      <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-        No classes found. You appear as the instructor on a class once an
-        admin adds <code>enrollments</code> rows with your user id as the
-        <code>instructor_id</code> for a course and semester.
-      </p>
-    )}
+    {
+      classes.length === 0 && (
+        <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+          No classes found. You appear as the instructor on a class once an
+          admin adds <code>enrollments</code> rows with your user id as the
+          <code>instructor_id</code> for a course and semester.
+        </p>
+      )
+    }
 
     <ul class="mt-8 space-y-3">
-      {classes.map((c) => {
-        const meta = courseMeta.get(c.course);
-        const atRisk = atRiskByKey.get(`${c.course}::${c.semester}`) ?? 0;
-        return (
-          <li class="rounded-lg border border-slate-200 p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 class="text-lg font-semibold">
-                  {meta?.code ?? c.course}
-                  <span class="ml-2 text-sm font-normal text-ink-muted">{c.semester}</span>
-                </h2>
-                {meta?.title && <p class="text-sm text-ink-muted">{meta.title}</p>}
-                <p class="mt-1 text-xs text-ink-muted">
-                  {c.studentCount} student{c.studentCount === 1 ? '' : 's'}
-                  {atRisk > 0 && (
-                    <span class="ml-2 rounded bg-amber-100 px-2 py-0.5 font-semibold uppercase text-amber-800">
-                      ⚠ {atRisk} at-risk
+      {
+        classes.map((c) => {
+          const meta = courseMeta.get(c.course);
+          const atRisk = atRiskByKey.get(`${c.course}::${c.semester}`) ?? 0;
+          return (
+            <li class="rounded-lg border border-slate-200 p-5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-semibold">
+                    {meta?.code ?? c.course}
+                    <span class="ml-2 text-sm font-normal text-ink-muted">
+                      {c.semester}
                     </span>
+                  </h2>
+                  {meta?.title && (
+                    <p class="text-sm text-ink-muted">{meta.title}</p>
                   )}
-                </p>
+                  <p class="mt-1 text-xs text-ink-muted">
+                    {c.studentCount} student{c.studentCount === 1 ? '' : 's'}
+                    {atRisk > 0 && (
+                      <span class="ml-2 rounded bg-amber-100 px-2 py-0.5 font-semibold uppercase text-amber-800">
+                        ⚠ {atRisk} at-risk
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <a
+                  href={`/instructor/classes/${c.course}?semester=${encodeURIComponent(c.semester)}`}
+                  class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
+                >
+                  Open roster →
+                </a>
               </div>
-              <a
-                href={`/instructor/classes/${c.course}?semester=${encodeURIComponent(c.semester)}`}
-                class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
-              >
-                Open roster →
-              </a>
-            </div>
-          </li>
-        );
-      })}
+            </li>
+          );
+        })
+      }
     </ul>
   </div>
 </BaseLayout>

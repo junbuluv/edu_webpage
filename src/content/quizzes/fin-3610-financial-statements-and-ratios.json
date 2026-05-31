@@ -29,11 +29,7 @@
         "Capital expenditures hit cash this year but income statement over depreciation life",
         "The firm changed its dividend policy"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Non-cash expenses, working-capital changes, and the difference between CapEx timing and depreciation timing are the three primary reconciling items between net income and cash flow. Dividend policy affects financing cash flow but not the gap between NI and operating cash flow.",
       "points": 2
     },
@@ -50,12 +46,7 @@
       "type": "multiple_choice",
       "id": "q4",
       "prompt": "Using the same firm in question 3, decompose ROE via DuPont (net margin \u00d7 asset turnover \u00d7 equity multiplier). What is the equity multiplier?",
-      "choices": [
-        "1.5",
-        "2.0",
-        "3.0",
-        "4.0"
-      ],
+      "choices": ["1.5", "2.0", "3.0", "4.0"],
       "correctIndex": 2,
       "explanation": "Equity multiplier = Assets / Equity = 1500 / 500 = 3.0. The firm finances 2/3 of its assets with debt.",
       "points": 1

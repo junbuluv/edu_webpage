@@ -26,6 +26,7 @@ if (!article && data.quizSlug) {
 
 const { prev, next } = findPrevNext(lesson, allLessons);
 ---
+
 <BaseLayout title={data.title} description={data.summary}>
   <article class="mx-auto max-w-3xl px-4 py-10">
     <p class="text-sm uppercase tracking-wide text-accent font-medium">
@@ -36,9 +37,7 @@ const { prev, next } = findPrevNext(lesson, allLessons);
 
     <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
       <span>⏱ {data.estimatedMinutes} min</span>
-      {data.tags.length > 0 && (
-        <span>Tags: {data.tags.join(', ')}</span>
-      )}
+      {data.tags.length > 0 && <span>Tags: {data.tags.join(', ')}</span>}
     </div>
 
     <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
@@ -56,52 +55,60 @@ const { prev, next } = findPrevNext(lesson, allLessons);
 
     {article && <FurtherReadingCard article={article} variant="lesson" />}
 
-    <div class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6">
+    <div
+      class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6"
+    >
       <LessonProgressButton client:load lessonSlug={lesson.slug} />
-      {data.quizSlug && (
-        <a
-          href={`/practice/${data.quizSlug}`}
-          class="rounded bg-accent px-4 py-2 text-white font-medium"
-        >
-          Practice quiz →
-        </a>
-      )}
+      {
+        data.quizSlug && (
+          <a
+            href={`/practice/${data.quizSlug}`}
+            class="rounded bg-accent px-4 py-2 text-white font-medium"
+          >
+            Practice quiz →
+          </a>
+        )
+      }
     </div>
 
     <nav
       class="mt-8 grid gap-3 border-t border-slate-200 pt-6 md:grid-cols-2"
       aria-label="Lesson navigation"
     >
-      {prev ? (
-        <a
-          href={`/lessons/${prev.slug}`}
-          class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
-        >
-          <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
-            ← Previous lesson
-          </span>
-          <span class="mt-1 font-medium text-ink">{prev.data.title}</span>
-        </a>
-      ) : (
-        <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-ink-muted">
-          You're at the first lesson in this course.
-        </div>
-      )}
-      {next ? (
-        <a
-          href={`/lessons/${next.slug}`}
-          class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5 md:items-end md:text-right"
-        >
-          <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
-            Next lesson →
-          </span>
-          <span class="mt-1 font-medium text-ink">{next.data.title}</span>
-        </a>
-      ) : (
-        <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-right text-sm text-ink-muted">
-          You've reached the end of this course.
-        </div>
-      )}
+      {
+        prev ? (
+          <a
+            href={`/lessons/${prev.slug}`}
+            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
+          >
+            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+              ← Previous lesson
+            </span>
+            <span class="mt-1 font-medium text-ink">{prev.data.title}</span>
+          </a>
+        ) : (
+          <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-ink-muted">
+            You're at the first lesson in this course.
+          </div>
+        )
+      }
+      {
+        next ? (
+          <a
+            href={`/lessons/${next.slug}`}
+            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5 md:items-end md:text-right"
+          >
+            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+              Next lesson →
+            </span>
+            <span class="mt-1 font-medium text-ink">{next.data.title}</span>
+          </a>
+        ) : (
+          <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-right text-sm text-ink-muted">
+            You've reached the end of this course.
+          </div>
+        )
+      }
     </nav>
   </article>
 </BaseLayout>

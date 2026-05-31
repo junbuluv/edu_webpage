@@ -129,7 +129,10 @@ const courses = defineCollection({
     description: z.string(),
     accentColor: z
       .string()
-      .regex(/^#[0-9a-fA-F]{6}$/, 'accentColor must be a 6-digit hex (#rrggbb)'),
+      .regex(
+        /^#[0-9a-fA-F]{6}$/,
+        'accentColor must be a 6-digit hex (#rrggbb)',
+      ),
     order: z.number().int().nonnegative(),
     defaultSemester: z.string(),
   }),
@@ -156,5 +159,11 @@ const workshops = defineCollection({
   }),
 });
 
-export const collections = { lessons, quizzes, instructors, courses, workshops };
+export const collections = {
+  lessons,
+  quizzes,
+  instructors,
+  courses,
+  workshops,
+};
 export type QuestionT = z.infer<typeof QuestionSchema>;
