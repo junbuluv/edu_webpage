@@ -1,0 +1,79 @@
+{
+  "slug": "eco-1002-open-economy-fx",
+  "title": "Open-Economy Macro and the Real Exchange Rate",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/open-economy-fx",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "In an open economy, if saving exceeds investment (S - I > 0), which of the following must be true?",
+      "choices": [
+        "The country runs a trade deficit financed by foreign borrowing.",
+        "The country runs a trade surplus and accumulates foreign assets.",
+        "The real exchange rate appreciates to clear the goods market.",
+        "The country must impose tariffs to protect domestic producers."
+      ],
+      "correctIndex": 1,
+      "explanation": "The saving-investment identity S - I = NX states that if saving exceeds investment, net exports must be positive. A trade surplus (NX > 0) means the country exports more than it imports, accumulating net foreign assets.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "A country experiences an increase in saving with no change in investment. What happens to the real exchange rate and the trade balance?",
+      "choices": [
+        "The real exchange rate appreciates; the trade balance moves toward deficit.",
+        "The real exchange rate weakens; the trade balance moves toward surplus.",
+        "The real exchange rate is unaffected; saving changes do not clear markets.",
+        "The real exchange rate weakens; the trade balance remains unchanged."
+      ],
+      "correctIndex": 1,
+      "explanation": "When S - I rises (saving increases), the equilibrium net exports NX must rise. Since a higher (stronger) real exchange rate reduces NX by making exports expensive, the real exchange rate must fall (weaken) to allow NX to increase. The trade balance improves toward surplus.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following statements about tariffs in this open-economy framework are correct?",
+      "choices": [
+        "A protective tariff shifts the net exports curve rightward at any given real exchange rate.",
+        "A protective tariff causes the real exchange rate to appreciate, offsetting the tariff's trade effect.",
+        "The equilibrium quantity of net exports changes after a tariff because domestic output rises.",
+        "A protective tariff leaves the trade balance unchanged because S - I determines NX, not policy."
+      ],
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "Tariffs shift the NX curve outward and trigger appreciation of the real exchange rate (higher epsilon) that exactly offsets the tariff, leaving equilibrium NX unchanged. The trade balance is pinned by S - I; tariffs only change the composition and prices of trade, not the balance itself.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "Suppose a country initially has S = 500, I = 400, and NX = 100 (all in billions of dollars). A shock raises investment to I = 450 while S remains 500. What is the new equilibrium value of NX?",
+      "answer": 50,
+      "tolerance": 0,
+      "unit": "billions of dollars",
+      "explanation": "The saving-investment identity S - I = NX is an accounting identity that always holds. With S = 500 and I = 450, the new NX must equal 500 - 450 = 50. This can also be derived from the fact that the increase in investment lowers S - I from 100 to 50, forcing NX to fall correspondingly.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "If the world real interest rate rises, what is the channel by which it affects the US real exchange rate?",
+      "choices": [
+        "Higher world rates directly increase US inflation, weakening the dollar mechanically.",
+        "Higher world rates attract capital into the US, raising US investment and S - I.",
+        "Higher world rates attract capital out of the US, lowering US investment and raising S - I, which weakens the dollar to clear trade.",
+        "Higher world rates eliminate the need for trade adjustment; exchange rates stop moving."
+      ],
+      "correctIndex": 2,
+      "explanation": "A higher world real rate causes capital to flow out of the US in search of better returns abroad, reducing US investment. This raises S - I, and by the identity S - I = NX, net exports must rise. Since a weaker real exchange rate reduces the price of US exports and raises the relative price of imports, the dollar weakens to bring NX into equilibrium with the higher S - I.",
+      "points": 1
+    }
+  ]
+}

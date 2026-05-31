@@ -1,0 +1,78 @@
+{
+  "slug": "eco-1002-fed-balance-sheet",
+  "title": "The Fed's Balance Sheet and the Money Supply",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/fed-balance-sheet",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "According to the lesson, what two components make up the Federal Reserve's monetary base?",
+      "choices": [
+        "Treasury securities and mortgage-backed securities",
+        "Currency in circulation and bank reserves",
+        "Currency in circulation and Treasury securities",
+        "Bank reserves and deposits at commercial banks"
+      ],
+      "correctIndex": 1,
+      "explanation": "The monetary base is defined as MB = Currency + Reserves. These are the two liabilities of the Fed's balance sheet that form the monetary base.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "If banks hold a required reserve ratio of 10 percent (r = 0.10) and the public holds no currency, what is the simple deposit multiplier?",
+      "answer": 10,
+      "tolerance": 0,
+      "explanation": "The simple deposit multiplier is m_simple = 1/r. With r = 0.10, m = 1/0.10 = 10.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "Which of the following factors reduce the realistic money multiplier below the simple deposit multiplier? (Select all that apply.)",
+      "choices": [
+        "The public's decision to hold currency outside the banking system",
+        "Banks holding excess reserves beyond the required reserve ratio",
+        "The Fed's purchase of Treasury securities on the open market",
+        "An increase in the currency-to-deposit ratio"
+      ],
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "The realistic multiplier is reduced by two leakages: currency held by the public (C/D) and reserve holdings by banks (R/D). Both appear in the denominator of m = (1 + C/D) / ((C/D) + (R/D)), so increases in either reduce m. Fed asset purchases expand the base but do not directly reduce the multiplier.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "The lesson notes that after 2008, the Federal Reserve's money multiplier fell dramatically. What was the primary cause within the Fed's control?",
+      "choices": [
+        "A sudden increase in the public's currency-to-deposit ratio due to loss of confidence in banks",
+        "The Fed's decision to pay interest on reserve balances, encouraging banks to hold excess reserves instead of lending",
+        "A decrease in the monetary base due to quantitative tightening",
+        "Commercial banks' inability to meet customer deposit demands"
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson states that after 2008, R/D rose dramatically because the Fed began paying interest on reserves and banks chose to park excess reserves there instead of lending, causing the multiplier to fall.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "According to the lesson, which of the following does the Federal Reserve directly control?",
+      "choices": [
+        "The currency-to-deposit ratio, C/D",
+        "The reserve-to-deposit ratio, R/D, which determines total bank lending",
+        "The monetary base (MB) through open-market operations and the size of its balance sheet",
+        "The broad money supply (M2) directly through reserve requirements"
+      ],
+      "correctIndex": 2,
+      "explanation": "The Fed directly controls MB through open-market operations and balance-sheet management. It influences R/D indirectly through interest rates on reserves. It does not control C/D, which is a household choice.",
+      "points": 1
+    }
+  ]
+}

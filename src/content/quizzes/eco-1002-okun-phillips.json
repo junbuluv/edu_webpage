@@ -1,0 +1,79 @@
+{
+  "slug": "eco-1002-okun-phillips",
+  "title": "Okun's Law and the Phillips Curve",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/okun-phillips",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "According to Okun's law with k ≈ 0.5, if the output gap widens from 0% to +2%, what should happen to unemployment relative to the natural rate?",
+      "choices": [
+        "Unemployment rises by 1 percentage point",
+        "Unemployment falls by 1 percentage point",
+        "Unemployment remains unchanged",
+        "Unemployment falls by 2 percentage points"
+      ],
+      "correctIndex": 1,
+      "explanation": "Okun's law states u - u_n ≈ -k(Y - Y_n)/Y_n. A +2% output gap with k = 0.5 gives u - u_n ≈ -0.5 × 2 = -1, meaning unemployment is 1 percentage point below the natural rate.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "If the expectations-augmented Phillips curve is π = π^e - β(u - u_n) + ε with β = 0.5, and unemployment falls 1 percentage point below the natural rate while inflation expectations are anchored at 2%, by how many percentage points would inflation exceed expectations (holding ε = 0)?",
+      "answer": 0.5,
+      "tolerance": 0.01,
+      "unit": "percentage points",
+      "explanation": "With β = 0.5 and (u - u_n) = -1, the Phillips curve gives π = 2 - 0.5(-1) = 2.5%, so inflation exceeds expectations by 0.5 percentage points.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "In the chain of Okun's law and Phillips curve (π = π^e + βk(Y - Y_n)/Y_n + ε), what does the product βk represent?",
+      "choices": [
+        "The natural rate of unemployment",
+        "The inverse of the sacrifice ratio: inflation increase per percentage point of output over-heating",
+        "The lag between output shocks and unemployment changes",
+        "The speed at which the Fed raises interest rates"
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson states that βk is the sacrifice ratio's inverse, measuring roughly how much extra inflation a percentage point of over-heating output produces in the short run.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "During the 2020-2022 US macro path, which of the following occurred according to the lesson? (Select all that apply.)",
+      "choices": [
+        "The output gap fell to -3% during the 2020 trough, causing unemployment to spike",
+        "Fiscal stimulus and recovery pushed the output gap to +2% by mid-2022, pulling unemployment to about 3.5%",
+        "Inflation stayed anchored to expectations throughout 2021 because unemployment remained at the natural rate",
+        "Aggressive Fed tightening through 2023 closed the output gap back toward zero and allowed inflation to ease"
+      ],
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "The lesson describes the -3% trough, the +2% gap with unemployment near 3.5%, and the Fed tightening that closed the gap. The 'inflation stayed anchored' choice is incorrect: by mid-2022 the positive output gap pushed unemployment well below the natural rate, so inflation overshot expectations rather than staying anchored.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "The expectations-augmented Phillips curve shows that inflation depends on three factors. Which of the following is NOT one of them according to the lesson?",
+      "choices": [
+        "Expected inflation (π^e)",
+        "The unemployment gap relative to the natural rate (u - u_n)",
+        "Supply shocks and measurement error (ε)",
+        "The growth rate of the money supply"
+      ],
+      "correctIndex": 3,
+      "explanation": "The Phillips curve formula is π = π^e - β(u - u_n) + ε, so its three inputs are expected inflation, the unemployment gap, and shocks. Money supply growth does not appear in the formula. At most, monetary conditions help move the output gap, which then feeds inflation through the chain; money growth is not a direct term in the Phillips curve.",
+      "points": 1
+    }
+  ]
+}

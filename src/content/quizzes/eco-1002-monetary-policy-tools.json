@@ -1,0 +1,79 @@
+{
+  "slug": "eco-1002-monetary-policy-tools",
+  "title": "Monetary Policy Tools and Targets",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/monetary-policy-tools",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "The Federal Reserve's dual mandate under the Federal Reserve Reform Act of 1977 requires the Fed to pursue which two primary objectives?",
+      "choices": [
+        "Maximum employment and stable prices",
+        "Economic growth and foreign-exchange stability",
+        "Interest-rate stability and financial market stability",
+        "Maximum employment and maximum economic growth"
+      ],
+      "correctIndex": 0,
+      "explanation": "Congress established the Fed's dual mandate as maximum employment and stable prices. The other goals listed in the lesson (growth, FX stability, etc.) are supporting objectives, not part of the formal mandate.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q2",
+      "prompt": "Which of the following are primary monetary policy tools the Fed uses to influence the federal funds rate? (Select all that apply.)",
+      "choices": [
+        "Open-market operations (buying or selling Treasuries and MBS)",
+        "Setting the inflation target at 2%",
+        "Interest on reserves (IORB)",
+        "Discount-window lending to banks"
+      ],
+      "correctIndices": [
+        0,
+        2,
+        3
+      ],
+      "explanation": "The lesson identifies three primary tools (OMOs, discount-window lending, and reserve requirements) and one newer tool (IORB). Setting the inflation target is a goal, not a tool used to implement policy.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "The federal funds rate transmission mechanism to the broader economy operates through which sequence?",
+      "choices": [
+        "FFR up, short-term rates up, longer-term rates up, borrowing costs up, consumption and investment down",
+        "FFR up, reserve requirements up, banks reduce lending, money supply down",
+        "FFR up, inflation expectations up, expected real returns down, nominal rates up",
+        "FFR up, central bank balance sheet shrinks, stock prices fall, wealth effect reduces spending"
+      ],
+      "correctIndex": 0,
+      "explanation": "The lesson explicitly traces this transmission mechanism: FFR changes propagate through the yield curve to longer rates, raising borrowing costs and reducing aggregate demand. The other channels either misidentify the mechanism or omit intermediate steps.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "According to the lesson, empirically how many months after a federal funds rate change does the peak effect on output typically occur?",
+      "answer": 15,
+      "tolerance": 3,
+      "unit": "months",
+      "explanation": "The lesson states that peak effects on output occur 12-18 months after a rate change, with peak inflation effects arriving 18-24 months out. A numeric answer within the 12-18 month range reflects this variable lag structure.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "Why did the Fed's shift from monetary targeting (M1/M2) to federal funds rate targeting in the mid-1980s occur?",
+      "choices": [
+        "The velocity of money became unstable due to financial innovation, making the relationship between money supply and nominal GDP unreliable",
+        "Congress mandated the switch in the Federal Reserve Reform Act",
+        "Interest rates on reserves (IORB) could not be used with monetary targeting",
+        "Monetarism was disproven and discredited by academic economists"
+      ],
+      "correctIndex": 0,
+      "explanation": "The lesson explains that financial innovation destabilized money velocity, breaking the money-to-nominal-GDP link that monetary aggregates relied on. The Fed then adopted FFR targeting as a more stable policy lever.",
+      "points": 1
+    }
+  ]
+}

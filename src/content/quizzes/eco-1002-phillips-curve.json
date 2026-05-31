@@ -1,0 +1,79 @@
+{
+  "slug": "eco-1002-phillips-curve",
+  "title": "The Phillips Curve: Inflation vs Unemployment",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/phillips-curve",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "According to the expectations-augmented Phillips curve equation π = π^e − β(u − u_n), what happens to actual inflation when unemployment falls below the natural rate while expected inflation remains constant?",
+      "choices": [
+        "Inflation decreases as firms reduce wage pressures",
+        "Inflation increases because the unemployment gap (u − u_n) is negative, so the −β(u − u_n) term is positive and adds to expected inflation",
+        "Inflation stays constant because expected inflation anchors nominal outcomes",
+        "Inflation becomes unpredictable and depends only on monetary policy"
+      ],
+      "correctIndex": 1,
+      "explanation": "When u < u_n, the gap (u − u_n) is negative. Multiplying by −β flips the sign, so −β(u − u_n) is positive and gets added to π^e, pushing actual inflation above expected inflation. Firms compete for scarce workers, and wages and prices rise faster than expected.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Why did the simple Phillips curve trade-off appear to break down in the 1970s?",
+      "choices": [
+        "The natural rate of unemployment increased permanently due to technological change",
+        "Expected inflation began rising and shifted the Phillips curve upward as workers incorporated past high inflation into wage demands",
+        "The relationship between unemployment and inflation became positive instead of negative",
+        "Firms stopped competing for workers and wages fell despite low unemployment"
+      ],
+      "correctIndex": 1,
+      "explanation": "In the 1970s, sustained low unemployment kept inflation elevated, causing people's inflation expectations to ratchet upward over time. The Phillips curve shifted up, producing stagflation (high inflation and high unemployment at the same time).",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "What is the shape and location of the long-run Phillips curve, and what does this imply for policymakers?",
+      "choices": [
+        "Downward-sloping; policymakers can trade unemployment for permanently lower inflation",
+        "Vertical at the natural rate u_n; permanent reduction in unemployment is impossible through demand-side policy alone",
+        "Upward-sloping; lower unemployment must always cause higher inflation",
+        "Horizontal at the natural rate; inflation has no effect on unemployment over time"
+      ],
+      "correctIndex": 1,
+      "explanation": "The long-run Phillips curve is vertical because expected inflation fully adjusts. Only the natural rate is sustainable; demand-side policy cannot buy permanently lower unemployment without ever-accelerating inflation.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "During the 2022 inflation episode, which of the following factors supported the Fed's soft landing and helped keep expectations from coming unanchored the way they did in the 1970s? Select all that apply.",
+      "choices": [
+        "Survey measures of expected inflation rose somewhat but stayed well below the actual 9% inflation rate",
+        "Bond market implied expectations remained near 2.5%, suggesting anchored long-term expectations",
+        "Actual inflation had reached 9%, which automatically resets expectations downward",
+        "The Fed tightened monetary policy aggressively to bring inflation back down before expectations drifted higher"
+      ],
+      "correctIndices": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "A soft landing relied on expectations staying anchored (shown by survey and bond market measures remaining well below realized inflation) plus swift policy action before expectations could drift higher. Reaching 9% inflation does not automatically reset expectations; expectations are forward-looking and can drift away from past inflation.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Suppose the natural rate of unemployment is 4%, the unemployment rate is currently 3%, and expected inflation is 2%. If β = 1 in the Phillips curve equation π = π^e − β(u − u_n), what is the current rate of actual inflation (in percent)?",
+      "answer": 3,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "Using π = π^e − β(u − u_n): π = 2 − 1(3 − 4) = 2 − (−1) = 3%. The negative unemployment gap (unemployment 1 point below the natural rate) raises inflation above its expected level.",
+      "points": 1
+    }
+  ]
+}

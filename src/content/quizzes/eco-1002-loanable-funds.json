@@ -1,0 +1,79 @@
+{
+  "slug": "eco-1002-loanable-funds",
+  "title": "Loanable Funds and Crowding Out",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/loanable-funds",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "In the loanable funds market, what is the price that clears the market for borrowing and lending?",
+      "choices": [
+        "The inflation rate",
+        "The real interest rate",
+        "The nominal interest rate",
+        "The federal funds rate"
+      ],
+      "correctIndex": 1,
+      "explanation": "The real interest rate is the price in the loanable funds market that equates the quantity of funds supplied (saving) with the quantity demanded (investment).",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "When the government runs a budget deficit, how does the supply of loanable funds change?",
+      "choices": [
+        "Supply increases because government borrowing adds funds to the market",
+        "Supply decreases because government saving is negative, reducing the total pool of funds",
+        "Supply remains unchanged; only demand shifts",
+        "Supply becomes infinitely elastic at the current interest rate"
+      ],
+      "correctIndex": 1,
+      "explanation": "A government deficit reduces national saving (the sum of private saving and government saving). Since a deficit means negative government saving, total supply of loanable funds decreases at every interest rate, shifting the supply curve left.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "As the real interest rate rises in the loanable funds market, which of the following occurs?",
+      "choices": [
+        "Investment increases and saving decreases",
+        "Investment decreases and saving increases",
+        "Both investment and saving increase",
+        "Both investment and saving decrease"
+      ],
+      "correctIndex": 1,
+      "explanation": "Investment is negatively related to the real interest rate (higher borrowing costs reduce firms' incentive to invest). Saving is positively related to the real interest rate (a higher reward for deferring consumption increases private saving).",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "When a government deficit shifts the supply of loanable funds left, which of the following are consequences in the new equilibrium? (Select all that apply.)",
+      "choices": [
+        "The real interest rate rises",
+        "Private investment falls",
+        "The rise in the real interest rate stimulates additional private saving",
+        "The deficit completely displaces all new investment"
+      ],
+      "correctIndices": [
+        0,
+        1,
+        2
+      ],
+      "explanation": "A leftward supply shift raises the equilibrium real interest rate. The higher rate reduces investment (demand slides down) and increases private saving (supply expands partly). However, investment does not fall by the full deficit amount; some is absorbed by extra saving, and some crowding out still occurs.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Suppose a government deficit of $300 billion reduces the supply of loanable funds by $300 billion at each interest rate. If the new equilibrium real interest rate rises enough to elicit an additional $120 billion of private saving, how much investment is crowded out (in billions of dollars)?",
+      "answer": 180,
+      "tolerance": 5,
+      "unit": "billions of dollars",
+      "explanation": "The deficit reduces supply by $300B. Of this, $120B is offset by additional private saving induced by the higher real interest rate. The remaining $300B - $120B = $180B must come from lower investment, so $180B is crowded out.",
+      "points": 1
+    }
+  ]
+}

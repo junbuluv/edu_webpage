@@ -1,72 +1,76 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { recordQuizAttempt } from '@lib/progress';
-import type { QuestionT } from '@/content/config';
+import type { PublicQuestion } from '@lib/quiz/public';
+import type { GradeResult } from '@lib/quiz/grade';
 
 interface Props {
   slug: string;
   title: string;
-  questions: QuestionT[];
+  // No answer keys: the client only receives the public question shape.
+  // Grading happens server-side via POST /api/quiz/grade.
+  questions: PublicQuestion[];
   passingScore?: number;
 }
 
 type AnswerMap = Record<string, number | number[] | string>;
 
-export default function Quiz({
-  slug,
-  title,
-  questions,
-  passingScore = 0.7,
-}: Props) {
+// Block copy / cut / context-menu inside the quiz so the prompts and choices
+// can't be trivially lifted into another tool. A soft deterrent only —
+// screenshots and retyping still work; the real protection is that answers
+// are graded server-side and never shipped to the page.
+const noCopy = {
+  onCopy: (e: React.ClipboardEvent) => e.preventDefault(),
+  onCut: (e: React.ClipboardEvent) => e.preventDefault(),
+  onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+};
+
+export default function Quiz({ slug, title, questions }: Props) {
   const [answers, setAnswers] = useState<AnswerMap>({});
-  const [submitted, setSubmitted] = useState(false);
-
-  const maxScore = useMemo(
-    () => questions.reduce((s, q) => s + q.points, 0),
-    [questions],
-  );
-
-  const { score, perQuestion } = useMemo(() => {
-    let total = 0;
-    const detail: Record<string, { correct: boolean; awarded: number }> = {};
-    for (const q of questions) {
-      const ans = answers[q.id];
-      let correct = false;
-      if (q.type === 'multiple_choice' && typeof ans === 'number') {
-        correct = ans === q.correctIndex;
-      } else if (q.type === 'multi_select' && Array.isArray(ans)) {
-        const a = [...ans].sort().join(',');
-        const c = [...q.correctIndices].sort().join(',');
-        correct = a === c;
-      } else if (q.type === 'numeric' && typeof ans === 'string') {
-        const parsed = Number(ans);
-        if (Number.isFinite(parsed)) {
-          correct = Math.abs(parsed - q.answer) <= q.tolerance;
-        }
-      }
-      const awarded = correct ? q.points : 0;
-      total += awarded;
-      detail[q.id] = { correct, awarded };
-    }
-    return { score: total, perQuestion: detail };
-  }, [answers, questions]);
+  const [result, setResult] = useState<GradeResult | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const submitted = result !== null;
 
   async function submit() {
-    setSubmitted(true);
-    await recordQuizAttempt({
-      quizSlug: slug,
-      score,
-      maxScore,
-      answers,
-    });
+    setPending(true);
+    setError(null);
+    try {
+      const resp = await fetch('/api/quiz/grade', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ slug, answers }),
+      });
+      if (!resp.ok) throw new Error(`grade failed (${resp.status})`);
+      const graded = (await resp.json()) as GradeResult;
+      setResult(graded);
+      // Persist the server-computed score (signed-in -> Supabase, anon ->
+      // localStorage). A persistence failure must NOT read as a grading
+      // failure — the grade already succeeded and is shown.
+      try {
+        await recordQuizAttempt({
+          quizSlug: slug,
+          score: graded.score,
+          maxScore: graded.maxScore,
+          answers,
+        });
+      } catch {
+        setError("Your score was graded, but we couldn't save this attempt to your progress.");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Couldn't submit your answers (${err.message}). Check your connection and try again.`
+          : "Couldn't submit your answers. Try again.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
-
-  const pct = maxScore === 0 ? 0 : score / maxScore;
-  const passed = pct >= passingScore;
 
   return (
     <section className="my-10 rounded-lg border border-slate-200 bg-white p-6">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <ol className="mt-6 space-y-8">
+      <ol className="mt-6 space-y-8 select-none" {...noCopy}>
         {questions.map((q, i) => (
           <li key={q.id}>
             <p className="font-medium">
@@ -76,7 +80,7 @@ export default function Quiz({
               {q.type === 'multiple_choice' && (
                 <MCInput
                   questionId={q.id}
-                  choices={q.choices}
+                  choices={q.choices ?? []}
                   value={answers[q.id] as number | undefined}
                   onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   disabled={submitted}
@@ -85,7 +89,7 @@ export default function Quiz({
               {q.type === 'multi_select' && (
                 <MultiInput
                   questionId={q.id}
-                  choices={q.choices}
+                  choices={q.choices ?? []}
                   value={(answers[q.id] as number[] | undefined) ?? []}
                   onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   disabled={submitted}
@@ -100,10 +104,10 @@ export default function Quiz({
                 />
               )}
             </div>
-            {submitted && (
+            {submitted && result.perQuestion[q.id] && (
               <Feedback
-                correct={perQuestion[q.id].correct}
-                explanation={q.explanation}
+                correct={result.perQuestion[q.id].correct}
+                explanation={result.perQuestion[q.id].explanation}
               />
             )}
           </li>
@@ -114,14 +118,20 @@ export default function Quiz({
         {!submitted ? (
           <button
             onClick={submit}
-            className="rounded bg-accent px-4 py-2 text-white font-medium"
+            disabled={pending}
+            className="rounded bg-accent px-4 py-2 text-white font-medium disabled:opacity-60"
           >
-            Submit answers
+            {pending ? 'Submitting…' : 'Submit answers'}
           </button>
         ) : (
-          <ResultBadge score={score} maxScore={maxScore} passed={passed} />
+          <ResultBadge
+            score={result.score}
+            maxScore={result.maxScore}
+            passed={result.passed}
+          />
         )}
       </div>
+      {error && <p className="mt-3 text-sm text-rose-700">{error}</p>}
     </section>
   );
 }
