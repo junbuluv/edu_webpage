@@ -43,13 +43,19 @@ export default function Quiz({ slug, title, questions }: Props) {
       if (!resp.ok) throw new Error(`grade failed (${resp.status})`);
       const graded = (await resp.json()) as GradeResult;
       setResult(graded);
-      // Persist the server-computed score (signed-in -> Supabase, anon -> localStorage).
-      await recordQuizAttempt({
-        quizSlug: slug,
-        score: graded.score,
-        maxScore: graded.maxScore,
-        answers,
-      });
+      // Persist the server-computed score (signed-in -> Supabase, anon ->
+      // localStorage). A persistence failure must NOT read as a grading
+      // failure — the grade already succeeded and is shown.
+      try {
+        await recordQuizAttempt({
+          quizSlug: slug,
+          score: graded.score,
+          maxScore: graded.maxScore,
+          answers,
+        });
+      } catch {
+        setError("Your score was graded, but we couldn't save this attempt to your progress.");
+      }
     } catch (err) {
       setError(
         err instanceof Error

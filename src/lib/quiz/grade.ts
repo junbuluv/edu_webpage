@@ -57,7 +57,11 @@ function isQuestionCorrect(q: GradableQuestion, ans: AnswerValue | undefined): b
     return a === c;
   }
   // numeric
-  if (typeof ans !== 'string' && typeof ans !== 'number') return false;
+  if (typeof ans === 'string') {
+    if (ans.trim() === '') return false; // blank = unanswered, NOT 0 (Number('') === 0)
+  } else if (typeof ans !== 'number') {
+    return false;
+  }
   const parsed = Number(ans);
   return Number.isFinite(parsed) && Math.abs(parsed - q.answer) <= q.tolerance;
 }

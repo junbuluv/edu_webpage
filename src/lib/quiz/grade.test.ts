@@ -39,6 +39,15 @@ test('missing / wrong-type answers score 0, never throw', () => {
   assert.equal(gradeQuiz(questions, { q1: [1, 2] }).perQuestion.q1.correct, false); // array for MC
 });
 
+test('blank numeric input is unanswered, not 0 (Number("") === 0 trap)', () => {
+  const qZero: GradableQuestion[] = [
+    { type: 'numeric', id: 'z', answer: 0, tolerance: 0.01, explanation: 'zero', points: 1 },
+  ];
+  assert.equal(gradeQuiz(qZero, { z: '' }).perQuestion.z.correct, false); // blank ≠ correct
+  assert.equal(gradeQuiz(qZero, { z: '   ' }).perQuestion.z.correct, false); // whitespace
+  assert.equal(gradeQuiz(qZero, { z: '0' }).perQuestion.z.correct, true); // explicit 0 is correct
+});
+
 test('passing threshold uses fraction', () => {
   // 3/4 = 0.75
   assert.equal(gradeQuiz(questions, { q1: 2, q2: [0, 3] }).passed, true); // 0.75 >= 0.7
