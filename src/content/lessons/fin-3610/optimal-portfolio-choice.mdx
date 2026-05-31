@@ -17,6 +17,7 @@ draft: false
 ---
 
 import Figure from '@components/mdx/Figure';
+import EfficientFrontier from '@components/viz/EfficientFrontier';
 
 ## Two risky assets, one decision
 
@@ -34,9 +35,26 @@ For two assets, as we vary $w_1$ from 0 to 1:
 - At $w_1 = 1$: portfolio is 100% asset 1; we sit at $(\sigma_1, E[R_1])$.
 - In between: a curve that depends on $\rho_{12}$.
 
-Lower $\rho_{12}$ means the curve bows further to the left (lower
-risk for a given return). At $\rho = -1$ the curve is a kink that
-can reach $\sigma = 0$.
+The expected return is linear in the weight, but the variance is not:
+
+$$
+E[R_p] = w E[R_1] + (1-w) E[R_2], \quad \sigma_p^2 = w^2\sigma_1^2 + (1-w)^2\sigma_2^2 + 2w(1-w)\rho_{12}\sigma_1\sigma_2.
+$$
+
+The cross term carries $\rho_{12}$. Lower $\rho_{12}$ shrinks it, so the
+curve bows further to the left (lower risk for a given return). At
+$\rho = -1$ the curve kinks and can reach $\sigma = 0$: two perfectly
+negatively correlated assets can be combined into a riskless position.
+
+Drag the correlation slider and watch the frontier bow. Then note how
+the risk-free rate picks out a single tangent portfolio:
+
+<EfficientFrontier client:load />
+
+_Baseline: asset 1 is higher risk and return (12%, σ 20%), asset 2
+lower (7%, σ 10%), correlation 0.2, risk-free rate 3%. Lower ρ toward
+-1 to see the bow deepen; the red tangent point (set by the risk-free
+rate) is the highest-Sharpe risky mix._
 
 <Figure
   src="/figures/fin-3610/optimal-portfolio-choice/vix-1990-2024.png"

@@ -60,6 +60,16 @@
       "correctIndices": [0, 1],
       "explanation": "Normal returns OR quadratic utility makes mean-variance fully sufficient. Fat tails and skewness violate the framework's assumptions; market efficiency is unrelated to this question.",
       "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Two assets: σ₁ = 20%, σ₂ = 10%, correlation ρ = 0. You hold 50% in each. What is the portfolio standard deviation, in percent? (σ_p² = w²σ₁² + (1−w)²σ₂² + 2w(1−w)ρσ₁σ₂.)",
+      "answer": 11.18,
+      "tolerance": 0.3,
+      "unit": "%",
+      "explanation": "With ρ = 0 the cross term vanishes: σ_p² = 0.5²(0.20²) + 0.5²(0.10²) = 0.01 + 0.0025 = 0.0125, so σ_p = √0.0125 ≈ 11.18%. That is below the 15% weighted average of the two standard deviations: the gap is the diversification benefit.",
+      "points": 2
     }
   ],
   "furtherReading": {
