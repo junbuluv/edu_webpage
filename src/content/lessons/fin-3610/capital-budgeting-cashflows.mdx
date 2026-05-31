@@ -41,6 +41,12 @@ Where:
   cash even though they don't show up in net income that year.
 - **CapEx** subtracted in the year the cash leaves the firm.
 
+In practice this is a two-step forecast. First project the project's
+**incremental earnings** (revenue, costs, depreciation, taxes). Then
+convert those earnings to free cash flow with the adjustments above.
+Earnings are an accounting story; free cash flow is the cash the
+project actually throws off, and only the cash drives NPV.
+
 <BarFigure
   client:load
   data={[
@@ -78,7 +84,7 @@ matters as much as profitability for NPV.
 
 ## What to include — and what not to
 
-Three principles for what counts as an _incremental_ cash flow:
+The principles for what counts as an _incremental_ cash flow:
 
 **1. Include opportunity costs.** If the project uses a building you
 already own, the cash flow to include is what you'd otherwise have
@@ -99,6 +105,12 @@ sunk costs are backward-looking.
 **4. Exclude financing cash flows.** Interest, principal, and
 dividends are not in FCF. They belong in the discount rate.
 Including them double-counts the cost of capital.
+
+**5. Allocate overhead carefully.** A new product line is often
+charged a share of corporate overhead (HR, the head office, existing
+IT). Include only the overhead that actually _rises_ because of the
+project. Costs the firm would incur anyway are not incremental, even
+when the accountants assign a slice of them to the project.
 
 ## Working capital — the hidden cost of growth
 

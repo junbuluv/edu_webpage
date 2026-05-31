@@ -55,6 +55,20 @@
       "correctIndex": 2,
       "explanation": "For conventional CFs and a single accept/reject decision (no ranking), NPV > 0 \u27fa IRR > cost of capital. Disagreements arise with non-conventional CFs or mutually exclusive choices.",
       "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "A firm has a $100M capital budget and three independent projects: A (invest $100M, NPV $40M), B (invest $50M, NPV $30M), C (invest $50M, NPV $25M). Which set maximizes value within the budget?",
+      "choices": [
+        "A alone, because it has the highest NPV",
+        "B and C, because their profitability index (NPV per dollar invested) is higher",
+        "A and B, because they have the two highest NPVs",
+        "All three, because each has positive NPV"
+      ],
+      "correctIndex": 1,
+      "explanation": "Under a binding budget, rank by profitability index = NPV/investment. A's PI is 0.40; B's is 0.60 and C's is 0.50. B + C fit in $100M and create $55M, beating A alone ($40M). NPV-greedy picks A and leaves $15M of value on the table.",
+      "points": 2
     }
   ],
   "furtherReading": {

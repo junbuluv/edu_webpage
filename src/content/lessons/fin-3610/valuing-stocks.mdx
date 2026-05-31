@@ -1,180 +1,225 @@
 ---
-title: 'Valuing Stocks: DDM and FCFE'
+title: 'Valuing Stocks: Dividends, Payouts, and Free Cash Flow'
 course: fin-3610
 unit: 'Valuing projects and firms'
 order: 13
-summary: 'Two ways to value a share of stock — the dividend discount model and free-cash-flow-to-equity — and when each is preferred.'
+summary: 'Three progressively more general ways to value a share: the dividend-discount model, the total-payout model (dividends plus buybacks), and discounted free cash flow to the whole enterprise. When growth adds value, and when it destroys it.'
 learningObjectives:
-  - 'Apply the Gordon growth dividend discount model to a stable mature company.'
-  - 'Build a multi-stage DDM with an explicit forecast phase and a terminal phase.'
-  - 'Compute equity value via FCFE discounted at the cost of equity, and explain when this beats the DDM.'
+  - 'Value a share as the present value of future dividends, and apply the Gordon growth model and its limits.'
+  - 'Explain why growth only creates value when the return on new investment exceeds the cost of equity.'
+  - 'Use the total-payout model to capture share repurchases, and discounted free cash flow to value the enterprise at the WACC.'
 prerequisites:
-  - 'Gordon growth model (Unit 2).'
-  - 'Free cash flow construction (prior lesson).'
+  - 'Gordon growth / perpetuity formula (Unit 2).'
+  - 'Free cash flow construction and capital budgeting (prior lesson).'
 estimatedMinutes: 25
-tags: ['fin-3610', 'Berk-DeMarzo Ch 9', 'stock valuation', 'DDM', 'FCFE']
+tags: ['fin-3610', 'Berk-DeMarzo Ch 9', 'stock valuation', 'DDM', 'total payout', 'free cash flow']
 quizSlug: 'fin-3610-valuing-stocks'
 draft: false
 ---
 
 import BarFigure from '@components/mdx/BarFigure';
+import DDMValuation from '@components/viz/DDMValuation';
 
-## What is a stock worth?
+## What is a share worth?
 
-A share of stock is a claim on the future dividends the firm chooses
-to pay you, plus whatever you can sell the share for later. Since
-"sell it later" itself depends on someone else's view of future
-dividends, the share's intrinsic value reduces to the PV of all
-future dividends. That's the dividend discount model (DDM):
+A company can report collapsing earnings and still trade at a high
+multiple of those earnings, because a share price reflects expected
+_future_ cash flows, not last quarter's results. So the question
+"what is a share worth?" reduces to: what cash will reach
+shareholders, and what is it worth today?
 
-$$
-P_0 = \sum_{t=1}^{\infty} \frac{D_t}{(1 + r_E)^t}.
-$$
+We build three progressively more general answers:
 
-Where $D_t$ is the dividend at time $t$ and $r_E$ is the cost of
-equity (covered in Unit 4). Until then, treat $r_E$ as given.
+1. **Dividend-discount model (DDM).** Value the share from the
+   dividends it will pay.
+2. **Total-payout model.** Add the cash returned through share
+   repurchases, which for many firms dwarfs dividends.
+3. **Discounted free cash flow (DCF).** Value the entire firm from the
+   cash its operations generate, then back out equity. This is the
+   same machinery as project NPV from the previous lesson, applied to
+   the whole company.
 
-## The Gordon special case
+## The dividend-discount model
 
-If dividends grow at constant rate $g$ forever, the infinite sum
-collapses to:
-
-$$
-P_0 = \frac{D_1}{r_E - g}.
-$$
-
-Requires $g < r_E$. Works for mature, stable companies (utilities,
-consumer staples) where payout policy is set and growth is predictable.
-
-Example. Coca-Cola pays a \$1.88 annual dividend, has historically
-grown it about 5% per year, and has a cost of equity of about 8%.
+Hold a share for one year. You collect dividend $Div_1$ and sell at
+price $P_1$. Discounting that one-year payoff at the cost of equity
+$r_E$ (the return investors require on equally risky equity):
 
 $$
-P_0 = \frac{1.88 \times 1.05}{0.08 - 0.05} = \frac{1.974}{0.03} \approx \$65.80.
+P_0 = \frac{Div_1 + P_1}{1 + r_E}.
 $$
 
-Coca-Cola actually trades around \$60-70 per share in 2025-2026. The
-Gordon model gets us in the ballpark precisely because Coke is the
-kind of company it was designed for.
+The date-1 buyer faces the same one-period trade, so $P_1$ depends on
+$Div_2$ and $P_2$, and so on. Rolling the substitution forward, the
+sale price drops out and a share is worth the present value of all
+future dividends:
+
+$$
+P_0 = \sum_{t=1}^{\infty} \frac{Div_t}{(1 + r_E)^t}.
+$$
+
+### The Gordon growth special case
+
+If dividends grow at a constant rate $g$ forever (with $g < r_E$), the
+sum collapses to the perpetuity-with-growth formula:
+
+$$
+P_0 = \frac{Div_1}{r_E - g}.
+$$
+
+This fits mature, stable payers (utilities, consumer staples) whose
+payout policy is set and whose growth is predictable.
 
 <BarFigure
   client:load
   data={[
     { fy: 'FY14', dps: 1.12 },
-    { fy: 'FY15', dps: 1.24 },
     { fy: 'FY16', dps: 1.44 },
-    { fy: 'FY17', dps: 1.56 },
     { fy: 'FY18', dps: 1.72 },
-    { fy: 'FY19', dps: 1.84 },
     { fy: 'FY20', dps: 2.04 },
-    { fy: 'FY21', dps: 2.24 },
     { fy: 'FY22', dps: 2.48 },
-    { fy: 'FY23', dps: 2.72 },
     { fy: 'FY24', dps: 3.0 },
   ]}
   xKey="fy"
   series={[{ key: 'dps', name: 'Dividend per share ($)', color: '#4572a7' }]}
   yAxisLabel="USD per share"
-  caption="Microsoft's annual dividend per share, fiscal years 2014–2024 (Microsoft's FY ends June 30; no stock splits since 2003 so the series is directly comparable). The compound annual growth rate from FY14 to FY24 is about 10.4% — the kind of stable, growing dividend stream the Gordon model is designed for, even if Microsoft's actual cost of equity makes the formula non-trivial."
+  caption="Microsoft's annual dividend per share, FY2014 to FY2024 (fiscal year ends June 30; no splits since 2003, so the series is directly comparable). The roughly 10% annual growth is the kind of steady, rising stream the Gordon model is built for."
   credit="Microsoft Corp. 10-K filings via SEC EDGAR"
   creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000789019&type=10-K"
 />
 
-## When Gordon breaks
+### Growth is not free: it has to be funded
 
-Gordon assumes a single constant $g$ forever. Lots of real firms
-don't fit that.
-
-- **High-growth firms** (early Amazon, Nvidia today): $g > r_E$ for
-  some period, so the formula gives infinity. Need multi-stage.
-- **Cyclical firms**: dividend growth is anything but constant.
-- **No-dividend firms** (most tech in their growth phase): $D = 0$
-  forever, so DDM says the stock is worth \$0. Obviously wrong.
-
-For these, two patches:
-
-## Multi-stage DDM
-
-Split the firm's life into two (or more) phases:
-
-1. **Explicit forecast** (years 1 to $T$): forecast each year's
-   dividend individually.
-2. **Terminal value** (year $T+1$ onwards): apply Gordon at a
-   sustainable long-run growth rate.
+Where does $g$ come from? A firm splits each dollar of earnings
+between paying it out and reinvesting it. Let $b$ be the **retention
+rate** (the fraction reinvested) and let those reinvestments earn a
+**return on new investment**. Then:
 
 $$
-P_0 = \sum_{t=1}^{T} \frac{D_t}{(1+r_E)^t} + \frac{1}{(1+r_E)^T} \cdot \frac{D_{T+1}}{r_E - g_{LR}}.
+g = b \times (\text{return on new investment}), \qquad Div_1 = EPS_1 \times (1 - b).
 $$
 
-The first term is the PV of forecasted dividends. The second is the
-PV of the Gordon terminal value, discounted back to today.
+Retaining more raises $g$ but lowers the current dividend. Whether that
+trade is worth it depends entirely on the return earned. The benchmark
+is a firm that pays out everything: $P = EPS_1 / r_E$. Reinvestment
+beats that benchmark only when the return on new investment is above
+$r_E$. If it is below $r_E$, the firm is plowing money into projects
+that earn less than shareholders require, and growth destroys value.
 
-Example. A firm pays $D_1 = \$2$, growing 12% per year for 5 years,
-then 3% per year forever. $r_E = 10\%$.
+Move the sliders. Watch the price relative to the no-growth benchmark
+as you change the return on new investment:
 
-Years 1-5 dividends: 2.00, 2.24, 2.51, 2.81, 3.15. PV at 10%:
-sum to about \$9.46.
+<DDMValuation client:load />
 
-Year 6 dividend = 3.15 × 1.03 = 3.24. Terminal value at end of year
-5: \$3.24 / (0.10 - 0.03) = \$46.32$. PV today: \$46.32 / 1.10^5 \approx \$28.76$.
+_Baseline: $EPS_1 = \$5$, $r_E = 10\%$, return on new investment $= 12\%$.
+Because 12% is above $r_E$, retaining earnings adds value; drag the return
+below 10% and watch the same growth start to destroy it._
 
-Stock value: \$9.46 + 28.76 = \$38.22 per share.
+The headline: growth at the wrong return is value-destroying. A firm
+can grow earnings every year and still shrink the value of a share.
 
-## FCFE: when there are no dividends to discount
+### Multi-stage DDM
 
-For firms that don't pay dividends (most growth-stage tech), use
-**free cash flow to equity**:
-
-$$
-\text{FCFE} = \text{Net Income} + \text{D\&A} - \Delta\text{WC} - \text{CapEx} + \text{Net Borrowing}.
-$$
-
-This is the cash available to equity holders after the firm has paid
-for operations, working capital, CapEx, and net debt repayments. If
-the firm doesn't pay it all out as a dividend, that cash either
-accumulates as additional book value or funds buybacks — either way
-it accrues to equity holders.
-
-Equity value = PV of FCFE discounted at cost of equity:
+Constant growth forever is a poor fit for firms growing faster than
+$r_E$ for a while (the Gordon formula would return a negative or
+infinite price). Split the firm's life into an explicit forecast and a
+terminal value:
 
 $$
-\text{Equity value} = \sum_{t=1}^{\infty} \frac{\text{FCFE}_t}{(1+r_E)^t}.
+P_0 = \sum_{t=1}^{T} \frac{Div_t}{(1+r_E)^t} + \frac{1}{(1+r_E)^T}\cdot\frac{Div_{T+1}}{r_E - g_{L}}.
 $$
 
-Per-share value = Equity value / shares outstanding.
+The first term is the PV of forecasted dividends through year $T$. The
+second is the PV of a Gordon terminal value at a sustainable long-run
+rate $g_L$, discounted back to today.
 
-This is the right approach for non-dividend payers because what
-matters is the cash the firm _could_ pay out, not the cash it
-_chooses_ to pay out.
+Worked example. $Div_1 = \$2$, growing 12% for five years, then 3%
+forever, with $r_E = 10\%$. Years 1 to 5 dividends are 2.00, 2.24,
+2.51, 2.81, 3.15, with PV about \$9.46. The year-6 dividend is
+$3.15 \times 1.03 = 3.24$, so the terminal value at the end of year 5
+is $3.24 / (0.10 - 0.03) = \$46.32$, worth $46.32 / 1.10^5 \approx
+\$28.76$ today. Share value: about \$38.22.
 
-## DDM vs FCFE: which when
+A one-percentage-point change in the long-run rate can move the price
+20% or more. Forecasts that hinge on a single growth assumption are
+fragile, which motivates models that lean less on dividend forecasts.
 
-| Use DDM when                                                         | Use FCFE when                            |
-| -------------------------------------------------------------------- | ---------------------------------------- |
-| Firm has stable dividend policy                                      | Firm pays little or no dividend          |
-| Payout ratio is predictable                                          | Payout is sporadic / opportunistic       |
-| You're valuing utility-like, consumer-staple, mature financial firms | You're valuing tech, growth, M&A targets |
+## The total-payout model
 
-For most large public US firms today, FCFE is the more general tool.
-DDM remains useful as a sanity check and for traditional dividend-
-focused investors.
+Many firms return far more cash through **share repurchases** than
+through dividends. A pure DDM, which counts only dividends per share,
+misses that cash entirely.
 
-## A reconciliation
+The fix: discount _total_ payouts (dividends plus repurchases) to get
+the value of total equity, then divide by shares outstanding. Growth
+here applies to total payouts, not to per-share dividends.
 
-If a firm pays out 100% of FCFE as dividends, FCFE = dividends and
-the two methods give identical equity values. The DDM is a special
-case of FCFE valuation under a specific (and often unrealistic)
-payout policy. Knowing this means you don't need to memorize "which
-method": pick the one whose inputs you can defend.
+<BarFigure
+  client:load
+  data={[
+    { fy: 'FY20', dividends: 14.1, buybacks: 72.4 },
+    { fy: 'FY21', dividends: 14.5, buybacks: 86.0 },
+    { fy: 'FY22', dividends: 14.8, buybacks: 89.4 },
+    { fy: 'FY23', dividends: 15.0, buybacks: 77.6 },
+    { fy: 'FY24', dividends: 15.2, buybacks: 94.9 },
+  ]}
+  xKey="fy"
+  series={[
+    { key: 'dividends', name: 'Dividends ($B)', color: '#4572a7' },
+    { key: 'buybacks', name: 'Share repurchases ($B)', color: '#aa4643' },
+  ]}
+  yAxisLabel="USD billions"
+  caption="Apple's cash returned to shareholders, approximate fiscal-year figures from 10-K cash flow statements. Repurchases run roughly five to six times dividends. A dividend-only model would value the smaller of the two streams and badly understate the equity."
+  credit="Apple Inc. 10-K cash flow statements via SEC EDGAR"
+  creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
+/>
 
-## What we're skipping for now
+## Discounted free cash flow: valuing the whole enterprise
 
-- **WACC valuation** of the whole firm (enterprise value), then
-  subtracting debt to get equity. Covered in Unit 5 with capital
-  structure.
-- **Adjusted Present Value (APV)** — value the unlevered firm,
-  then add tax-shield benefits separately. Same unit.
-- **Multiples-based valuation** — covered next lesson.
+What if a firm pays no dividends and does no buybacks, plowing all
+cash back in? Value the **enterprise** directly from its free cash
+flows, the same FCF you built for a project last lesson, now for the
+whole company:
 
-These all give equity values too; they're just different paths to
-the same destination.
+$$
+V_0 = \sum_{t=1}^{T} \frac{FCF_t}{(1+\text{WACC})^t} + \frac{1}{(1+\text{WACC})^T}\cdot\frac{FCF_{T+1}}{\text{WACC} - g_{FCF}}.
+$$
+
+Two things differ from the DDM. First, free cash flow belongs to _all_
+investors, debt and equity, so discount it at the **WACC**, not at
+$r_E$. Second, this yields enterprise value. Back out equity:
+
+$$
+\text{Equity value} = V_0 - \text{Net debt}, \qquad P_0 = \frac{\text{Equity value}}{\text{shares outstanding}}.
+$$
+
+As with any terminal-value model, the terminal piece often accounts
+for the majority of enterprise value, so small changes in $g_{FCF}$
+swing the answer. Treat the long-run growth assumption with care and
+sanity-check the result against the market.
+
+## Multiples as a cross-check
+
+A discounted cash flow estimate rests on many assumptions. A quick
+cross-check is to compare the firm to similar firms using a multiple
+such as P/E or EV/EBITDA. Multiples are fast and market-based but
+assume the comparables are fairly priced and truly comparable. We
+treat them in depth in the [Multiples and Comparables](/lessons/fin-3610/multiples-and-comparables)
+lesson.
+
+## Why the estimate keeps changing
+
+If your careful valuation differs sharply from the market price, the
+honest first question is who has better information. In a competitive
+market, prices already embed widely available information, so a model
+built from public data rarely uncovers a bargain on its own. The
+limits of that idea, and what moves prices, are the subject of the
+[Factor Models and Market Efficiency](/lessons/fin-3610/factor-models)
+lesson.
+
+## Deferred to capital structure
+
+Two refinements wait until Unit 5, once leverage is on the table:
+the full derivation of the WACC, and Adjusted Present Value, which
+values the unlevered firm and adds the tax shield separately. Both are
+alternative routes to the same equity value.
