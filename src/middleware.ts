@@ -7,6 +7,17 @@ const PROTECTED_PREFIXES = ['/account', '/dashboard', '/exams', '/workshops'];
 const ADMIN_PREFIXES = ['/admin'];
 const STAFF_PREFIXES = ['/instructor'];
 
+// Match on path segments, not raw string prefix. A loose
+// `startsWith('/instructor')` would also catch any `/instructors...` sibling
+// (e.g. a future top-level instructor route), silently gating it behind the
+// staff check. Require an exact match or a trailing-slash boundary so
+// `/instructor` gates `/instructor/workshops` but never an `/instructors/...`
+// sibling. (Public instructor profiles live under `/<course>/instructors/`,
+// which already never matched — this keeps it that way defensively.)
+function matchesPrefix(pathname: string, prefixes: string[]): boolean {
+  return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   // Issue a device_id cookie on first visit. Used by the workshop stamp
   // flow to enforce one-stamp-per-device. Set early so it's available
@@ -45,7 +56,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const isAdmin = isAdminRole(role);
   const isStaff = isStaffRole(role);
 
-  if (ADMIN_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+  if (matchesPrefix(url.pathname, ADMIN_PREFIXES)) {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
@@ -53,7 +64,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       );
     }
     if (!isAdmin) return context.redirect('/');
-  } else if (STAFF_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+  } else if (matchesPrefix(url.pathname, STAFF_PREFIXES)) {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
@@ -61,7 +72,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       );
     }
     if (!isStaff) return context.redirect('/');
-  } else if (PROTECTED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+  } else if (matchesPrefix(url.pathname, PROTECTED_PREFIXES)) {
     if (!context.locals.user) {
       if (!supabase) return context.redirect('/auth/setup-required');
       return context.redirect(
