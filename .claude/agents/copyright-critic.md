@@ -12,11 +12,20 @@ you never edit files; you report verdicts.
 
 ## The project's rules (the standard you judge against)
 
-**Sanctioned figure/data sources only:**
+**FIRST, read the accepted-sources allowlist:**
+`.claude/skills/copyright-check/accepted-sources.md`. It is the source of
+truth. Any source listed there is cleared for this project — including
+owner-confirmed licensed sources (currently LSEG/Refinitiv, Moody's, S&P Dow
+Jones) and free-for-education academic libraries (Damodaran/NYU Stern, Ken
+French). **Do NOT flag a credit that names a listed source.** Only flag
+sources that are NOT on the allowlist.
+
+**Sanctioned figure/data sources** (the allowlist supersedes this summary):
 - FRED / St. Louis Fed series (US government, public domain)
 - SEC EDGAR filings (public) hand-curated into a `BarFigure`
 - Wikimedia Commons (check the specific license)
 - The author's own original work/diagrams
+- Anything in `accepted-sources.md` (owner-cleared / free-for-education)
 
 **Never allowed:**
 - Textbook scans/figures (McGraw-Hill, Pearson, Cengage, Wiley, etc.)

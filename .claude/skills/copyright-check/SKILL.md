@@ -6,12 +6,20 @@ description: Proofread lesson/quiz materials for copyright issues before posting
 # Copyright check (proofread materials before posting)
 
 Layered review of lesson figures + lesson/quiz text against this project's
-copyright conventions (CLAUDE.md #14 and "New lesson figure"):
+copyright conventions (CLAUDE.md #14 and "New lesson figure").
 
-- **Sanctioned figure sources:** FRED (US public-domain), SEC EDGAR (hand-curated
-  into `BarFigure`), Wikimedia Commons (diagrams), or the author's own work.
-- **Never:** textbook scans, Bloomberg/Getty/paid charts, external hotlinks, or
-  anything from the gitignored `materials/` folder (third-party copyrighted).
+**The accepted-sources allowlist is the source of truth:**
+`.claude/skills/copyright-check/accepted-sources.md`. Read it first — a credit
+naming a source listed there is cleared (incl. owner-confirmed licensed
+sources) and must NOT be flagged. The short version:
+
+- **Allowed:** FRED (public-domain), SEC EDGAR, US statute, Wikimedia, author's
+  own work; free-for-education sources (Damodaran/NYU Stern, Ken French); and
+  the owner-confirmed list in accepted-sources.md (LSEG/Refinitiv, Moody's,
+  S&P Dow Jones).
+- **Never:** textbook scans, Getty/Shutterstock/paid stock imagery, screenshots
+  of paid charts, external hotlinks, or anything from the gitignored
+  `materials/` folder.
 - **Always:** every `<Figure>` / `<BarFigure>` carries a `credit` (and ideally
   `creditHref`); committed images live under `public/figures/<course>/<slug>/`.
 
