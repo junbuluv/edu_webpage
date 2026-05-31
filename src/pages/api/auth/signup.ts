@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (!isAllowedEmail(email)) {
     return redirect(
       `/auth/signup?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
-        `Please use a Baruch College email address (${allowedDomainsHumanList()}).`,
+        `Please sign up with an accepted email domain: ${allowedDomainsHumanList()}.`,
       )}`,
     );
   }
