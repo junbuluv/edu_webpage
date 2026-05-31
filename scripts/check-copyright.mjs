@@ -35,15 +35,24 @@ function lineOf(text, index) {
   return text.slice(0, index).split('\n').length;
 }
 
-// Extract `<Figure .../>` and `<BarFigure .../>` blocks (attrs up to the
-// self-closing `/>`). Heuristic but sufficient for hand-authored MDX.
+// Extract `<Figure ...>` / `<BarFigure ...>` blocks (the attribute span).
+// Handles BOTH self-closing (`<Figure ... />`) and paired
+// (`<Figure ...></Figure>`) forms — taking whichever close comes first — so
+// a paired tag can't slip past the credit/src checks. Heuristic but
+// sufficient for hand-authored MDX.
 function* componentBlocks(text) {
   const re = /<(Figure|BarFigure)\b/g;
   let m;
   while ((m = re.exec(text))) {
     const start = m.index;
-    const close = text.indexOf('/>', start);
-    const attrs = close === -1 ? text.slice(start, start + 600) : text.slice(start, close);
+    const selfClose = text.indexOf('/>', start);
+    const pairedClose = text.indexOf(`</${m[1]}>`, start);
+    let end = -1;
+    if (selfClose !== -1) end = selfClose + 2;
+    if (pairedClose !== -1 && (end === -1 || pairedClose < end)) {
+      end = pairedClose + m[1].length + 3; // length of `</Name>`
+    }
+    const attrs = end === -1 ? text.slice(start, start + 1200) : text.slice(start, end);
     yield { name: m[1], attrs, line: lineOf(text, start) };
   }
 }

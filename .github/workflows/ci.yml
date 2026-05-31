@@ -113,7 +113,12 @@ jobs:
   copyright-gate:
     runs-on: ubuntu-latest
     steps:
+      # Read-only job: don't persist the GITHUB_TOKEN into .git/config.
+      # (Action refs use @v4 to match the rest of this workflow; SHA-pinning
+      # is a separate repo-wide hardening change, not this PR's scope.)
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
