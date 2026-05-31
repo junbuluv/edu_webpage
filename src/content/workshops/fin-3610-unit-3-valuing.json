@@ -38,7 +38,7 @@
     {
       "id": "q7",
       "prompt": "A firm returns about $15B a year in dividends and $90B in share repurchases. An analyst values its equity with a pure dividend-discount model. What does that miss, and how should the group fix the valuation?",
-      "notes": "A pure DDM values only the $15B dividend stream and ignores the $90B of buybacks, capturing roughly a sixth of the cash actually returned and badly understating equity. Fix: the total-payout model. Discount total payouts (dividends plus repurchases) to get total equity value, then divide by shares outstanding. Growth applies to total payouts, not to per-share dividends."
+      "notes": "A pure DDM values only the $15B dividend stream and ignores the $90B of buybacks, capturing only about a seventh of the cash actually returned ($15B of $105B) and badly understating equity. Fix: the total-payout model. Discount total payouts (dividends plus repurchases) to get total equity value, then divide by shares outstanding. Growth applies to total payouts, not to per-share dividends."
     }
   ]
 }
