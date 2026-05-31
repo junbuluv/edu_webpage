@@ -56,6 +56,20 @@
       "unit": "$M",
       "explanation": "TV_T = FCF_{T+1} / (r - g) = 50 / (0.08 - 0.02) = 50 / 0.06 \u2248 833.33M.",
       "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "A new product line is charged $500K of corporate overhead by accounting. The head office, HR, and IT would cost the firm the same whether or not the line launches. How much overhead is an incremental cash flow for the project's NPV?",
+      "choices": [
+        "$500K, because that is what accounting allocates to the project",
+        "$0, because that overhead would be incurred anyway and is not caused by the project",
+        "Half, as a reasonable compromise",
+        "$500K plus a share of future overhead growth"
+      ],
+      "correctIndex": 1,
+      "explanation": "Only overhead that actually rises because of the project is incremental. Allocated shares of costs the firm incurs regardless are not caused by the decision, so they do not belong in the project's free cash flows.",
+      "points": 1
     }
   ],
   "furtherReading": {
