@@ -22,8 +22,8 @@
     },
     {
       "id": "q4",
-      "prompt": "Apply the Gordon growth model to a firm with $2 dividend, 4% growth, 10% cost of equity. Why does increasing g by 1% have an outsized effect on price?",
-      "notes": "P = D/(r-g). At g=4%: $33.33. At g=5%: $40. ~20% jump in price for a 1% growth bump. The denominator (r-g) is small, so price is highly sensitive — biggest critique of single-stage DDM in practice."
+      "prompt": "A firm earns $5 EPS next year with a 10% cost of equity. It can pay everything out, or retain 40% of earnings and reinvest. Work out the share price if the reinvestment earns 15%, versus if it earns 7%. What general rule does the comparison illustrate?",
+      "notes": "No-growth benchmark: pay everything out, P = EPS/r_E = 5/0.10 = $50. Retain 40% (b = 0.4) so Div₁ = 5 × 0.6 = $3, and g = b × return. At a 15% return: g = 6%, P = 3/(0.10 − 0.06) = $75, so reinvestment creates $25 of value (return 15% > r_E 10%). At a 7% return: g = 2.8%, P = 3/(0.10 − 0.028) ≈ $41.67, below the benchmark, so the same growth destroys value (return 7% < r_E 10%). Rule: growth adds value only when the return on new investment exceeds the cost of equity. Growth at the wrong return destroys value."
     },
     {
       "id": "q5",
@@ -34,6 +34,11 @@
       "id": "q6",
       "prompt": "A startup has negative FCF for years 1-5 and turns FCF-positive in year 6. Show how the terminal value typically dominates DCF in this case. What does that mean for sensitivity?",
       "notes": "Terminal value at year 5 = FCF₆/(r-g) discounted back 5 periods. Often 60-80% of total PV. DCF is sensitive to terminal assumptions (r, g) more than near-term forecasts — a key risk for startup valuations."
+    },
+    {
+      "id": "q7",
+      "prompt": "A firm returns about $15B a year in dividends and $90B in share repurchases. An analyst values its equity with a pure dividend-discount model. What does that miss, and how should the group fix the valuation?",
+      "notes": "A pure DDM values only the $15B dividend stream and ignores the $90B of buybacks, capturing roughly a sixth of the cash actually returned and badly understating equity. Fix: the total-payout model. Discount total payouts (dividends plus repurchases) to get total equity value, then divide by shares outstanding. Growth applies to total payouts, not to per-share dividends."
     }
   ]
 }
