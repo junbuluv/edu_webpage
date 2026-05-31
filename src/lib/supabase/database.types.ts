@@ -98,6 +98,8 @@ export type Database = {
           instructor_id: string;
           semester: string;
           enrolled_at: string;
+          student_name: string | null;
+          section: string | null;
         };
         Insert: {
           user_id: string;
@@ -105,6 +107,8 @@ export type Database = {
           instructor_id: string;
           semester: string;
           enrolled_at?: string;
+          student_name?: string | null;
+          section?: string | null;
         };
         Update: {
           user_id?: string;
@@ -112,6 +116,8 @@ export type Database = {
           instructor_id?: string;
           semester?: string;
           enrolled_at?: string;
+          student_name?: string | null;
+          section?: string | null;
         };
         Relationships: [];
       };

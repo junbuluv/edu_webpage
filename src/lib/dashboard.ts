@@ -2,6 +2,7 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseServerClient } from '@lib/supabase/server';
 import { COURSE_SLUGS, type CourseSlug, isCourseSlug } from '@lib/courses';
+import { computeAvgBestScore, countDistinctQuizzes } from '@lib/progress-aggregate';
 
 export type AvailableCourse = {
   slug: CourseSlug;
@@ -253,26 +254,4 @@ async function sortByCourseOrder(slugs: CourseSlug[]): Promise<CourseSlug[]> {
   return slugs
     .slice()
     .sort((a, b) => (orderBySlug.get(a) ?? 999) - (orderBySlug.get(b) ?? 999));
-}
-
-function countDistinctQuizzes(
-  attempts: Array<{ quiz_slug: string }>,
-): number {
-  return new Set(attempts.map((a) => a.quiz_slug)).size;
-}
-
-function computeAvgBestScore(
-  attempts: Array<{ quiz_slug: string; score: number; max_score: number }>,
-): number | null {
-  if (attempts.length === 0) return null;
-  const bestByQuiz = new Map<string, number>();
-  for (const a of attempts) {
-    if (a.max_score <= 0) continue;
-    const pct = a.score / a.max_score;
-    const prev = bestByQuiz.get(a.quiz_slug);
-    if (prev === undefined || pct > prev) bestByQuiz.set(a.quiz_slug, pct);
-  }
-  if (bestByQuiz.size === 0) return null;
-  const sum = Array.from(bestByQuiz.values()).reduce((s, v) => s + v, 0);
-  return sum / bestByQuiz.size;
 }

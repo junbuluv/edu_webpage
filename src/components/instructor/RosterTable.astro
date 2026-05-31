@@ -1,0 +1,65 @@
+---
+import type { RosterStudent } from '@lib/instructor/class-roster';
+
+interface Props {
+  students: RosterStudent[];
+  lessonsTotal: number;
+}
+
+const { students, lessonsTotal } = Astro.props;
+
+function pct(v: number | null): string {
+  return v == null ? '—' : `${Math.round(v * 100)}%`;
+}
+
+function lastSeen(iso: string | null): string {
+  if (!iso) return 'never';
+  const days = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
+  if (days <= 0) return 'today';
+  if (days === 1) return '1d ago';
+  return `${days}d ago`;
+}
+---
+
+<div class="mt-4 overflow-x-auto rounded-lg border border-slate-200">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-ink-muted">
+      <tr>
+        <th class="px-3 py-2 font-medium">Student</th>
+        <th class="px-3 py-2 font-medium">Lessons</th>
+        <th class="px-3 py-2 font-medium">Quizzes</th>
+        <th class="px-3 py-2 font-medium">Avg</th>
+        <th class="px-3 py-2 font-medium">Attend</th>
+        <th class="px-3 py-2 font-medium">Last seen</th>
+        <th class="px-3 py-2 font-medium">Flag</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {students.map((s) => (
+        <tr class={s.risk.atRisk ? 'bg-amber-50/60' : ''}>
+          <td class="px-3 py-2">
+            <div class="font-medium">{s.name ?? <span class="italic text-ink-muted">(no name set)</span>}</div>
+            <div class="text-xs text-ink-muted">{s.email ?? '—'}</div>
+          </td>
+          <td class="px-3 py-2 tabular-nums">{s.lessonsCompleted}/{lessonsTotal}</td>
+          <td class="px-3 py-2 tabular-nums">{s.quizzesTaken}</td>
+          <td class="px-3 py-2 tabular-nums">{pct(s.avgBestScore)}</td>
+          <td class="px-3 py-2 tabular-nums">{s.attendanceCount}</td>
+          <td class="px-3 py-2 whitespace-nowrap text-ink-muted">{lastSeen(s.lastActiveAt)}</td>
+          <td class="px-3 py-2">
+            {s.risk.atRisk ? (
+              <span
+                class="inline-block cursor-help rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold uppercase text-amber-800"
+                title={s.risk.reasons.join(' · ')}
+              >
+                ⚠ at-risk
+              </span>
+            ) : (
+              <span class="text-ink-muted">—</span>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

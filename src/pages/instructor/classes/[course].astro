@@ -1,0 +1,221 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getEntry } from 'astro:content';
+import RosterTable from '@components/instructor/RosterTable.astro';
+import { isAdmin as isAdminRole } from '@lib/roles';
+import { isCourseSlug } from '@lib/courses';
+import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
+import { logDisclosureSafe } from '@lib/audit';
+
+const user = Astro.locals.user!;
+const role = Astro.locals.profile?.role ?? 'student';
+const isAdmin = isAdminRole(role);
+
+const courseParam = Astro.params.course;
+if (!courseParam || !isCourseSlug(courseParam)) {
+  return Astro.redirect('/instructor/classes');
+}
+const course = courseParam;
+
+// Semester comes from ?semester=; default to this instructor's newest
+// class for the course.
+let semester = Astro.url.searchParams.get('semester');
+if (!semester) {
+  const classes = await listClasses(user.id, isAdmin);
+  const newest = classes.find((c) => c.course === course);
+  if (!newest) return Astro.redirect('/instructor/classes');
+  semester = newest.semester;
+}
+
+const wantsCsv = Astro.url.searchParams.get('format') === 'csv';
+const result = await loadClassRoster(user.id, isAdmin, course, semester, Date.now());
+
+if (result.kind === 'forbidden') return new Response(null, { status: 403 });
+if (result.kind === 'not_found') return Astro.redirect('/instructor/classes');
+if (result.kind === 'error') {
+  // A real load error — distinct from an empty/non-existent class, which
+  // would have been not_found. Don't masquerade the failure as "no class".
+  return new Response('Could not load this class right now — please try again shortly.', {
+    status: 503,
+  });
+}
+const roster = result.roster;
+
+// CSV export branch.
+if (wantsCsv) {
+  const esc = (v: string | number | null) => {
+    let s = v == null ? '' : String(v);
+    // Neutralize spreadsheet formula injection: a cell starting with one of
+    // these is treated as a formula by Excel/Sheets. Prefix an apostrophe.
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const header = [
+    'name',
+    'email',
+    'lessons_completed',
+    'lessons_total',
+    'quizzes_taken',
+    'avg_best_score',
+    'attendance',
+    'last_active',
+    'at_risk',
+    'risk_reasons',
+  ];
+  const lines = [header.join(',')];
+  for (const s of roster.students) {
+    lines.push(
+      [
+        esc(s.name),
+        esc(s.email),
+        s.lessonsCompleted,
+        s.lessonsTotal,
+        s.quizzesTaken,
+        s.avgBestScore == null ? '' : Math.round(s.avgBestScore * 100) / 100,
+        s.attendanceCount,
+        esc(s.lastActiveAt),
+        s.risk.atRisk ? 'yes' : 'no',
+        esc(s.risk.reasons.join('; ')),
+      ].join(','),
+    );
+  }
+  await logDisclosureSafe({
+    actorId: user.id,
+    actorRole: role as 'instructor' | 'ta' | 'admin',
+    action: 'export_student_data',
+    targetResource: `${course}:${semester}`,
+    metadata: { rows: roster.students.length, format: 'csv' },
+    request: Astro.request,
+  });
+  // Sanitize the filename inline: semester is free text, so strip anything
+  // that could break the header (quotes, CR/LF) down to a safe token.
+  return new Response(lines.join('\n'), {
+    status: 200,
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition':
+        'attachment; filename="' +
+        (course + '-' + semester).replace(/[^A-Za-z0-9._-]+/g, '_') +
+        '-roster.csv"',
+    },
+  });
+}
+
+// HTML roster view discloses plaintext student emails — audit it (the CSV
+// branch above logs its own export_student_data and returns before here).
+await logDisclosureSafe({
+  actorId: user.id,
+  actorRole: role as 'instructor' | 'ta' | 'admin',
+  action: 'read_class_roster',
+  targetResource: `${course}:${semester}`,
+  metadata: { students: roster.students.length, withEmail: !roster.emailLookupFailed },
+  request: Astro.request,
+});
+
+const riskOnly = Astro.url.searchParams.get('risk') === 'only';
+const visibleStudents = riskOnly
+  ? roster.students.filter((s) => s.risk.atRisk)
+  : roster.students;
+
+const courseEntry = await getEntry('courses', course);
+const courseCode = courseEntry?.data.code ?? course;
+const semesterQs = encodeURIComponent(semester);
+
+const importedN = Astro.url.searchParams.get('imported');
+const importSummary =
+  importedN != null
+    ? {
+        enrolled: importedN,
+        updated: Astro.url.searchParams.get('updated') ?? '0',
+        skipped: Astro.url.searchParams.get('skipped') ?? '0',
+      }
+    : null;
+---
+
+<BaseLayout title={`Roster: ${courseCode} · ${semester}`}>
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">Instructor · Roster</p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">
+      {courseCode}
+      <span class="ml-2 text-base font-normal text-ink-muted">{semester}</span>
+    </h1>
+    <p class="mt-2 text-sm text-ink-muted">
+      <a href="/instructor/classes" class="text-accent underline">← All classes</a>
+    </p>
+
+    {importSummary && (
+      <div class="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900">
+        Import complete: <strong>{importSummary.enrolled}</strong> enrolled,
+        <strong> {importSummary.updated}</strong> updated,
+        <strong> {importSummary.skipped}</strong> skipped (no account yet).
+      </div>
+    )}
+
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-sm text-ink-muted">
+        <strong>{roster.students.length}</strong> students ·
+        <strong> {roster.atRiskCount}</strong> at-risk ·
+        <strong> {roster.closedWindowCount}</strong> closed workshop window{roster.closedWindowCount === 1 ? '' : 's'}
+      </p>
+      <div class="flex gap-2">
+        <a
+          href={`/instructor/classes/import?course=${course}&semester=${semesterQs}`}
+          class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
+        >
+          Import roster
+        </a>
+        <a
+          href={`/instructor/classes/${course}?semester=${semesterQs}&format=csv`}
+          class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
+        >
+          Download CSV
+        </a>
+      </div>
+    </div>
+
+    {roster.emailLookupFailed && (
+      <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        Couldn't load student emails this time (auth service lookup failed).
+        Names and progress are still accurate; emails show as "—".
+      </p>
+    )}
+
+    {roster.dataIncomplete && (
+      <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        Some progress data couldn't be loaded just now, so lesson / quiz /
+        attendance figures (and at-risk flags) may be incomplete. Refresh to retry.
+      </p>
+    )}
+
+    <nav class="mt-6 flex gap-2 text-xs" aria-label="Filter">
+      <a
+        href={`/instructor/classes/${course}?semester=${semesterQs}`}
+        aria-current={riskOnly ? undefined : 'page'}
+        class:list={[
+          'rounded-full border px-3 py-1 font-medium',
+          riskOnly ? 'border-slate-300 bg-white text-ink hover:border-accent' : 'border-accent bg-accent text-white',
+        ]}
+      >
+        All ({roster.students.length})
+      </a>
+      <a
+        href={`/instructor/classes/${course}?semester=${semesterQs}&risk=only`}
+        aria-current={riskOnly ? 'page' : undefined}
+        class:list={[
+          'rounded-full border px-3 py-1 font-medium',
+          riskOnly ? 'border-accent bg-accent text-white' : 'border-slate-300 bg-white text-ink hover:border-accent',
+        ]}
+      >
+        At-risk only ({roster.atRiskCount})
+      </a>
+    </nav>
+
+    {visibleStudents.length === 0 ? (
+      <p class="mt-8 text-sm text-ink-muted">
+        {riskOnly ? 'No at-risk students — nice.' : 'No students enrolled in this class yet.'}
+      </p>
+    ) : (
+      <RosterTable students={visibleStudents} lessonsTotal={roster.lessonsTotal} />
+    )}
+  </div>
+</BaseLayout>

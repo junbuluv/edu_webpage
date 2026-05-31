@@ -1,8 +1,30 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import { getAdminClient } from '@lib/supabase/admin';
 
 const user = Astro.locals.user!;
 const profile = Astro.locals.profile!;
+
+// Recent management activity from the audit log (read-only). Admin-gated by
+// middleware; read via service-role since audit_log has no read RLS policy.
+const admin = getAdminClient();
+const { data: events } = await admin
+  .from('audit_log')
+  .select('id, ts, actor_id, actor_role, action, target_resource')
+  .order('ts', { ascending: false })
+  .limit(50);
+
+const actorIds = [
+  ...new Set((events ?? []).map((e) => e.actor_id).filter((x): x is string => !!x)),
+];
+let actorNameById = new Map<string, string | null>();
+if (actorIds.length > 0) {
+  const { data: profs } = await admin
+    .from('profiles')
+    .select('id, display_name')
+    .in('id', actorIds);
+  actorNameById = new Map((profs ?? []).map((p) => [p.id, p.display_name]));
+}
 ---
 
 <BaseLayout title="Admin">
@@ -19,6 +41,46 @@ const profile = Astro.locals.profile!;
         management, audit-log search, data exports. For now, day-one admin
         actions go through SQL — see <a class="text-accent underline" href="https://github.com/junbuluv/edu_webpage/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.
       </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+        Recent activity
+      </h2>
+      <p class="mt-1 text-xs text-ink-muted">
+        Last 50 audited events (roster imports, student-data exports, and other
+        disclosures). IP / user-agent are HMAC'd, not shown.
+      </p>
+
+      {(!events || events.length === 0) ? (
+        <p class="mt-4 text-sm text-ink-muted">No audited events yet.</p>
+      ) : (
+        <div class="mt-4 overflow-x-auto rounded-lg border border-slate-200">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-ink-muted">
+              <tr>
+                <th class="px-3 py-2 font-medium">When</th>
+                <th class="px-3 py-2 font-medium">Actor</th>
+                <th class="px-3 py-2 font-medium">Action</th>
+                <th class="px-3 py-2 font-medium">Target</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {events.map((e) => (
+                <tr>
+                  <td class="px-3 py-2 whitespace-nowrap text-ink-muted">{new Date(e.ts).toLocaleString()}</td>
+                  <td class="px-3 py-2">
+                    {e.actor_id ? (actorNameById.get(e.actor_id) ?? '—') : '—'}
+                    {e.actor_role && <span class="ml-1 text-xs text-ink-muted">({e.actor_role})</span>}
+                  </td>
+                  <td class="px-3 py-2"><code class="text-xs">{e.action}</code></td>
+                  <td class="px-3 py-2 text-xs text-ink-muted">{e.target_resource ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   </div>
 </BaseLayout>
