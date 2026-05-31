@@ -15,12 +15,7 @@
         "Stock-based compensation became a larger share of pay, and buybacks offset its dilution",
         "Greater flexibility (no commitment to a sustainable per-period level)"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2,
-        3
-      ],
+      "correctIndices": [0, 1, 2, 3],
       "explanation": "All four contributed. The 2022 IRA added a 1% excise tax on buybacks, narrowing but not closing the preference gap.",
       "points": 2
     },

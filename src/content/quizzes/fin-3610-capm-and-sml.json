@@ -33,12 +33,7 @@
       "type": "multiple_choice",
       "id": "q3",
       "prompt": "Cov(R_i, R_m) = 0.024, Var(R_m) = 0.020. What is \u03b2_i?",
-      "choices": [
-        "0.83",
-        "1.0",
-        "1.2",
-        "1.5"
-      ],
+      "choices": ["0.83", "1.0", "1.2", "1.5"],
       "correctIndex": 2,
       "explanation": "\u03b2 = Cov(R_i, R_m) / Var(R_m) = 0.024 / 0.020 = 1.2.",
       "points": 1

@@ -1,18 +1,18 @@
 ---
-title: "Credit Risk and Spreads"
+title: 'Credit Risk and Spreads'
 course: fin-3610
-unit: "Time, money, and interest rates"
+unit: 'Time, money, and interest rates'
 order: 9
-summary: "How default risk shows up as a yield spread over Treasuries, what credit ratings actually mean, and how recovery rates and macro conditions drive the term structure of credit spreads."
+summary: 'How default risk shows up as a yield spread over Treasuries, what credit ratings actually mean, and how recovery rates and macro conditions drive the term structure of credit spreads.'
 learningObjectives:
-  - "Decompose a corporate bond yield into Treasury yield + credit spread."
-  - "Explain how rating, recovery rate, and macro factors drive spreads."
-  - "Compute the expected return on a defaultable bond given a simple default-and-recovery model."
+  - 'Decompose a corporate bond yield into Treasury yield + credit spread.'
+  - 'Explain how rating, recovery rate, and macro factors drive spreads.'
+  - 'Compute the expected return on a defaultable bond given a simple default-and-recovery model.'
 prerequisites:
-  - "Bond pricing and YTM (prior lesson)."
+  - 'Bond pricing and YTM (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 6", "credit risk", "spreads"]
-quizSlug: "fin-3610-credit-risk-and-spreads"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 6', 'credit risk', 'spreads']
+quizSlug: 'fin-3610-credit-risk-and-spreads'
 draft: false
 ---
 
@@ -47,7 +47,7 @@ $$
 A bond with 2% annual default probability and 40% recovery rate
 needs a spread of about $0.02 \times 0.6 = 1.2\% = 120$ bps over
 Treasury to break even on expected return. Real-world spreads are
-typically *higher* than this — investors demand extra premium for
+typically _higher_ than this — investors demand extra premium for
 bearing the risk (not just the expected loss).
 
 ## Credit ratings
@@ -55,16 +55,16 @@ bearing the risk (not just the expected loss).
 Three big rating agencies (S&P, Moody's, Fitch) classify bonds on a
 letter-grade scale. Simplified:
 
-| Grade | S&P / Fitch | Moody's | Default risk |
-|---|---|---|---|
-| Investment grade | AAA | Aaa | Very low |
-|  | AA | Aa | Very low |
-|  | A | A | Low |
-|  | BBB | Baa | Modest |
-| Speculative ("high yield" / "junk") | BB | Ba | Material |
-|  | B | B | High |
-|  | CCC | Caa | Distressed |
-|  | D | C | In default |
+| Grade                               | S&P / Fitch | Moody's | Default risk |
+| ----------------------------------- | ----------- | ------- | ------------ |
+| Investment grade                    | AAA         | Aaa     | Very low     |
+|                                     | AA          | Aa      | Very low     |
+|                                     | A           | A       | Low          |
+|                                     | BBB         | Baa     | Modest       |
+| Speculative ("high yield" / "junk") | BB          | Ba      | Material     |
+|                                     | B           | B       | High         |
+|                                     | CCC         | Caa     | Distressed   |
+|                                     | D           | C       | In default   |
 
 Two bright lines matter:
 
@@ -91,7 +91,13 @@ horizons; less well at very long horizons or in deep recessions.
     { rating: 'Caa-C', defaultRate: 52.0 },
   ]}
   xKey="rating"
-  series={[{ key: 'defaultRate', name: '10-year cumulative default rate (%)', color: '#4572a7' }]}
+  series={[
+    {
+      key: 'defaultRate',
+      name: '10-year cumulative default rate (%)',
+      color: '#4572a7',
+    },
+  ]}
   yAxisLabel="Default probability (%)"
   caption="Approximate 10-year cumulative default rates by initial Moody's rating, from the long-run global corporate default study. Investment grade (Aaa through Baa) defaults are rare even over a decade; speculative-grade bonds default at materially higher rates, with the lowest tier (Caa-C) defaulting more than half the time. The ratings encode this cumulative risk; the spread is the market's price for it."
   credit="Moody's Annual Default Study (long-run global corporate cohort)"
@@ -120,7 +126,7 @@ financial markets are pricing risk.
 
 Spreads also depend on maturity. For investment-grade firms, the
 curve typically slopes upward (longer = more time for things to go
-wrong). For deeply distressed firms, it can slope *downward* —
+wrong). For deeply distressed firms, it can slope _downward_ —
 if a firm survives the near term, it has demonstrated some
 resilience; the unconditional default rate is concentrated in the
 short window.
@@ -138,7 +144,7 @@ market actually trades it at 6%, so there's a **125 bps** spread —
 of which roughly 75 bps compensates for expected loss and the
 remaining ~50 bps is the risk premium.
 
-In recessions both pieces grow: expected default rate rises *and*
+In recessions both pieces grow: expected default rate rises _and_
 the risk premium rises. That's why high-yield spreads can swing
 from 250 bps in good times to 1,\!000+ bps in crises.
 

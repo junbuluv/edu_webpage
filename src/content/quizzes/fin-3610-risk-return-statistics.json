@@ -9,12 +9,7 @@
       "type": "multiple_choice",
       "id": "q1",
       "prompt": "Approximately what has been the long-run real annual return on US large-cap stocks (1926-2024)?",
-      "choices": [
-        "About 0.5%",
-        "About 2.5%",
-        "About 7.5%",
-        "About 15%"
-      ],
+      "choices": ["About 0.5%", "About 2.5%", "About 7.5%", "About 15%"],
       "correctIndex": 2,
       "explanation": "Around 7-8% real per year. Nominal returns are closer to 10%; the difference is long-run inflation.",
       "points": 1

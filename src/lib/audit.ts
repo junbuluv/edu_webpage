@@ -62,7 +62,9 @@ export async function logDisclosure(ctx: DisclosureContext): Promise<void> {
  * trusted-instructor teaching app; switch a call site back to
  * `logDisclosure` (which throws) if an action must fail closed.
  */
-export async function logDisclosureSafe(ctx: DisclosureContext): Promise<boolean> {
+export async function logDisclosureSafe(
+  ctx: DisclosureContext,
+): Promise<boolean> {
   try {
     await logDisclosure(ctx);
     return true;

@@ -78,9 +78,7 @@ export default function Quiz({
                   questionId={q.id}
                   choices={q.choices}
                   value={answers[q.id] as number | undefined}
-                  onChange={(v) =>
-                    setAnswers((a) => ({ ...a, [q.id]: v }))
-                  }
+                  onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   disabled={submitted}
                 />
               )}
@@ -89,9 +87,7 @@ export default function Quiz({
                   questionId={q.id}
                   choices={q.choices}
                   value={(answers[q.id] as number[] | undefined) ?? []}
-                  onChange={(v) =>
-                    setAnswers((a) => ({ ...a, [q.id]: v }))
-                  }
+                  onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   disabled={submitted}
                 />
               )}
@@ -99,9 +95,7 @@ export default function Quiz({
                 <NumericInput
                   unit={q.unit}
                   value={(answers[q.id] as string | undefined) ?? ''}
-                  onChange={(v) =>
-                    setAnswers((a) => ({ ...a, [q.id]: v }))
-                  }
+                  onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   disabled={submitted}
                 />
               )}
@@ -183,9 +177,7 @@ function MultiInput({
   disabled: boolean;
 }) {
   function toggle(i: number) {
-    onChange(
-      value.includes(i) ? value.filter((v) => v !== i) : [...value, i],
-    );
+    onChange(value.includes(i) ? value.filter((v) => v !== i) : [...value, i]);
   }
   return (
     <div className="space-y-2">
@@ -248,9 +240,7 @@ function Feedback({
   return (
     <div
       className={`mt-3 rounded-md p-3 text-sm ${
-        correct
-          ? 'bg-emerald-50 text-emerald-800'
-          : 'bg-rose-50 text-rose-800'
+        correct ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'
       }`}
     >
       <strong>{correct ? 'Correct.' : 'Not quite.'}</strong> {explanation}
@@ -274,7 +264,9 @@ function ResultBadge({
       >
         {score} / {maxScore}
       </span>{' '}
-      <span className="text-ink-muted">— {passed ? 'passed' : 'review the lesson and retry'}</span>
+      <span className="text-ink-muted">
+        — {passed ? 'passed' : 'review the lesson and retry'}
+      </span>
     </div>
   );
 }

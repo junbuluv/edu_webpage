@@ -65,7 +65,10 @@ export default function ISLMScenarioView({ state }: Props) {
       </div>
       <div className="mt-2 h-72">
         <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 8, right: 16, bottom: 28, left: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
+          >
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
               dataKey="Y"

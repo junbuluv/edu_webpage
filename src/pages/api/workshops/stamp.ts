@@ -22,7 +22,8 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
   if (!locals.user) return json({ ok: false, reason: 'unauthenticated' }, 401);
 
   const body = await safeJson(request);
-  const administrationId = typeof body.administration_id === 'string' ? body.administration_id : null;
+  const administrationId =
+    typeof body.administration_id === 'string' ? body.administration_id : null;
   const lat = typeof body.lat === 'number' ? body.lat : null;
   const lng = typeof body.lng === 'number' ? body.lng : null;
 
@@ -102,7 +103,8 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
         {
           ok: false,
           reason: 'out_of_geofence',
-          detail: 'You appear to be outside the workshop location. Move closer and retry.',
+          detail:
+            'You appear to be outside the workshop location. Move closer and retry.',
         },
         403,
       );
@@ -132,8 +134,9 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     // detail for both so the API doesn't disclose which dedupe key
     // (user vs device cookie) triggered.
     if (insertError.code === '23505') {
-      const reason =
-        insertError.message.includes('device_id') ? 'device_already_used' : 'already_stamped';
+      const reason = insertError.message.includes('device_id')
+        ? 'device_already_used'
+        : 'already_stamped';
       return json(
         {
           ok: false,

@@ -30,7 +30,12 @@ export default function Figure({
             <span className="mt-1 block italic">
               Source:{' '}
               {creditHref ? (
-                <a href={creditHref} className="underline" rel="noopener" target="_blank">
+                <a
+                  href={creditHref}
+                  className="underline"
+                  rel="noopener"
+                  target="_blank"
+                >
                   {credit}
                 </a>
               ) : (

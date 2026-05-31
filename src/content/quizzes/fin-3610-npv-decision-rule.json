@@ -39,11 +39,7 @@
         "Easy to compute",
         "Can reject very long-lived high-NPV projects"
       ],
-      "correctIndices": [
-        0,
-        1,
-        3
-      ],
+      "correctIndices": [0, 1, 3],
       "explanation": "Payback ignores TVM and tail cash flows, leading to rejection of long-lived projects with large positive NPV. Being easy to compute is a feature, not a bug \u2014 just not enough to make it a good decision rule.",
       "points": 2
     },

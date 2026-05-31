@@ -38,7 +38,7 @@ export const ISLM_PRESETS: ISLMPreset[] = [
     label: '2008 fiscal stimulus (ARRA)',
     state: { G: 180, M: 130, A0: 90 },
     blurb:
-      "Congress lifts G; Fed accommodates with higher M; private confidence still soft (A0 a touch low). Net effect: Y recovers without r exploding.",
+      'Congress lifts G; Fed accommodates with higher M; private confidence still soft (A0 a touch low). Net effect: Y recovers without r exploding.',
   },
   {
     id: 'pandemic-2020',

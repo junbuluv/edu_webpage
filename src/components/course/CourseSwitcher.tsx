@@ -93,7 +93,12 @@ export default function CourseSwitcher({ courses, activeSlug }: Props) {
           viewBox="0 0 12 12"
           fill="currentColor"
         >
-          <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <path
+            d="M3 4.5l3 3 3-3"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            fill="none"
+          />
         </svg>
       </button>
 

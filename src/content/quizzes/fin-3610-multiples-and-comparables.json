@@ -23,12 +23,7 @@
       "type": "multiple_choice",
       "id": "q2",
       "prompt": "An early-stage biotech with negative earnings can still be valued via which multiple?",
-      "choices": [
-        "Trailing P/E",
-        "Price-to-book",
-        "EV/Sales",
-        "Forward EPS"
-      ],
+      "choices": ["Trailing P/E", "Price-to-book", "EV/Sales", "Forward EPS"],
       "correctIndex": 2,
       "explanation": "EV/Sales is the multiple of last resort when earnings are negative or volatile. It doesn't reflect margin but it always exists.",
       "points": 1
@@ -37,12 +32,7 @@
       "type": "multiple_choice",
       "id": "q3",
       "prompt": "A target firm has $80M of forecast EBITDA and $200M of net debt. Peer median EV/EBITDA = 12\u00d7. With 50M shares outstanding, what is the implied share price?",
-      "choices": [
-        "$12.00",
-        "$15.20",
-        "$19.20",
-        "$80.00"
-      ],
+      "choices": ["$12.00", "$15.20", "$19.20", "$80.00"],
       "correctIndex": 1,
       "explanation": "EV = 12 \u00d7 80 = $960M. Equity = EV \u2212 Net Debt = 960 \u2212 200 = $760M. Per share = 760 / 50 = $15.20.",
       "points": 2
@@ -57,11 +47,7 @@
         "Using transaction multiples (with control premium) to value a public-market stake",
         "Reporting the median multiple instead of the mean"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Cyclical traps, growth differences, and confusing transaction with trading multiples are all classic errors. Using median (not mean) is good practice \u2014 it resists outliers.",
       "points": 2
     }

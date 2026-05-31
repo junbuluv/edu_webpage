@@ -43,10 +43,7 @@
         "Multiplier compression of the autonomous shock",
         "Crowding out of private spending"
       ],
-      "correctIndices": [
-        0,
-        3
-      ],
+      "correctIndices": [0, 3],
       "explanation": "Higher r lowers investment directly and crowds out private spending. Money demand effects are about market-clearing, not output, and the multiplier itself isn't an r-channel.",
       "points": 2
     },

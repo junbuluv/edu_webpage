@@ -14,7 +14,9 @@ export type QuizAttemptRow = {
 };
 
 /** Number of distinct quizzes a student has attempted at least once. */
-export function countDistinctQuizzes(attempts: Array<{ quiz_slug: string }>): number {
+export function countDistinctQuizzes(
+  attempts: Array<{ quiz_slug: string }>,
+): number {
   return new Set(attempts.map((a) => a.quiz_slug)).size;
 }
 
@@ -22,7 +24,9 @@ export function countDistinctQuizzes(attempts: Array<{ quiz_slug: string }>): nu
  * Best (highest) fraction-correct per quiz, keyed by quiz_slug. Attempts
  * with a non-positive max_score are ignored (can't form a ratio).
  */
-export function bestScoreByQuiz(attempts: QuizAttemptRow[]): Map<string, number> {
+export function bestScoreByQuiz(
+  attempts: QuizAttemptRow[],
+): Map<string, number> {
   const best = new Map<string, number>();
   for (const a of attempts) {
     if (a.max_score <= 0) continue;
@@ -112,7 +116,11 @@ export function evaluateRisk(
       : (ctx.nowMs - Date.parse(s.lastActiveAt)) / DAY_MS;
 
   // Rule 2 only applies once they've engaged at all (rule 1 covers the rest).
-  if (!noActivity && daysSinceActive > t.inactiveDays && ratio < t.minLessonCompletionRatio) {
+  if (
+    !noActivity &&
+    daysSinceActive > t.inactiveDays &&
+    ratio < t.minLessonCompletionRatio
+  ) {
     // Guard the non-finite case (engaged but no dated activity) so the label
     // never renders "Infinityd".
     const inactiveLabel = Number.isFinite(daysSinceActive)

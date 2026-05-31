@@ -39,12 +39,7 @@
       "type": "multiple_choice",
       "id": "q4",
       "prompt": "Which assumption does the Gordon growth model require?",
-      "choices": [
-        "g > r",
-        "g < r",
-        "g = r",
-        "r = 0"
-      ],
+      "choices": ["g > r", "g < r", "g = r", "r = 0"],
       "correctIndex": 1,
       "explanation": "If g >= r, the discounted series diverges and PV is infinite (or undefined). The formula PV = C / (r-g) requires g < r.",
       "points": 1

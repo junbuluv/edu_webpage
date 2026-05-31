@@ -43,10 +43,7 @@
         "A higher depreciation rate \u03b4",
         "A higher capital share \u03b1"
       ],
-      "correctIndices": [
-        0,
-        3
-      ],
+      "correctIndices": [0, 3],
       "explanation": "Higher s and higher \u03b1 raise k*. Higher n or higher \u03b4 raise the break-even line, lowering k*.",
       "points": 2
     },

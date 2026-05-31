@@ -20,14 +20,14 @@ import {
 
 interface State {
   monetaryBase: number;
-  reserveRatio: number;     // R/D
-  currencyRatio: number;    // C/D
+  reserveRatio: number; // R/D
+  currencyRatio: number; // C/D
 }
 
 const baseline: State = {
   monetaryBase: 1000,
-  reserveRatio: 0.10,
-  currencyRatio: 0.30,
+  reserveRatio: 0.1,
+  currencyRatio: 0.3,
 };
 
 function multiplier(s: State) {
@@ -107,23 +107,36 @@ export default function MoneyMultiplier() {
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip
-              formatter={(v: number) => `$${v.toFixed(0)}B`}
-            />
+            <Tooltip formatter={(v: number) => `$${v.toFixed(0)}B`} />
             <Legend />
-            <Bar dataKey="currency" name="Currency in circulation" stackId="a" fill="#2563eb" />
-            <Bar dataKey="reserves" name="Bank reserves" stackId="a" fill="#dc2626" />
-            <Bar dataKey="deposits" name="Checkable deposits" stackId="a" fill="#059669" />
+            <Bar
+              dataKey="currency"
+              name="Currency in circulation"
+              stackId="a"
+              fill="#2563eb"
+            />
+            <Bar
+              dataKey="reserves"
+              name="Bank reserves"
+              stackId="a"
+              fill="#dc2626"
+            />
+            <Bar
+              dataKey="deposits"
+              name="Checkable deposits"
+              stackId="a"
+              fill="#059669"
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <p className="mt-3 text-xs text-ink-muted">
         Money supply <code>M = m · MB</code> where
-        <code> m = (1 + C/D) / ((C/D) + (R/D))</code>. As banks hold more
-        excess reserves (R/D ↑) or the public holds more cash (C/D ↑), the
-        multiplier shrinks. This is why QE's effect on M depends on what
-        banks do with the new reserves.
+        <code> m = (1 + C/D) / ((C/D) + (R/D))</code>. As banks hold more excess
+        reserves (R/D ↑) or the public holds more cash (C/D ↑), the multiplier
+        shrinks. This is why QE's effect on M depends on what banks do with the
+        new reserves.
       </p>
     </div>
   );

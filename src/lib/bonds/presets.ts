@@ -2,11 +2,11 @@
 // not real-time security data. Yields are recent-history representative.
 
 export interface BondSnapshot {
-  coupon: number;   // annual coupon rate (e.g. 0.05 = 5%)
-  face: number;     // face value in dollars
+  coupon: number; // annual coupon rate (e.g. 0.05 = 5%)
+  face: number; // face value in dollars
   maturity: number; // integer years
   yieldRate: number; // yield to maturity (e.g. 0.045 = 4.5%)
-  zero: boolean;    // zero-coupon bond
+  zero: boolean; // zero-coupon bond
 }
 
 export interface BondPreset {
@@ -77,7 +77,7 @@ export const BOND_PRESETS: BondPreset[] = [
       coupon: 0.08,
       face: 1000,
       maturity: 7,
-      yieldRate: 0.10,
+      yieldRate: 0.1,
       zero: false,
     },
     blurb:

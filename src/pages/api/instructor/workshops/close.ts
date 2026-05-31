@@ -15,7 +15,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const form = await request.formData();
   const administrationId = String(form.get('administration_id') ?? '');
-  if (!administrationId) return new Response('missing administration_id', { status: 400 });
+  if (!administrationId)
+    return new Response('missing administration_id', { status: 400 });
 
   const admin = getAdminClient();
   const { data: row } = await admin
@@ -34,10 +35,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .update({ closes_at: new Date().toISOString() })
     .eq('id', administrationId);
 
-  if (error) return new Response(`update_failed: ${error.message}`, { status: 500 });
+  if (error)
+    return new Response(`update_failed: ${error.message}`, { status: 500 });
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/instructor/workshops/${row.workshop_slug}?ok=closed` },
+    headers: {
+      Location: `/instructor/workshops/${row.workshop_slug}?ok=closed`,
+    },
   });
 };

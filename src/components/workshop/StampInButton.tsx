@@ -9,12 +9,7 @@ interface Props {
   requiredRadiusMeters: number;
 }
 
-type Phase =
-  | 'idle'
-  | 'locating'
-  | 'submitting'
-  | 'success'
-  | 'error';
+type Phase = 'idle' | 'locating' | 'submitting' | 'success' | 'error';
 
 interface StampResult {
   ok: boolean;
@@ -39,7 +34,9 @@ export default function StampInButton({
 
   async function getPosition(): Promise<{ lat: number; lng: number } | null> {
     if (!('geolocation' in navigator)) {
-      setError('Your browser does not support geolocation. Open this page in a different browser.');
+      setError(
+        'Your browser does not support geolocation. Open this page in a different browser.',
+      );
       return null;
     }
     return new Promise((resolve) => {
@@ -106,10 +103,13 @@ export default function StampInButton({
     return (
       <div className="rounded border border-emerald-300 bg-emerald-50 p-4">
         <p className="font-medium text-emerald-900">
-          {section ? `✓ Stamped in for section ${section}.` : '✓ Stamped in for this workshop.'}
+          {section
+            ? `✓ Stamped in for section ${section}.`
+            : '✓ Stamped in for this workshop.'}
         </p>
         <p className="mt-1 text-sm text-emerald-900">
-          {stampedAt && `Recorded at ${new Date(stampedAt).toLocaleTimeString()}.`}{' '}
+          {stampedAt &&
+            `Recorded at ${new Date(stampedAt).toLocaleTimeString()}.`}{' '}
           Discussion questions will be revealed by your instructor during class.
         </p>
       </div>
@@ -128,7 +128,9 @@ export default function StampInButton({
           ? 'Checking location…'
           : phase === 'submitting'
             ? 'Recording…'
-            : section ? `Stamp in for ${section}` : 'Stamp in'}
+            : section
+              ? `Stamp in for ${section}`
+              : 'Stamp in'}
       </button>
       {error && (
         <p className="rounded border border-rose-300 bg-rose-50 p-2 text-sm text-rose-900">

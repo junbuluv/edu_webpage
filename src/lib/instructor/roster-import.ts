@@ -10,7 +10,11 @@
 // ownership check here (enrollments has no INSERT RLS policy), consistent
 // with the other instructor write-paths.
 
-import { getAdminClient, listAllAuthUsers, selectAllRows } from '@lib/supabase/admin';
+import {
+  getAdminClient,
+  listAllAuthUsers,
+  selectAllRows,
+} from '@lib/supabase/admin';
 import type { CourseSlug } from '@lib/courses';
 import { parseRosterCsv } from './roster-csv';
 
@@ -89,7 +93,10 @@ async function fetchExisting(
       .range(from, to),
   );
   if (error) {
-    throw new RosterImportError('failed', `Failed to load existing enrollments: ${error}`);
+    throw new RosterImportError(
+      'failed',
+      `Failed to load existing enrollments: ${error}`,
+    );
   }
   const map = new Map<string, ExistingEnrollment>();
   for (const r of rows) map.set(r.user_id, r);
@@ -114,7 +121,11 @@ function isOwnedByOther(
   return true;
 }
 
-async function planImport(course: CourseSlug, semester: string, csvText: string) {
+async function planImport(
+  course: CourseSlug,
+  semester: string,
+  csvText: string,
+) {
   const parsed = parseRosterCsv(csvText);
   const admin = getAdminClient();
   const [emailToId, existing] = await Promise.all([
@@ -205,7 +216,11 @@ export async function applyImport(
     const { error } = await p.admin
       .from('enrollments')
       .upsert(payload, { onConflict: 'user_id,course_slug,semester' });
-    if (error) throw new RosterImportError('failed', `enrollment upsert failed: ${error.message}`);
+    if (error)
+      throw new RosterImportError(
+        'failed',
+        `enrollment upsert failed: ${error.message}`,
+      );
   }
 
   return {

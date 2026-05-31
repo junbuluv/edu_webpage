@@ -43,11 +43,7 @@
         "Forward guidance",
         "Special lending facilities (TAF, PDCF, etc.)"
       ],
-      "correctIndices": [
-        0,
-        2,
-        3
-      ],
+      "correctIndices": [0, 2, 3],
       "explanation": "The Fed used QE, forward guidance, and emergency facilities. It did NOT use negative IORB; rates stayed at or above zero throughout.",
       "points": 2
     },

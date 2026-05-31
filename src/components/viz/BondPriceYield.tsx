@@ -360,11 +360,10 @@ export default function BondPriceYield() {
       )}
 
       <p className="mt-3 text-xs text-ink-muted">
-        Price-yield curve is convex. For a small yield change Δy, price
-        changes by approximately <code>−D_modified · P · Δy</code>. Longer
-        maturity → steeper curve → more interest-rate risk. Drag the YTM
-        pill on the right, type values, or pick a preset (Treasury, IG
-        corp, junk, T-bill).
+        Price-yield curve is convex. For a small yield change Δy, price changes
+        by approximately <code>−D_modified · P · Δy</code>. Longer maturity →
+        steeper curve → more interest-rate risk. Drag the YTM pill on the right,
+        type values, or pick a preset (Treasury, IG corp, junk, T-bill).
       </p>
     </div>
   );

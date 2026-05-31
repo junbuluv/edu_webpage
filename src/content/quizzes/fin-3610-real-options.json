@@ -15,11 +15,7 @@
         "Option to abandon",
         "Option to issue equity"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "Timing, growth, and abandonment are the three classic real-option categories. Issuing equity is a financing decision, not a real option in the project sense.",
       "points": 2
     },

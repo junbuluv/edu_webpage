@@ -24,7 +24,9 @@ if (resolution.kind === 'redirect') {
 
 const activeSlug = resolution.courseSlug;
 const availableCourses = await listAvailableCourses(supabase, user.id);
-const data = activeSlug ? await getDashboardData(supabase, user.id, activeSlug) : null;
+const data = activeSlug
+  ? await getDashboardData(supabase, user.id, activeSlug)
+  : null;
 
 // Staff section: only renders for instructor / ta / admin AND when a
 // course is active. Range comes from ?range= param (default = week).
@@ -41,90 +43,108 @@ const staffMetrics =
     <h1 class="text-3xl font-semibold tracking-tight">Your dashboard</h1>
     <p class="mt-2 text-ink-muted">Signed in as {user.email}</p>
 
-    {availableCourses.length > 0 && (
-      <div class="mt-8">
-        <DashboardCourseTabs courses={availableCourses} activeSlug={activeSlug} />
-      </div>
-    )}
-
-    {data && (
-      <div class="mt-8 space-y-10">
-        {viewerIsStaff && staffMetrics && activeSlug && (
-          <StaffCourseManagement
-            metrics={staffMetrics}
-            courseSlug={activeSlug}
-            courseCode={data.course.data.code}
-            range={range}
+    {
+      availableCourses.length > 0 && (
+        <div class="mt-8">
+          <DashboardCourseTabs
+            courses={availableCourses}
+            activeSlug={activeSlug}
           />
-        )}
-        {data.enrolledSemester === null && (
-          <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-            <p>
-              <strong>Browse mode.</strong> You're not enrolled in this course.
-              You can read lessons and try the practice quizzes, but
-              enrollment-only features (proctored quizzes, instructor support,
-              roster-scoped exam administrations) won't appear until your
-              instructor adds you to the roster.
-            </p>
-          </div>
-        )}
-        <CourseHeaderCard
-          course={data.course}
-          instructors={data.instructors}
-          enrolledSemester={data.enrolledSemester}
-          stats={data.stats}
-        />
+        </div>
+      )
+    }
 
-        <section>
-          <h2 class="text-xl font-semibold">Lessons</h2>
-          <div class="mt-4">
-            <LessonProgressList
-              lessons={data.lessons}
-              progressBySlug={data.progressBySlug}
+    {
+      data && (
+        <div class="mt-8 space-y-10">
+          {viewerIsStaff && staffMetrics && activeSlug && (
+            <StaffCourseManagement
+              metrics={staffMetrics}
+              courseSlug={activeSlug}
+              courseCode={data.course.data.code}
+              range={range}
             />
-          </div>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-semibold">Recent quiz attempts</h2>
-          {data.quizAttempts.length > 0 ? (
-            <ul class="mt-4 divide-y divide-slate-200 rounded border border-slate-200">
-              {data.quizAttempts.slice(0, 20).map((a) => (
-                <li class="flex items-baseline justify-between px-4 py-3">
-                  <a href={`/practice/${a.quiz_slug}`} class="text-accent underline">
-                    {a.quiz_slug}
-                  </a>
-                  <span class="text-sm text-ink-muted">
-                    {a.score} / {a.max_score} · {new Date(a.submitted_at).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="mt-2 text-ink-muted">No quiz attempts in this course yet.</p>
           )}
-        </section>
-      </div>
-    )}
+          {data.enrolledSemester === null && (
+            <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+              <p>
+                <strong>Browse mode.</strong> You're not enrolled in this
+                course. You can read lessons and try the practice quizzes, but
+                enrollment-only features (proctored quizzes, instructor support,
+                roster-scoped exam administrations) won't appear until your
+                instructor adds you to the roster.
+              </p>
+            </div>
+          )}
+          <CourseHeaderCard
+            course={data.course}
+            instructors={data.instructors}
+            enrolledSemester={data.enrolledSemester}
+            stats={data.stats}
+          />
 
-    {!data && availableCourses.length === 0 && (
-      <div class="mt-10 rounded border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900">
-        <p class="font-medium">You don't have any active courses yet.</p>
-        <p class="mt-2">
-          Once your instructor enrolls you, or once you start a lesson or
-          quiz, your course-scoped progress will appear here. Browse the
-          available courses from the navigation above to get started.
-        </p>
-      </div>
-    )}
+          <section>
+            <h2 class="text-xl font-semibold">Lessons</h2>
+            <div class="mt-4">
+              <LessonProgressList
+                lessons={data.lessons}
+                progressBySlug={data.progressBySlug}
+              />
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-semibold">Recent quiz attempts</h2>
+            {data.quizAttempts.length > 0 ? (
+              <ul class="mt-4 divide-y divide-slate-200 rounded border border-slate-200">
+                {data.quizAttempts.slice(0, 20).map((a) => (
+                  <li class="flex items-baseline justify-between px-4 py-3">
+                    <a
+                      href={`/practice/${a.quiz_slug}`}
+                      class="text-accent underline"
+                    >
+                      {a.quiz_slug}
+                    </a>
+                    <span class="text-sm text-ink-muted">
+                      {a.score} / {a.max_score} ·{' '}
+                      {new Date(a.submitted_at).toLocaleDateString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="mt-2 text-ink-muted">
+                No quiz attempts in this course yet.
+              </p>
+            )}
+          </section>
+        </div>
+      )
+    }
+
+    {
+      !data && availableCourses.length === 0 && (
+        <div class="mt-10 rounded border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900">
+          <p class="font-medium">You don't have any active courses yet.</p>
+          <p class="mt-2">
+            Once your instructor enrolls you, or once you start a lesson or
+            quiz, your course-scoped progress will appear here. Browse the
+            available courses from the navigation above to get started.
+          </p>
+        </div>
+      )
+    }
 
     <section class="mt-12 border-t border-slate-200 pt-6">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
         Account
       </h2>
       <p class="mt-3 text-sm">
-        <a class="text-red-700 underline" href="/account/delete">Delete my account</a>
-        <span class="ml-2 text-ink-muted">— permanently removes your data.</span>
+        <a class="text-red-700 underline" href="/account/delete"
+          >Delete my account</a
+        >
+        <span class="ml-2 text-ink-muted">— permanently removes your data.</span
+        >
       </p>
     </section>
   </div>

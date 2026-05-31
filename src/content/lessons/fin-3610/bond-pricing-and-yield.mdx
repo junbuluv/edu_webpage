@@ -1,18 +1,18 @@
 ---
-title: "Bond Pricing and Yield to Maturity"
+title: 'Bond Pricing and Yield to Maturity'
 course: fin-3610
-unit: "Time, money, and interest rates"
+unit: 'Time, money, and interest rates'
 order: 8
-summary: "Pricing coupon and zero-coupon bonds as the PV of their cash flows; defining YTM as the IRR of a bond; the price-yield curve, duration, and convexity."
+summary: 'Pricing coupon and zero-coupon bonds as the PV of their cash flows; defining YTM as the IRR of a bond; the price-yield curve, duration, and convexity.'
 learningObjectives:
-  - "Price a coupon bond given coupon rate, face value, maturity, and YTM."
+  - 'Price a coupon bond given coupon rate, face value, maturity, and YTM.'
   - "Compute YTM given a bond's price."
-  - "Use modified duration to approximate price changes from yield changes."
+  - 'Use modified duration to approximate price changes from yield changes.'
 prerequisites:
-  - "Annuity and TVM formulas (prior two lessons)."
+  - 'Annuity and TVM formulas (prior two lessons).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 6", "bonds", "duration"]
-quizSlug: "fin-3610-bond-pricing-and-yield"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 6', 'bonds', 'duration']
+quizSlug: 'fin-3610-bond-pricing-and-yield'
 draft: false
 ---
 
@@ -49,16 +49,16 @@ spreadsheet's RATE function.
 
 ## Three regimes
 
-| Coupon vs YTM | Price vs Face | Name |
-|---|---|---|
-| $c > y$ | $P > F$ | trading at a **premium** |
-| $c = y$ | $P = F$ | trading at **par** |
-| $c < y$ | $P < F$ | trading at a **discount** |
+| Coupon vs YTM | Price vs Face | Name                      |
+| ------------- | ------------- | ------------------------- |
+| $c > y$       | $P > F$       | trading at a **premium**  |
+| $c = y$       | $P = F$       | trading at **par**        |
+| $c < y$       | $P < F$       | trading at a **discount** |
 
 A bond issued at par at a 5% coupon, then yields rise to 7%: the price
 falls below par. Why would anyone pay par for a 5% coupon when the
 market wants 7%? They wouldn't — so the price drops to make the
-*total* return (coupons + capital gain at maturity) equal 7%.
+_total_ return (coupons + capital gain at maturity) equal 7%.
 
 <Figure
   src="/figures/fin-3610/bond-pricing-and-yield/dgs10-vs-dgs2-1976-2024.png"
@@ -116,7 +116,7 @@ holdings fell sharply, eroding their capital.
 
 ## Why convexity matters
 
-Modified duration is a *linear* approximation. For small yield
+Modified duration is a _linear_ approximation. For small yield
 moves it's accurate; for large moves, the price-yield curve is
 visibly bent, so the linear approximation under-estimates how much
 price falls when yields rise and how much it gains when yields

@@ -35,8 +35,7 @@ const params = { a: 800, b: 40, g: 1.5, m: 0.4, c: 0.05 };
 
 function solve(s: State) {
   const { a, b, g, m, c } = params;
-  const P =
-    (c * a + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
+  const P = (c * a + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
   const Y = a - b * P + g * s.G + m * s.M;
   return { Y, P };
 }
@@ -268,7 +267,12 @@ export default function ADASChart() {
         </ResponsiveContainer>
 
         <DragHandle label="AD" color="#2563eb" top="25%" onDrag={onDragAD} />
-        <DragHandle label="SRAS" color="#dc2626" top="60%" onDrag={onDragSRAS} />
+        <DragHandle
+          label="SRAS"
+          color="#dc2626"
+          top="60%"
+          onDrag={onDragSRAS}
+        />
       </div>
 
       {/* Pin & compare + share */}
@@ -320,8 +324,8 @@ export default function ADASChart() {
 
       <p className="mt-4 text-xs text-ink-muted">
         Short-run AD-AS. AD slopes down in (Y, P); SRAS slopes up around Yₙ.
-        Demand shocks shift AD; supply shocks change Pᵉ or Yₙ. Drag the AD
-        or SRAS pill on the right edge, use sliders, or pick a preset.
+        Demand shocks shift AD; supply shocks change Pᵉ or Yₙ. Drag the AD or
+        SRAS pill on the right edge, use sliders, or pick a preset.
       </p>
     </div>
   );

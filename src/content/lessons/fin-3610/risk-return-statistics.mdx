@@ -1,18 +1,18 @@
 ---
-title: "Risk and Return Statistics"
+title: 'Risk and Return Statistics'
 course: fin-3610
-unit: "Risk and return"
+unit: 'Risk and return'
 order: 15
-summary: "Expected return, variance, covariance, and correlation of asset returns; historical evidence on equity vs bond returns; why diversification reduces risk without reducing expected return."
+summary: 'Expected return, variance, covariance, and correlation of asset returns; historical evidence on equity vs bond returns; why diversification reduces risk without reducing expected return.'
 learningObjectives:
-  - "Compute expected return, variance, covariance, and correlation from return data."
-  - "Cite the historical excess return of US equities over Treasuries."
-  - "Distinguish systematic risk from idiosyncratic risk and explain why only systematic risk is priced."
+  - 'Compute expected return, variance, covariance, and correlation from return data.'
+  - 'Cite the historical excess return of US equities over Treasuries.'
+  - 'Distinguish systematic risk from idiosyncratic risk and explain why only systematic risk is priced.'
 prerequisites:
-  - "Basic probability: mean, variance, expectation."
+  - 'Basic probability: mean, variance, expectation.'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 10", "risk", "return", "diversification"]
-quizSlug: "fin-3610-risk-return-statistics"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 10', 'risk', 'return', 'diversification']
+quizSlug: 'fin-3610-risk-return-statistics'
 draft: false
 ---
 
@@ -60,13 +60,13 @@ Covariance normalized to $[-1, 1]$.
 
 Compounded annual real returns (in 2024 dollars):
 
-| Asset class | Mean return | Std dev |
-|---|---|---|
-| Treasury bills (cash) | ~0.5% | ~3.5% |
-| Treasury bonds (10y) | ~2.5% | ~10% |
-| Corporate bonds (investment grade) | ~3.5% | ~9% |
-| Large-cap stocks (S&P 500) | ~7.5% | ~17% |
-| Small-cap stocks | ~9% | ~22% |
+| Asset class                        | Mean return | Std dev |
+| ---------------------------------- | ----------- | ------- |
+| Treasury bills (cash)              | ~0.5%       | ~3.5%   |
+| Treasury bonds (10y)               | ~2.5%       | ~10%    |
+| Corporate bonds (investment grade) | ~3.5%       | ~9%     |
+| Large-cap stocks (S&P 500)         | ~7.5%       | ~17%    |
+| Small-cap stocks                   | ~9%         | ~22%    |
 
 The **equity risk premium** — the expected excess return of stocks
 over T-bills — has averaged 5-7% over the long run. It's compensation
@@ -75,7 +75,7 @@ for bearing the risk shown in the standard-deviation column.
 A useful framing: the average annual return of US stocks is around
 10% nominal. In any single year that average is almost never the
 realization — annual returns range from -40% to +50% in the historical
-record. The 10% is what you earn *on average over decades*, not next
+record. The 10% is what you earn _on average over decades_, not next
 year.
 
 <BarFigure
@@ -108,7 +108,7 @@ Combine two assets with weights $w_1$ and $w_2 = 1 - w_1$:
 - Portfolio variance: $\sigma_p^2 = w_1^2 \sigma_1^2 + w_2^2 \sigma_2^2 + 2 w_1 w_2 \sigma_1 \sigma_2 \rho_{12}$.
 
 That last term is the key. If $\rho_{12} < 1$ (the assets aren't
-perfectly correlated), portfolio variance is *less* than the weighted
+perfectly correlated), portfolio variance is _less_ than the weighted
 average of individual variances. The lower the correlation, the
 bigger the variance reduction. At $\rho_{12} = -1$, you can construct
 a portfolio with zero variance.
@@ -132,7 +132,7 @@ In a well-diversified portfolio, idiosyncratic risk averages to
 roughly zero (some firms have good idiosyncratic surprises, some
 bad — they cancel). Only systematic risk remains.
 
-This decomposition matters for pricing. Investors should *not* be
+This decomposition matters for pricing. Investors should _not_ be
 compensated for bearing risk they could have eliminated for free
 through diversification. So only systematic risk is priced. That's
 the foundation for CAPM, two lessons from now.
@@ -143,6 +143,7 @@ Two stocks: A has $E[R_A] = 12\%$, $\sigma_A = 30\%$. B has $E[R_B]
 = 8\%$, $\sigma_B = 20\%$. Correlation $\rho_{AB} = 0.3$.
 
 50/50 portfolio:
+
 - $E[R_p] = 0.5 \times 12 + 0.5 \times 8 = 10\%$ (linear).
 - $\sigma_p^2 = 0.25 \times 900 + 0.25 \times 400 + 2 \times 0.25 \times 30 \times 20 \times 0.3 = 325$
 - $\sigma_p = \sqrt{325} \approx 18\%$ (less than 25%, the average).
@@ -151,6 +152,7 @@ You got an average return at less-than-average risk. That's
 diversification at work.
 
 If $\rho_{AB}$ had been 1.0 instead of 0.3:
+
 - $\sigma_p = 0.5 \times 30 + 0.5 \times 20 = 25\%$.
 
 No diversification benefit when correlations are perfect.
@@ -166,5 +168,5 @@ total variance — much higher than what CAPM prescribes. Empirically,
 investors do diversify (most retail investors via index funds;
 institutional investors via mandate); the assumption is reasonable.
 
-Next lesson: the systematic framework for choosing *which* portfolio
+Next lesson: the systematic framework for choosing _which_ portfolio
 to hold.

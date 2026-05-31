@@ -18,7 +18,10 @@ interface Options {
  * Intended for chart-driven values (slider -> equilibrium price, for
  * example) so the chart doesn't snap when the student moves a control.
  */
-export function useAnimatedValue(target: number, options: Options = {}): number {
+export function useAnimatedValue(
+  target: number,
+  options: Options = {},
+): number {
   const {
     durationMs = 250,
     easing = easeOutCubic,

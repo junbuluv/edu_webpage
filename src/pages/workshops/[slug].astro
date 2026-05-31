@@ -51,9 +51,14 @@ const myAttempts = canView
       .select('administration_id, stamped_at')
       .eq('user_id', user.id)
   : { data: [] };
-const stampedSet = new Set((myAttempts.data ?? []).map((a) => a.administration_id));
+const stampedSet = new Set(
+  (myAttempts.data ?? []).map((a) => a.administration_id),
+);
 
-function statusOf(opens: string, closes: string): 'open' | 'upcoming' | 'closed' {
+function statusOf(
+  opens: string,
+  closes: string,
+): 'open' | 'upcoming' | 'closed' {
   const now = Date.now();
   if (now < Date.parse(opens)) return 'upcoming';
   if (now > Date.parse(closes)) return 'closed';
@@ -69,105 +74,127 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     <p class="text-xs uppercase tracking-wide text-accent font-medium">
       {workshop.data.course} · Workshop
     </p>
-    <h1 class="mt-1 text-3xl font-semibold tracking-tight">{workshop.data.title}</h1>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">
+      {workshop.data.title}
+    </h1>
     <p class="mt-3 text-ink-muted">{workshop.data.summary}</p>
 
-    {!canView && (
-      <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-        <p class="font-medium">You're not enrolled in this course.</p>
-        <p class="mt-2">
-          Workshop attendance is only available to enrolled students. Ask
-          your instructor to add you to the roster.
-        </p>
-      </div>
-    )}
+    {
+      !canView && (
+        <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+          <p class="font-medium">You're not enrolled in this course.</p>
+          <p class="mt-2">
+            Workshop attendance is only available to enrolled students. Ask your
+            instructor to add you to the roster.
+          </p>
+        </div>
+      )
+    }
 
-    {canView && !enrolled && viewerIsAdmin && (
-      <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
-        <strong>Admin view.</strong> You're viewing this page without being enrolled. Stamping is not available without enrollment.
-      </div>
-    )}
+    {
+      canView && !enrolled && viewerIsAdmin && (
+        <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
+          <strong>Admin view.</strong> You're viewing this page without being
+          enrolled. Stamping is not available without enrollment.
+        </div>
+      )
+    }
 
-    {canView && (admins ?? []).length === 0 && (
-      <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
-        <p>
-          <strong>No workshop sessions are scheduled right now.</strong>{' '}
-          {courseUsesSections
-            ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
-            : 'Your instructor will open a workshop window each week.'}{' '}
-          Come back during class time.
-        </p>
-      </div>
-    )}
+    {
+      canView && (admins ?? []).length === 0 && (
+        <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
+          <p>
+            <strong>No workshop sessions are scheduled right now.</strong>{' '}
+            {courseUsesSections
+              ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
+              : 'Your instructor will open a workshop window each week.'}{' '}
+            Come back during class time.
+          </p>
+        </div>
+      )
+    }
 
-    {canView && (admins?.length ?? 0) > 0 && (
-      <section class="mt-10">
-        <h2 class="text-xl font-semibold">
-          {courseUsesSections ? "This week's sections" : "This week's workshop"}
-        </h2>
-        <p class="mt-1 text-sm text-ink-muted">
-          {courseUsesSections
-            ? <>Stamp in for <em>your</em> section once you're physically in the room.</>
-            : <>Stamp in once you're physically in the room.</>}
-        </p>
-        <ul class="mt-4 space-y-3">
-          {(admins ?? []).map((a) => {
-            const status = statusOf(a.opens_at, a.closes_at);
-            const alreadyStamped = stampedSet.has(a.id);
-            return (
-              <li class="rounded-lg border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-medium">
-                      {a.section ? <>Section {a.section} · </> : null}
-                      week of {new Date(a.week_of).toLocaleDateString()}
-                    </p>
-                    <p class="mt-1 text-xs text-ink-muted">
-                      Open {new Date(a.opens_at).toLocaleString()} — closes{' '}
-                      {new Date(a.closes_at).toLocaleString()}
-                    </p>
-                    {a.notes && <p class="mt-1 text-xs text-ink-muted">{a.notes}</p>}
+    {
+      canView && (admins?.length ?? 0) > 0 && (
+        <section class="mt-10">
+          <h2 class="text-xl font-semibold">
+            {courseUsesSections
+              ? "This week's sections"
+              : "This week's workshop"}
+          </h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            {courseUsesSections ? (
+              <>
+                Stamp in for <em>your</em> section once you're physically in the
+                room.
+              </>
+            ) : (
+              <>Stamp in once you're physically in the room.</>
+            )}
+          </p>
+          <ul class="mt-4 space-y-3">
+            {(admins ?? []).map((a) => {
+              const status = statusOf(a.opens_at, a.closes_at);
+              const alreadyStamped = stampedSet.has(a.id);
+              return (
+                <li class="rounded-lg border border-slate-200 p-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <p class="text-sm font-medium">
+                        {a.section ? <>Section {a.section} · </> : null}
+                        week of {new Date(a.week_of).toLocaleDateString()}
+                      </p>
+                      <p class="mt-1 text-xs text-ink-muted">
+                        Open {new Date(a.opens_at).toLocaleString()} — closes{' '}
+                        {new Date(a.closes_at).toLocaleString()}
+                      </p>
+                      {a.notes && (
+                        <p class="mt-1 text-xs text-ink-muted">{a.notes}</p>
+                      )}
+                    </div>
+                    <span
+                      class={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold uppercase ${
+                        status === 'open'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : status === 'upcoming'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {status}
+                    </span>
                   </div>
-                  <span
-                    class={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold uppercase ${
-                      status === 'open'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : status === 'upcoming'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {status}
-                  </span>
-                </div>
-                <div class="mt-3">
-                  {alreadyStamped ? (
-                    <p class="rounded border border-emerald-300 bg-emerald-50 p-2 text-sm text-emerald-900">
-                      ✓ You're already stamped in for this section. Discussion
-                      questions appear once your instructor reveals them in
-                      class.
-                    </p>
-                  ) : status === 'open' ? (
-                    <StampInButton
-                      client:load
-                      administrationId={a.id}
-                      section={a.section ?? null}
-                      requiredLat={a.required_lat}
-                      requiredLng={a.required_lng}
-                      requiredRadiusMeters={a.required_radius_meters}
-                    />
-                  ) : status === 'upcoming' ? (
-                    <p class="text-sm text-ink-muted">Stamping opens at the start time above.</p>
-                  ) : (
-                    <p class="text-sm text-ink-muted">Window closed.</p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    )}
+                  <div class="mt-3">
+                    {alreadyStamped ? (
+                      <p class="rounded border border-emerald-300 bg-emerald-50 p-2 text-sm text-emerald-900">
+                        ✓ You're already stamped in for this section. Discussion
+                        questions appear once your instructor reveals them in
+                        class.
+                      </p>
+                    ) : status === 'open' ? (
+                      <StampInButton
+                        client:load
+                        administrationId={a.id}
+                        section={a.section ?? null}
+                        requiredLat={a.required_lat}
+                        requiredLng={a.required_lng}
+                        requiredRadiusMeters={a.required_radius_meters}
+                      />
+                    ) : status === 'upcoming' ? (
+                      <p class="text-sm text-ink-muted">
+                        Stamping opens at the start time above.
+                      </p>
+                    ) : (
+                      <p class="text-sm text-ink-muted">Window closed.</p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )
+    }
 
     <p class="mt-12 text-xs text-ink-muted">
       Stamping records your location and links the attendance to your own

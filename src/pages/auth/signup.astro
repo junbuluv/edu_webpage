@@ -23,16 +23,18 @@ const allowedList = allowedDomainsHumanList();
       For Baruch College students, faculty, and staff.
     </p>
     <p class="text-sm text-ink-muted mb-6">
-      Use your Baruch email. If the confirmation email doesn't arrive
-      (CUNY's spam filter sometimes blocks it), you can sign up with a
-      personal Gmail instead. Accepted: <strong>{allowedList}</strong>.
+      Use your Baruch email. If the confirmation email doesn't arrive (CUNY's
+      spam filter sometimes blocks it), you can sign up with a personal Gmail
+      instead. Accepted: <strong>{allowedList}</strong>.
     </p>
 
-    {error && (
-      <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-        {decodeURIComponent(error)}
-      </div>
-    )}
+    {
+      error && (
+        <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          {decodeURIComponent(error)}
+        </div>
+      )
+    }
 
     <form method="POST" action="/api/auth/signup" class="space-y-4">
       <input type="hidden" name="next" value={next} />
@@ -73,7 +75,10 @@ const allowedList = allowedDomainsHumanList();
 
     <p class="mt-6 text-sm text-ink-muted">
       Already have one?
-      <a class="text-accent underline" href={`/auth/signin?next=${encodeURIComponent(next)}`}>Sign in</a>
+      <a
+        class="text-accent underline"
+        href={`/auth/signin?next=${encodeURIComponent(next)}`}>Sign in</a
+      >
     </p>
   </div>
 </BaseLayout>

@@ -12,16 +12,21 @@ const error = Astro.url.searchParams.get('error');
       Enter the email you signed up with and we'll send a reset link.
     </p>
 
-    {sent && (
-      <div class="mt-6 rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
-        If an account exists for <strong>{decodeURIComponent(sent)}</strong>, a reset email has been sent.
-      </div>
-    )}
-    {error && (
-      <div class="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-        {decodeURIComponent(error)}
-      </div>
-    )}
+    {
+      sent && (
+        <div class="mt-6 rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
+          If an account exists for <strong>{decodeURIComponent(sent)}</strong>,
+          a reset email has been sent.
+        </div>
+      )
+    }
+    {
+      error && (
+        <div class="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          {decodeURIComponent(error)}
+        </div>
+      )
+    }
 
     <form method="POST" action="/api/auth/forgot" class="mt-6 space-y-4">
       <label class="block">

@@ -48,14 +48,22 @@ export default function BarFigure({
         style={{ width: '100%', height }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
+          <BarChart
+            data={data}
+            margin={{ top: 16, right: 24, left: 8, bottom: 8 }}
+          >
             <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
             <XAxis dataKey={xKey} fontSize={11} />
             <YAxis
               fontSize={11}
               label={
                 yAxisLabel
-                  ? { value: yAxisLabel, angle: -90, position: 'insideLeft', fontSize: 11 }
+                  ? {
+                      value: yAxisLabel,
+                      angle: -90,
+                      position: 'insideLeft',
+                      fontSize: 11,
+                    }
                   : undefined
               }
             />
@@ -79,7 +87,12 @@ export default function BarFigure({
             <span className="mt-1 block italic">
               Source:{' '}
               {creditHref ? (
-                <a href={creditHref} className="underline" rel="noopener" target="_blank">
+                <a
+                  href={creditHref}
+                  className="underline"
+                  rel="noopener"
+                  target="_blank"
+                >
                   {credit}
                 </a>
               ) : (

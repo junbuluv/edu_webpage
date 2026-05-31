@@ -1,18 +1,18 @@
 ---
-title: "Estimating the Cost of Capital"
+title: 'Estimating the Cost of Capital'
 course: fin-3610
-unit: "Risk and return"
+unit: 'Risk and return'
 order: 18
-summary: "Practical recipes for estimating the cost of equity (via CAPM with realistic inputs), the after-tax cost of debt, and how to choose project-specific vs firm-wide discount rates."
+summary: 'Practical recipes for estimating the cost of equity (via CAPM with realistic inputs), the after-tax cost of debt, and how to choose project-specific vs firm-wide discount rates.'
 learningObjectives:
-  - "Estimate cost of equity from CAPM with realistic input choices."
-  - "Estimate the pre-tax and after-tax cost of debt from current market yields."
-  - "Adjust for project-specific risk vs firm-wide risk in capital budgeting."
+  - 'Estimate cost of equity from CAPM with realistic input choices.'
+  - 'Estimate the pre-tax and after-tax cost of debt from current market yields.'
+  - 'Adjust for project-specific risk vs firm-wide risk in capital budgeting.'
 prerequisites:
-  - "CAPM (prior lesson)."
+  - 'CAPM (prior lesson).'
 estimatedMinutes: 25
-tags: ["fin-3610", "Berk-DeMarzo Ch 12", "cost of capital", "WACC"]
-quizSlug: "fin-3610-cost-of-capital"
+tags: ['fin-3610', 'Berk-DeMarzo Ch 12', 'cost of capital', 'WACC']
+quizSlug: 'fin-3610-cost-of-capital'
 draft: false
 ---
 
@@ -54,12 +54,12 @@ real and you need to include it.
 
 **Pick a defensible market risk premium.** Three common approaches:
 
-1. *Historical*: long-run average of stock returns minus T-bill.
+1. _Historical_: long-run average of stock returns minus T-bill.
    ~5-7% for US.
-2. *Implied*: solve a multi-stage DDM with current S&P 500 price
+2. _Implied_: solve a multi-stage DDM with current S&P 500 price
    and consensus earnings/dividends for the discount rate that makes
    them consistent. Tends to give 4-6%.
-3. *Survey*: ask CFOs or finance professionals. CFO surveys (Duke)
+3. _Survey_: ask CFOs or finance professionals. CFO surveys (Duke)
    typically yield 5-6%.
 
 Most finance practitioners settle on 5-6% as a working assumption.
@@ -93,7 +93,7 @@ horizon). That's the rate the market currently demands for the
 firm's credit risk.
 
 **2. Synthetic rating + spread table.** If the firm doesn't have
-public debt, estimate what rating it *would* get based on coverage
+public debt, estimate what rating it _would_ get based on coverage
 ratios and leverage, then add the typical spread for that rating to
 the Treasury benchmark. Damodaran (NYU Stern) publishes a synthetic-
 rating table widely used in practice.
@@ -122,7 +122,7 @@ reduced by the tax shield. WACC always uses the after-tax rate.
 
 ## Project risk vs firm risk
 
-If you're using the firm's WACC to discount a *project*, you're
+If you're using the firm's WACC to discount a _project_, you're
 implicitly assuming the project has the same risk as the average of
 the firm's existing assets. This is right for projects that look
 like the firm's main business. It's wrong when:
@@ -150,12 +150,14 @@ Estimate cost of capital for a hypothetical mid-cap industrial
 manufacturer.
 
 **Cost of equity**:
+
 - $R_f$ = 4.2% (10-year Treasury).
 - MRP = 5.5%.
 - Beta = 1.1 (from FactSet, 60-month regression).
 - $r_E = 4.2 + 1.1 \times 5.5 = 4.2 + 6.05 = 10.25\%$.
 
 **Cost of debt**:
+
 - Existing 10-year bonds trade at 6.0% YTM.
 - Tax rate 25%.
 - $r_D^{\text{after-tax}} = 6.0 \times (1 - 0.25) = 4.5\%$.
@@ -167,7 +169,7 @@ bond-portfolio pricing.
 ## What's hard
 
 The single biggest source of error in cost-of-capital estimation is
-*not* the formulas — they're trivial — but the input choices.
+_not_ the formulas — they're trivial — but the input choices.
 Sensitivity-test every estimate. If your DCF says \$50 per share at
 10% WACC and \$30 per share at 11%, the dispersion in plausible WACC
 estimates is meaningful. Present a range, not a point.

@@ -5,7 +5,9 @@
 import { hmacPIIHex } from './crypto/pii';
 import { getAdminClient } from './supabase/admin';
 
-export async function findProfileIdByEmail(email: string): Promise<string | null> {
+export async function findProfileIdByEmail(
+  email: string,
+): Promise<string | null> {
   const supabase = getAdminClient();
   const { data, error } = await supabase
     .from('profiles')

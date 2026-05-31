@@ -42,7 +42,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const courseUsesSections = COURSES_WITH_SECTIONS.has(courseSlug);
   const section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null = courseUsesSections
-    ? (SECTIONS.has(rawSection) ? (rawSection as 'CML' | 'CTL' | 'CWL' | 'CRL') : null)
+    ? SECTIONS.has(rawSection)
+      ? (rawSection as 'CML' | 'CTL' | 'CWL' | 'CRL')
+      : null
     : null;
   if (courseUsesSections && section == null) {
     return errorRedirect(workshopSlug, 'invalid_input');
@@ -71,7 +73,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     closes_at: new Date(closesAt).toISOString(),
     required_lat: BARUCH_55_LEX.lat,
     required_lng: BARUCH_55_LEX.lng,
-    required_radius_meters: Number.isFinite(radius) ? Math.max(10, Math.floor(radius)) : 200,
+    required_radius_meters: Number.isFinite(radius)
+      ? Math.max(10, Math.floor(radius))
+      : 200,
     notes,
   });
 
@@ -92,7 +96,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 // the error encoded in the query string. Falls back to the workshops
 // index if the slug is missing (which can only happen on a malformed
 // request).
-function errorRedirect(workshopSlug: string, reason: string, detail?: string): Response {
+function errorRedirect(
+  workshopSlug: string,
+  reason: string,
+  detail?: string,
+): Response {
   const target = workshopSlug
     ? `/instructor/workshops/${workshopSlug}`
     : '/instructor/workshops';

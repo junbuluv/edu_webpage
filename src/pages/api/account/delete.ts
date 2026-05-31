@@ -8,7 +8,9 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (!locals.user) return redirect('/auth/signin?next=/account/delete');
 
   const form = await request.formData();
-  const confirm = String(form.get('confirm') ?? '').trim().toLowerCase();
+  const confirm = String(form.get('confirm') ?? '')
+    .trim()
+    .toLowerCase();
   if (confirm !== CONFIRM_PHRASE) {
     return redirect(
       `/account/delete?error=${encodeURIComponent(

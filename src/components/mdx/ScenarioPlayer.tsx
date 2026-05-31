@@ -13,7 +13,10 @@ export interface Stage<S extends StageState = StageState> {
 interface Props<S extends StageState = StageState> {
   stages: Stage<S>[];
   /** Renders the chart for the currently-interpolated state. */
-  render: (state: S, info: { stageIndex: number; isPlaying: boolean }) => ReactNode;
+  render: (
+    state: S,
+    info: { stageIndex: number; isPlaying: boolean },
+  ) => ReactNode;
   /** Transition duration between stages (ms). Default 600. */
   transitionMs?: number;
   /** When playing, how long to dwell on each stage after the transition (ms). Default 1200. */
@@ -141,9 +144,15 @@ export default function ScenarioPlayer<S extends StageState>({
 
   return (
     <section className="my-6 rounded-lg border border-slate-200 bg-white p-4">
-      {title && <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">{title}</h3>}
+      {title && (
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+          {title}
+        </h3>
+      )}
 
-      <div className="mt-2">{render(displayState, { stageIndex, isPlaying })}</div>
+      <div className="mt-2">
+        {render(displayState, { stageIndex, isPlaying })}
+      </div>
 
       {current.caption && (
         <p className="mt-3 rounded bg-slate-50 px-3 py-2 text-sm">

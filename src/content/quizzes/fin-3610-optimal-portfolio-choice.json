@@ -57,10 +57,7 @@
         "Markets are perfectly efficient",
         "Returns are heavily skewed with fat tails"
       ],
-      "correctIndices": [
-        0,
-        1
-      ],
+      "correctIndices": [0, 1],
       "explanation": "Normal returns OR quadratic utility makes mean-variance fully sufficient. Fat tails and skewness violate the framework's assumptions; market efficiency is unrelated to this question.",
       "points": 2
     }

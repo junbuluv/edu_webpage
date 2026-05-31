@@ -29,7 +29,11 @@ const healthy: StudentSignals = {
 test('countDistinctQuizzes counts unique slugs', () => {
   assert.equal(countDistinctQuizzes([]), 0);
   assert.equal(
-    countDistinctQuizzes([{ quiz_slug: 'a' }, { quiz_slug: 'a' }, { quiz_slug: 'b' }]),
+    countDistinctQuizzes([
+      { quiz_slug: 'a' },
+      { quiz_slug: 'a' },
+      { quiz_slug: 'b' },
+    ]),
     2,
   );
 });
@@ -46,7 +50,10 @@ test('bestScoreByQuiz keeps the highest fraction per quiz and skips max_score<=0
 
 test('computeAvgBestScore averages per-quiz bests, null when nothing scorable', () => {
   assert.equal(computeAvgBestScore([]), null);
-  assert.equal(computeAvgBestScore([{ quiz_slug: 'a', score: 1, max_score: 0 }]), null);
+  assert.equal(
+    computeAvgBestScore([{ quiz_slug: 'a', score: 1, max_score: 0 }]),
+    null,
+  );
   // best(a)=0.9, best(b)=0.5 -> avg 0.7
   assert.equal(
     computeAvgBestScore([
@@ -66,7 +73,14 @@ test('healthy student is not at risk', () => {
 
 test('rule 1: no activity at all is flagged', () => {
   const r = evaluateRisk(
-    { ...healthy, lessonStartedCount: 0, quizAttemptCount: 0, attendanceCount: 0, lastActiveAt: null, avgBestScore: null },
+    {
+      ...healthy,
+      lessonStartedCount: 0,
+      quizAttemptCount: 0,
+      attendanceCount: 0,
+      lastActiveAt: null,
+      avgBestScore: null,
+    },
     { closedWindowCount: 0, nowMs: NOW },
   );
   assert.equal(r.atRisk, true);
@@ -86,14 +100,20 @@ test('rule 2: inactive AND behind is flagged; either alone is not', () => {
     { ...healthy, lessonsCompleted: 8, lastActiveAt: daysAgo(20) },
     { closedWindowCount: 0, nowMs: NOW },
   );
-  assert.equal(inactiveOnly.reasons.some((x) => x.startsWith('Inactive')), false);
+  assert.equal(
+    inactiveOnly.reasons.some((x) => x.startsWith('Inactive')),
+    false,
+  );
 
   // behind but recently active (2d) -> rule 2 silent
   const behindOnly = evaluateRisk(
     { ...healthy, lessonsCompleted: 2, lastActiveAt: daysAgo(2) },
     { closedWindowCount: 0, nowMs: NOW },
   );
-  assert.equal(behindOnly.reasons.some((x) => x.startsWith('Inactive')), false);
+  assert.equal(
+    behindOnly.reasons.some((x) => x.startsWith('Inactive')),
+    false,
+  );
 });
 
 test('rule 2 boundary: exactly inactiveDays is not yet inactive (strict >)', () => {
@@ -101,14 +121,24 @@ test('rule 2 boundary: exactly inactiveDays is not yet inactive (strict >)', () 
     { ...healthy, lessonsCompleted: 1, lastActiveAt: daysAgo(14) },
     { closedWindowCount: 0, nowMs: NOW },
   );
-  assert.equal(r.reasons.some((x) => x.startsWith('Inactive')), false);
+  assert.equal(
+    r.reasons.some((x) => x.startsWith('Inactive')),
+    false,
+  );
 });
 
 test('rule 2 never renders "Infinity" when engaged but lastActiveAt is null', () => {
   // Quiz activity but no dated lesson activity: noActivity is false, so rule 2
   // is reachable with daysSinceActive = Infinity. The label must not say "Infinityd".
   const r = evaluateRisk(
-    { ...healthy, lessonsCompleted: 0, lessonStartedCount: 0, lastActiveAt: null, quizAttemptCount: 3, avgBestScore: 0.9 },
+    {
+      ...healthy,
+      lessonsCompleted: 0,
+      lessonStartedCount: 0,
+      lastActiveAt: null,
+      quizAttemptCount: 3,
+      avgBestScore: 0.9,
+    },
     { closedWindowCount: 0, nowMs: NOW },
   );
   assert.equal(
@@ -120,28 +150,32 @@ test('rule 2 never renders "Infinity" when engaged but lastActiveAt is null', ()
 
 test('rule 3: low quiz avg flagged below 60%, boundary 60% is not', () => {
   assert.ok(
-    evaluateRisk({ ...healthy, avgBestScore: 0.59 }, { closedWindowCount: 0, nowMs: NOW }).reasons.some(
-      (x) => x.startsWith('Low quiz avg'),
-    ),
+    evaluateRisk(
+      { ...healthy, avgBestScore: 0.59 },
+      { closedWindowCount: 0, nowMs: NOW },
+    ).reasons.some((x) => x.startsWith('Low quiz avg')),
   );
   assert.equal(
-    evaluateRisk({ ...healthy, avgBestScore: 0.6 }, { closedWindowCount: 0, nowMs: NOW }).reasons.some(
-      (x) => x.startsWith('Low quiz avg'),
-    ),
+    evaluateRisk(
+      { ...healthy, avgBestScore: 0.6 },
+      { closedWindowCount: 0, nowMs: NOW },
+    ).reasons.some((x) => x.startsWith('Low quiz avg')),
     false,
   );
 });
 
 test('rule 4: no attendance flagged only once a window has closed', () => {
   assert.ok(
-    evaluateRisk({ ...healthy, attendanceCount: 0 }, { closedWindowCount: 2, nowMs: NOW }).reasons.includes(
-      'No workshop attendance',
-    ),
+    evaluateRisk(
+      { ...healthy, attendanceCount: 0 },
+      { closedWindowCount: 2, nowMs: NOW },
+    ).reasons.includes('No workshop attendance'),
   );
   assert.equal(
-    evaluateRisk({ ...healthy, attendanceCount: 0 }, { closedWindowCount: 0, nowMs: NOW }).reasons.includes(
-      'No workshop attendance',
-    ),
+    evaluateRisk(
+      { ...healthy, attendanceCount: 0 },
+      { closedWindowCount: 0, nowMs: NOW },
+    ).reasons.includes('No workshop attendance'),
     false,
   );
 });

@@ -27,51 +27,72 @@ const avgPct =
 >
   <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-      <p class="text-xs uppercase tracking-wide font-medium" style={`color: ${course.data.accentColor};`}>
+      <p
+        class="text-xs uppercase tracking-wide font-medium"
+        style={`color: ${course.data.accentColor};`}
+      >
         {course.data.code}
       </p>
       <h2 class="mt-1 text-2xl font-semibold">{course.data.title}</h2>
-      <p class="mt-2 max-w-2xl text-sm text-ink-muted">{course.data.description}</p>
-      {(enrolledSemester || course.data.defaultSemester) && (
-        <p class="mt-2 text-xs text-ink-muted">
-          {enrolledSemester
-            ? `Enrolled • ${enrolledSemester}`
-            : `Reference semester: ${course.data.defaultSemester}`}
-        </p>
-      )}
+      <p class="mt-2 max-w-2xl text-sm text-ink-muted">
+        {course.data.description}
+      </p>
+      {
+        (enrolledSemester || course.data.defaultSemester) && (
+          <p class="mt-2 text-xs text-ink-muted">
+            {enrolledSemester
+              ? `Enrolled • ${enrolledSemester}`
+              : `Reference semester: ${course.data.defaultSemester}`}
+          </p>
+        )
+      }
     </div>
-    {instructors.length > 0 && (
-      <div class="text-right text-sm">
-        <p class="text-xs uppercase tracking-wide text-ink-muted">Instructor{instructors.length > 1 ? 's' : ''}</p>
-        <ul class="mt-1 space-y-0.5">
-          {instructors.map((i) => (
-            <li>
-              <a
-                class="text-accent underline"
-                href={`/${course.data.slug}/instructors/${i.slug}`}
-              >
-                {i.data.preferredName ?? i.data.fullName}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+    {
+      instructors.length > 0 && (
+        <div class="text-right text-sm">
+          <p class="text-xs uppercase tracking-wide text-ink-muted">
+            Instructor{instructors.length > 1 ? 's' : ''}
+          </p>
+          <ul class="mt-1 space-y-0.5">
+            {instructors.map((i) => (
+              <li>
+                <a
+                  class="text-accent underline"
+                  href={`/${course.data.slug}/instructors/${i.slug}`}
+                >
+                  {i.data.preferredName ?? i.data.fullName}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
   </div>
 
   <dl class="mt-6 grid grid-cols-3 gap-4">
     <div class="rounded bg-slate-50 p-3">
-      <dt class="text-xs uppercase tracking-wide text-ink-muted">Lessons completed</dt>
+      <dt class="text-xs uppercase tracking-wide text-ink-muted">
+        Lessons completed
+      </dt>
       <dd class="mt-1 text-xl font-semibold">
-        {stats.lessonsCompleted}<span class="text-base font-normal text-ink-muted"> / {stats.lessonsTotal}</span>
+        {stats.lessonsCompleted}<span
+          class="text-base font-normal text-ink-muted"
+        >
+          / {stats.lessonsTotal}</span
+        >
       </dd>
     </div>
     <div class="rounded bg-slate-50 p-3">
-      <dt class="text-xs uppercase tracking-wide text-ink-muted">Quizzes taken</dt>
+      <dt class="text-xs uppercase tracking-wide text-ink-muted">
+        Quizzes taken
+      </dt>
       <dd class="mt-1 text-xl font-semibold">{stats.quizzesTaken}</dd>
     </div>
     <div class="rounded bg-slate-50 p-3">
-      <dt class="text-xs uppercase tracking-wide text-ink-muted">Avg best score</dt>
+      <dt class="text-xs uppercase tracking-wide text-ink-muted">
+        Avg best score
+      </dt>
       <dd class="mt-1 text-xl font-semibold">{avgPct}</dd>
     </div>
   </dl>
