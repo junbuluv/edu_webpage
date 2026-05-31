@@ -1,6 +1,6 @@
 {
   "slug": "fin-3610-valuing-stocks",
-  "title": "Valuing stocks (DDM and FCFE)",
+  "title": "Valuing stocks: dividends, payouts, and free cash flow",
   "course": "fin-3610",
   "lessonSlug": "fin-3610/valuing-stocks",
   "passingScore": 0.7,
@@ -8,49 +8,73 @@
     {
       "type": "numeric",
       "id": "q1",
-      "prompt": "A stock will pay $4 in dividends next year, growing 4% forever. Cost of equity is 10%. Using the Gordon DDM, what is the fair value per share? Answer in dollars.",
+      "prompt": "A stock will pay $4 in dividends next year, growing 4% forever. Cost of equity is 10%. Using the Gordon growth model, what is the fair value per share? Answer in dollars.",
       "answer": 66.67,
       "tolerance": 0.5,
       "unit": "$",
-      "explanation": "P_0 = D_1 / (r_E - g) = 4 / (0.10 - 0.04) = 4 / 0.06 \u2248 66.67.",
+      "explanation": "P_0 = Div_1 / (r_E - g) = 4 / (0.10 - 0.04) = 4 / 0.06 ≈ 66.67.",
       "points": 1
     },
     {
       "type": "multiple_choice",
       "id": "q2",
-      "prompt": "Why does the Gordon DDM say a non-dividend-paying tech company is worth $0?",
+      "prompt": "A firm earns EPS_1 = $5 with cost of equity 10%. It is deciding whether to retain and reinvest some earnings. Reinvested funds would earn a 7% return. What does retaining do to the share price relative to paying everything out?",
       "choices": [
-        "Because the company actually is worthless",
-        "Because Gordon discounts dividends only \u2014 if D = 0 forever, the sum is 0. The result is wrong; the company isn't worthless, the model is the wrong tool",
-        "Because the cost of equity is too high",
-        "Because growth exceeds the discount rate"
+        "Raises it: any positive growth adds value",
+        "Lowers it: the reinvestment return (7%) is below the cost of equity (10%), so growth destroys value",
+        "Leaves it unchanged: payout policy never affects value",
+        "Raises it: retaining always funds higher future dividends"
       ],
       "correctIndex": 1,
-      "explanation": "Gordon's special-case assumption (constant D, growing at g) breaks when there are no dividends. Use FCFE \u2014 discounts the cash the firm *could* pay out, not what it does pay.",
+      "explanation": "Growth created by reinvesting below r_E destroys value. The no-growth benchmark is EPS_1/r_E = $50; reinvesting at 7% < 10% produces a price below $50, even though earnings grow.",
       "points": 1
     },
     {
-      "type": "multi_select",
+      "type": "numeric",
       "id": "q3",
-      "prompt": "When should you prefer FCFE over DDM for valuing equity?",
+      "prompt": "A firm reinvests 40% of its earnings (retention b = 0.40) at a return on new investment of 15%. What is its dividend growth rate g, in percent?",
+      "answer": 6,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "g = b × (return on new investment) = 0.40 × 0.15 = 0.06 = 6%.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "Apple returns far more cash through share repurchases than through dividends. What does this imply for valuing its equity with a pure dividend-discount model?",
       "choices": [
-        "Firm pays little or no dividend",
-        "Firm has stable, predictable dividend policy",
-        "Firm uses buybacks instead of dividends",
-        "You want results identical to DDM under any payout policy"
+        "Nothing: buybacks and dividends are valued the same way automatically",
+        "A pure DDM understates the equity, because it ignores the cash returned via repurchases; use the total-payout model",
+        "A pure DDM overstates the equity, because buybacks reduce shares",
+        "Buybacks make the stock worth zero under the DDM"
       ],
-      "correctIndices": [0, 2],
-      "explanation": "FCFE handles non-payers and buyback users correctly. DDM is fine for stable dividend policy; under 100% payout they're identical.",
-      "points": 2
+      "correctIndex": 1,
+      "explanation": "The DDM counts only per-share dividends. For a heavy repurchaser, that misses most of the cash returned. The total-payout model discounts dividends plus buybacks, then divides by shares.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "In the discounted free cash flow (enterprise) model, why are free cash flows discounted at the WACC rather than the cost of equity?",
+      "choices": [
+        "Because the WACC is always lower, giving a higher valuation",
+        "Because free cash flow belongs to all investors (debt and equity), so the discount rate must reflect both",
+        "Because equity is riskier than the firm's assets",
+        "Because the WACC already subtracts net debt"
+      ],
+      "correctIndex": 1,
+      "explanation": "FCF is the cash available to all capital providers before financing. Discounting at the WACC gives enterprise value; subtract net debt to get equity value.",
+      "points": 1
     },
     {
       "type": "numeric",
-      "id": "q4",
-      "prompt": "A multi-stage DDM: D_1 = $2, growing 12% per year for 5 years (so D_5 = $3.15), then 3% forever. r_E = 10%. What is the terminal value at end of year 5 (the Gordon TV at that date)? Answer in $.",
+      "id": "q6",
+      "prompt": "A multi-stage DDM: Div_1 = $2, growing 12% per year for 5 years (so Div_5 = $3.15), then 3% forever. r_E = 10%. What is the terminal value at the end of year 5 (the Gordon value at that date)? Answer in dollars.",
       "answer": 46.32,
       "tolerance": 0.5,
       "unit": "$",
-      "explanation": "D_6 = 3.15 \u00d7 1.03 = 3.24. TV_5 = D_6 / (r_E - g) = 3.24 / (0.10 - 0.03) = 3.24 / 0.07 \u2248 46.32.",
+      "explanation": "Div_6 = 3.15 × 1.03 = 3.24. TV_5 = Div_6 / (r_E - g_L) = 3.24 / (0.10 - 0.03) = 3.24 / 0.07 ≈ 46.32.",
       "points": 2
     }
   ],
@@ -58,7 +82,7 @@
     "title": "The Power of Expectations: Nvidia's Earnings and the Market Reaction",
     "url": "https://aswathdamodaran.blogspot.com/2024/09/the-expectations-game-aftermath-of.html",
     "source": "Damodaran's Musings on Markets blog",
-    "why": "Damodaran's own DCF on NVIDIA ($87 intrinsic vs $106 market) is a concrete, named practitioner's valuation of the central AI stock \u2014 not a textbook explainer.",
+    "why": "Damodaran's own DCF on NVIDIA ($87 intrinsic vs $106 market) is a concrete, named practitioner's valuation of the central AI stock, not a textbook explainer.",
     "date": "2024-09"
   }
 }
