@@ -79,11 +79,12 @@ durationMinutes: z.number().positive().optional(),
 
 Register `videos` in the exported `collections` object.
 
-**ECO-only enforcement:** the FIN archive page renders no video facet/section.
-Display is controlled by a course capability flag (e.g. `hasVideos` derived for
-`eco-1002`) rather than hard-coding, so it is not brittle. Open option to be
-confirmed during implementation: add a stricter schema
-`.refine(d => d.course === 'eco-1002')` to reject non-ECO videos at build time.
+**ECO-only enforcement (two layers):**
+1. Schema guard — `videos` carries `.refine(d => d.course === 'eco-1002', ...)`
+   so authoring a non-ECO video is a build-time Zod error.
+2. Display — the FIN archive page renders no video facet/section regardless,
+   controlled by a course capability flag (e.g. `hasVideos` derived for
+   `eco-1002`) rather than hard-coding.
 
 ### Lecture notes
 
