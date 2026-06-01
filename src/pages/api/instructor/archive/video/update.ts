@@ -30,6 +30,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const provider = String(form.get('provider') ?? '');
   const videoId = String(form.get('video_id') ?? '').trim();
   const description = String(form.get('description') ?? '').trim() || null;
+  const durationRaw = Number(form.get('duration_minutes') ?? NaN);
+  const durationMinutes =
+    Number.isFinite(durationRaw) && durationRaw > 0
+      ? Math.floor(durationRaw)
+      : null;
   // Unchecked checkbox is absent from formData; presence => published.
   const published = form.get('published') != null;
 
@@ -79,6 +84,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       provider: provider as 'youtube' | 'vimeo',
       video_id: videoId,
       description,
+      duration_minutes: durationMinutes,
       published,
       updated_at: new Date().toISOString(),
     })
