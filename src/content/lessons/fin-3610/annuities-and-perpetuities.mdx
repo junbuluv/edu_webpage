@@ -3,7 +3,7 @@ title: 'Annuities and Perpetuities'
 course: fin-3610
 unit: 'Time, money, and interest rates'
 order: 6
-summary: 'Closed-form formulas for the present value of perpetuities, growing perpetuities, annuities, and growing annuities — the building blocks of valuing mortgages, bonds, dividend streams, and pensions.'
+summary: 'Closed-form formulas for the present value of perpetuities, growing perpetuities, annuities, and growing annuities, the building blocks of valuing mortgages, bonds, dividend streams, and pensions.'
 learningObjectives:
   - 'Derive the PV formula for a perpetuity from the geometric series.'
   - 'Apply the growing perpetuity formula (Gordon model) to value a stream of cash flows growing at rate g forever.'
@@ -71,7 +71,7 @@ forever. Cost of equity is 10%. Stock value = \$2 / (0.10 - 0.04) =
 
 Caveats: the formula's biggest practical sensitivity is to the
 _difference_ $r - g$. If $r - g = 6\%$, the PV is 16.7×C. If $r -
-g = 4\%$, it jumps to 25×C — a small change in either makes a big
+g = 4\%$, it jumps to 25×C: a small change in either makes a big
 change in valuation. Real-world DCFs use multi-stage growth precisely
 to avoid pretending $g$ is constant forever.
 
@@ -101,7 +101,7 @@ $$
 PV = \frac{C}{r - g} \left[1 - \left(\frac{1 + g}{1 + r}\right)^T\right].
 $$
 
-Used to value finite streams of growing cash flows — say, a lease
+Used to value finite streams of growing cash flows, say, a lease
 with annual escalators.
 
 ## Explore the four streams
@@ -137,7 +137,7 @@ $$
 
 This is why the change from a 3% mortgage to a 7% mortgage in
 2022-2023 was so painful for homebuyers. At 3%, the same \$400,000
-mortgage is about \$1,686/month — a difference of \$1,000/month for
+mortgage is about \$1,686/month, a difference of \$1,000/month for
 the same house. Lennar's mortgage-rate buydowns (mentioned in the
 ECO 1002 IS-LM lesson) exist exactly to close part of that gap for
 new buyers.
@@ -145,7 +145,7 @@ new buyers.
 <Figure
   src="/figures/fin-3610/annuities-and-perpetuities/mortgage30-1971-2024.png"
   alt="The 30-year fixed-rate US mortgage average, weekly, from 1971 to 2024."
-  caption="The 30-year fixed mortgage rate since 1971. The 1981 Volcker peak above 18% would have made the same \$400,000 mortgage cost about \$6,000/month — more than 2× the 7% case worked above. The 2020-2021 trough under 3% is what made the 2022-2023 doubling so painful for homebuyers: identical house, identical down payment, monthly payment roughly 60% higher."
+  caption="The 30-year fixed mortgage rate since 1971. The 1981 Volcker peak above 18% would have made the same \$400,000 mortgage cost about \$6,000/month, more than 2× the 7% case worked above. The 2020-2021 trough under 3% is what made the 2022-2023 doubling so painful for homebuyers: identical house, identical down payment, monthly payment roughly 60% higher."
   credit="FRED, St. Louis Fed (MORTGAGE30US)"
   creditHref="https://fred.stlouisfed.org/series/MORTGAGE30US"
 />
@@ -154,7 +154,7 @@ new buyers.
 
 These formulas all assume payments at the _end_ of each period
 (ordinary annuity). If payments come at the _start_ of each period
-(annuity due — like rent), multiply the PV by $(1 + r)$. The
+(annuity due, like rent), multiply the PV by $(1 + r)$. The
 difference is one period of compounding.
 
 ## Where this leads

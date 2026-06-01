@@ -44,7 +44,7 @@ the bond's PV equal to its current market price. It's the bond
 investor's IRR if held to maturity, assuming all coupons are
 reinvested at $y$.
 
-Given a price, you solve for $y$ — usually iteratively, or with a
+Given a price, you solve for $y$, usually iteratively, or with a
 spreadsheet's RATE function.
 
 ## Three regimes
@@ -57,13 +57,13 @@ spreadsheet's RATE function.
 
 A bond issued at par at a 5% coupon, then yields rise to 7%: the price
 falls below par. Why would anyone pay par for a 5% coupon when the
-market wants 7%? They wouldn't — so the price drops to make the
+market wants 7%? They wouldn't. So the price drops to make the
 _total_ return (coupons + capital gain at maturity) equal 7%.
 
 <Figure
   src="/figures/fin-3610/bond-pricing-and-yield/dgs10-vs-dgs2-1976-2024.png"
   alt="10-year and 2-year US Treasury constant maturity yields, daily, from 1976 to 2024."
-  caption="Long- and short-Treasury yields since 1976. A bond's YTM at issuance plus the path of these market yields is what determines whether it later trades at a premium or discount. The 2022–2024 stretch where the 2-year (red) exceeded the 10-year (blue) — the inverted curve — is unusual: it means brand-new short-term Treasuries paid more than long-term ones, the opposite of the normal upward-sloping shape."
+  caption="Long- and short-Treasury yields since 1976. A bond's YTM at issuance plus the path of these market yields is what determines whether it later trades at a premium or discount. The 2022–2024 stretch where the 2-year (red) exceeded the 10-year (blue) (the inverted curve) is unusual: it means brand-new short-term Treasuries paid more than long-term ones, the opposite of the normal upward-sloping shape."
   credit="FRED, St. Louis Fed (DGS10, DGS2)"
   creditHref="https://fred.stlouisfed.org/graph/?id=DGS10,DGS2"
 />
@@ -75,11 +75,11 @@ _total_ return (coupons + capital gain at maturity) equal 7%.
 Three things to confirm:
 
 1. **Price-yield is downward-sloping and convex.** As yield rises,
-   price falls — at a decreasing rate (the convexity).
+   price falls, at a decreasing rate (the convexity).
 2. **Longer maturity = steeper curve.** A 30-year bond's price is
    far more sensitive to yield changes than a 2-year bond's.
 3. **Zero-coupon bonds are the most sensitive of all.** Toggle the
-   "zero-coupon" checkbox and watch the curve get even steeper —
+   "zero-coupon" checkbox and watch the curve get even steeper:
    100% of the cash flow comes at maturity, so duration equals
    maturity.
 
@@ -110,7 +110,7 @@ $7.7 \times 0.005 = 3.85\%$.
 
 This is the **interest-rate risk** banks and bond funds manage every
 day. Silicon Valley Bank's failure in 2023 was largely a duration
-mismatch story — they held long-duration bonds and Treasuries, and
+mismatch story: they held long-duration bonds and Treasuries, and
 when yields spiked in 2022-2023, the mark-to-market value of those
 holdings fell sharply, eroding their capital.
 
@@ -121,7 +121,7 @@ moves it's accurate; for large moves, the price-yield curve is
 visibly bent, so the linear approximation under-estimates how much
 price falls when yields rise and how much it gains when yields
 fall. The bend is **convexity**, and it's a positive thing for the
-bondholder — they benefit asymmetrically.
+bondholder: they benefit asymmetrically.
 
 For most coursework you can treat convexity as a second-order
 correction; for real-world risk management of large portfolios, it's
@@ -130,6 +130,6 @@ material.
 ## Spreads come next
 
 So far we've assumed a single risk-free yield $y$. Corporate bonds
-trade at higher yields than Treasuries — the difference is the
+trade at higher yields than Treasuries: the difference is the
 **credit spread**, which compensates for default risk. That's the
 subject of the next lesson.
