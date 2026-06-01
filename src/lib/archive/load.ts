@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import type { CourseSlug } from '@lib/courses';
 import { buildArchiveItems, deriveFacets, normalizeLessonSlug } from './build';
+import { fetchArchiveVideos } from './db';
 import type {
   ArchiveItem,
   Facets,
@@ -39,7 +40,7 @@ export async function loadArchiveForCourse(
     semester: q.data.semester ?? null,
   }));
 
-  const videos: VideoInput[] = videoEntries.map((v) => ({
+  const gitVideos: VideoInput[] = videoEntries.map((v) => ({
     slug: v.data.slug,
     course: v.data.course,
     title: v.data.title,
@@ -49,6 +50,20 @@ export async function loadArchiveForCourse(
     videoId: v.data.videoId,
     semester: v.data.semester,
   }));
+
+  const dbVideoRows = await fetchArchiveVideos(course);
+  const dbVideos: VideoInput[] = dbVideoRows.map((r) => ({
+    slug: r.id,
+    course: r.course_slug,
+    title: r.title,
+    lessonSlug: r.lesson_slug,
+    description: r.description ?? undefined,
+    provider: r.provider,
+    videoId: r.video_id,
+    semester: { term: r.semester_term, year: r.semester_year },
+  }));
+
+  const videos: VideoInput[] = [...gitVideos, ...dbVideos];
 
   const items = buildArchiveItems({ lessons, quizzes, videos, course });
 
