@@ -17,6 +17,7 @@ draft: false
 ---
 
 import BarFigure from '@components/mdx/BarFigure';
+import DuPontExplorer from '@components/viz/DuPontExplorer';
 
 ## The three statements, in one sentence each
 
@@ -38,7 +39,7 @@ $$
 It must hold by construction. If your model breaks this, you have a
 modeling mistake.
 
-## The income statement reveals what the cash flow statement why
+## Why net income is not cash flow
 
 Net income is not cash flow. A firm can show a profit and run out of
 cash; a firm can post a loss and generate plenty of cash. Three big
@@ -158,6 +159,16 @@ This firm's 40% ROE comes mostly from leverage (equity multiplier of
 business slows, the leverage that boosted ROE in good times will
 amplify losses in bad times. Same ROE, very different risk profile
 from a firm with the same return at zero leverage.
+
+<DuPontExplorer client:load />
+
+_The three archetype bars sit at the same height: each reaches about
+18% ROE through a different mix of margin, turnover, and leverage. Your
+firm starts at the worked example's 40% (the red line), which is almost
+all leverage, an equity multiplier of 4. Push the equity multiplier
+slider alone and the line rises with no change in the business; load an
+archetype and it drops onto the bars. Archetype figures are
+illustrative._
 
 ## Limitations to keep in mind
 

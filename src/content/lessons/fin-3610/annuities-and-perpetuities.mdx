@@ -17,6 +17,7 @@ draft: false
 ---
 
 import Figure from '@components/mdx/Figure';
+import AnnuityExplorer from '@components/viz/AnnuityExplorer';
 
 ## Why these formulas exist
 
@@ -102,6 +103,18 @@ $$
 
 Used to value finite streams of growing cash flows — say, a lease
 with annual escalators.
+
+## Explore the four streams
+
+Pick a stream type and drag the discount rate. The curve is present
+value as a function of $r$; the red dot is your current rate.
+
+<AnnuityExplorer client:load />
+
+_Baseline: a \$1,000 perpetuity at r = 5%, worth \$20,000. Drag r down
+to 2.5% and watch it reach \$40,000, the exact sensitivity called out
+above. Switch to a growing stream to see the curve diverge as r
+approaches g._
 
 ## Worked example: a mortgage payment
 
