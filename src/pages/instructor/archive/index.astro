@@ -1,0 +1,239 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { isStaff, isAdmin, isContentManager } from '@lib/roles';
+import { loadInstructorArchive } from '@lib/instructor/archive-manage';
+import { partitionByOwnership } from '@lib/instructor/archive-ownership';
+import { normalizeLessonSlug } from '@lib/archive/build';
+
+const user = Astro.locals.user;
+const role = Astro.locals.profile?.role ?? 'student';
+
+if (!user) {
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
+}
+if (!isStaff(role)) {
+  return Astro.redirect('/dashboard');
+}
+
+const { courses, videos } = await loadInstructorArchive(user.id, role);
+const canManage = isContentManager(role);
+const { editable, readOnly } = partitionByOwnership(videos, {
+  userId: user.id,
+  canEditAll: isAdmin(role),
+});
+
+// Only ECO 1002 supports videos; show the add form only if the viewer
+// manages eco-1002.
+const canAddVideo = canManage && courses.includes('eco-1002');
+const ecoLessons = canAddVideo
+  ? (await getCollection('lessons', (l) => l.data.course === 'eco-1002'))
+      .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
+      .sort((a, b) => a.title.localeCompare(b.title))
+  : [];
+
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
+---
+
+<BaseLayout title="Archive content">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      Instructor
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Archive content</h1>
+    <p class="mt-3 text-ink-muted">
+      Add lecture videos (ECO 1002) to the course archive. Students enrolled in
+      the course see published items. You can edit, hide, or remove the items
+      you created.
+    </p>
+
+    {
+      ok && (
+        <p class="mt-6 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+          Saved ({ok}).
+        </p>
+      )
+    }
+    {
+      error && (
+        <p class="mt-6 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          Could not complete the action: {error}.
+        </p>
+      )
+    }
+
+    {
+      !canManage && (
+        <p class="mt-6 rounded border border-slate-200 bg-slate-50 p-3 text-sm text-ink-muted">
+          You have read-only access. Only instructors and admins can add or edit
+          archive content.
+        </p>
+      )
+    }
+
+    {
+      canAddVideo && (
+        <section class="mt-8 rounded-lg border border-slate-200 p-5">
+          <h2 class="text-lg font-semibold">Add a video</h2>
+          <form
+            method="POST"
+            action="/api/instructor/archive/video/create"
+            class="mt-4 space-y-3 text-sm"
+          >
+            <input type="hidden" name="course_slug" value="eco-1002" />
+            <label class="block">
+              <span class="text-ink-muted">Title</span>
+              <input
+                name="title"
+                required
+                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+              />
+            </label>
+            <label class="block">
+              <span class="text-ink-muted">Lesson</span>
+              <select
+                name="lesson_slug"
+                required
+                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+              >
+                {ecoLessons.map((l) => (
+                  <option value={l.slug}>{l.title}</option>
+                ))}
+              </select>
+            </label>
+            <div class="flex gap-3">
+              <label class="block">
+                <span class="text-ink-muted">Term</span>
+                <select
+                  name="semester_term"
+                  required
+                  class="mt-1 rounded border border-slate-300 px-2 py-1"
+                >
+                  <option value="spring">Spring</option>
+                  <option value="summer">Summer</option>
+                  <option value="fall">Fall</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="text-ink-muted">Year</span>
+                <input
+                  name="semester_year"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  required
+                  class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+                />
+              </label>
+            </div>
+            <div class="flex gap-3">
+              <label class="block">
+                <span class="text-ink-muted">Provider</span>
+                <select
+                  name="provider"
+                  required
+                  class="mt-1 rounded border border-slate-300 px-2 py-1"
+                >
+                  <option value="youtube">YouTube</option>
+                  <option value="vimeo">Vimeo</option>
+                </select>
+              </label>
+              <label class="block flex-1">
+                <span class="text-ink-muted">Video ID</span>
+                <input
+                  name="video_id"
+                  required
+                  placeholder="e.g. dQw4w9WgXcQ"
+                  class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+                />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-ink-muted">Description (optional)</span>
+              <input
+                name="description"
+                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+              />
+            </label>
+            <label class="block">
+              <span class="text-ink-muted">Duration minutes (optional)</span>
+              <input
+                name="duration_minutes"
+                type="number"
+                min="1"
+                class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+              />
+            </label>
+            <button
+              type="submit"
+              class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+            >
+              Add video
+            </button>
+          </form>
+        </section>
+      )
+    }
+
+    <section class="mt-8">
+      <h2 class="text-lg font-semibold">Videos</h2>
+      {
+        videos.length === 0 && (
+          <p class="mt-2 text-sm text-ink-muted">No videos yet.</p>
+        )
+      }
+      <ul class="mt-3 space-y-2">
+        {
+          editable.map((v) => (
+            <li class="rounded border border-slate-200 p-3 text-sm">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="font-medium">{v.title}</span>
+                <span class="text-xs text-ink-muted">
+                  {v.semesterTerm} {v.semesterYear} ·{' '}
+                  {v.published ? 'published' : 'hidden'}
+                </span>
+              </div>
+              <div class="mt-2 flex gap-3">
+                {canManage && (
+                  <>
+                    <a
+                      href={`/instructor/archive/video/${v.id}`}
+                      class="text-accent underline"
+                    >
+                      Edit
+                    </a>
+                    <form
+                      method="POST"
+                      action="/api/instructor/archive/video/delete"
+                    >
+                      <input type="hidden" name="id" value={v.id} />
+                      <button type="submit" class="text-red-600 underline">
+                        Delete
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
+            </li>
+          ))
+        }
+        {
+          readOnly.map((v) => (
+            <li class="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="font-medium">{v.title}</span>
+                <span class="text-xs text-ink-muted">
+                  {v.semesterTerm} {v.semesterYear} · added by another
+                  instructor
+                </span>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>

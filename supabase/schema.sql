@@ -692,3 +692,42 @@ create policy "workshop_attendance_instructor_read_scoped"
 -- Inserts via service-role client through /api/workshops/stamp. The two
 -- unique constraints above are the substantive anti-cheating barrier;
 -- RLS is just a read-scoping layer.
+
+-- =========================================================================
+-- archive_videos --- instructor-managed ECO 1002 lecture videos surfaced in
+-- the course archive. RLS-locked: no anon/authenticated policies; all access
+-- goes through the service-role admin client, gated in app code (the
+-- instructor-data pattern, CLAUDE.md convention #6). No PII here.
+-- =========================================================================
+create table if not exists public.archive_videos (
+  id uuid primary key default gen_random_uuid(),
+  course_slug text not null,
+  lesson_slug text not null,
+  semester_term text not null,
+  semester_year integer not null,
+  title text not null,
+  provider text not null,
+  video_id text not null,
+  description text,
+  duration_minutes integer,
+  created_by uuid not null references public.profiles(id) on delete restrict,
+  published boolean not null default true,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  -- updated_at is maintained by the mutation API (set to now() on update);
+  -- no trigger, consistent with the rest of this schema.
+  updated_at timestamptz not null default now(),
+  check (course_slug = 'eco-1002'),
+  check (semester_term in ('spring', 'summer', 'fall')),
+  check (semester_year between 2020 and 2100),
+  check (provider in ('youtube', 'vimeo'))
+);
+
+create index if not exists archive_videos_live_idx
+  on public.archive_videos (course_slug)
+  where deleted_at is null and published;
+
+alter table public.archive_videos enable row level security;
+-- Intentionally NO policies: PostgREST/anon/authenticated cannot read or
+-- write. The service-role admin client (which bypasses RLS) is the only
+-- accessor, used server-side behind isContentManager + ownership checks.

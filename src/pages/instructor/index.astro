@@ -98,6 +98,23 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
               </a>
             </div>
           </section>
+
+          <section class="rounded-lg border border-slate-200 p-5">
+            <h2 class="text-xl font-semibold">Archive content</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+              Add lecture videos (ECO 1002) to the course archive. Manage the
+              items you created; students enrolled in the course see published
+              items.
+            </p>
+            <div class="mt-4">
+              <a
+                href="/instructor/archive"
+                class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Manage archive →
+              </a>
+            </div>
+          </section>
         </div>
       )
     }

@@ -1,0 +1,173 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getAdminClient } from '@lib/supabase/admin';
+import { isContentManager, isAdmin } from '@lib/roles';
+import { instructorOwnsCourse } from '@lib/archive/access';
+import { normalizeLessonSlug } from '@lib/archive/build';
+
+const user = Astro.locals.user;
+const role = Astro.locals.profile?.role ?? 'student';
+const { id } = Astro.params;
+
+if (!user) {
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
+}
+if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+if (!id) return new Response(null, { status: 404 });
+
+const admin = getAdminClient();
+const { data: v } = await admin
+  .from('archive_videos')
+  .select(
+    'id, course_slug, lesson_slug, semester_term, semester_year, title, provider, video_id, description, duration_minutes, published, created_by',
+  )
+  .eq('id', id)
+  .is('deleted_at', null)
+  .maybeSingle();
+
+if (!v) return new Response(null, { status: 404 });
+if (!(await instructorOwnsCourse(user.id, v.course_slug, role))) {
+  return Astro.redirect('/instructor/archive?error=not_course_instructor');
+}
+if (!isAdmin(role) && v.created_by !== user.id) {
+  return Astro.redirect('/instructor/archive?error=not_owner');
+}
+
+const ecoLessons = (
+  await getCollection('lessons', (l) => l.data.course === v.course_slug)
+)
+  .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<BaseLayout title="Edit video">
+  <div class="mx-auto max-w-2xl px-4 py-12">
+    <h1 class="text-2xl font-semibold tracking-tight">Edit video</h1>
+    <form
+      method="POST"
+      action="/api/instructor/archive/video/update"
+      class="mt-6 space-y-3 text-sm"
+    >
+      <input type="hidden" name="id" value={v.id} />
+      <label class="block">
+        <span class="text-ink-muted">Title</span>
+        <input
+          name="title"
+          required
+          value={v.title}
+          class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+        />
+      </label>
+      <label class="block">
+        <span class="text-ink-muted">Lesson</span>
+        <select
+          name="lesson_slug"
+          required
+          class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+        >
+          {
+            ecoLessons.map((l) => (
+              <option value={l.slug} selected={l.slug === v.lesson_slug}>
+                {l.title}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+      <div class="flex gap-3">
+        <label class="block">
+          <span class="text-ink-muted">Term</span>
+          <select
+            name="semester_term"
+            required
+            class="mt-1 rounded border border-slate-300 px-2 py-1"
+          >
+            {
+              ['spring', 'summer', 'fall'].map((t) => (
+                <option value={t} selected={t === v.semester_term}>
+                  {t}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-ink-muted">Year</span>
+          <input
+            name="semester_year"
+            type="number"
+            min="2020"
+            max="2100"
+            required
+            value={v.semester_year}
+            class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+      </div>
+      <div class="flex gap-3">
+        <label class="block">
+          <span class="text-ink-muted">Provider</span>
+          <select
+            name="provider"
+            required
+            class="mt-1 rounded border border-slate-300 px-2 py-1"
+          >
+            {
+              ['youtube', 'vimeo'].map((p) => (
+                <option value={p} selected={p === v.provider}>
+                  {p}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+        <label class="block flex-1">
+          <span class="text-ink-muted">Video ID</span>
+          <input
+            name="video_id"
+            required
+            value={v.video_id}
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+      </div>
+      <label class="block">
+        <span class="text-ink-muted">Description</span>
+        <input
+          name="description"
+          value={v.description ?? ''}
+          class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+        />
+      </label>
+      <label class="block">
+        <span class="text-ink-muted">Duration minutes (optional)</span>
+        <input
+          name="duration_minutes"
+          type="number"
+          min="1"
+          value={v.duration_minutes ?? ''}
+          class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+        />
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="published" checked={v.published} />
+        <span>Published (visible to students)</span>
+      </label>
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+        >
+          Save
+        </button>
+        <a
+          href="/instructor/archive"
+          class="px-3 py-1.5 text-ink-muted underline">Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</BaseLayout>

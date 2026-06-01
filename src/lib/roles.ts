@@ -16,6 +16,17 @@ export function isAdmin(role: UserRole | null | undefined): boolean {
   return role ? ADMIN_ROLES.has(role) : false;
 }
 
+const CONTENT_MANAGER_ROLES = new Set<UserRole>(['instructor', 'admin']);
+
+/**
+ * Who may create/edit/delete instructor-managed content (archive videos and
+ * papers): instructors and admins, but NOT TAs (TAs are read-only here).
+ * Distinct from isStaff, which includes 'ta'.
+ */
+export function isContentManager(role: UserRole | null | undefined): boolean {
+  return role ? CONTENT_MANAGER_ROLES.has(role) : false;
+}
+
 /** Human-readable label for the role, for instructor profiles and UI hints. */
 export function roleLabel(role: UserRole | null | undefined): string {
   switch (role) {
