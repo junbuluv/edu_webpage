@@ -3,7 +3,7 @@ title: 'The Time Value of Money'
 course: fin-3610
 unit: 'Time, money, and interest rates'
 order: 5
-summary: 'Three rules of time travel — discount the future, compound the past, never add cash flows from different dates. The single most important computational skill in finance.'
+summary: 'Three rules of time travel: discount the future, compound the past, never add cash flows from different dates. The single most important computational skill in finance.'
 learningObjectives:
   - 'Apply the three rules of time travel to a single cash flow.'
   - 'Compute present value (PV) and future value (FV) given a discount rate r and horizon T.'
@@ -23,7 +23,7 @@ import Figure from '@components/mdx/Figure';
 
 You can earn interest on a dollar you have today. A dollar promised
 next year can't earn interest until you actually receive it. So a
-dollar today is worth more than a dollar tomorrow — even ignoring
+dollar today is worth more than a dollar tomorrow, even ignoring
 inflation, default risk, and your patience.
 
 The exchange rate between dollars at different dates is the **interest
@@ -45,18 +45,18 @@ mistake.
 compared or combined. Adding "\$100 today" to "\$100 in five years"
 is meaningless until you've moved one of them to the other date.
 
-**Rule 2.** To move a cash flow _forward_ in time by $n$ periods,
+**Rule 2.** To move a cash flow _forward_ in time by $T$ periods,
 compound it:
 
 $$
-FV \;=\; C \times (1 + r)^n.
+FV \;=\; C \times (1 + r)^T.
 $$
 
-**Rule 3.** To move a cash flow _backward_ in time by $n$ periods,
+**Rule 3.** To move a cash flow _backward_ in time by $T$ periods,
 discount it:
 
 $$
-PV \;=\; \frac{C}{(1 + r)^n}.
+PV \;=\; \frac{C}{(1 + r)^T}.
 $$
 
 That's the entire toolkit. Every multi-period NPV calculation is just
@@ -96,7 +96,7 @@ Move both to today's dollars:
 - Option A: \$500 (already today).
 - Option B: \$600 / (1.05)^3 = 600 / 1.1576 ≈ \$518.30.
 
-Take option B — it's worth about \$18.30 more in today's dollars.
+Take option B; it's worth about \$18.30 more in today's dollars.
 
 ## The Rule of 72
 
@@ -127,7 +127,7 @@ the source of nearly every preventable TVM mistake.
 <Figure
   src="/figures/fin-3610/time-value-of-money/dgs10-1962-2024.png"
   alt="10-year US Treasury constant maturity rate, daily, from 1962 to 2024."
-  caption="The 10-year US Treasury yield since 1962 — a sensible reference for the discount rate $r$ in long-horizon TVM problems. The Volcker-era peak above 15% (1981) and the post-2008 secular low under 1% (mid-2020) bracket the range you should expect to plug into a 10-year present-value calculation across different decades."
+  caption="The 10-year US Treasury yield since 1962, a sensible reference for the discount rate $r$ in long-horizon TVM problems. The Volcker-era peak above 15% (1981) and the post-2008 secular low under 1% (mid-2020) bracket the range you should expect to plug into a 10-year present-value calculation across different decades."
   credit="FRED, St. Louis Fed (DGS10)"
   creditHref="https://fred.stlouisfed.org/series/DGS10"
 />
