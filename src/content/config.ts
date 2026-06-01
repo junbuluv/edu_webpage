@@ -5,7 +5,7 @@ const courseEnum = z.enum(COURSE_SLUGS);
 
 const semesterSchema = z.object({
   term: z.enum(['spring', 'summer', 'fall']),
-  year: z.number().int(),
+  year: z.number().int().min(2020).max(2100),
 });
 
 const lessons = defineCollection({
@@ -179,7 +179,7 @@ const videos = defineCollection({
       slug: z.string(),
       title: z.string(),
       course: courseEnum,
-      lessonSlug: z.string(),
+      lessonSlug: z.string().min(1),
       semester: semesterSchema,
       provider: z.enum(['youtube', 'vimeo']),
       videoId: z.string().min(1),
