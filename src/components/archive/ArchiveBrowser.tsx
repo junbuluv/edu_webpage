@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { filterItems } from '@lib/archive/build';
+import { filterItems, semesterLabel } from '@lib/archive/build';
 import type { ArchiveItem, ArchiveItemType, Facets } from '@lib/archive/types';
 
 const TYPE_LABEL: Record<ArchiveItemType, string> = {
@@ -137,6 +137,13 @@ export default function ArchiveBrowser({ items, facets }: Props) {
         )}
       </div>
 
+      {semester && (
+        <p className="mt-2 text-xs text-ink-muted">
+          Lecture notes are not semester-specific and are hidden while a
+          semester filter is active.
+        </p>
+      )}
+
       <p className="mt-4 text-xs text-ink-muted">
         {filtered.length} {filtered.length === 1 ? 'item' : 'items'}
       </p>
@@ -153,9 +160,7 @@ export default function ArchiveBrowser({ items, facets }: Props) {
               </span>
               {item.semester && (
                 <span className="text-xs text-ink-muted">
-                  {item.semester.term.charAt(0).toUpperCase() +
-                    item.semester.term.slice(1)}{' '}
-                  {item.semester.year}
+                  {semesterLabel(item.semester)}
                 </span>
               )}
             </div>
@@ -168,6 +173,8 @@ export default function ArchiveBrowser({ items, facets }: Props) {
                   onClick={() =>
                     setOpenVideo(openVideo === item.id ? null : item.id)
                   }
+                  aria-expanded={openVideo === item.id}
+                  aria-label={`${openVideo === item.id ? 'Hide' : 'Play'} video: ${item.title}`}
                 >
                   {item.title}
                 </button>
