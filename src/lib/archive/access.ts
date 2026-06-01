@@ -43,13 +43,17 @@ export async function instructorOwnsCourse(
   if (isAdmin(role as never)) return true;
   try {
     const admin = getAdminClient();
+    // An instructor has one enrollments row per enrolled student, so this
+    // query returns MANY rows for a real class. Use limit(1) + array check —
+    // .maybeSingle() errors (PGRST116) on >1 row, which would wrongly deny
+    // ownership for any course with two or more students.
     const { data } = await admin
       .from('enrollments')
       .select('user_id')
       .eq('instructor_id', userId)
       .eq('course_slug', courseSlug)
-      .maybeSingle();
-    return !!data;
+      .limit(1);
+    return !!(data && data.length > 0);
   } catch {
     return false;
   }
