@@ -2,7 +2,45 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-const quizzes = await getCollection('quizzes');
+const [quizzes, courseEntries, lessons] = await Promise.all([
+  getCollection('quizzes'),
+  getCollection('courses'),
+  getCollection('lessons'),
+]);
+
+// Map a quiz's lessonSlug to its lesson order so quizzes list in course
+// sequence, not alphabetically. Key by both the raw collection id and the
+// extension-stripped form to be robust to the id format.
+const lessonOrder = new Map<string, number>();
+for (const l of lessons) {
+  lessonOrder.set(l.id, l.data.order);
+  lessonOrder.set(l.id.replace(/\.mdx?$/, ''), l.data.order);
+}
+const quizOrder = (lessonSlug?: string) =>
+  lessonSlug ? (lessonOrder.get(lessonSlug) ?? 999) : 999;
+
+// Group quizzes by course.
+const byCourse = new Map<string, typeof quizzes>();
+for (const q of quizzes) {
+  const arr = byCourse.get(q.data.course) ?? [];
+  arr.push(q);
+  byCourse.set(q.data.course, arr);
+}
+for (const arr of byCourse.values()) {
+  arr.sort(
+    (a, b) =>
+      quizOrder(a.data.lessonSlug) - quizOrder(b.data.lessonSlug) ||
+      a.data.title.localeCompare(b.data.title),
+  );
+}
+
+// One section per course that has quizzes, in the course's display order.
+const sections = courseEntries
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
+  .filter((c) => byCourse.has(c.data.slug))
+  .map((c) => ({ course: c.data, quizzes: byCourse.get(c.data.slug)! }));
+
+const totalQuizzes = quizzes.length;
 ---
 
 <BaseLayout title="Practice">
@@ -10,30 +48,111 @@ const quizzes = await getCollection('quizzes');
     <h1 class="text-3xl font-semibold tracking-tight">Practice quizzes</h1>
     <p class="mt-3 text-ink-muted">
       Self-grading drills with worked explanations. Signed-in attempts are saved
-      to your dashboard.
+      to your dashboard. Pick your course below.
     </p>
 
-    <ul class="mt-8 space-y-3">
-      {
-        quizzes.map((q) => (
-          <li class="rounded border border-slate-200 p-4 hover:border-accent">
-            <a
-              href={`/practice/${q.data.slug}`}
-              class="flex items-baseline justify-between"
+    {
+      sections.length > 1 && (
+        <div
+          class="mt-6 flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter practice quizzes by course"
+        >
+          <button
+            type="button"
+            data-practice-pill="all"
+            aria-pressed="true"
+            class="practice-pill rounded-full border border-slate-300 px-3 py-1 text-sm text-ink-muted hover:bg-slate-50 aria-pressed:border-accent aria-pressed:bg-accent/10 aria-pressed:font-medium aria-pressed:text-accent"
+          >
+            All courses
+          </button>
+          {sections.map((s) => (
+            <button
+              type="button"
+              data-practice-pill={s.course.slug}
+              aria-pressed="false"
+              class="practice-pill rounded-full border border-slate-300 px-3 py-1 text-sm text-ink-muted hover:bg-slate-50 aria-pressed:border-accent aria-pressed:bg-accent/10 aria-pressed:font-medium aria-pressed:text-accent"
             >
-              <span>
-                <span class="font-medium">{q.data.title}</span>
-                <span class="ml-3 text-xs uppercase tracking-wide text-ink-muted">
-                  {q.data.course}
-                </span>
-              </span>
-              <span class="text-sm text-ink-muted">
-                {q.data.questions.length} questions
-              </span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+              {s.course.code}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      totalQuizzes === 0 && (
+        <p class="mt-8 text-ink-muted">No practice quizzes authored yet.</p>
+      )
+    }
+
+    {
+      sections.map((s) => (
+        <section
+          data-practice-section={s.course.slug}
+          id={`practice-${s.course.slug}`}
+          class="mt-10"
+        >
+          <div class="flex items-baseline gap-3 border-b border-slate-200 pb-2">
+            <span
+              class="inline-block h-3 w-3 rounded-full"
+              style={`background:${s.course.accentColor}`}
+              aria-hidden="true"
+            />
+            <h2 class="text-xl font-semibold">{s.course.code}</h2>
+            <span class="text-sm text-ink-muted">{s.course.title}</span>
+            <span class="ml-auto text-xs text-ink-muted">
+              {s.quizzes.length} {s.quizzes.length === 1 ? 'quiz' : 'quizzes'}
+            </span>
+          </div>
+
+          <ul class="mt-4 space-y-3">
+            {s.quizzes.map((q) => (
+              <li class="rounded border border-slate-200 p-4 hover:border-accent">
+                <a
+                  href={`/practice/${q.data.slug}`}
+                  class="flex items-baseline justify-between gap-3"
+                >
+                  <span class="font-medium">{q.data.title}</span>
+                  <span class="shrink-0 text-sm text-ink-muted">
+                    {q.data.questions.length} questions
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
   </div>
 </BaseLayout>
+
+<script>
+  // Progressive enhancement: clicking a course pill shows only that course's
+  // section. Without JS, every section is visible (the pills do nothing).
+  // Rebind on astro:page-load because <ClientRouter /> swaps the DOM on
+  // cross-page navigation (see CLAUDE.md #13).
+  function initPracticeFilter() {
+    const pills = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('[data-practice-pill]'),
+    );
+    if (pills.length === 0) return;
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-practice-section]'),
+    );
+    for (const pill of pills) {
+      pill.addEventListener('click', () => {
+        const choice = pill.dataset.practicePill;
+        for (const p of pills) {
+          p.setAttribute('aria-pressed', String(p === pill));
+        }
+        for (const section of sections) {
+          const match =
+            choice === 'all' || section.dataset.practiceSection === choice;
+          section.hidden = !match;
+        }
+      });
+    }
+  }
+  document.addEventListener('astro:page-load', initPracticeFilter);
+</script>
