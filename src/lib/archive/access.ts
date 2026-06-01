@@ -1,4 +1,5 @@
-import { isStaff } from '@lib/roles';
+import { isStaff, isAdmin } from '@lib/roles';
+import { getAdminClient } from '@lib/supabase/admin';
 
 /**
  * True iff the current viewer may see gated, course-scoped archive content
@@ -25,4 +26,31 @@ export async function canViewCourse(
     .eq('course_slug', courseSlug)
     .maybeSingle();
   return !!data;
+}
+
+/**
+ * True iff `userId` may manage content for `courseSlug`: an admin (any
+ * course), or an instructor listed as instructor_id on some enrollment row
+ * for that course. Uses the service-role admin client (enrollments are not
+ * readable under a normal client for arbitrary users). Fails closed on
+ * missing env / error.
+ */
+export async function instructorOwnsCourse(
+  userId: string,
+  courseSlug: string,
+  role: string | null | undefined,
+): Promise<boolean> {
+  if (isAdmin(role as never)) return true;
+  try {
+    const admin = getAdminClient();
+    const { data } = await admin
+      .from('enrollments')
+      .select('user_id')
+      .eq('instructor_id', userId)
+      .eq('course_slug', courseSlug)
+      .maybeSingle();
+    return !!data;
+  } catch {
+    return false;
+  }
 }
