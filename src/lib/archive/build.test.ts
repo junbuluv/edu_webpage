@@ -188,3 +188,38 @@ test('deriveFacets sorts semesters newest-first and lists present types', () => 
     { slug: 'eco-1002/solow', title: 'The Solow Model' },
   ]);
 });
+
+test('deriveFacets orders same-year semesters fall-before-spring; labels all terms', () => {
+  assert.equal(semesterLabel({ term: 'spring', year: 2025 }), 'Spring 2025');
+  assert.equal(semesterLabel({ term: 'summer', year: 2025 }), 'Summer 2025');
+
+  const sameYear: QuizInput[] = [
+    {
+      slug: 'q-spring',
+      course: 'eco-1002',
+      title: 'Spring exam',
+      kind: 'exam',
+      covers: ['eco-1002/solow'],
+      semester: { term: 'spring', year: 2025 },
+    },
+    {
+      slug: 'q-fall',
+      course: 'eco-1002',
+      title: 'Fall exam',
+      kind: 'exam',
+      covers: ['eco-1002/solow'],
+      semester: { term: 'fall', year: 2025 },
+    },
+  ];
+  const items = buildArchiveItems({
+    lessons,
+    quizzes: sameYear,
+    videos: [],
+    course: 'eco-1002',
+  });
+  const f = deriveFacets(items, lessonIndex);
+  assert.deepEqual(
+    f.semesters.map((s) => s.key),
+    ['fall-2025', 'spring-2025'],
+  );
+});
