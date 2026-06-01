@@ -1,0 +1,57 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ArchiveBrowser from '@components/archive/ArchiveBrowser';
+import { loadArchiveForCourse } from '@lib/archive/load';
+import { isStaff } from '@lib/roles';
+
+const COURSE = 'fin-3610' as const;
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+
+if (!user) {
+  return Astro.redirect(`/auth/signin?next=${Astro.url.pathname}`);
+}
+const staff = isStaff(Astro.locals.profile?.role);
+let enrolled = false;
+if (supabase) {
+  const { data } = await supabase
+    .from('enrollments')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .eq('course_slug', COURSE)
+    .maybeSingle();
+  enrolled = !!data;
+}
+const canView = enrolled || staff;
+
+const { items, facets } = canView
+  ? await loadArchiveForCourse(COURSE)
+  : { items: [], facets: { types: [], semesters: [], units: [], lessons: [] } };
+---
+
+<BaseLayout title="FIN 3610 — Archive">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs uppercase tracking-wide text-accent font-medium">
+      FIN 3610
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Course archive</h1>
+    <p class="mt-3 text-ink-muted">
+      Past exams and assignments and lecture notes from prior semesters. Filter
+      by type, semester, unit, or lesson, or search by keyword.
+    </p>
+
+    {
+      !canView ? (
+        <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm">
+          <p class="font-medium">You're not enrolled in FIN 3610.</p>
+          <p class="mt-1 text-ink-muted">
+            The course archive is available to enrolled students. Ask your
+            instructor to add you to the roster.
+          </p>
+        </div>
+      ) : (
+        <ArchiveBrowser client:load items={items} facets={facets} />
+      )
+    }
+  </div>
+</BaseLayout>
