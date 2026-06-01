@@ -1,0 +1,11 @@
+{
+  "slug": "eco-1002-solow-fa24",
+  "title": "Solow Growth Model lecture (sample — replace videoId)",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/solow",
+  "semester": { "term": "fall", "year": 2024 },
+  "provider": "youtube",
+  "videoId": "jNQXAC9IVRw",
+  "description": "Sample archive video. Replace videoId with a real lecture recording before relying on this in a live course.",
+  "durationMinutes": 48
+}

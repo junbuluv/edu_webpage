@@ -4,6 +4,7 @@ import Quiz from '@components/quiz/Quiz';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { getEntry } from 'astro:content';
 import { toPublicQuestions } from '@lib/quiz/public';
+import { canViewCourse } from '@lib/archive/access';
 
 // SSR so Astro.locals.user is populated by middleware and the header
 // renders the signed-in state. Lookup the quiz by slug on each request.
@@ -17,12 +18,33 @@ if (!entry) {
   return new Response(null, { status: 404 });
 }
 const quiz = entry.data;
+
+// Practice quizzes stay public. Archive papers (exam/assignment) are
+// gated to enrolled students + staff so they can't be reached by
+// guessing a slug.
+if (quiz.kind !== 'practice') {
+  if (!Astro.locals.user) {
+    return Astro.redirect(
+      `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+    );
+  }
+  if (!(await canViewCourse(Astro.locals, quiz.course))) {
+    return Astro.redirect(`/${quiz.course}/archive`);
+  }
+}
+
+const kindLabel =
+  quiz.kind === 'exam'
+    ? 'Exam'
+    : quiz.kind === 'assignment'
+      ? 'Assignment'
+      : 'Practice';
 ---
 
 <BaseLayout title={quiz.title}>
   <div class="mx-auto max-w-3xl px-4 py-12">
     <p class="text-xs uppercase tracking-wide text-accent font-medium">
-      Practice · {quiz.course}
+      {kindLabel} · {quiz.course}
     </p>
     <h1 class="text-2xl font-semibold tracking-tight mt-2">{quiz.title}</h1>
 

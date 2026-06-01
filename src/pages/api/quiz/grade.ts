@@ -1,6 +1,11 @@
 import type { APIRoute } from 'astro';
 import { getEntry } from 'astro:content';
-import { gradeQuiz, type AnswerMap, type GradableQuestion } from '@lib/quiz/grade';
+import {
+  gradeQuiz,
+  type AnswerMap,
+  type GradableQuestion,
+} from '@lib/quiz/grade';
+import { canViewCourse } from '@lib/archive/access';
 
 // Server-side quiz grading. The quiz (including answer keys + explanations)
 // is loaded here from the content collection and never shipped to the client;
@@ -14,7 +19,7 @@ function json(payload: unknown, status = 200): Response {
   });
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   let body: { slug?: unknown; answers?: unknown };
   try {
     body = (await request.json()) as typeof body;
@@ -26,10 +31,22 @@ export const POST: APIRoute = async ({ request }) => {
   if (!slug) return json({ error: 'missing_slug' }, 400);
 
   const answers: AnswerMap =
-    body.answers && typeof body.answers === 'object' ? (body.answers as AnswerMap) : {};
+    body.answers && typeof body.answers === 'object'
+      ? (body.answers as AnswerMap)
+      : {};
 
   const entry = await getEntry('quizzes', slug);
   if (!entry) return json({ error: 'quiz_not_found' }, 404);
+
+  // Practice quizzes grade publicly. Exam/assignment papers are gated to
+  // enrolled students + staff, matching the page-level gate — otherwise the
+  // grader would leak answer explanations for archive papers by slug.
+  if (entry.data.kind !== 'practice') {
+    if (!locals.user) return json({ error: 'unauthorized' }, 401);
+    if (!(await canViewCourse(locals, entry.data.course))) {
+      return json({ error: 'forbidden' }, 403);
+    }
+  }
 
   const result = gradeQuiz(
     entry.data.questions as GradableQuestion[],

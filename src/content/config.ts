@@ -3,6 +3,11 @@ import { COURSE_SLUGS } from '@lib/courses';
 
 const courseEnum = z.enum(COURSE_SLUGS);
 
+const semesterSchema = z.object({
+  term: z.enum(['spring', 'summer', 'fall']),
+  year: z.number().int().min(2020).max(2100),
+});
+
 const lessons = defineCollection({
   type: 'content',
   schema: z.object({
@@ -101,23 +106,31 @@ const instructors = defineCollection({
 
 const quizzes = defineCollection({
   type: 'data',
-  schema: z.object({
-    slug: z.string(),
-    title: z.string(),
-    course: courseEnum,
-    lessonSlug: z.string().optional(),
-    questions: z.array(QuestionSchema).min(1),
-    passingScore: z.number().min(0).max(1).default(0.7),
-    furtherReading: z
-      .object({
-        title: z.string(),
-        url: z.string().url(),
-        source: z.string(),
-        date: z.string().optional(),
-        why: z.string(),
-      })
-      .optional(),
-  }),
+  schema: z
+    .object({
+      slug: z.string(),
+      title: z.string(),
+      course: courseEnum,
+      lessonSlug: z.string().optional(),
+      kind: z.enum(['practice', 'exam', 'assignment']).default('practice'),
+      semester: semesterSchema.optional(),
+      covers: z.array(z.string()).default([]),
+      questions: z.array(QuestionSchema).min(1),
+      passingScore: z.number().min(0).max(1).default(0.7),
+      furtherReading: z
+        .object({
+          title: z.string(),
+          url: z.string().url(),
+          source: z.string(),
+          date: z.string().optional(),
+          why: z.string(),
+        })
+        .optional(),
+    })
+    .refine((d) => d.kind === 'practice' || d.semester !== undefined, {
+      message: 'exam/assignment quizzes must declare a semester',
+      path: ['semester'],
+    }),
 });
 
 const courses = defineCollection({
@@ -159,11 +172,32 @@ const workshops = defineCollection({
   }),
 });
 
+const videos = defineCollection({
+  type: 'data',
+  schema: z
+    .object({
+      slug: z.string(),
+      title: z.string(),
+      course: courseEnum,
+      lessonSlug: z.string().min(1),
+      semester: semesterSchema,
+      provider: z.enum(['youtube', 'vimeo']),
+      videoId: z.string().min(1),
+      description: z.string().optional(),
+      durationMinutes: z.number().positive().optional(),
+    })
+    .refine((d) => d.course === 'eco-1002', {
+      message: 'videos are only supported for eco-1002',
+      path: ['course'],
+    }),
+});
+
 export const collections = {
   lessons,
   quizzes,
   instructors,
   courses,
   workshops,
+  videos,
 };
 export type QuestionT = z.infer<typeof QuestionSchema>;
