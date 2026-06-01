@@ -1,7 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildArchiveItems } from './build.ts';
-import type { LessonInput, QuizInput, VideoInput } from './types.ts';
+import {
+  buildArchiveItems,
+  deriveFacets,
+  semesterKey,
+  semesterLabel,
+} from './build.ts';
+import type { LessonInput, LessonRef, QuizInput, VideoInput } from './types.ts';
 
 const lessons: LessonInput[] = [
   {
@@ -152,4 +157,34 @@ test('exam with empty covers falls back to lessonSlug for units', () => {
   assert.ok(exam);
   assert.deepEqual(exam.lessonSlugs, ['eco-1002/solow']);
   assert.deepEqual(exam.units, ['Growth']);
+});
+
+const lessonIndex: LessonRef[] = [
+  { slug: 'eco-1002/solow', title: 'The Solow Model', unit: 'Growth' },
+];
+
+test('semesterKey / semesterLabel format correctly', () => {
+  assert.equal(semesterKey({ term: 'fall', year: 2024 }), 'fall-2024');
+  assert.equal(semesterKey(null), '');
+  assert.equal(semesterLabel({ term: 'fall', year: 2024 }), 'Fall 2024');
+});
+
+test('deriveFacets sorts semesters newest-first and lists present types', () => {
+  const items = buildArchiveItems({
+    lessons,
+    quizzes,
+    videos,
+    course: 'eco-1002',
+  });
+  const f = deriveFacets(items, lessonIndex);
+  assert.deepEqual(f.types, ['notes', 'exam', 'video']);
+  // spring 2025 is newer than fall 2024
+  assert.deepEqual(
+    f.semesters.map((s) => s.key),
+    ['spring-2025', 'fall-2024'],
+  );
+  assert.deepEqual(f.units, ['Growth']);
+  assert.deepEqual(f.lessons, [
+    { slug: 'eco-1002/solow', title: 'The Solow Model' },
+  ]);
 });

@@ -1,7 +1,11 @@
 import type {
   ArchiveItem,
+  ArchiveItemType,
+  Facets,
   LessonInput,
+  LessonRef,
   QuizInput,
+  Semester,
   VideoInput,
 } from './types.ts';
 
@@ -98,4 +102,48 @@ export function buildArchiveItems(input: {
   }
 
   return items;
+}
+
+const TYPE_ORDER: ArchiveItemType[] = ['notes', 'exam', 'assignment', 'video'];
+const TERM_RANK: Record<Semester['term'], number> = {
+  spring: 0,
+  summer: 1,
+  fall: 2,
+};
+
+export function semesterKey(s: Semester | null): string {
+  return s ? `${s.term}-${s.year}` : '';
+}
+
+export function semesterLabel(s: Semester): string {
+  const term = s.term.charAt(0).toUpperCase() + s.term.slice(1);
+  return `${term} ${s.year}`;
+}
+
+export function deriveFacets(
+  items: ArchiveItem[],
+  lessonIndex: LessonRef[],
+): Facets {
+  const presentTypes = new Set(items.map((i) => i.type));
+  const types = TYPE_ORDER.filter((t) => presentTypes.has(t));
+
+  const semMap = new Map<string, Semester>();
+  for (const i of items) {
+    if (i.semester) semMap.set(semesterKey(i.semester), i.semester);
+  }
+  const semesters = [...semMap.values()]
+    .sort((a, b) => b.year - a.year || TERM_RANK[b.term] - TERM_RANK[a.term])
+    .map((s) => ({ key: semesterKey(s), label: semesterLabel(s) }));
+
+  const units = [...new Set(items.flatMap((i) => i.units))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+
+  const referenced = new Set(items.flatMap((i) => i.lessonSlugs));
+  const lessons = lessonIndex
+    .filter((l) => referenced.has(l.slug))
+    .map((l) => ({ slug: l.slug, title: l.title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  return { types, semesters, units, lessons };
 }
