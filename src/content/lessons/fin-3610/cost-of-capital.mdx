@@ -7,6 +7,7 @@ summary: 'Practical recipes for estimating the cost of equity (via CAPM with rea
 learningObjectives:
   - 'Estimate cost of equity from CAPM with realistic input choices.'
   - 'Estimate the pre-tax and after-tax cost of debt from current market yields.'
+  - 'Assemble the WACC from the cost of equity and after-tax cost of debt at given capital-structure weights.'
   - 'Adjust for project-specific risk vs firm-wide risk in capital budgeting.'
 prerequisites:
   - 'CAPM (prior lesson).'
@@ -32,9 +33,10 @@ free cash flow → WACC. Pre-tax operating cash flow → also WACC,
 but conceptually. Get the rate-cash-flow matching wrong and your
 valuation is meaningless.
 
-This lesson focuses on estimating $r_E$ and $r_D$ in practice.
-WACC assembly is in Unit 5 (after we've covered capital structure
-properly).
+This lesson estimates $r_E$ and $r_D$ in practice and assembles them
+into the WACC. How a firm's _choice_ of capital structure changes the
+WACC, and whether an optimal debt mix exists, is the subject of Unit 5;
+here we take the weights as given and compute the rate.
 
 ## Cost of equity from CAPM
 
@@ -162,9 +164,27 @@ manufacturer.
 - Tax rate 25%.
 - $r_D^{\text{after-tax}} = 6.0 \times (1 - 0.25) = 4.5\%$.
 
-These two are the inputs to WACC (Unit 5), but they're also each
-useful on their own — $r_E$ for FCFE-based valuations, $r_D$ for
-bond-portfolio pricing.
+**Assembling the WACC**. Weight each rate by its share of the firm's
+value $V = E + D$, and use the after-tax cost of debt:
+
+$$
+r_{\text{wacc}} = \frac{E}{V} r_E + \frac{D}{V} r_D (1 - t).
+$$
+
+Say the firm is financed \$700M equity and \$300M debt, so
+$E/V = 0.70$ and $D/V = 0.30$:
+
+$$
+r_{\text{wacc}} = 0.70 \times 10.25\% + 0.30 \times 6.0\% \times 0.75 = 7.18\% + 1.35\% = 8.53\%.
+$$
+
+That 8.53% is the discount rate for the firm's free cash flow.
+Each input is also useful on its own: $r_E$ for FCFE-based
+valuations, $r_D$ for bond-portfolio pricing.
+
+The weights here are taken as given. Whether the firm could lower its
+WACC by changing the mix, and what stops it from using all debt, is
+the capital-structure question of Unit 5.
 
 ## What's hard
 
