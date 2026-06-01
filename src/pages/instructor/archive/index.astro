@@ -20,10 +20,10 @@ if (!isStaff(role)) {
 
 const { courses, videos } = await loadInstructorArchive(user.id, role);
 const canManage = isContentManager(role);
-const { editable, readOnly } = partitionByOwnership(
-  videos.map((v) => ({ ...v, createdBy: v.createdBy })),
-  { userId: user.id, canEditAll: isAdmin(role) },
-);
+const { editable, readOnly } = partitionByOwnership(videos, {
+  userId: user.id,
+  canEditAll: isAdmin(role),
+});
 
 // Only ECO 1002 supports videos; show the add form only if the viewer
 // manages eco-1002.

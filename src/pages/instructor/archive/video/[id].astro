@@ -142,6 +142,16 @@ const ecoLessons = (
           class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
         />
       </label>
+      <label class="block">
+        <span class="text-ink-muted">Duration minutes (optional)</span>
+        <input
+          name="duration_minutes"
+          type="number"
+          min="1"
+          value={v.duration_minutes ?? ''}
+          class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+        />
+      </label>
       <label class="flex items-center gap-2">
         <input type="checkbox" name="published" checked={v.published} />
         <span>Published (visible to students)</span>
