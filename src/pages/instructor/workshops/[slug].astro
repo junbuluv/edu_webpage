@@ -14,13 +14,15 @@ if (!workshop) return new Response(null, { status: 404 });
 // Authorize: only an instructor of this course (any enrollments row
 // where they're the instructor_id) can manage. Admins can view anything.
 const role = Astro.locals.profile?.role ?? 'student';
+// One enrollments row per enrolled student → many rows for a real class.
+// limit(1) + length check; .maybeSingle() errors (PGRST116) on >1 row.
 const { data: rosterRow } = await supabase
   .from('enrollments')
   .select('user_id')
   .eq('instructor_id', user.id)
   .eq('course_slug', workshop.data.course)
-  .maybeSingle();
-const canManage = role === 'admin' || !!rosterRow;
+  .limit(1);
+const canManage = role === 'admin' || (rosterRow?.length ?? 0) > 0;
 if (!canManage) {
   return new Response(null, { status: 403 });
 }

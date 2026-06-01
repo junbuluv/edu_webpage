@@ -19,13 +19,16 @@ export async function canViewCourse(
   if (isStaff(locals.profile?.role)) return true;
   const supabase = locals.supabase;
   if (!supabase) return false;
+  // A student can have one enrollments row per semester for the same course,
+  // so this may return >1 row. limit(1) + length check — .maybeSingle()
+  // errors (PGRST116) on multiple rows, wrongly denying a re-enrolled student.
   const { data } = await supabase
     .from('enrollments')
     .select('user_id')
     .eq('user_id', user.id)
     .eq('course_slug', courseSlug)
-    .maybeSingle();
-  return !!data;
+    .limit(1);
+  return !!data && data.length > 0;
 }
 
 /**
