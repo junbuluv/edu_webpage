@@ -91,6 +91,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      archive_videos: {
+        Row: {
+          id: string;
+          course_slug: string;
+          lesson_slug: string;
+          semester_term: string;
+          semester_year: number;
+          title: string;
+          provider: string;
+          video_id: string;
+          description: string | null;
+          duration_minutes: number | null;
+          created_by: string;
+          published: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_slug: string;
+          lesson_slug: string;
+          semester_term: string;
+          semester_year: number;
+          title: string;
+          provider: string;
+          video_id: string;
+          description?: string | null;
+          duration_minutes?: number | null;
+          created_by: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_slug?: string;
+          lesson_slug?: string;
+          semester_term?: string;
+          semester_year?: number;
+          title?: string;
+          provider?: string;
+          video_id?: string;
+          description?: string | null;
+          duration_minutes?: number | null;
+          created_by?: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       enrollments: {
         Row: {
           user_id: string;
