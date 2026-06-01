@@ -22,7 +22,11 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Quizzes: `src/content/quizzes/<slug>.json`
 - Content schemas (frontmatter + quiz shape): `src/content/config.ts`
 - Visualizations: `src/components/viz/`
-- Quiz engine: `src/components/quiz/Quiz.tsx`
+- Quiz engine: `src/components/quiz/Quiz.tsx`. Grading is server-side:
+  the island POSTs answers to `/api/quiz/grade` (pure `gradeQuiz()` in
+  `src/lib/quiz/grade.ts`); pages render `toPublicQuestions()`
+  (`src/lib/quiz/public.ts`), which strips answers before SSR. See
+  convention #17
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
@@ -79,7 +83,7 @@ public-repo path):
   a second person is in the repo — see "When teammates join" in
   `CONTRIBUTING.md`.
 
-CI config: `.github/workflows/ci.yml`. Two jobs:
+CI config: `.github/workflows/ci.yml`. Three jobs:
 
 - **`verify`** (typecheck + build) — **required** by branch protection.
   Status check name in sync with the ruleset.
@@ -89,6 +93,11 @@ CI config: `.github/workflows/ci.yml`. Two jobs:
   (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
   Currently **advisory**, not blocking — flip to required in the ruleset
   when ready by adding `schema-roundtrip` to `required_status_checks`.
+- **`copyright-gate`** — runs `node scripts/check-copyright.mjs` over
+  lesson MDX + quiz JSON (flags missing `credit`, external/hotlinked
+  images, `materials/` references). Also **advisory**; the deeper,
+  on-demand AI review is the `/copyright-check` skill (see "New lesson
+  figure" under Common tasks).
 
 If a job name changes, update the ruleset via:
 ```bash
@@ -183,6 +192,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     pattern lives in `src/pages/instructor/workshops/[slug].astro`
     (after PR #68). Workshop slug or other form-derived ID can be
     pulled from `formData()` to build the right target.
+17. **Quiz answers never reach the client.** Grading is server-side:
+    the `Quiz.tsx` island POSTs responses to `/api/quiz/grade`, which
+    calls the pure `gradeQuiz()` in `src/lib/quiz/grade.ts`. Pages
+    render `toPublicQuestions()` (`src/lib/quiz/public.ts`), which
+    strips `answer` / `correctIndex` / `correctIndices` / `explanation`
+    before SSR, so correct answers are never in the page source or
+    client bundle (this stops students pasting a quiz into an LLM for
+    the key). Don't pass full answer data into client props or add a
+    client-side grader. `grade.ts` is alias-free and unit-tested (see
+    "Verifying").
 
 ## Hosted Supabase gotchas
 
@@ -278,7 +297,11 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   `data={[...]}`. **Avoid textbook scans, Bloomberg screenshots, or
   third-party paid charts** — the repo is public and copyright risk is
   real. Use Wikimedia Commons as a backup for diagrams; never use the
-  `materials/` folder.
+  `materials/` folder. Before posting, run the `/copyright-check` skill:
+  it runs the deterministic `scripts/check-copyright.mjs` gate (same as
+  CI) plus the `copyright-critic` and `content-critic` agents. The
+  cleared-sources allowlist (owner-confirmed LSEG/Refinitiv, Moody's,
+  S&P) lives in `.claude/skills/copyright-check/accepted-sources.md`.
 - **Schema change**: edit `supabase/schema.sql` (idempotent, always re-runnable),
   apply in Supabase SQL editor, rerun `npm run supabase:types`, commit both
   the SQL and the regenerated `database.types.ts`.
@@ -319,11 +342,12 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
    `proseWrap: preserve` means lesson prose is never reflowed, and Prettier
    leaves `$…$` math untouched. Run it before committing.
 3. `node --test 'src/lib/**/*.test.ts'` — unit tests for pure logic
-   (aggregation, at-risk rules, CSV parsing). `node --test` strips TS types
-   but does NOT resolve `@lib/*` path aliases, so anything it tests must be
-   alias-free — that's why pure logic is split into `progress-aggregate.ts` /
-   `roster-csv.ts`, separate from the `@lib`-importing service-role modules.
-   Keep that split when adding testable logic.
+   (aggregation, at-risk rules, CSV parsing, quiz grading). `node --test`
+   strips TS types but does NOT resolve `@lib/*` path aliases, so anything
+   it tests must be alias-free — that's why pure logic is split into
+   `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts`, separate
+   from the `@lib`-importing service-role modules. Keep that split when
+   adding testable logic.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
