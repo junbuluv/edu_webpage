@@ -17,11 +17,12 @@ draft: false
 ---
 
 import BarFigure from '@components/mdx/BarFigure';
+import MMPropositionII from '@components/viz/MMPropositionII';
 
 ## The starting question
 
 Should a firm be financed mostly with debt, mostly with equity, or
-some mix? Common intuition says debt is "cheaper" — interest rates
+some mix? Common intuition says debt is "cheaper": interest rates
 on Treasuries are 4%, but expected stock returns are 10%. So
 loading up on debt should lower cost of capital and raise firm
 value. Right?
@@ -54,11 +55,12 @@ You could:
 3. Use the loan + the equity stake to replicate Firm L's payoff to
    equity holders.
 
-The replicating position costs $\alpha V_U + \alpha D_L = \alpha(V_U
-
-- D_L) = \alpha V_L \cdot (V_U + D_L)/V_L$. If $V_L > V_U$, then
-  buying L's equity costs more than the replicating portfolio, so you
-  sell L's equity and buy the cheaper replicating portfolio. Arbitrage.
+The replica costs $\alpha V_U - \alpha D_L = \alpha(V_U - D_L)$: you pay
+$\alpha V_U$ for the equity, and the personal loan brings in $\alpha D_L$
+of cash. Buying a fraction $\alpha$ of Firm L's equity directly costs
+$\alpha E_L = \alpha(V_L - D_L)$. If $V_L > V_U$, the direct stake is the
+dearer of the two, so you sell Firm L's equity and buy the cheaper
+homemade replica, banking $\alpha(V_L - V_U) > 0$ risk-free. Arbitrage.
 
 The market punishes the price discrepancy and pulls $V_L$ down to
 $V_U$. The logic also works in reverse if $V_L < V_U$. In
@@ -74,7 +76,7 @@ What it doesn't say:
 
 - It does _not_ say capital structure doesn't matter in the real
   world. The real world has taxes (next lesson), bankruptcy costs,
-  agency costs, information asymmetries — all of which break MM.
+  agency costs, information asymmetries, all of which break MM.
 - It does _not_ say debt is "free." Debt and equity claim different
   slices of the same pie; the value the firm forgoes to debt
   holders is exactly the value debt holders receive.
@@ -96,7 +98,7 @@ adds value, ask which MM assumption it relaxes.
   xKey="firm"
   series={[{ key: 'de', name: 'Debt / Equity (book)', color: '#4572a7' }]}
   yAxisLabel="D/E ratio"
-  caption="Book debt-to-equity ratios for six large US firms (approximate end-of-2024 values). MM I says capital structure shouldn't affect total firm value — yet real firms in the same broad market choose wildly different leverage. The 7× spread from Berkshire (~0.2) to Apple (~1.5) is the empirical puzzle the next three lessons (taxes, distress, signaling) work to explain."
+  caption="Book debt-to-equity ratios for six large US firms (approximate end-of-2024 values). MM I says capital structure shouldn't affect total firm value, yet real firms in the same broad market choose wildly different leverage. The 7× spread from Berkshire (~0.2) to Apple (~1.5) is the empirical puzzle the next three lessons (taxes, distress, signaling) work to explain."
   credit="Compiled from 10-K filings via SEC EDGAR"
 />
 
@@ -127,6 +129,15 @@ $$
 claim is junior to a bigger pile of debt) → higher required equity
 return. The lower cost of debt and the higher cost of equity
 exactly offset.
+
+Drag the leverage up and watch the two effects cancel. The cost of
+equity climbs, but the WACC line never moves:
+
+<MMPropositionII client:load />
+
+_Baseline: unlevered cost of capital r_U = 12%, cost of debt r_D = 5%.
+The flat green WACC line at 12% is the whole MM result; the next
+lessons add taxes and distress that bend it._
 
 ## Where MM breaks (preview of next 3 lessons)
 
