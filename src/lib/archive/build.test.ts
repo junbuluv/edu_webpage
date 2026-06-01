@@ -249,4 +249,14 @@ test('filterItems narrows by type, semester, unit, lesson, and query', () => {
   assert.equal(filterItems(items, { query: 'nonexistent' }).length, 0);
   // empty filters -> everything
   assert.equal(filterItems(items, {}).length, items.length);
+
+  // multi-facet AND: a video that is also in unit 'Growth'
+  assert.equal(filterItems(items, { type: 'video', unit: 'Growth' }).length, 1);
+  // multi-facet AND that yields zero: a video tagged with the exam's semester
+  assert.equal(
+    filterItems(items, { type: 'video', semester: 'fall-2024' }).length,
+    0,
+  );
+  // whitespace-only query is treated as no query
+  assert.equal(filterItems(items, { query: '   ' }).length, items.length);
 });
