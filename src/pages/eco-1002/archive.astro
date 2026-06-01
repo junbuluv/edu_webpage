@@ -2,11 +2,10 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ArchiveBrowser from '@components/archive/ArchiveBrowser';
 import { loadArchiveForCourse } from '@lib/archive/load';
-import { isStaff } from '@lib/roles';
+import { canViewCourse } from '@lib/archive/access';
 
 const COURSE = 'eco-1002' as const;
 const user = Astro.locals.user;
-const supabase = Astro.locals.supabase;
 
 // Gate: guests -> signin; signed-in-not-enrolled-not-staff -> notice;
 // enrolled or staff -> archive. Mirrors workshops/[slug].astro but uses
@@ -16,18 +15,7 @@ if (!user) {
     `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
   );
 }
-const staff = isStaff(Astro.locals.profile?.role);
-let enrolled = false;
-if (supabase) {
-  const { data } = await supabase
-    .from('enrollments')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .eq('course_slug', COURSE)
-    .maybeSingle();
-  enrolled = !!data;
-}
-const canView = enrolled || staff;
+const canView = await canViewCourse(Astro.locals, COURSE);
 
 const { items, facets } = canView
   ? await loadArchiveForCourse(COURSE)
