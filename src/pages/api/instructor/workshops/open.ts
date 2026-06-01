@@ -53,13 +53,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // Admin role: must be instructor for this course in some enrollment row.
   if (role === 'instructor') {
     const adminClient = getAdminClient();
+    // One enrollments row per enrolled student, so this returns MANY rows for
+    // a real class. Use limit(1) + array check — .maybeSingle() errors
+    // (PGRST116) on >1 row, wrongly denying a course with 2+ students.
     const { data: enr } = await adminClient
       .from('enrollments')
       .select('user_id')
       .eq('instructor_id', user.id)
       .eq('course_slug', courseSlug)
-      .maybeSingle();
-    if (!enr) return errorRedirect(workshopSlug, 'not_course_instructor');
+      .limit(1);
+    if (!enr || enr.length === 0) {
+      return errorRedirect(workshopSlug, 'not_course_instructor');
+    }
   }
 
   const admin = getAdminClient();
