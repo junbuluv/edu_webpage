@@ -17,6 +17,7 @@ draft: false
 ---
 
 import BarFigure from '@components/mdx/BarFigure';
+import CreditSpreadExplorer from '@components/viz/CreditSpreadExplorer';
 
 ## Where the spread comes from
 
@@ -49,6 +50,13 @@ needs a spread of about $0.02 \times 0.6 = 1.2\% = 120$ bps over
 Treasury to break even on expected return. Real-world spreads are
 typically _higher_ than this — investors demand extra premium for
 bearing the risk (not just the expected loss).
+
+<CreditSpreadExplorer client:load />
+
+_Baseline: 1.5% default probability, 50% recovery, 4% Treasury, giving
+the 75 bps break-even spread and 4.75% fair yield worked below. Drag
+recovery to zero and the break-even spread equals the default
+probability outright._
 
 ## Credit ratings
 
