@@ -1,4 +1,5 @@
 import type {
+  ArchiveFilters,
   ArchiveItem,
   ArchiveItemType,
   Facets,
@@ -146,4 +147,24 @@ export function deriveFacets(
     .sort((a, b) => a.title.localeCompare(b.title));
 
   return { types, semesters, units, lessons };
+}
+
+export function filterItems(
+  items: ArchiveItem[],
+  filters: ArchiveFilters,
+): ArchiveItem[] {
+  const tokens = (filters.query ?? '')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  return items.filter((i) => {
+    if (filters.type && i.type !== filters.type) return false;
+    if (filters.semester && semesterKey(i.semester) !== filters.semester)
+      return false;
+    if (filters.unit && !i.units.includes(filters.unit)) return false;
+    if (filters.lesson && !i.lessonSlugs.includes(filters.lesson)) return false;
+    if (tokens.length && !tokens.every((t) => i.searchText.includes(t)))
+      return false;
+    return true;
+  });
 }

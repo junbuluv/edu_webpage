@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildArchiveItems,
   deriveFacets,
+  filterItems,
   semesterKey,
   semesterLabel,
 } from './build.ts';
@@ -222,4 +223,30 @@ test('deriveFacets orders same-year semesters fall-before-spring; labels all ter
     f.semesters.map((s) => s.key),
     ['fall-2025', 'spring-2025'],
   );
+});
+
+test('filterItems narrows by type, semester, unit, lesson, and query', () => {
+  const items = buildArchiveItems({
+    lessons,
+    quizzes,
+    videos,
+    course: 'eco-1002',
+  });
+
+  assert.equal(filterItems(items, { type: 'video' }).length, 1);
+  assert.equal(filterItems(items, { semester: 'fall-2024' }).length, 1);
+  // notes have no semester -> excluded when a semester is selected
+  assert.equal(
+    filterItems(items, { semester: 'fall-2024' }).every(
+      (i) => i.type !== 'notes',
+    ),
+    true,
+  );
+  assert.equal(filterItems(items, { unit: 'Growth' }).length, 3);
+  assert.equal(filterItems(items, { lesson: 'eco-1002/solow' }).length, 3);
+  // keyword: all tokens must appear in searchText
+  assert.equal(filterItems(items, { query: 'solow lecture' }).length, 1);
+  assert.equal(filterItems(items, { query: 'nonexistent' }).length, 0);
+  // empty filters -> everything
+  assert.equal(filterItems(items, {}).length, items.length);
 });
