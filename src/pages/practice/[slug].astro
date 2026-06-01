@@ -4,6 +4,7 @@ import Quiz from '@components/quiz/Quiz';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { getEntry } from 'astro:content';
 import { toPublicQuestions } from '@lib/quiz/public';
+import { isStaff } from '@lib/roles';
 
 // SSR so Astro.locals.user is populated by middleware and the header
 // renders the signed-in state. Lookup the quiz by slug on each request.
@@ -17,6 +18,31 @@ if (!entry) {
   return new Response(null, { status: 404 });
 }
 const quiz = entry.data;
+
+// Practice quizzes stay public. Archive papers (exam/assignment) are
+// gated to enrolled students + staff so they can't be reached by
+// guessing a slug.
+if (quiz.kind !== 'practice') {
+  const user = Astro.locals.user;
+  const supabase = Astro.locals.supabase;
+  if (!user) {
+    return Astro.redirect(`/auth/signin?next=${Astro.url.pathname}`);
+  }
+  const staff = isStaff(Astro.locals.profile?.role);
+  let enrolled = false;
+  if (supabase) {
+    const { data } = await supabase
+      .from('enrollments')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .eq('course_slug', quiz.course)
+      .maybeSingle();
+    enrolled = !!data;
+  }
+  if (!enrolled && !staff) {
+    return Astro.redirect(`/${quiz.course}/archive`);
+  }
+}
 ---
 
 <BaseLayout title={quiz.title}>

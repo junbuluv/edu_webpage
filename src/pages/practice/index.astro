@@ -19,9 +19,11 @@ for (const l of lessons) {
 const quizOrder = (lessonSlug?: string) =>
   lessonSlug ? (lessonOrder.get(lessonSlug) ?? 999) : 999;
 
-// Group quizzes by course.
+// Group quizzes by course (practice kind only; exams/assignments live
+// in each course's gated archive).
 const byCourse = new Map<string, typeof quizzes>();
 for (const q of quizzes) {
+  if (q.data.kind !== 'practice') continue;
   const arr = byCourse.get(q.data.course) ?? [];
   arr.push(q);
   byCourse.set(q.data.course, arr);
@@ -40,7 +42,7 @@ const sections = courseEntries
   .filter((c) => byCourse.has(c.data.slug))
   .map((c) => ({ course: c.data, quizzes: byCourse.get(c.data.slug)! }));
 
-const totalQuizzes = quizzes.length;
+const totalQuizzes = quizzes.filter((q) => q.data.kind === 'practice').length;
 ---
 
 <BaseLayout title="Practice">
