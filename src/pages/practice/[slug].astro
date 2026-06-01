@@ -26,7 +26,9 @@ if (quiz.kind !== 'practice') {
   const user = Astro.locals.user;
   const supabase = Astro.locals.supabase;
   if (!user) {
-    return Astro.redirect(`/auth/signin?next=${Astro.url.pathname}`);
+    return Astro.redirect(
+      `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+    );
   }
   const staff = isStaff(Astro.locals.profile?.role);
   let enrolled = false;
@@ -43,12 +45,19 @@ if (quiz.kind !== 'practice') {
     return Astro.redirect(`/${quiz.course}/archive`);
   }
 }
+
+const kindLabel =
+  quiz.kind === 'exam'
+    ? 'Exam'
+    : quiz.kind === 'assignment'
+      ? 'Assignment'
+      : 'Practice';
 ---
 
 <BaseLayout title={quiz.title}>
   <div class="mx-auto max-w-3xl px-4 py-12">
     <p class="text-xs uppercase tracking-wide text-accent font-medium">
-      Practice · {quiz.course}
+      {kindLabel} · {quiz.course}
     </p>
     <h1 class="text-2xl font-semibold tracking-tight mt-2">{quiz.title}</h1>
 

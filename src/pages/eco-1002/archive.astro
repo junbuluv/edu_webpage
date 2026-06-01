@@ -12,7 +12,9 @@ const supabase = Astro.locals.supabase;
 // enrolled or staff -> archive. Mirrors workshops/[slug].astro but uses
 // isStaff (instructor/ta/admin), per CLAUDE.md convention #12.
 if (!user) {
-  return Astro.redirect(`/auth/signin?next=${Astro.url.pathname}`);
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
 }
 const staff = isStaff(Astro.locals.profile?.role);
 let enrolled = false;

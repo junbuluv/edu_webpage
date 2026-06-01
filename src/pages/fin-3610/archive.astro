@@ -9,7 +9,9 @@ const user = Astro.locals.user;
 const supabase = Astro.locals.supabase;
 
 if (!user) {
-  return Astro.redirect(`/auth/signin?next=${Astro.url.pathname}`);
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
 }
 const staff = isStaff(Astro.locals.profile?.role);
 let enrolled = false;
