@@ -714,6 +714,8 @@ create table if not exists public.archive_videos (
   published boolean not null default true,
   deleted_at timestamptz,
   created_at timestamptz not null default now(),
+  -- updated_at is maintained by the mutation API (set to now() on update);
+  -- no trigger, consistent with the rest of this schema.
   updated_at timestamptz not null default now(),
   check (course_slug = 'eco-1002'),
   check (semester_term in ('spring', 'summer', 'fall')),
@@ -721,8 +723,6 @@ create table if not exists public.archive_videos (
   check (provider in ('youtube', 'vimeo'))
 );
 
-create index if not exists archive_videos_course_idx
-  on public.archive_videos (course_slug);
 create index if not exists archive_videos_live_idx
   on public.archive_videos (course_slug)
   where deleted_at is null and published;

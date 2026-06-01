@@ -96,10 +96,10 @@ export type Database = {
           id: string;
           course_slug: string;
           lesson_slug: string;
-          semester_term: string;
+          semester_term: 'spring' | 'summer' | 'fall';
           semester_year: number;
           title: string;
-          provider: string;
+          provider: 'youtube' | 'vimeo';
           video_id: string;
           description: string | null;
           duration_minutes: number | null;
@@ -113,10 +113,10 @@ export type Database = {
           id?: string;
           course_slug: string;
           lesson_slug: string;
-          semester_term: string;
+          semester_term: 'spring' | 'summer' | 'fall';
           semester_year: number;
           title: string;
-          provider: string;
+          provider: 'youtube' | 'vimeo';
           video_id: string;
           description?: string | null;
           duration_minutes?: number | null;
@@ -130,10 +130,10 @@ export type Database = {
           id?: string;
           course_slug?: string;
           lesson_slug?: string;
-          semester_term?: string;
+          semester_term?: 'spring' | 'summer' | 'fall';
           semester_year?: number;
           title?: string;
-          provider?: string;
+          provider?: 'youtube' | 'vimeo';
           video_id?: string;
           description?: string | null;
           duration_minutes?: number | null;
