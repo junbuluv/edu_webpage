@@ -129,3 +129,27 @@ test('a different course yields no videos and only its own items', () => {
     true,
   );
 });
+
+test('exam with empty covers falls back to lessonSlug for units', () => {
+  const fallbackQuiz: QuizInput[] = [
+    {
+      slug: 'eco-1002-final-f24',
+      course: 'eco-1002',
+      title: 'Final',
+      kind: 'exam',
+      lessonSlug: 'eco-1002/solow',
+      covers: [],
+      semester: { term: 'fall', year: 2024 },
+    },
+  ];
+  const items = buildArchiveItems({
+    lessons,
+    quizzes: fallbackQuiz,
+    videos: [],
+    course: 'eco-1002',
+  });
+  const exam = items.find((i) => i.type === 'exam');
+  assert.ok(exam);
+  assert.deepEqual(exam.lessonSlugs, ['eco-1002/solow']);
+  assert.deepEqual(exam.units, ['Growth']);
+});

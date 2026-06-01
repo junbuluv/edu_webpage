@@ -10,10 +10,7 @@ export function normalizeLessonSlug(slug: string): string {
   return slug.replace(/\.mdx?$/, '');
 }
 
-function unitsFor(
-  slugs: string[],
-  unitBySlug: Map<string, string>,
-): string[] {
+function unitsFor(slugs: string[], unitBySlug: Map<string, string>): string[] {
   const out: string[] = [];
   for (const s of slugs) {
     const u = unitBySlug.get(s);
