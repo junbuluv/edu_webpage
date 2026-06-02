@@ -52,14 +52,15 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
         <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
           You're not listed as the instructor for any course yet. Ask an admin
           to add an enrollment row with your user id as the
-          <code>instructor_id</code> for the courses you teach.
+          <code>instructor_id</code> for the courses you teach. You can still
+          manage archive content below.
         </p>
       )
     }
 
-    {
-      instructorCourses.size > 0 && (
-        <div class="mt-10 space-y-6">
+    <div class="mt-10 space-y-6">
+      {
+        instructorCourses.size > 0 && (
           <section class="rounded-lg border border-slate-200 p-5">
             <h2 class="text-xl font-semibold">Classes</h2>
             <p class="mt-1 text-sm text-ink-muted">
@@ -76,7 +77,11 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
               </a>
             </div>
           </section>
+        )
+      }
 
+      {
+        instructorCourses.size > 0 && (
           <section class="rounded-lg border border-slate-200 p-5">
             <h2 class="text-xl font-semibold">Workshops</h2>
             <p class="mt-1 text-sm text-ink-muted">
@@ -98,26 +103,26 @@ const signedInAs = Astro.locals.profile?.display_name ?? user.email;
               </a>
             </div>
           </section>
+        )
+      }
 
-          <section class="rounded-lg border border-slate-200 p-5">
-            <h2 class="text-xl font-semibold">Archive content</h2>
-            <p class="mt-1 text-sm text-ink-muted">
-              Add lecture videos (ECO 1002), plus past exams and assignments, to
-              the course archive. Manage the items you created; enrolled
-              students see published items.
-            </p>
-            <div class="mt-4">
-              <a
-                href="/instructor/archive"
-                class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                Manage archive →
-              </a>
-            </div>
-          </section>
+      <section class="rounded-lg border border-slate-200 p-5">
+        <h2 class="text-xl font-semibold">Archive content</h2>
+        <p class="mt-1 text-sm text-ink-muted">
+          Add lecture videos (ECO 1002), plus past exams and assignments, to the
+          course archive. Manage the items you created; enrolled students see
+          published items.
+        </p>
+        <div class="mt-4">
+          <a
+            href="/instructor/archive"
+            class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Manage archive content →
+          </a>
         </div>
-      )
-    }
+      </section>
+    </div>
 
     <section class="mt-12 border-t border-slate-200 pt-6 text-sm">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
