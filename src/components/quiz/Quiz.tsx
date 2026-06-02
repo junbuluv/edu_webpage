@@ -54,7 +54,9 @@ export default function Quiz({ slug, title, questions }: Props) {
           answers,
         });
       } catch {
-        setError("Your score was graded, but we couldn't save this attempt to your progress.");
+        setError(
+          "Your score was graded, but we couldn't save this attempt to your progress.",
+        );
       }
     } catch (err) {
       setError(

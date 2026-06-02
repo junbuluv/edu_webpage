@@ -53,11 +53,7 @@
         "Inflation stayed anchored to expectations throughout 2021 because unemployment remained at the natural rate",
         "Aggressive Fed tightening through 2023 closed the output gap back toward zero and allowed inflation to ease"
       ],
-      "correctIndices": [
-        0,
-        1,
-        3
-      ],
+      "correctIndices": [0, 1, 3],
       "explanation": "The lesson describes the -3% trough, the +2% gap with unemployment near 3.5%, and the Fed tightening that closed the gap. The 'inflation stayed anchored' choice is incorrect: by mid-2022 the positive output gap pushed unemployment well below the natural rate, so inflation overshot expectations rather than staying anchored.",
       "points": 2
     },

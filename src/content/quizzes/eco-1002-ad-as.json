@@ -43,10 +43,7 @@
         "A spike in wage expectations that shifts SRAS up/left.",
         "A monetary expansion that increases the money supply."
       ],
-      "correctIndices": [
-        0,
-        2
-      ],
+      "correctIndices": [0, 2],
       "explanation": "Supply shocks shift SRAS directly. A rise in oil prices raises production costs at every level of output (option 0), and a spike in wage expectations raises the costs firms expect to pay, shifting SRAS up/left (option 2). Options 1 and 3 are demand shocks that shift AD.",
       "points": 2
     },

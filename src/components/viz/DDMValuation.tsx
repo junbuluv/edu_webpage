@@ -126,7 +126,8 @@ export default function DDMValuation() {
 
       <div className="md:col-span-2">
         <h4 className="text-sm font-semibold mb-2">
-          Price vs retention (benchmark = pay out everything, ${base.toFixed(2)})
+          Price vs retention (benchmark = pay out everything, ${base.toFixed(2)}
+          )
         </h4>
         <div className="h-72">
           <ResponsiveContainer>
@@ -145,26 +146,45 @@ export default function DDMValuation() {
               <YAxis tickFormatter={(v) => `$${v}`} />
               <Tooltip
                 formatter={(v: number) => `$${v.toFixed(2)}`}
-                labelFormatter={(l: number) => `retention = ${(l * 100).toFixed(0)}%`}
+                labelFormatter={(l: number) =>
+                  `retention = ${(l * 100).toFixed(0)}%`
+                }
               />
               <ReferenceLine
                 y={base}
                 stroke="#94a3b8"
                 strokeDasharray="4 4"
-                label={{ value: 'no-growth benchmark', position: 'insideTopRight', fontSize: 10 }}
+                label={{
+                  value: 'no-growth benchmark',
+                  position: 'insideTopRight',
+                  fontSize: 10,
+                }}
               />
-              <Line type="monotone" dataKey="price" name="P₀(b)" stroke="#2563eb" dot={false} connectNulls />
+              <Line
+                type="monotone"
+                dataKey="price"
+                name="P₀(b)"
+                stroke="#2563eb"
+                dot={false}
+                connectNulls
+              />
               {P !== null && (
-                <ReferenceDot x={s.retention} y={P} r={4} fill="#dc2626" stroke="none" />
+                <ReferenceDot
+                  x={s.retention}
+                  y={P}
+                  r={4}
+                  fill="#dc2626"
+                  stroke="none"
+                />
               )}
             </LineChart>
           </ResponsiveContainer>
         </div>
         <p className="mt-2 text-xs text-ink-muted">
-          When the return on new investment exceeds r_E, the curve rises above the
-          benchmark: retaining and reinvesting creates value. When it is below
-          r_E, the curve falls and the same growth destroys value. Equal to r_E,
-          the line is flat, so growth is value-neutral.
+          When the return on new investment exceeds r_E, the curve rises above
+          the benchmark: retaining and reinvesting creates value. When it is
+          below r_E, the curve falls and the same growth destroys value. Equal
+          to r_E, the line is flat, so growth is value-neutral.
         </p>
       </div>
     </div>
@@ -190,7 +210,9 @@ function Stat({
           : 'text-ink';
   return (
     <div className="rounded bg-slate-50 p-3">
-      <div className="text-xs uppercase tracking-wide text-ink-muted">{label}</div>
+      <div className="text-xs uppercase tracking-wide text-ink-muted">
+        {label}
+      </div>
       <div className={`mt-0.5 text-lg font-semibold ${color}`}>{value}</div>
     </div>
   );

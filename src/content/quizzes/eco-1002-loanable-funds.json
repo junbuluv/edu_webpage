@@ -57,11 +57,7 @@
         "The rise in the real interest rate stimulates additional private saving",
         "The deficit completely displaces all new investment"
       ],
-      "correctIndices": [
-        0,
-        1,
-        2
-      ],
+      "correctIndices": [0, 1, 2],
       "explanation": "A leftward supply shift raises the equilibrium real interest rate. The higher rate reduces investment (demand slides down) and increases private saving (supply expands partly). However, investment does not fall by the full deficit amount; some is absorbed by extra saving, and some crowding out still occurs.",
       "points": 2
     },

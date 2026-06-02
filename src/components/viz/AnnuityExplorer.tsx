@@ -26,7 +26,13 @@ interface State {
   T: number; // periods (annuity streams only)
 }
 
-const baseline: State = { type: 'perpetuity', C: 1000, r: 0.05, g: 0.02, T: 10 };
+const baseline: State = {
+  type: 'perpetuity',
+  C: 1000,
+  r: 0.05,
+  g: 0.02,
+  T: 10,
+};
 
 const LABELS: Record<Stream, string> = {
   perpetuity: 'Perpetuity  C / r',
@@ -35,7 +41,8 @@ const LABELS: Record<Stream, string> = {
   'growing-annuity': 'Growing annuity  (C/(r−g))·[1 − ((1+g)/(1+r))ᵀ]',
 };
 
-const isGrowing = (t: Stream) => t === 'growing-perp' || t === 'growing-annuity';
+const isGrowing = (t: Stream) =>
+  t === 'growing-perp' || t === 'growing-annuity';
 const isFinite_ = (t: Stream) => t === 'annuity' || t === 'growing-annuity';
 
 function pv(type: Stream, C: number, r: number, g: number, T: number): number {
@@ -62,7 +69,8 @@ export default function AnnuityExplorer() {
     for (let i = 0; i <= 60; i += 1) {
       const r = rMin + (0.16 - rMin) * (i / 60);
       const v = pv(s.type, s.C, r, s.g, s.T);
-      if (Number.isFinite(v) && v >= 0) pts.push({ r: +(r * 100).toFixed(2), pv: Math.round(v) });
+      if (Number.isFinite(v) && v >= 0)
+        pts.push({ r: +(r * 100).toFixed(2), pv: Math.round(v) });
     }
     return pts;
   }, [s]);
@@ -91,13 +99,45 @@ export default function AnnuityExplorer() {
       </div>
 
       <div className="flex flex-wrap gap-6">
-        <Slider label="Payment C" v={s.C} min={100} max={5000} step={100} fmt={(v) => '$' + v.toLocaleString()} onChange={(v) => setS((x) => ({ ...x, C: v }))} />
-        <Slider label="Discount rate r" v={s.r} min={0.01} max={0.15} step={0.0025} fmt={pct} onChange={(v) => setS((x) => ({ ...x, r: v }))} />
+        <Slider
+          label="Payment C"
+          v={s.C}
+          min={100}
+          max={5000}
+          step={100}
+          fmt={(v) => '$' + v.toLocaleString()}
+          onChange={(v) => setS((x) => ({ ...x, C: v }))}
+        />
+        <Slider
+          label="Discount rate r"
+          v={s.r}
+          min={0.01}
+          max={0.15}
+          step={0.0025}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, r: v }))}
+        />
         {isGrowing(s.type) && (
-          <Slider label="Growth g" v={s.g} min={0} max={0.1} step={0.0025} fmt={pct} onChange={(v) => setS((x) => ({ ...x, g: v }))} />
+          <Slider
+            label="Growth g"
+            v={s.g}
+            min={0}
+            max={0.1}
+            step={0.0025}
+            fmt={pct}
+            onChange={(v) => setS((x) => ({ ...x, g: v }))}
+          />
         )}
         {isFinite_(s.type) && (
-          <Slider label="Periods T" v={s.T} min={1} max={40} step={1} fmt={(v) => v + ' yr'} onChange={(v) => setS((x) => ({ ...x, T: v }))} />
+          <Slider
+            label="Periods T"
+            v={s.T}
+            min={1}
+            max={40}
+            step={1}
+            fmt={(v) => v + ' yr'}
+            onChange={(v) => setS((x) => ({ ...x, T: v }))}
+          />
         )}
         <button
           type="button"
@@ -111,33 +151,66 @@ export default function AnnuityExplorer() {
       <p className="mt-3 text-sm">
         Present value at r = {pct(s.r)}:{' '}
         <strong className="text-accent">
-          {currentValid ? '$' + Math.round(current).toLocaleString() : 'undefined (needs r > g)'}
+          {currentValid
+            ? '$' + Math.round(current).toLocaleString()
+            : 'undefined (needs r > g)'}
         </strong>
         {isGrowing(s.type) && currentValid && (
-          <span className="text-ink-muted">, driven by the gap r − g = {pct(s.r - s.g)}</span>
+          <span className="text-ink-muted">
+            , driven by the gap r − g = {pct(s.r - s.g)}
+          </span>
         )}
       </p>
 
       <div className="mt-3 h-72">
         <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 8, right: 16, bottom: 16, left: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
+          >
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
               dataKey="r"
               type="number"
               domain={['dataMin', 'dataMax']}
               tickFormatter={(v) => `${v}%`}
-              label={{ value: 'discount rate r', position: 'insideBottom', offset: -6, fontSize: 11 }}
+              label={{
+                value: 'discount rate r',
+                position: 'insideBottom',
+                offset: -6,
+                fontSize: 11,
+              }}
             />
             <YAxis
               tickFormatter={(v) => '$' + (v / 1000).toFixed(0) + 'k'}
               width={56}
-              label={{ value: 'present value', angle: -90, position: 'insideLeft', fontSize: 11 }}
+              label={{
+                value: 'present value',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
             />
-            <Tooltip formatter={(v: number) => '$' + v.toLocaleString()} labelFormatter={(l: number) => `r = ${l}%`} />
-            <Line type="monotone" dataKey="pv" name="PV" stroke="#4572a7" strokeWidth={2} dot={false} />
+            <Tooltip
+              formatter={(v: number) => '$' + v.toLocaleString()}
+              labelFormatter={(l: number) => `r = ${l}%`}
+            />
+            <Line
+              type="monotone"
+              dataKey="pv"
+              name="PV"
+              stroke="#4572a7"
+              strokeWidth={2}
+              dot={false}
+            />
             {currentValid && s.r >= rMin && (
-              <ReferenceDot x={+(s.r * 100).toFixed(2)} y={Math.round(current)} r={5} fill="#dc2626" stroke="none" />
+              <ReferenceDot
+                x={+(s.r * 100).toFixed(2)}
+                y={Math.round(current)}
+                r={5}
+                fill="#dc2626"
+                stroke="none"
+              />
             )}
           </LineChart>
         </ResponsiveContainer>

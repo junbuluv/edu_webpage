@@ -40,16 +40,43 @@ const roe = (s: State) => s.margin * s.turnover * s.em;
 export default function DuPontExplorer() {
   const [s, setS] = useState<State>(baseline);
 
-  const bars = ARCHETYPES.map((a) => ({ name: a.name, roe: +(roe(a.s) * 100).toFixed(1) }));
+  const bars = ARCHETYPES.map((a) => ({
+    name: a.name,
+    roe: +(roe(a.s) * 100).toFixed(1),
+  }));
   const mine = +(roe(s) * 100).toFixed(1);
   const yMax = Math.max(25, Math.ceil((mine + 5) / 5) * 5);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap gap-6">
-        <Slider label="Net margin" v={s.margin} min={0.01} max={0.3} step={0.005} fmt={pct} onChange={(v) => setS((x) => ({ ...x, margin: v }))} />
-        <Slider label="Asset turnover" v={s.turnover} min={0.05} max={3} step={0.05} fmt={(v) => v.toFixed(2) + '×'} onChange={(v) => setS((x) => ({ ...x, turnover: v }))} />
-        <Slider label="Equity multiplier" v={s.em} min={1} max={15} step={0.5} fmt={(v) => v.toFixed(1) + '×'} onChange={(v) => setS((x) => ({ ...x, em: v }))} />
+        <Slider
+          label="Net margin"
+          v={s.margin}
+          min={0.01}
+          max={0.3}
+          step={0.005}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, margin: v }))}
+        />
+        <Slider
+          label="Asset turnover"
+          v={s.turnover}
+          min={0.05}
+          max={3}
+          step={0.05}
+          fmt={(v) => v.toFixed(2) + '×'}
+          onChange={(v) => setS((x) => ({ ...x, turnover: v }))}
+        />
+        <Slider
+          label="Equity multiplier"
+          v={s.em}
+          min={1}
+          max={15}
+          step={0.5}
+          fmt={(v) => v.toFixed(1) + '×'}
+          onChange={(v) => setS((x) => ({ ...x, em: v }))}
+        />
         <button
           type="button"
           onClick={() => setS(baseline)}
@@ -60,7 +87,9 @@ export default function DuPontExplorer() {
       </div>
 
       <div className="mt-2 flex flex-wrap gap-2">
-        <span className="self-center text-xs text-ink-muted">Load archetype:</span>
+        <span className="self-center text-xs text-ink-muted">
+          Load archetype:
+        </span>
         {ARCHETYPES.map((a) => (
           <button
             key={a.name}
@@ -74,25 +103,53 @@ export default function DuPontExplorer() {
       </div>
 
       <p className="mt-3 text-sm">
-        Your firm: ROE = {pct(s.margin)} × {s.turnover.toFixed(2)} × {s.em.toFixed(1)} ={' '}
+        Your firm: ROE = {pct(s.margin)} × {s.turnover.toFixed(2)} ×{' '}
+        {s.em.toFixed(1)} ={' '}
         <strong className="text-accent">{mine.toFixed(1)}%</strong>
       </p>
 
       <div className="mt-3 h-72">
         <ResponsiveContainer>
-          <BarChart data={bars} margin={{ top: 16, right: 16, bottom: 8, left: 8 }}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+          <BarChart
+            data={bars}
+            margin={{ top: 16, right: 16, bottom: 8, left: 8 }}
+          >
+            <CartesianGrid
+              stroke="#e2e8f0"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
-            <YAxis domain={[0, yMax]} tickFormatter={(v) => `${v}%`} width={44} label={{ value: 'ROE', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+            <YAxis
+              domain={[0, yMax]}
+              tickFormatter={(v) => `${v}%`}
+              width={44}
+              label={{
+                value: 'ROE',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
+            />
             <Tooltip formatter={(v: number) => `${v}%`} />
             <ReferenceLine
               y={mine}
               stroke="#dc2626"
               strokeDasharray="5 4"
-              label={{ value: `your firm ${mine.toFixed(1)}%`, position: 'right', fontSize: 11, fill: '#dc2626' }}
+              label={{
+                value: `your firm ${mine.toFixed(1)}%`,
+                position: 'right',
+                fontSize: 11,
+                fill: '#dc2626',
+              }}
             />
             <Bar dataKey="roe" name="ROE" fill="#4572a7">
-              <LabelList dataKey="roe" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 11 }} />
+              <LabelList
+                dataKey="roe"
+                position="top"
+                formatter={(v: number) => `${v}%`}
+                style={{ fontSize: 11 }}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
