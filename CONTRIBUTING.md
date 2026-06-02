@@ -1,7 +1,7 @@
 # Contributing
 
 Thanks for working on Baruch Econ & Finance Studio. This document is the short version of "how
-to add things without breaking other things." For the *why*, see
+to add things without breaking other things." For the _why_, see
 `ARCHITECTURE.md`. For agent collaborators, see `AGENTS.md`.
 
 ## Local setup
@@ -137,8 +137,8 @@ If you need a new question type, **extend the union and the renderer in
 ## Adding a lesson figure
 
 Lessons can carry static figures alongside interactive viz: the figure
-shows the *empirical record* (what the world has looked like), the viz
-shows the *parameter exploration* (what happens when you change the
+shows the _empirical record_ (what the world has looked like), the viz
+shows the _parameter exploration_ (what happens when you change the
 inputs). Both jobs per lesson where it fits.
 
 Two MDX components in `src/components/mdx/`:
@@ -201,6 +201,7 @@ sibling repo or use Git LFS on a private branch.
 Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is tracked via stamp-in with three barriers: open/close window, geofence, and one-stamp-per-device.
 
 **Two course models:**
+
 - **ECO 1002** runs four per-day sections — `CML` (Mon), `CTL` (Tue), `CWL` (Wed), `CRL` (Thu). The instructor opens one administration per section per week (four per workshop per week).
 - **FIN 3610** runs one workshop window per week, no per-day sections. The `section` column is `NULL` for FIN administrations.
 
@@ -208,6 +209,7 @@ Workshops are weekly small-group sessions tied to a lesson. Content lives in `sr
 `/instructor/workshops/<slug>` — fill the form, set the open/close window, click the open button. The form shows a section picker only for ECO.
 
 **Or via SQL (ECO 1002 with section):**
+
 ```sql
 insert into public.workshop_administrations (
   workshop_slug, course_slug, section, week_of, instructor_id,
@@ -224,6 +226,7 @@ insert into public.workshop_administrations (
 ```
 
 **Or via SQL (FIN 3610, no section):**
+
 ```sql
 insert into public.workshop_administrations (
   workshop_slug, course_slug, section, week_of, instructor_id,
@@ -240,6 +243,7 @@ insert into public.workshop_administrations (
 ```
 
 Two partial unique indexes enforce no-duplicates per mode:
+
 - `(workshop_slug, section, week_of) where section is not null` — ECO can't double-open the same section in the same week.
 - `(workshop_slug, week_of) where section is null` — FIN can't double-open the same workshop in the same week.
 
@@ -297,11 +301,28 @@ People approved for `admin` but whose accounts don't exist yet. Promote
 them immediately after they sign up at `/auth/signup`, using the SQL
 above. Until they sign up, the row in `auth.users` doesn't exist, so the
 `update` would be a silent no-op — re-run it once their account is
-created. The canonical roster of *current* admins lives in the
+created. The canonical roster of _current_ admins lives in the
 `public.profiles` table (`select id from public.profiles where role =
 'admin'`).
 
 - `konstantin.kucheryavyy@baruch.cuny.edu` — Konstantin Kucheryavyy.
+
+## Managing classes and archive content (in-app)
+
+Role promotion stays SQL-only (above), but day-to-day class and content
+management now has in-app surfaces for staff:
+
+- **Roster CRUD** — `/instructor/classes/<course>` lets an instructor/admin
+  add, drop, and edit individual students (add by email, edit display
+  name/section, drop). Bulk enrollment is still the CSV importer at
+  `/instructor/classes/import`. No SQL needed for either.
+- **Course archive** — `/instructor/archive` (staff only) manages
+  prior-term videos, exam/assignment file uploads, and authored quizzes;
+  students/staff browse at `/{course}/archive`. Videos are ECO-1002 only.
+
+All write paths use the service-role admin client behind an app-side
+ownership check (instructor must own the course, or be admin) and are
+recorded in `audit_log` (`manage_enrollment` / `manage_archive`).
 
 ## Security primitives
 
@@ -384,6 +405,7 @@ Schedules (UTC):
 **enabled by the project owner** (Database → Extensions → "pg_cron" →
 Enable). Until then, the function definitions still install and can be
 invoked manually:
+
 ```sql
 select public.purge_inactive_accounts();
 select public.purge_old_quiz_attempts();
@@ -393,6 +415,7 @@ To change the cutoff window, pass the argument:
 `select public.purge_inactive_accounts(36);` (36 months instead of 24).
 
 To inspect what cron will run next:
+
 ```sql
 select * from cron.job;
 select * from cron.job_run_details order by start_time desc limit 20;
@@ -401,11 +424,18 @@ select * from cron.job_run_details order by start_time desc limit 20;
 ### Audit log
 
 `src/lib/audit.ts` exposes `logDisclosure(ctx)`. Every staff read of an
-individual student's record should call it. The helper:
+individual student's record — and every staff write that discloses or
+mutates student/content data (roster CRUD, archive management) — should
+call it. The helper:
 
 - writes through the service-role client (RLS denies regular inserts),
 - HMACs `client_ip` and `user-agent`,
 - captures `actor_id`, `actor_role`, `action`, `target_user_id`, `metadata`.
+
+On mutation paths where an audit-write failure shouldn't break the user
+action, use `logDisclosureSafe(ctx)` — it logs a console error and
+swallows the failure instead of throwing. Valid `action` values live in
+the `DisclosureAction` union in `audit.ts`.
 
 Do **not** insert into `audit_log` from a page or component. The single
 chokepoint is enforced by RLS denying all writes from anon/student clients.
@@ -450,7 +480,7 @@ If yes-no-yes, it's probably fine. Otherwise expect pushback.
 - TypeScript, strict mode.
 - Path aliases: `@components/*`, `@layouts/*`, `@lib/*`, `@content/*`, `@/*`.
 - No comments explaining what the code says. Reserve comments for non-obvious
-  *why* (parameter calibration rationale, RLS subtleties).
+  _why_ (parameter calibration rationale, RLS subtleties).
 - React: per-component `useState` is fine; reach for Zustand only when 3+
   components share state on a page.
 - Tailwind utility classes; no shadcn-ui unless we commit to it across the
@@ -503,13 +533,13 @@ in `astro.config.mjs` is the canonical place for build-time settings.
    checked on a Supabase var, the prod runtime gets `undefined` and every
    authenticated request redirects to `/auth/setup-required`:
 
-   | Variable | Value | Notes |
-   |---|---|---|
-   | `PUBLIC_SUPABASE_URL` | Supabase project URL | From Supabase → Settings → API |
-   | `PUBLIC_SUPABASE_ANON_KEY` | anon public JWT (`eyJ...`) | Same panel |
-   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`) | Mark as Sensitive |
-   | `PUBLIC_SITE_URL` | `https://<your-deploy>.vercel.app` | Update for custom domains |
-   | `PII_HMAC_SECRET` | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive |
+   | Variable                    | Value                                   | Notes                          |
+   | --------------------------- | --------------------------------------- | ------------------------------ |
+   | `PUBLIC_SUPABASE_URL`       | Supabase project URL                    | From Supabase → Settings → API |
+   | `PUBLIC_SUPABASE_ANON_KEY`  | anon public JWT (`eyJ...`)              | Same panel                     |
+   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`)             | Mark as Sensitive              |
+   | `PUBLIC_SITE_URL`           | `https://<your-deploy>.vercel.app`      | Update for custom domains      |
+   | `PII_HMAC_SECRET`           | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive              |
 
 4. Update Supabase Authentication → **URL Configuration**:
    - **Site URL**: same as `PUBLIC_SITE_URL`
@@ -519,6 +549,7 @@ in `astro.config.mjs` is the canonical place for build-time settings.
    deploys ~30–90 s.
 
 6. End-to-end verify with `curl`:
+
    ```bash
    SITE=https://<your-deploy>.vercel.app
    curl -s -o /dev/null -w "/auth/signin: %{http_code}\n" $SITE/auth/signin
@@ -608,11 +639,11 @@ domain. Both use the same domain via different DNS record types.
 
 Three sub-cases:
 
-| Situation | Action | Effort |
-|---|---|---|
-| You own a personal domain already (e.g., `<yourname>.com`) | Use it. The web side keeps pointing at `*.vercel.app`; only email records get added. | Free, 10 min |
-| You don't own a domain | Register one — Cloudflare Registrar (~$10/yr, at-cost), Namecheap, Porkbun. | ~$10/yr, 5 min |
-| You want `noreply@econ.baruch.cuny.edu` | BCTC ticket for both the subdomain AND authorization for an external sender to send mail from it. Highest deliverability long-term; not blocking for the immediate launch. | Days–weeks, $0 |
+| Situation                                                  | Action                                                                                                                                                                     | Effort         |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| You own a personal domain already (e.g., `<yourname>.com`) | Use it. The web side keeps pointing at `*.vercel.app`; only email records get added.                                                                                       | Free, 10 min   |
+| You don't own a domain                                     | Register one — Cloudflare Registrar (~$10/yr, at-cost), Namecheap, Porkbun.                                                                                                | ~$10/yr, 5 min |
+| You want `noreply@econ.baruch.cuny.edu`                    | BCTC ticket for both the subdomain AND authorization for an external sender to send mail from it. Highest deliverability long-term; not blocking for the immediate launch. | Days–weeks, $0 |
 
 ### Setup via Resend (recommended provider)
 
@@ -629,8 +660,8 @@ guides.
    - `DMARC` (TXT): `v=DMARC1; p=none; rua=mailto:...` —
      start with `p=none` for monitoring; tighten to `p=quarantine` or
      `p=reject` after a few weeks of clean reports.
-   Add them, click Verify, status flips pending → verified within
-   5–30 minutes (often instant).
+     Add them, click Verify, status flips pending → verified within
+     5–30 minutes (often instant).
 3. **Create an API key.** Resend Dashboard → API Keys → Create →
    "Sending access" permission → Create. Copy the `re_...` key
    immediately; it isn't shown again.
@@ -679,6 +710,7 @@ No app redeploy required — Supabase reads SMTP creds at runtime.
 
 Supabase's default confirmation emails say generic things. Customize
 under Auth → Email Templates:
+
 - Subject: e.g., "Confirm your Baruch Econ & Finance Studio account"
 - Body: use `{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .Token }}`
   placeholders. Branded text helps deliverability further; some
