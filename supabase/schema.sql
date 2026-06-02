@@ -780,3 +780,38 @@ exception
   -- schema/table or where the role lacks privilege (e.g. the CI stub).
   when others then null;
 end $$;
+
+-- =========================================================================
+-- archive_quizzes --- instructor-authored interactive quizzes (exam/assignment)
+-- surfaced in the archive and taken at /practice/<id>. RLS-locked; questions
+-- (incl. answer keys) live in jsonb, server-only. Validated app-side by the
+-- Zod schema in src/lib/quiz/question-schema.ts before insert.
+-- =========================================================================
+create table if not exists public.archive_quizzes (
+  id uuid primary key default gen_random_uuid(),
+  course_slug text not null,
+  kind text not null,
+  title text not null,
+  semester_term text not null,
+  semester_year integer not null,
+  covers text[] not null default '{}',
+  questions jsonb not null,
+  passing_score numeric not null default 0.7,
+  created_by uuid not null references public.profiles(id) on delete restrict,
+  published boolean not null default true,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  -- updated_at maintained by the mutation API.
+  updated_at timestamptz not null default now(),
+  check (kind in ('exam', 'assignment')),
+  check (semester_term in ('spring', 'summer', 'fall')),
+  check (semester_year between 2020 and 2100),
+  check (passing_score >= 0 and passing_score <= 1)
+);
+
+create index if not exists archive_quizzes_live_idx
+  on public.archive_quizzes (course_slug)
+  where deleted_at is null and published;
+
+alter table public.archive_quizzes enable row level security;
+-- No policies: service-role only (instructor UI gates in app code).

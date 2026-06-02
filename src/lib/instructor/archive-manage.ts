@@ -27,10 +27,21 @@ export interface ManagePaper {
   createdBy: string;
 }
 
+export interface ManageQuiz {
+  id: string;
+  courseSlug: string;
+  kind: 'exam' | 'assignment';
+  title: string;
+  semesterTerm: string;
+  semesterYear: number;
+  published: boolean;
+  createdBy: string;
+}
+
 /**
  * Courses the viewer manages (admins: all; else enrollments where they are
- * instructor_id) plus the non-deleted video rows in those courses. Includes
- * hidden (unpublished) rows so instructors can re-publish them.
+ * instructor_id) plus the non-deleted video/paper/quiz rows in those courses.
+ * Includes hidden (unpublished) rows so instructors can re-publish them.
  */
 export async function loadInstructorArchive(
   userId: string,
@@ -39,6 +50,7 @@ export async function loadInstructorArchive(
   courses: string[];
   videos: ManageVideo[];
   papers: ManagePaper[];
+  quizzes: ManageQuiz[];
 }> {
   const admin = getAdminClient();
 
@@ -54,7 +66,8 @@ export async function loadInstructorArchive(
     courses = [...new Set((rows ?? []).map((r) => r.course_slug))];
   }
 
-  if (courses.length === 0) return { courses, videos: [], papers: [] };
+  if (courses.length === 0)
+    return { courses, videos: [], papers: [], quizzes: [] };
 
   const { data: vids } = await admin
     .from('archive_videos')
@@ -99,5 +112,25 @@ export async function loadInstructorArchive(
     createdBy: p.created_by,
   }));
 
-  return { courses, videos, papers };
+  const { data: quizRows } = await admin
+    .from('archive_quizzes')
+    .select(
+      'id, course_slug, kind, title, semester_term, semester_year, published, created_by',
+    )
+    .in('course_slug', courses)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  const quizzes: ManageQuiz[] = (quizRows ?? []).map((q) => ({
+    id: q.id,
+    courseSlug: q.course_slug,
+    kind: q.kind,
+    title: q.title,
+    semesterTerm: q.semester_term,
+    semesterYear: q.semester_year,
+    published: q.published,
+    createdBy: q.created_by,
+  }));
+
+  return { courses, videos, papers, quizzes };
 }

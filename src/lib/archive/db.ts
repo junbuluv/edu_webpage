@@ -90,6 +90,37 @@ export async function signPaperUrl(
   }
 }
 
+export interface ArchiveQuizRow {
+  id: string;
+  course_slug: string;
+  kind: 'exam' | 'assignment';
+  title: string;
+  semester_term: 'spring' | 'summer' | 'fall';
+  semester_year: number;
+  covers: string[];
+}
+
+/** Published, non-deleted authored quizzes for a course (service-role). [] on error. */
+export async function fetchArchiveQuizzes(
+  course: string,
+): Promise<ArchiveQuizRow[]> {
+  try {
+    const admin = getAdminClient();
+    const { data, error } = await admin
+      .from('archive_quizzes')
+      .select(
+        'id, course_slug, kind, title, semester_term, semester_year, covers',
+      )
+      .eq('course_slug', course)
+      .eq('published', true)
+      .is('deleted_at', null);
+    if (error) return [];
+    return (data ?? []) as ArchiveQuizRow[];
+  } catch {
+    return [];
+  }
+}
+
 /** Published, non-deleted videos for one lesson (service-role). [] on error. */
 export async function fetchArchiveVideosForLesson(
   course: string,

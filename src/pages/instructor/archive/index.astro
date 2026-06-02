@@ -18,13 +18,20 @@ if (!isStaff(role)) {
   return Astro.redirect('/dashboard');
 }
 
-const { courses, videos, papers } = await loadInstructorArchive(user.id, role);
+const { courses, videos, papers, quizzes } = await loadInstructorArchive(
+  user.id,
+  role,
+);
 const canManage = isContentManager(role);
 const editableVideos = partitionByOwnership(videos, {
   userId: user.id,
   canEditAll: isAdmin(role),
 });
 const editablePapers = partitionByOwnership(papers, {
+  userId: user.id,
+  canEditAll: isAdmin(role),
+});
+const editableQuizzes = partitionByOwnership(quizzes, {
   userId: user.id,
   canEditAll: isAdmin(role),
 });
@@ -390,6 +397,78 @@ const error = Astro.url.searchParams.get('error');
               <span class="font-medium">{p.title}</span>
               <span class="ml-2 text-xs text-ink-muted">
                 {p.courseSlug} · added by another instructor
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-lg font-semibold">Interactive quizzes</h2>
+      <p class="mt-1 text-sm text-ink-muted">
+        Authored quizzes are graded server-side at{' '}
+        <code>/practice/&lt;id&gt;</code>. Answers are never sent to the client.
+      </p>
+
+      {
+        canManage && (
+          <a
+            href="/instructor/archive/quiz/new"
+            class="mt-4 inline-block rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Build a quiz
+          </a>
+        )
+      }
+
+      {
+        quizzes.length === 0 && (
+          <p class="mt-3 text-sm text-ink-muted">
+            No authored quizzes yet
+            {canManage ? '. Use the button above to create one.' : '.'}
+          </p>
+        )
+      }
+      <ul class="mt-3 space-y-2">
+        {
+          editableQuizzes.editable.map((q) => (
+            <li class="rounded border border-slate-200 p-3 text-sm">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="font-medium">{q.title}</span>
+                <span class="text-xs text-ink-muted">
+                  {q.courseSlug} · {q.kind} · {q.semesterTerm} {q.semesterYear}{' '}
+                  · {q.published ? 'published' : 'hidden'}
+                </span>
+              </div>
+              {canManage && (
+                <div class="mt-2 flex gap-3">
+                  <a
+                    href={`/instructor/archive/quiz/${q.id}`}
+                    class="text-accent underline"
+                  >
+                    Edit
+                  </a>
+                  <form
+                    method="POST"
+                    action="/api/instructor/archive/quiz/delete"
+                  >
+                    <input type="hidden" name="id" value={q.id} />
+                    <button type="submit" class="text-red-600 underline">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              )}
+            </li>
+          ))
+        }
+        {
+          editableQuizzes.readOnly.map((q) => (
+            <li class="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
+              <span class="font-medium">{q.title}</span>
+              <span class="ml-2 text-xs text-ink-muted">
+                {q.courseSlug} · added by another instructor
               </span>
             </li>
           ))

@@ -4,10 +4,11 @@ import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager, isAdmin } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
+import { quizQuestionsSchema } from '@lib/quiz/question-schema';
 import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
-const PROVIDERS = new Set(['youtube', 'vimeo']);
+const KINDS = new Set(['exam', 'assignment']);
 
 function err(reason: string): Response {
   return new Response(null, {
@@ -23,21 +24,26 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const role = locals.profile?.role ?? 'student';
 
   const form = await request.formData();
-  const id = String(form.get('id') ?? '');
-  const lessonSlug = String(form.get('lesson_slug') ?? '');
-  const term = String(form.get('semester_term') ?? '');
-  const year = Number(form.get('semester_year') ?? NaN);
-  const title = String(form.get('title') ?? '').trim();
-  const provider = String(form.get('provider') ?? '');
-  const videoId = String(form.get('video_id') ?? '').trim();
-  const description = String(form.get('description') ?? '').trim() || null;
-  const durationRaw = Number(form.get('duration_minutes') ?? NaN);
-  const durationMinutes =
-    Number.isFinite(durationRaw) && durationRaw > 0
-      ? Math.floor(durationRaw)
-      : null;
-  // Unchecked checkbox is absent from formData; presence => published.
-  const published = form.get('published') != null;
+  let p: Record<string, unknown>;
+  try {
+    p = JSON.parse(String(form.get('payload') ?? '')) as Record<
+      string,
+      unknown
+    >;
+  } catch {
+    return err('invalid_payload');
+  }
+
+  const id = typeof p.id === 'string' ? p.id : '';
+  const kind = typeof p.kind === 'string' ? p.kind : '';
+  const title = (typeof p.title === 'string' ? p.title : '').trim();
+  const term = typeof p.semester_term === 'string' ? p.semester_term : '';
+  const year = Number(p.semester_year ?? NaN);
+  const covers = Array.isArray(p.covers)
+    ? p.covers.map(String).filter((c) => c.length > 0)
+    : [];
+  const passing = Number(p.passing_score ?? 0.7);
+  const published = p.published === true;
 
   if (!user) return err('unauthenticated');
   if (!isContentManager(role)) return err('forbidden');
@@ -45,51 +51,52 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const admin = getAdminClient();
   const { data: row } = await admin
-    .from('archive_videos')
+    .from('archive_quizzes')
     .select('course_slug, created_by')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
   if (!row) return err('not_found');
-
   if (!(await instructorOwnsCourse(user.id, row.course_slug, role)))
     return err('not_course_instructor');
   if (!isAdmin(role) && row.created_by !== user.id) return err('not_owner');
 
   if (
     !title ||
-    !videoId ||
+    !KINDS.has(kind) ||
     !TERMS.has(term) ||
-    !PROVIDERS.has(provider) ||
     !Number.isInteger(year) ||
     year < 2020 ||
-    year > 2100
+    year > 2100 ||
+    !(passing >= 0 && passing <= 1)
   ) {
     return err('invalid_input');
   }
+  const parsed = quizQuestionsSchema.safeParse(p.questions);
+  if (!parsed.success) return err('invalid_questions');
 
   const lessons = await getCollection(
     'lessons',
     (l) => l.data.course === row.course_slug,
   );
-  const validSlugs = new Set(lessons.map((l) => normalizeLessonSlug(l.id)));
-  if (!validSlugs.has(lessonSlug)) return err('invalid_lesson');
+  const valid = new Set(lessons.map((l) => normalizeLessonSlug(l.id)));
+  if (covers.some((c) => !valid.has(c))) return err('invalid_lesson');
 
   const { error } = await admin
-    .from('archive_videos')
+    .from('archive_quizzes')
     .update({
-      lesson_slug: lessonSlug,
+      kind: kind as 'exam' | 'assignment',
+      title,
       semester_term: term as 'spring' | 'summer' | 'fall',
       semester_year: year,
-      title,
-      provider: provider as 'youtube' | 'vimeo',
-      video_id: videoId,
-      description,
-      duration_minutes: durationMinutes,
+      covers,
+      questions: parsed.data,
+      passing_score: passing,
       published,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('update_failed');
 
   await logDisclosureSafe({
@@ -97,12 +104,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     actorRole: role as 'instructor' | 'admin',
     action: 'manage_archive',
     request,
-    targetResource: `video update: ${title} (${row.course_slug})`,
-    metadata: { resource: 'video', op: 'update', id, course: row.course_slug },
+    targetResource: `quiz update: ${title} (${row.course_slug})`,
+    metadata: { resource: 'quiz', op: 'update', id, course: row.course_slug },
   });
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/instructor/archive?ok=updated` },
+    headers: { Location: `/instructor/archive?ok=quiz_updated` },
   });
 };

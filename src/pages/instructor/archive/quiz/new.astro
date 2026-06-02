@@ -1,0 +1,78 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getAdminClient } from '@lib/supabase/admin';
+import { isContentManager, isAdmin } from '@lib/roles';
+import { normalizeLessonSlug } from '@lib/archive/build';
+import ArchiveQuizBuilder from '@components/archive/ArchiveQuizBuilder';
+
+const user = Astro.locals.user;
+const role = Astro.locals.profile?.role ?? 'student';
+
+if (!user) {
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
+}
+if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+
+// Compute manageable courses: admin → all; else distinct enrollments
+let courses: string[];
+if (isAdmin(role)) {
+  const all = await getCollection('courses');
+  courses = all.map((c) => c.data.slug);
+} else {
+  const admin = getAdminClient();
+  const { data: rows } = await admin
+    .from('enrollments')
+    .select('course_slug')
+    .eq('instructor_id', user.id);
+  courses = [...new Set((rows ?? []).map((r) => r.course_slug))];
+}
+
+const prefillCourse = Astro.url.searchParams.get('course') ?? '';
+const selectedCourse = courses.includes(prefillCourse)
+  ? prefillCourse
+  : (courses[0] ?? '');
+
+const lessons = selectedCourse
+  ? (await getCollection('lessons', (l) => l.data.course === selectedCourse))
+      .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
+      .sort((a, b) => a.title.localeCompare(b.title))
+  : [];
+---
+
+<BaseLayout title="Build a quiz">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs font-medium uppercase tracking-wide text-accent">
+      Instructor
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Build a quiz</h1>
+    <p class="mt-3 text-sm text-ink-muted">
+      Author an interactive exam or assignment. Questions are stored server-side
+      and graded at <code>/practice/&lt;id&gt;</code>.
+    </p>
+
+    {
+      courses.length === 0 ? (
+        <p class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          You are not listed as the instructor for any course. Contact an admin
+          to be enrolled as instructor before authoring quizzes.
+        </p>
+      ) : (
+        <ArchiveQuizBuilder
+          client:load
+          action="/api/instructor/archive/quiz/create"
+          courses={courses}
+          lessons={lessons}
+        />
+      )
+    }
+
+    <p class="mt-6 text-sm">
+      <a href="/instructor/archive" class="text-accent underline">
+        Back to archive hub
+      </a>
+    </p>
+  </div>
+</BaseLayout>

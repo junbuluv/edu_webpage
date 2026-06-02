@@ -227,3 +227,23 @@ Phase 2a's plan is written first.
   lesson page/layout; `database.types.ts`.
 - **Unchanged:** TA workshop/roster access; git content; `gradeQuiz` engine;
   the existing video CRUD + ownership fixes.
+
+---
+
+## Addendum (2026-06-02): Audit logging for archive management
+
+All archive **management** actions (create / update / delete of videos, file
+papers, and authored quizzes) are recorded in the existing `audit_log` so they
+appear in the admin viewer (`/admin`).
+
+- Extend `DisclosureAction` in `src/lib/audit.ts` with `'manage_archive'`.
+- In every archive mutation handler (video/paper/quiz × create/update/delete),
+  call `logDisclosureSafe` (fail-open, matching roster export/import — an audit
+  write must not block a trusted instructor's action) right before the success
+  redirect, with: `actorId = user.id`, `actorRole = role`, `action =
+  'manage_archive'`, `request` (for HMAC'd IP/UA), `targetResource` = a
+  human-readable summary (the admin viewer shows `target_resource`), e.g.
+  `"video create: <title> (eco-1002)"`, and `metadata = { resource:
+  'video'|'paper'|'quiz', op: 'create'|'update'|'delete', id, course }`.
+- `actorRole` is `'instructor' | 'admin'` here (TAs can't manage), which fits
+  the `DisclosureContext.actorRole` type.

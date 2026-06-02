@@ -16,7 +16,6 @@ function err(reason: string): Response {
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
-
   const form = await request.formData();
   const id = String(form.get('id') ?? '');
 
@@ -26,21 +25,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const admin = getAdminClient();
   const { data: row } = await admin
-    .from('archive_videos')
+    .from('archive_quizzes')
     .select('course_slug, created_by, title')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
   if (!row) return err('not_found');
-
   if (!(await instructorOwnsCourse(user.id, row.course_slug, role)))
     return err('not_course_instructor');
   if (!isAdmin(role) && row.created_by !== user.id) return err('not_owner');
 
   const { error } = await admin
-    .from('archive_videos')
+    .from('archive_quizzes')
     .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('delete_failed');
 
   await logDisclosureSafe({
@@ -48,9 +47,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     actorRole: role as 'instructor' | 'admin',
     action: 'manage_archive',
     request,
-    targetResource: `video delete: ${row.title} (${row.course_slug})`,
+    targetResource: `quiz delete: ${row.title} (${row.course_slug})`,
     metadata: {
-      resource: 'video',
+      resource: 'quiz',
       op: 'delete',
       id,
       course: row.course_slug,
@@ -59,6 +58,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/instructor/archive?ok=deleted` },
+    headers: { Location: `/instructor/archive?ok=quiz_deleted` },
   });
 };

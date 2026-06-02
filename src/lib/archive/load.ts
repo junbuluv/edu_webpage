@@ -1,7 +1,12 @@
 import { getCollection } from 'astro:content';
 import type { CourseSlug } from '@lib/courses';
 import { buildArchiveItems, deriveFacets, normalizeLessonSlug } from './build';
-import { fetchArchiveVideos, fetchArchivePapers, signPaperUrl } from './db';
+import {
+  fetchArchiveVideos,
+  fetchArchivePapers,
+  fetchArchiveQuizzes,
+  signPaperUrl,
+} from './db';
 import type {
   ArchiveItem,
   Facets,
@@ -31,7 +36,7 @@ export async function loadArchiveForCourse(
     draft: l.data.draft,
   }));
 
-  const quizzes: QuizInput[] = quizEntries.map((q) => ({
+  const gitQuizzes: QuizInput[] = quizEntries.map((q) => ({
     slug: q.data.slug,
     course: q.data.course,
     title: q.data.title,
@@ -40,6 +45,17 @@ export async function loadArchiveForCourse(
     covers: q.data.covers,
     semester: q.data.semester ?? null,
   }));
+
+  const dbQuizRows = await fetchArchiveQuizzes(course);
+  const dbQuizzes: QuizInput[] = dbQuizRows.map((r) => ({
+    slug: r.id,
+    course: r.course_slug,
+    title: r.title,
+    kind: r.kind,
+    covers: r.covers,
+    semester: { term: r.semester_term, year: r.semester_year },
+  }));
+  const quizzes: QuizInput[] = [...gitQuizzes, ...dbQuizzes];
 
   const gitVideos: VideoInput[] = videoEntries.map((v) => ({
     slug: v.data.slug,
