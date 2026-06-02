@@ -769,6 +769,14 @@ alter table public.archive_papers enable row level security;
 
 -- Private Storage bucket for paper files. Access only via service-role
 -- createSignedUrl(); no public reads. Idempotent.
-insert into storage.buckets (id, name, public)
-values ('archive-papers', 'archive-papers', false)
-on conflict (id) do nothing;
+-- Wrapped so a stock Postgres without Supabase's `storage` schema (e.g. the
+-- schema-roundtrip CI stub) doesn't abort. Real Supabase has storage.buckets.
+do $$ begin
+  insert into storage.buckets (id, name, public)
+  values ('archive-papers', 'archive-papers', false)
+  on conflict (id) do nothing;
+exception
+  when undefined_table then null;
+  when undefined_schema then null;
+  when insufficient_privilege then null;
+end $$;
