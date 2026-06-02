@@ -15,6 +15,18 @@ export interface ManageVideo {
   createdBy: string;
 }
 
+export interface ManagePaper {
+  id: string;
+  courseSlug: string;
+  kind: 'exam' | 'assignment';
+  title: string;
+  semesterTerm: string;
+  semesterYear: number;
+  originalFilename: string;
+  published: boolean;
+  createdBy: string;
+}
+
 /**
  * Courses the viewer manages (admins: all; else enrollments where they are
  * instructor_id) plus the non-deleted video rows in those courses. Includes
@@ -23,7 +35,11 @@ export interface ManageVideo {
 export async function loadInstructorArchive(
   userId: string,
   role: string | null | undefined,
-): Promise<{ courses: string[]; videos: ManageVideo[] }> {
+): Promise<{
+  courses: string[];
+  videos: ManageVideo[];
+  papers: ManagePaper[];
+}> {
   const admin = getAdminClient();
 
   let courses: string[];
@@ -38,7 +54,7 @@ export async function loadInstructorArchive(
     courses = [...new Set((rows ?? []).map((r) => r.course_slug))];
   }
 
-  if (courses.length === 0) return { courses, videos: [] };
+  if (courses.length === 0) return { courses, videos: [], papers: [] };
 
   const { data: vids } = await admin
     .from('archive_videos')
@@ -62,5 +78,26 @@ export async function loadInstructorArchive(
     createdBy: v.created_by,
   }));
 
-  return { courses, videos };
+  const { data: paperRows } = await admin
+    .from('archive_papers')
+    .select(
+      'id, course_slug, kind, title, semester_term, semester_year, original_filename, published, created_by',
+    )
+    .in('course_slug', courses)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  const papers: ManagePaper[] = (paperRows ?? []).map((p) => ({
+    id: p.id,
+    courseSlug: p.course_slug,
+    kind: p.kind,
+    title: p.title,
+    semesterTerm: p.semester_term,
+    semesterYear: p.semester_year,
+    originalFilename: p.original_filename,
+    published: p.published,
+    createdBy: p.created_by,
+  }));
+
+  return { courses, videos, papers };
 }
