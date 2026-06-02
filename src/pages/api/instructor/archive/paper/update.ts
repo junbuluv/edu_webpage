@@ -4,6 +4,7 @@ import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager, isAdmin } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
+import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
 const KINDS = new Set(['exam', 'assignment']);
@@ -77,6 +78,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .eq('id', id)
     .is('deleted_at', null);
   if (error) return err('update_failed');
+
+  await logDisclosureSafe({
+    actorId: user.id,
+    actorRole: role as 'instructor' | 'admin',
+    action: 'manage_archive',
+    request,
+    targetResource: `paper update: ${title} (${row.course_slug})`,
+    metadata: { resource: 'paper', op: 'update', id, course: row.course_slug },
+  });
 
   return new Response(null, {
     status: 303,

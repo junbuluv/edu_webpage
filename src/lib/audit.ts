@@ -9,7 +9,8 @@ export type DisclosureAction =
   | 'export_student_data'
   | 'import_roster'
   | 'delete_user'
-  | 'promote_role';
+  | 'promote_role'
+  | 'manage_archive';
 
 export interface DisclosureContext {
   actorId: string;

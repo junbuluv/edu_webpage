@@ -4,6 +4,7 @@ import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
+import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
 const PROVIDERS = new Set(['youtube', 'vimeo']);
@@ -63,19 +64,32 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!validSlugs.has(lessonSlug)) return err('invalid_lesson');
 
   const admin = getAdminClient();
-  const { error } = await admin.from('archive_videos').insert({
-    course_slug: course,
-    lesson_slug: lessonSlug,
-    semester_term: term as 'spring' | 'summer' | 'fall',
-    semester_year: year,
-    title,
-    provider: provider as 'youtube' | 'vimeo',
-    video_id: videoId,
-    description,
-    duration_minutes: durationMinutes,
-    created_by: user.id,
-  });
+  const { data: inserted, error } = await admin
+    .from('archive_videos')
+    .insert({
+      course_slug: course,
+      lesson_slug: lessonSlug,
+      semester_term: term as 'spring' | 'summer' | 'fall',
+      semester_year: year,
+      title,
+      provider: provider as 'youtube' | 'vimeo',
+      video_id: videoId,
+      description,
+      duration_minutes: durationMinutes,
+      created_by: user.id,
+    })
+    .select('id')
+    .single();
   if (error) return err('insert_failed');
+
+  await logDisclosureSafe({
+    actorId: user.id,
+    actorRole: role as 'instructor' | 'admin',
+    action: 'manage_archive',
+    request,
+    targetResource: `video create: ${title} (${course})`,
+    metadata: { resource: 'video', op: 'create', id: inserted.id, course },
+  });
 
   return new Response(null, {
     status: 303,

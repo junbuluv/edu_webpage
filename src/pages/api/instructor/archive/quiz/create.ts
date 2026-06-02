@@ -5,6 +5,7 @@ import { isContentManager } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import { quizQuestionsSchema } from '@lib/quiz/question-schema';
+import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
 const KINDS = new Set(['exam', 'assignment']);
@@ -78,18 +79,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (covers.some((c) => !valid.has(c))) return err('invalid_lesson');
 
   const admin = getAdminClient();
-  const { error } = await admin.from('archive_quizzes').insert({
-    course_slug: course,
-    kind: kind as 'exam' | 'assignment',
-    title,
-    semester_term: term as 'spring' | 'summer' | 'fall',
-    semester_year: year,
-    covers,
-    questions: parsed.data,
-    passing_score: passing,
-    created_by: user.id,
-  });
+  const { data: inserted, error } = await admin
+    .from('archive_quizzes')
+    .insert({
+      course_slug: course,
+      kind: kind as 'exam' | 'assignment',
+      title,
+      semester_term: term as 'spring' | 'summer' | 'fall',
+      semester_year: year,
+      covers,
+      questions: parsed.data,
+      passing_score: passing,
+      created_by: user.id,
+    })
+    .select('id')
+    .single();
   if (error) return err('insert_failed');
+
+  await logDisclosureSafe({
+    actorId: user.id,
+    actorRole: role as 'instructor' | 'admin',
+    action: 'manage_archive',
+    request,
+    targetResource: `quiz create: ${title} (${course})`,
+    metadata: { resource: 'quiz', op: 'create', id: inserted.id, course },
+  });
 
   return new Response(null, {
     status: 303,

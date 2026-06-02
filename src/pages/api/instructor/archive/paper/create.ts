@@ -4,6 +4,7 @@ import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
+import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
 const KINDS = new Set(['exam', 'assignment']);
@@ -94,6 +95,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     await admin.storage.from('archive-papers').remove([path]);
     return err('insert_failed');
   }
+
+  await logDisclosureSafe({
+    actorId: user.id,
+    actorRole: role as 'instructor' | 'admin',
+    action: 'manage_archive',
+    request,
+    targetResource: `paper create: ${title} (${course})`,
+    metadata: { resource: 'paper', op: 'create', id, course },
+  });
 
   return new Response(null, {
     status: 303,
