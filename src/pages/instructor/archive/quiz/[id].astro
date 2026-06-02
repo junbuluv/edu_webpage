@@ -1,0 +1,78 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getAdminClient } from '@lib/supabase/admin';
+import { isContentManager, isAdmin } from '@lib/roles';
+import { instructorOwnsCourse } from '@lib/archive/access';
+import { normalizeLessonSlug } from '@lib/archive/build';
+import ArchiveQuizBuilder from '@components/archive/ArchiveQuizBuilder';
+
+const user = Astro.locals.user;
+const role = Astro.locals.profile?.role ?? 'student';
+const { id } = Astro.params;
+
+if (!user) {
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
+}
+if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+if (!id) return new Response(null, { status: 404 });
+
+const admin = getAdminClient();
+const { data: row } = await admin
+  .from('archive_quizzes')
+  .select(
+    'id, course_slug, kind, title, semester_term, semester_year, covers, questions, passing_score, published, created_by',
+  )
+  .eq('id', id)
+  .is('deleted_at', null)
+  .maybeSingle();
+if (!row) return new Response(null, { status: 404 });
+if (!(await instructorOwnsCourse(user.id, row.course_slug, role))) {
+  return Astro.redirect('/instructor/archive?error=not_course_instructor');
+}
+if (!isAdmin(role) && row.created_by !== user.id) {
+  return Astro.redirect('/instructor/archive?error=not_owner');
+}
+
+const lessons = (
+  await getCollection('lessons', (l) => l.data.course === row.course_slug)
+)
+  .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<BaseLayout title="Edit quiz">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <p class="text-xs font-medium uppercase tracking-wide text-accent">
+      Instructor
+    </p>
+    <h1 class="mt-1 text-3xl font-semibold tracking-tight">Edit quiz</h1>
+
+    <ArchiveQuizBuilder
+      client:load
+      action="/api/instructor/archive/quiz/update"
+      courses={[row.course_slug]}
+      lessons={lessons}
+      initial={{
+        id: row.id,
+        course_slug: row.course_slug,
+        kind: row.kind,
+        title: row.title,
+        semester_term: row.semester_term,
+        semester_year: row.semester_year,
+        covers: row.covers,
+        passing_score: Number(row.passing_score),
+        published: row.published,
+        questions: row.questions as any[],
+      }}
+    />
+
+    <p class="mt-6 text-sm">
+      <a href="/instructor/archive" class="text-accent underline">
+        Back to archive hub
+      </a>
+    </p>
+  </div>
+</BaseLayout>
