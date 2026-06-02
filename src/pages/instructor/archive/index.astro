@@ -128,6 +128,10 @@ const errorMessage = error
       canAddVideo && (
         <section class="mt-8 rounded-lg border border-slate-200 p-5">
           <h2 class="text-lg font-semibold">Add a video</h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            Videos link to YouTube or Vimeo. Paste the video's ID, not a file.
+            (To upload an exam or assignment file, use the section below.)
+          </p>
           <form
             method="POST"
             action="/api/instructor/archive/video/create"
@@ -201,6 +205,12 @@ const errorMessage = error
                   placeholder="e.g. dQw4w9WgXcQ"
                   class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
                 />
+                <span class="mt-1 block text-xs text-ink-muted">
+                  The ID only, not the full URL. YouTube
+                  <code>watch?v=dQw4w9WgXcQ</code> → <code>dQw4w9WgXcQ</code>;
+                  Vimeo <code>vimeo.com/123456789</code> →{' '}
+                  <code>123456789</code>.
+                </span>
               </label>
             </div>
             <label class="block">
