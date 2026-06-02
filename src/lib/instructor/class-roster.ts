@@ -36,6 +36,7 @@ export interface InstructorClass {
 export interface RosterStudent {
   userId: string;
   name: string | null;
+  section: string | null;
   email: string | null;
   lessonsCompleted: number;
   lessonsTotal: number;
@@ -133,10 +134,11 @@ export async function loadClassRoster(
     user_id: string;
     instructor_id: string;
     student_name: string | null;
+    section: string | null;
   }>((from, to) =>
     admin
       .from('enrollments')
-      .select('user_id, instructor_id, student_name')
+      .select('user_id, instructor_id, student_name, section')
       .eq('course_slug', course)
       .eq('semester', semester)
       .range(from, to),
@@ -153,8 +155,11 @@ export async function loadClassRoster(
   // Registrar-provided name (from roster import) is authoritative; it
   // falls back to profiles.display_name below.
   const registrarNameById = new Map<string, string | null>();
-  for (const r of roster)
+  const sectionById = new Map<string, string | null>();
+  for (const r of roster) {
     registrarNameById.set(r.user_id, r.student_name ?? null);
+    sectionById.set(r.user_id, r.section ?? null);
+  }
 
   // 2. Course-level facts + per-student source rows, in parallel. Each
   // table read is paginated past the 1000-row PostgREST cap so a large
@@ -334,6 +339,7 @@ export async function loadClassRoster(
     return {
       userId: id,
       name: registrarNameById.get(id) ?? nameById.get(id) ?? null,
+      section: sectionById.get(id) ?? null,
       email: emailById?.get(id) ?? null,
       lessonsCompleted: lessons.completed,
       lessonsTotal,

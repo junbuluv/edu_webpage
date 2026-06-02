@@ -4,9 +4,15 @@ import type { RosterStudent } from '@lib/instructor/class-roster';
 interface Props {
   students: RosterStudent[];
   lessonsTotal: number;
+  course: string;
+  semester: string;
+  usesSections: boolean;
+  canManage: boolean;
 }
 
-const { students, lessonsTotal } = Astro.props;
+const { students, lessonsTotal, course, semester, usesSections, canManage } =
+  Astro.props;
+const SECTION_OPTS = ['CML', 'CTL', 'CWL', 'CRL'];
 
 function pct(v: number | null): string {
   return v == null ? '—' : `${Math.round(v * 100)}%`;
@@ -34,6 +40,7 @@ function lastSeen(iso: string | null): string {
         <th class="px-3 py-2 font-medium">Attend</th>
         <th class="px-3 py-2 font-medium">Last seen</th>
         <th class="px-3 py-2 font-medium">Flag</th>
+        {canManage && <th class="px-3 py-2 font-medium">Manage</th>}
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100">
@@ -69,6 +76,67 @@ function lastSeen(iso: string | null): string {
                 <span class="text-ink-muted">—</span>
               )}
             </td>
+            {canManage && (
+              <td class="px-3 py-2">
+                <details>
+                  <summary class="cursor-pointer text-xs text-accent">
+                    Edit
+                  </summary>
+                  <form
+                    method="POST"
+                    action="/api/instructor/classes/update"
+                    class="mt-2 flex flex-col gap-1"
+                  >
+                    <input type="hidden" name="course_slug" value={course} />
+                    <input type="hidden" name="semester" value={semester} />
+                    <input type="hidden" name="user_id" value={s.userId} />
+                    <input
+                      name="student_name"
+                      placeholder="Display name"
+                      value={s.name ?? ''}
+                      class="rounded border border-slate-300 px-1 py-0.5 text-xs"
+                    />
+                    {usesSections && (
+                      <select
+                        name="section"
+                        class="rounded border border-slate-300 px-1 py-0.5 text-xs"
+                      >
+                        <option value="" selected={!s.section}>
+                          —
+                        </option>
+                        {SECTION_OPTS.map((o) => (
+                          <option value={o} selected={s.section === o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      type="submit"
+                      class="rounded bg-accent px-2 py-0.5 text-xs text-white"
+                    >
+                      Save
+                    </button>
+                  </form>
+                  <form
+                    method="POST"
+                    action="/api/instructor/classes/drop"
+                    class="mt-2"
+                    onsubmit="return confirm('Remove this student from the class?');"
+                  >
+                    <input type="hidden" name="course_slug" value={course} />
+                    <input type="hidden" name="semester" value={semester} />
+                    <input type="hidden" name="user_id" value={s.userId} />
+                    <button
+                      type="submit"
+                      class="text-xs text-red-600 underline"
+                    >
+                      Remove
+                    </button>
+                  </form>
+                </details>
+              </td>
+            )}
           </tr>
         ))
       }

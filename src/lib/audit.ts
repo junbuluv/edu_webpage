@@ -8,6 +8,7 @@ export type DisclosureAction =
   | 'read_class_roster'
   | 'export_student_data'
   | 'import_roster'
+  | 'manage_enrollment'
   | 'delete_user'
   | 'promote_role'
   | 'manage_archive';
