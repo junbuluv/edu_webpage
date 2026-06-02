@@ -40,7 +40,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { error } = await admin
     .from('archive_videos')
     .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('delete_failed');
 
   await logDisclosureSafe({

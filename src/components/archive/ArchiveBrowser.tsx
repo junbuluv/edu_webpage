@@ -11,7 +11,7 @@ const TYPE_LABEL: Record<ArchiveItemType, string> = {
 
 function embedSrc(item: ArchiveItem): string {
   if (item.provider === 'youtube')
-    return `https://www.youtube-nocookie.com/embed/${item.videoId}`;
+    return `https://www.youtube-nocookie.com/embed/${item.videoId}?rel=0`;
   return `https://player.vimeo.com/video/${item.videoId}`;
 }
 
