@@ -3,6 +3,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import ArchiveBrowser from '@components/archive/ArchiveBrowser';
 import { loadArchiveForCourse } from '@lib/archive/load';
 import { canViewCourse } from '@lib/archive/access';
+import { isStaff } from '@lib/roles';
 
 const COURSE = 'eco-1002' as const;
 const user = Astro.locals.user;
@@ -16,6 +17,8 @@ if (!user) {
   );
 }
 const canView = await canViewCourse(Astro.locals, COURSE);
+const role = Astro.locals.profile?.role;
+const staff = isStaff(role);
 
 const { items, facets } = canView
   ? await loadArchiveForCourse(COURSE)
@@ -44,7 +47,22 @@ const { items, facets } = canView
           </p>
         </div>
       ) : (
-        <ArchiveBrowser client:load items={items} facets={facets} />
+        <Fragment>
+          {staff && (
+            <p class="mt-6 rounded border border-accent/30 bg-accent/5 p-3 text-sm">
+              <a
+                href={`/instructor/archive?course=${COURSE}`}
+                class="font-medium text-accent underline"
+              >
+                ＋ Manage this archive →
+              </a>
+              <span class="ml-2 text-ink-muted">
+                Add or edit videos, exams, and assignments.
+              </span>
+            </p>
+          )}
+          <ArchiveBrowser client:load items={items} facets={facets} />
+        </Fragment>
       )
     }
   </div>
