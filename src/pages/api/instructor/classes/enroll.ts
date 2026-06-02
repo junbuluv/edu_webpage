@@ -59,10 +59,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
     section = rawSection;
   }
 
-  const admin = getAdminClient();
-  const users = await listAllAuthUsers();
-  const userId =
-    users.find((u) => u.email?.toLowerCase() === email)?.id ?? null;
+  // The admin client + auth-user listing can throw (missing service-role
+  // env, transient auth-API failure). Degrade to a banner on the page
+  // rather than a raw 500 that strands the instructor mid-form.
+  let admin: ReturnType<typeof getAdminClient>;
+  let userId: string | null;
+  try {
+    admin = getAdminClient();
+    const users = await listAllAuthUsers();
+    userId = users.find((u) => u.email?.toLowerCase() === email)?.id ?? null;
+  } catch {
+    return err(course, semester, 'lookup_failed');
+  }
 
   let alreadyEnrolled = false;
   if (userId) {
