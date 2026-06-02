@@ -74,7 +74,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       published,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('update_failed');
 
   return new Response(null, {

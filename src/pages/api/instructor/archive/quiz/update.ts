@@ -38,7 +38,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const title = (typeof p.title === 'string' ? p.title : '').trim();
   const term = typeof p.semester_term === 'string' ? p.semester_term : '';
   const year = Number(p.semester_year ?? NaN);
-  const covers = Array.isArray(p.covers) ? p.covers.map(String) : [];
+  const covers = Array.isArray(p.covers)
+    ? p.covers.map(String).filter((c) => c.length > 0)
+    : [];
   const passing = Number(p.passing_score ?? 0.7);
   const published = p.published === true;
 
@@ -92,7 +94,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       published,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('update_failed');
 
   return new Response(null, {
