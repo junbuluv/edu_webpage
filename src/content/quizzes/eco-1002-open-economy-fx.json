@@ -43,11 +43,7 @@
         "The equilibrium quantity of net exports changes after a tariff because domestic output rises.",
         "A protective tariff leaves the trade balance unchanged because S - I determines NX, not policy."
       ],
-      "correctIndices": [
-        0,
-        1,
-        3
-      ],
+      "correctIndices": [0, 1, 3],
       "explanation": "Tariffs shift the NX curve outward and trigger appreciation of the real exchange rate (higher epsilon) that exactly offsets the tariff, leaving equilibrium NX unchanged. The trade balance is pinned by S - I; tariffs only change the composition and prices of trade, not the balance itself.",
       "points": 2
     },

@@ -46,7 +46,10 @@ export interface GradeResult {
   perQuestion: Record<string, PerQuestionResult>;
 }
 
-function isQuestionCorrect(q: GradableQuestion, ans: AnswerValue | undefined): boolean {
+function isQuestionCorrect(
+  q: GradableQuestion,
+  ans: AnswerValue | undefined,
+): boolean {
   if (q.type === 'multiple_choice') {
     return typeof ans === 'number' && ans === q.correctIndex;
   }

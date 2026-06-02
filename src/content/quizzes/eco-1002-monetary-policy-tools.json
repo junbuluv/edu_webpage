@@ -29,11 +29,7 @@
         "Interest on reserves (IORB)",
         "Discount-window lending to banks"
       ],
-      "correctIndices": [
-        0,
-        2,
-        3
-      ],
+      "correctIndices": [0, 2, 3],
       "explanation": "The lesson identifies three primary tools (OMOs, discount-window lending, and reserve requirements) and one newer tool (IORB). Setting the inflation target is a goal, not a tool used to implement policy.",
       "points": 2
     },

@@ -57,11 +57,7 @@
         "Actual inflation had reached 9%, which automatically resets expectations downward",
         "The Fed tightened monetary policy aggressively to bring inflation back down before expectations drifted higher"
       ],
-      "correctIndices": [
-        0,
-        1,
-        3
-      ],
+      "correctIndices": [0, 1, 3],
       "explanation": "A soft landing relied on expectations staying anchored (shown by survey and bond market measures remaining well below realized inflation) plus swift policy action before expectations could drift higher. Reaching 9% inflation does not automatically reset expectations; expectations are forward-looking and can drift away from past inflation.",
       "points": 2
     },

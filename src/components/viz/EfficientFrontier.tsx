@@ -87,18 +87,72 @@ export default function EfficientFrontier() {
   return (
     <div className="my-8 grid gap-6 rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap gap-5">
-        <Slider label="E[R₁]" v={s.er1} min={0} max={0.25} step={0.005} fmt={pct} onChange={(v) => setS((x) => ({ ...x, er1: v }))} />
-        <Slider label="σ₁" v={s.sd1} min={0.02} max={0.4} step={0.005} fmt={pct} onChange={(v) => setS((x) => ({ ...x, sd1: v }))} />
-        <Slider label="E[R₂]" v={s.er2} min={0} max={0.25} step={0.005} fmt={pct} onChange={(v) => setS((x) => ({ ...x, er2: v }))} />
-        <Slider label="σ₂" v={s.sd2} min={0.02} max={0.4} step={0.005} fmt={pct} onChange={(v) => setS((x) => ({ ...x, sd2: v }))} />
-        <Slider label="Correlation ρ" v={s.rho} min={-1} max={1} step={0.05} fmt={(v) => v.toFixed(2)} onChange={(v) => setS((x) => ({ ...x, rho: v }))} />
-        <Slider label="Risk-free Rf" v={s.rf} min={0} max={0.08} step={0.0025} fmt={pct} onChange={(v) => setS((x) => ({ ...x, rf: v }))} />
+        <Slider
+          label="E[R₁]"
+          v={s.er1}
+          min={0}
+          max={0.25}
+          step={0.005}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, er1: v }))}
+        />
+        <Slider
+          label="σ₁"
+          v={s.sd1}
+          min={0.02}
+          max={0.4}
+          step={0.005}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, sd1: v }))}
+        />
+        <Slider
+          label="E[R₂]"
+          v={s.er2}
+          min={0}
+          max={0.25}
+          step={0.005}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, er2: v }))}
+        />
+        <Slider
+          label="σ₂"
+          v={s.sd2}
+          min={0.02}
+          max={0.4}
+          step={0.005}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, sd2: v }))}
+        />
+        <Slider
+          label="Correlation ρ"
+          v={s.rho}
+          min={-1}
+          max={1}
+          step={0.05}
+          fmt={(v) => v.toFixed(2)}
+          onChange={(v) => setS((x) => ({ ...x, rho: v }))}
+        />
+        <Slider
+          label="Risk-free Rf"
+          v={s.rf}
+          min={0}
+          max={0.08}
+          step={0.0025}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, rf: v }))}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
         <Stat label="Tangent Sharpe" value={tangent.sharpe.toFixed(2)} />
-        <Stat label="Tangent: weight in asset 1" value={(tangent.w * 100).toFixed(0) + '%'} />
-        <Stat label="Min-variance σ" value={(minVar.sd * 100).toFixed(1) + '%'} />
+        <Stat
+          label="Tangent: weight in asset 1"
+          value={(tangent.w * 100).toFixed(0) + '%'}
+        />
+        <Stat
+          label="Min-variance σ"
+          value={(minVar.sd * 100).toFixed(1) + '%'}
+        />
       </div>
 
       <div className="h-80">
@@ -111,14 +165,24 @@ export default function EfficientFrontier() {
               name="risk"
               unit="%"
               domain={[0, Math.ceil(maxX)]}
-              label={{ value: 'risk σ (%)', position: 'insideBottom', offset: -8, fontSize: 11 }}
+              label={{
+                value: 'risk σ (%)',
+                position: 'insideBottom',
+                offset: -8,
+                fontSize: 11,
+              }}
             />
             <YAxis
               type="number"
               dataKey="y"
               name="return"
               unit="%"
-              label={{ value: 'expected return (%)', angle: -90, position: 'insideLeft', fontSize: 11 }}
+              label={{
+                value: 'expected return (%)',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
             />
             <ZAxis range={[60, 60]} />
             <Tooltip
@@ -126,10 +190,38 @@ export default function EfficientFrontier() {
               formatter={(v: number) => v.toFixed(1) + '%'}
             />
             <Legend verticalAlign="top" height={24} />
-            <Scatter name="Frontier (vary weights)" data={frontier} line={{ stroke: '#2563eb' }} fill="#2563eb" shape={() => <></>} />
-            <Scatter name="Capital market line" data={cml} line={{ stroke: '#059669', strokeDasharray: '5 4' }} fill="#059669" shape={() => <></>} />
-            <Scatter name="Assets" data={[{ x: +(s.sd1 * 100).toFixed(2), y: +(s.er1 * 100).toFixed(2) }, { x: +(s.sd2 * 100).toFixed(2), y: +(s.er2 * 100).toFixed(2) }]} fill="#0f172a" />
-            <Scatter name="Tangent portfolio" data={[{ x: +(tangent.sd * 100).toFixed(2), y: +(tangent.er * 100).toFixed(2) }]} fill="#dc2626" />
+            <Scatter
+              name="Frontier (vary weights)"
+              data={frontier}
+              line={{ stroke: '#2563eb' }}
+              fill="#2563eb"
+              shape={() => <></>}
+            />
+            <Scatter
+              name="Capital market line"
+              data={cml}
+              line={{ stroke: '#059669', strokeDasharray: '5 4' }}
+              fill="#059669"
+              shape={() => <></>}
+            />
+            <Scatter
+              name="Assets"
+              data={[
+                { x: +(s.sd1 * 100).toFixed(2), y: +(s.er1 * 100).toFixed(2) },
+                { x: +(s.sd2 * 100).toFixed(2), y: +(s.er2 * 100).toFixed(2) },
+              ]}
+              fill="#0f172a"
+            />
+            <Scatter
+              name="Tangent portfolio"
+              data={[
+                {
+                  x: +(tangent.sd * 100).toFixed(2),
+                  y: +(tangent.er * 100).toFixed(2),
+                },
+              ]}
+              fill="#dc2626"
+            />
           </ScatterChart>
         </ResponsiveContainer>
       </div>
@@ -150,7 +242,9 @@ const pct = (v: number) => (v * 100).toFixed(1) + '%';
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded bg-slate-50 p-3">
-      <div className="text-xs uppercase tracking-wide text-ink-muted">{label}</div>
+      <div className="text-xs uppercase tracking-wide text-ink-muted">
+        {label}
+      </div>
       <div className="mt-0.5 text-lg font-semibold">{value}</div>
     </div>
   );

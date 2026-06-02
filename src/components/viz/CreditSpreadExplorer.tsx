@@ -34,7 +34,10 @@ export default function CreditSpreadExplorer() {
     const pts: { p: number; bps: number }[] = [];
     for (let i = 0; i <= 50; i += 1) {
       const p = (0.1 * i) / 50; // 0 to 10%
-      pts.push({ p: +(p * 100).toFixed(2), bps: Math.round(spread(p, s.delta) * 10000) });
+      pts.push({
+        p: +(p * 100).toFixed(2),
+        bps: Math.round(spread(p, s.delta) * 10000),
+      });
     }
     return pts;
   }, [s.delta]);
@@ -46,9 +49,33 @@ export default function CreditSpreadExplorer() {
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap gap-6">
-        <Slider label="Default probability p" v={s.p} min={0} max={0.1} step={0.0025} fmt={pct} onChange={(v) => setS((x) => ({ ...x, p: v }))} />
-        <Slider label="Recovery rate δ" v={s.delta} min={0} max={0.9} step={0.05} fmt={pct} onChange={(v) => setS((x) => ({ ...x, delta: v }))} />
-        <Slider label="Treasury yield" v={s.yT} min={0.01} max={0.08} step={0.0025} fmt={pct} onChange={(v) => setS((x) => ({ ...x, yT: v }))} />
+        <Slider
+          label="Default probability p"
+          v={s.p}
+          min={0}
+          max={0.1}
+          step={0.0025}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, p: v }))}
+        />
+        <Slider
+          label="Recovery rate δ"
+          v={s.delta}
+          min={0}
+          max={0.9}
+          step={0.05}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, delta: v }))}
+        />
+        <Slider
+          label="Treasury yield"
+          v={s.yT}
+          min={0.01}
+          max={0.08}
+          step={0.0025}
+          fmt={pct}
+          onChange={(v) => setS((x) => ({ ...x, yT: v }))}
+        />
         <button
           type="button"
           onClick={() => setS(baseline)}
@@ -60,42 +87,71 @@ export default function CreditSpreadExplorer() {
 
       <p className="mt-3 text-sm">
         Break-even spread = p(1 − δ) ={' '}
-        <strong className="text-accent">{bps} bps</strong>. Fair corporate yield ={' '}
-        {pct(s.yT)} + {(sp * 100).toFixed(2)}% ={' '}
+        <strong className="text-accent">{bps} bps</strong>. Fair corporate yield
+        = {pct(s.yT)} + {(sp * 100).toFixed(2)}% ={' '}
         <strong className="text-emerald-700">{pct(yCorp)}</strong>.
       </p>
 
       <div className="mt-3 h-72">
         <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 8, right: 16, bottom: 16, left: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
+          >
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
               dataKey="p"
               type="number"
               domain={[0, 10]}
               tickFormatter={(v) => `${v}%`}
-              label={{ value: 'annual default probability p', position: 'insideBottom', offset: -6, fontSize: 11 }}
+              label={{
+                value: 'annual default probability p',
+                position: 'insideBottom',
+                offset: -6,
+                fontSize: 11,
+              }}
             />
             <YAxis
               tickFormatter={(v) => `${v}`}
               width={48}
-              label={{ value: 'spread (bps)', angle: -90, position: 'insideLeft', fontSize: 11 }}
+              label={{
+                value: 'spread (bps)',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
             />
-            <Tooltip formatter={(v: number) => `${v} bps`} labelFormatter={(l: number) => `p = ${l}%`} />
-            <Line type="monotone" dataKey="bps" name="break-even spread" stroke="#aa4643" strokeWidth={2} dot={false} />
-            <ReferenceDot x={+(s.p * 100).toFixed(2)} y={bps} r={5} fill="#dc2626" stroke="none" />
+            <Tooltip
+              formatter={(v: number) => `${v} bps`}
+              labelFormatter={(l: number) => `p = ${l}%`}
+            />
+            <Line
+              type="monotone"
+              dataKey="bps"
+              name="break-even spread"
+              stroke="#aa4643"
+              strokeWidth={2}
+              dot={false}
+            />
+            <ReferenceDot
+              x={+(s.p * 100).toFixed(2)}
+              y={bps}
+              r={5}
+              fill="#dc2626"
+              stroke="none"
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-xs text-ink-muted">
-        The line is the spread that just compensates for expected loss; its slope
-        is (1 − δ), so dragging recovery down steepens it. Drag δ to 0 (lose
-        everything in default) and the spread equals the default probability
-        outright. Actual market spreads trade above this line: that gap is the
-        risk premium for bearing default risk, not just expecting it. The
-        Treasury-yield slider moves only the fair corporate yield in the readout
-        (corporate = Treasury + spread); the spread curve is independent of the
-        risk-free level.
+        The line is the spread that just compensates for expected loss; its
+        slope is (1 − δ), so dragging recovery down steepens it. Drag δ to 0
+        (lose everything in default) and the spread equals the default
+        probability outright. Actual market spreads trade above this line: that
+        gap is the risk premium for bearing default risk, not just expecting it.
+        The Treasury-yield slider moves only the fair corporate yield in the
+        readout (corporate = Treasury + spread); the spread curve is independent
+        of the risk-free level.
       </p>
     </div>
   );

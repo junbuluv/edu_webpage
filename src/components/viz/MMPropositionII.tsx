@@ -61,7 +61,9 @@ export default function MMPropositionII() {
           // Keep r_U >= r_D so (r_U - r_D) >= 0 and the cost-of-equity line
           // always slopes up with leverage, matching the lesson. Pulling r_U
           // down drags r_D with it.
-          onChange={(v) => setS((x) => ({ ...x, rU: v, rD: Math.min(x.rD, v) }))}
+          onChange={(v) =>
+            setS((x) => ({ ...x, rU: v, rD: Math.min(x.rD, v) }))
+          }
         />
         <Slider
           label="Cost of debt r_D"
@@ -74,7 +76,8 @@ export default function MMPropositionII() {
         />
         <div className="self-end text-sm text-ink-muted">
           At D/E = 1: r_E ≈ <strong>{at1.rE.toFixed(1)}%</strong>, WACC ={' '}
-          <strong className="text-emerald-700">{at1.wacc.toFixed(1)}%</strong> (= r_U)
+          <strong className="text-emerald-700">{at1.wacc.toFixed(1)}%</strong>{' '}
+          (= r_U)
         </div>
         <button
           type="button"
@@ -91,21 +94,51 @@ export default function MMPropositionII() {
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
               dataKey="de"
-              label={{ value: 'leverage D/E', position: 'insideBottom', offset: -4, fontSize: 11 }}
+              label={{
+                value: 'leverage D/E',
+                position: 'insideBottom',
+                offset: -4,
+                fontSize: 11,
+              }}
             />
             <YAxis
               tickFormatter={(v) => `${v}%`}
               domain={[0, 'auto']}
-              label={{ value: 'rate (%)', angle: -90, position: 'insideLeft', fontSize: 11 }}
+              label={{
+                value: 'rate (%)',
+                angle: -90,
+                position: 'insideLeft',
+                fontSize: 11,
+              }}
             />
             <Tooltip
               formatter={(v: number) => `${v.toFixed(1)}%`}
               labelFormatter={(l: number) => `D/E = ${l}`}
             />
             <Legend verticalAlign="top" height={24} />
-            <Line type="monotone" dataKey="rE" name="Cost of equity r_E" stroke="#dc2626" dot={false} />
-            <Line type="monotone" dataKey="wacc" name="WACC (= r_U, flat)" stroke="#059669" strokeWidth={2.5} dot={false} />
-            <Line type="monotone" dataKey="rD" name="Cost of debt r_D" stroke="#2563eb" strokeDasharray="5 4" dot={false} />
+            <Line
+              type="monotone"
+              dataKey="rE"
+              name="Cost of equity r_E"
+              stroke="#dc2626"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="wacc"
+              name="WACC (= r_U, flat)"
+              stroke="#059669"
+              strokeWidth={2.5}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="rD"
+              name="Cost of debt r_D"
+              stroke="#2563eb"
+              strokeDasharray="5 4"
+              dot={false}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
