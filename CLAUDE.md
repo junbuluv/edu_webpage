@@ -52,12 +52,37 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/lib/progress-aggregate.ts` + `src/lib/instructor/roster-csv.ts`
   (unit-tested — see "Verifying"); read-only audit-log viewer on
   `src/pages/admin/index.astro`
+- Enrollment CRUD (PR #101): instructors/admins add/drop/edit individual
+  students from the roster page (`/instructor/classes/<course>`). Gated
+  POST handlers `src/pages/api/instructor/classes/{enroll,drop,update}.ts`
+  (gate order: `!user` → `!isStaff` → `isCourseSlug`+required fields →
+  `instructorOwnsCourse`); pure unit-tested classifier
+  `src/lib/instructor/enroll-classify.ts`. Add matches by email; drop/update
+  take a hidden `user_id`. Existing rows keep their `instructor_id` (only new
+  inserts set it). Sections `{CML,CTL,CWL,CRL}` validated, eco-1002 only.
+  RosterTable has a staff-only "Manage" column
+- Course archive (PRs #90–100): per-course `/{course}/archive` of prior-term
+  materials (faceted browse + keyword search), gated to enrolled students +
+  staff. Pure alias-free core `src/lib/archive/{types,build}.ts`
+  (unit-tested); git+DB loader `load.ts`; access gates `access.ts`;
+  service-role reads `db.ts`. Content is hybrid: git (lesson notes, quiz
+  JSON) + DB tables `archive_videos`/`archive_papers`/`archive_quizzes`
+  (RLS-locked, convention #6 service-role pattern). Instructor management UI
+  under `src/pages/instructor/archive/{index,video,paper,quiz}`; file uploads
+  land in the private `archive-papers` Supabase Storage bucket via gated
+  signed URLs. Authored quizzes are server-graded through the git-or-DB
+  resolver `src/lib/quiz/resolve.ts` (`loadGradableQuiz`). **Videos are
+  ECO-1002 only.** Lessons render a "Lecture videos" section to
+  enrolled+staff
 - Course primitives: `src/lib/courses.ts` (slug tuple),
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
   `src/components/course/CourseSwitcher.tsx` (global header dropdown)
-- Role helpers: `src/lib/roles.ts` — `isStaff`, `isAdmin`, `roleLabel`.
-  Use these instead of inline equality checks
+- Role helpers: `src/lib/roles.ts` — `isStaff`, `isAdmin`,
+  `isContentManager`, `roleLabel`. Use these instead of inline equality
+  checks. `isContentManager` (instructor|admin, **TA read-only**) gates
+  content mutation and is deliberately narrower than `isStaff` (which
+  includes `ta`)
 - Device cookie: `src/lib/device.ts` — middleware issues a `device_id`
   UUID cookie used by the workshop stamp uniqueness constraint
 - Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
@@ -88,8 +113,8 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
 - **`verify`** (typecheck + build) — **required** by branch protection.
   Status check name in sync with the ruleset.
 - **`schema-roundtrip`** — applies `supabase/schema.sql` twice against a
-  stock Postgres 15 service container with a minimal `auth` stub (roles
-  + `auth.users` + `auth.uid()`). Catches idempotency regressions
+  stock Postgres 15 service container with a minimal `auth` stub (roles,
+  `auth.users`, and `auth.uid()`). Catches idempotency regressions
   (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
   Currently **advisory**, not blocking — flip to required in the ruleset
   when ready by adding `schema-roundtrip` to `required_status_checks`.
@@ -100,6 +125,7 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   figure" under Common tasks).
 
 If a job name changes, update the ruleset via:
+
 ```bash
 gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 ```
@@ -109,7 +135,7 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 1. **Lessons are content, not code.** New topics go in MDX. Only build a new
    React island if there is genuine interactivity (sliders, animation, quiz).
 2. **Quiz JSON must match the discriminated union in `config.ts`.** Adding a
-   new question type means extending that union *and* the renderer in `Quiz.tsx`.
+   new question type means extending that union _and_ the renderer in `Quiz.tsx`.
 3. **Charts run client-side.** Mark islands with `client:load` (or `client:visible`
    for below-the-fold visualizations to defer hydration).
 4. **Progress writes go through `src/lib/progress.ts`.** It transparently
@@ -122,7 +148,7 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 6. **RLS is the source of truth for access control.** When adding a table,
    add policies in `supabase/schema.sql` and regenerate types via
    `npm run supabase:types`. Tag the PR title with `db:` so reviewers check RLS.
-   **Sanctioned exception:** instructor-facing data access (reads *and* writes)
+   **Sanctioned exception:** instructor-facing data access (reads _and_ writes)
    goes through the service-role admin client (`@lib/supabase/admin`) + an
    app-side ownership / `isStaff` check, NOT RLS — see
    `api/instructor/workshops/*.ts` and
@@ -146,16 +172,23 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 10. **Audit log writes go through `src/lib/audit.ts`.** Don't insert into
     `audit_log` directly from a page — always call `logDisclosure(ctx)`
     so IP/UA are HMAC'd consistently and the service-role client is used.
+    Use `logDisclosureSafe(ctx)` (fail-open: logs a console error instead
+    of throwing) on mutation paths where an audit-write failure shouldn't
+    break the user action. Valid actions are the `DisclosureAction` union
+    in `audit.ts` (e.g. `manage_archive`, `manage_enrollment`); add new
+    ones there. Keep `actorRole` as the real role so TA actions stay `'ta'`.
 11. **`createSupabaseServerClient(cookies, headers, request)` needs all three
-    args.** `getAll()` reads the *incoming* Cookie header from `request` (not
+    args.** `getAll()` reads the _incoming_ Cookie header from `request` (not
     `cookies.headers()`, which is outgoing Set-Cookie). In `setAll`, local
-    `COOKIE_OPTIONS` are spread *after* Supabase's defaults so `secure: false`
+    `COOKIE_OPTIONS` are spread _after_ Supabase's defaults so `secure: false`
     sticks on http://localhost in dev — don't invert that merge order.
 12. **Use `isStaff(role)` / `isAdmin(role)` from `@lib/roles`** for any
     staff/admin gate — never inline `role === 'instructor' || role === 'admin'`.
     The `user_role` enum now has four values: `student`, `instructor`,
     `ta`, `admin`. New TA-equivalent permissions land for free when checks
-    go through `isStaff`.
+    go through `isStaff`. For content _mutation_ gates (archive
+    videos/papers/quizzes) use `isContentManager` instead — it excludes
+    `ta` (TAs are read-only on content).
 13. **`<ClientRouter />` is mounted in `BaseLayout`.** Cross-page nav
     uses Astro View Transitions. If a React island appears unresponsive
     after navigation, suspect stale DOM references in test/debug code
@@ -201,7 +234,20 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     client bundle (this stops students pasting a quiz into an LLM for
     the key). Don't pass full answer data into client props or add a
     client-side grader. `grade.ts` is alias-free and unit-tested (see
-    "Verifying").
+    "Verifying"). Quizzes resolve through `loadGradableQuiz`
+    (`src/lib/quiz/resolve.ts`), which loads either a git-authored quiz or
+    a DB-authored archive quiz; the standalone Zod `question-schema.ts`
+    re-validates DB-authored questions. Both are alias-free + tested.
+18. **Never `.maybeSingle()` an `enrollments` query keyed only by
+    `instructor_id`/`user_id` + `course_slug`.** Those filters can match
+    multiple rows (an instructor with ≥2 students; a student enrolled
+    across ≥2 semesters), and `.maybeSingle()` throws PGRST116 on >1 row —
+    silently denying a legitimate instructor/student. Use `.limit(1)` + an
+    array-length check instead. This bit ownership/visibility gates
+    repeatedly (#93/#94); `instructorOwnsCourse` + `canViewCourse` in
+    `src/lib/archive/access.ts` are the corrected pattern. (A `.maybeSingle()`
+    keyed on the full enrollments PK — `user_id`+`course_slug`+`semester` —
+    is safe, since that matches at most one row.)
 
 ## Hosted Supabase gotchas
 
@@ -225,22 +271,22 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   For prod, configure custom SMTP (Resend / Postmark / SES) — full runbook in
   `CONTRIBUTING.md`. **Interim (PR #74):** `gmail.com` is an accepted signup
   domain (`src/lib/auth/email-allowlist.ts`) so students can fall back to
-  Gmail when Baruch confirmation is dropped. Verified: built-in email *does*
+  Gmail when Baruch confirmation is dropped. Verified: built-in email _does_
   reach Gmail, so the failure is recipient-side Microsoft filtering. Custom
   SMTP + domain registration is deferred to **Aug 2026** (before fall term).
 - **Adding values to `user_role`** uses `alter type user_role add value if
-  not exists '<value>';`. Postgres enforces two related restrictions
+not exists '<value>';`. Postgres enforces two related restrictions
   around enum value additions, and Supabase SQL Editor (which wraps the
   whole paste in one transaction) can trip either:
   - `25001: ALTER TYPE … ADD cannot run inside a transaction block` —
     the `ALTER TYPE` statement itself is rejected. Run it alone in its
     own query, then re-paste the rest of `schema.sql`.
   - `55P04: unsafe use of new value "X" of enum type … New enum values
-    must be committed before they can be used` — the `ALTER TYPE`
+must be committed before they can be used` — the `ALTER TYPE`
     succeeded but a later statement in the same transaction (a
     `CHECK`, RLS policy, or `WHERE … in (...)` literal) referenced the
     new value before the implicit commit. Same fix: run the `ALTER
-    TYPE` standalone first; on the re-paste it becomes a no-op (since
+TYPE` standalone first; on the re-paste it becomes a no-op (since
     the value now exists) and the rest runs cleanly.
 
 ## Vercel deployment gotchas
