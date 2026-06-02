@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getEntry } from 'astro:content';
+import { loadGradableQuiz } from '@lib/quiz/resolve';
 import {
   gradeQuiz,
   type AnswerMap,
@@ -35,23 +35,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ? (body.answers as AnswerMap)
       : {};
 
-  const entry = await getEntry('quizzes', slug);
-  if (!entry) return json({ error: 'quiz_not_found' }, 404);
+  const quiz = await loadGradableQuiz(slug);
+  if (!quiz) return json({ error: 'quiz_not_found' }, 404);
 
   // Practice quizzes grade publicly. Exam/assignment papers are gated to
   // enrolled students + staff, matching the page-level gate — otherwise the
   // grader would leak answer explanations for archive papers by slug.
-  if (entry.data.kind !== 'practice') {
+  if (quiz.kind !== 'practice') {
     if (!locals.user) return json({ error: 'unauthorized' }, 401);
-    if (!(await canViewCourse(locals, entry.data.course))) {
+    if (!(await canViewCourse(locals, quiz.course))) {
       return json({ error: 'forbidden' }, 403);
     }
   }
 
   const result = gradeQuiz(
-    entry.data.questions as GradableQuestion[],
+    quiz.questions as GradableQuestion[],
     answers,
-    entry.data.passingScore,
+    quiz.passingScore,
   );
   return json(result);
 };

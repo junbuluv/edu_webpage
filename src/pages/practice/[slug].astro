@@ -2,7 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Quiz from '@components/quiz/Quiz';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
-import { getEntry } from 'astro:content';
+import { loadGradableQuiz } from '@lib/quiz/resolve';
 import { toPublicQuestions } from '@lib/quiz/public';
 import { canViewCourse } from '@lib/archive/access';
 
@@ -13,11 +13,10 @@ const { slug } = Astro.params;
 if (!slug) {
   return new Response(null, { status: 404 });
 }
-const entry = await getEntry('quizzes', slug);
-if (!entry) {
+const quiz = await loadGradableQuiz(slug);
+if (!quiz) {
   return new Response(null, { status: 404 });
 }
-const quiz = entry.data;
 
 // Practice quizzes stay public. Archive papers (exam/assignment) are
 // gated to enrolled students + staff so they can't be reached by
