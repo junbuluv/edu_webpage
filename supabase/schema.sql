@@ -815,3 +815,14 @@ create index if not exists archive_quizzes_live_idx
 
 alter table public.archive_quizzes enable row level security;
 -- No policies: service-role only (instructor UI gates in app code).
+
+-- Backstop: restrict archive content to known course slugs (defense-in-depth;
+-- the create routes also validate). Idempotent.
+do $$ begin
+  alter table public.archive_papers
+    add constraint archive_papers_course_chk check (course_slug in ('eco-1002', 'fin-3610'));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.archive_quizzes
+    add constraint archive_quizzes_course_chk check (course_slug in ('eco-1002', 'fin-3610'));
+exception when duplicate_object then null; end $$;

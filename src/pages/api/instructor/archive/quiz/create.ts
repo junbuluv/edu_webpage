@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager } from '@lib/roles';
+import { isCourseSlug } from '@lib/courses';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import { quizQuestionsSchema } from '@lib/quiz/question-schema';
@@ -54,6 +55,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (!user) return err('unauthenticated');
   if (!isContentManager(role)) return err('forbidden');
+  if (!isCourseSlug(course)) return err('invalid_course');
   if (!(await instructorOwnsCourse(user.id, course, role)))
     return err('not_course_instructor');
   if (

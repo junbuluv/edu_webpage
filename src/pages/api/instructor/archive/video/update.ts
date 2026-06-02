@@ -8,6 +8,10 @@ import { logDisclosureSafe } from '@lib/audit';
 
 const TERMS = new Set(['spring', 'summer', 'fall']);
 const PROVIDERS = new Set(['youtube', 'vimeo']);
+const VIDEO_ID_RE: Record<string, RegExp> = {
+  youtube: /^[A-Za-z0-9_-]{1,64}$/,
+  vimeo: /^\d{1,15}$/,
+};
 
 function err(reason: string): Response {
   return new Response(null, {
@@ -67,6 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   ) {
     return err('invalid_input');
   }
+  if (!VIDEO_ID_RE[provider]?.test(videoId)) return err('invalid_video_id');
 
   const lessons = await getCollection(
     'lessons',
