@@ -7,7 +7,13 @@ import {
   semesterKey,
   semesterLabel,
 } from './build.ts';
-import type { LessonInput, LessonRef, QuizInput, VideoInput } from './types.ts';
+import type {
+  LessonInput,
+  LessonRef,
+  PaperInput,
+  QuizInput,
+  VideoInput,
+} from './types.ts';
 
 const lessons: LessonInput[] = [
   {
@@ -259,4 +265,43 @@ test('filterItems narrows by type, semester, unit, lesson, and query', () => {
   );
   // whitespace-only query is treated as no query
   assert.equal(filterItems(items, { query: '   ' }).length, items.length);
+});
+
+test('papers become file-exam/assignment items with fileUrl and no /practice href', () => {
+  const papers: PaperInput[] = [
+    {
+      id: 'p1',
+      course: 'eco-1002',
+      kind: 'assignment',
+      title: 'PS1 (Fall 2024)',
+      covers: ['eco-1002/solow'],
+      semester: { term: 'fall', year: 2024 },
+      fileUrl: 'https://signed.example/p1.pdf',
+      fileName: 'ps1.pdf',
+    },
+  ];
+  const items = buildArchiveItems({
+    lessons,
+    quizzes: [],
+    videos: [],
+    papers,
+    course: 'eco-1002',
+  });
+  const paper = items.find((i) => i.type === 'assignment');
+  assert.ok(paper);
+  assert.equal(paper.href, '');
+  assert.equal(paper.fileUrl, 'https://signed.example/p1.pdf');
+  assert.equal(paper.fileName, 'ps1.pdf');
+  assert.deepEqual(paper.units, ['Growth']);
+  assert.deepEqual(paper.semester, { term: 'fall', year: 2024 });
+});
+
+test('buildArchiveItems works when papers is omitted (back-compat)', () => {
+  const items = buildArchiveItems({
+    lessons,
+    quizzes,
+    videos,
+    course: 'eco-1002',
+  });
+  assert.ok(items.length > 0);
 });

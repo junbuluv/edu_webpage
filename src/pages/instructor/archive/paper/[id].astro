@@ -1,0 +1,151 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getAdminClient } from '@lib/supabase/admin';
+import { isContentManager, isAdmin } from '@lib/roles';
+import { instructorOwnsCourse } from '@lib/archive/access';
+import { normalizeLessonSlug } from '@lib/archive/build';
+
+const user = Astro.locals.user;
+const role = Astro.locals.profile?.role ?? 'student';
+const { id } = Astro.params;
+
+if (!user) {
+  return Astro.redirect(
+    `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
+  );
+}
+if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+if (!id) return new Response(null, { status: 404 });
+
+const admin = getAdminClient();
+const { data: p } = await admin
+  .from('archive_papers')
+  .select(
+    'id, course_slug, kind, title, semester_term, semester_year, covers, original_filename, published, created_by',
+  )
+  .eq('id', id)
+  .is('deleted_at', null)
+  .maybeSingle();
+if (!p) return new Response(null, { status: 404 });
+if (!(await instructorOwnsCourse(user.id, p.course_slug, role))) {
+  return Astro.redirect('/instructor/archive?error=not_course_instructor');
+}
+if (!isAdmin(role) && p.created_by !== user.id) {
+  return Astro.redirect('/instructor/archive?error=not_owner');
+}
+
+const lessons = (
+  await getCollection('lessons', (l) => l.data.course === p.course_slug)
+)
+  .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+const covers = new Set(p.covers);
+---
+
+<BaseLayout title="Edit paper">
+  <div class="mx-auto max-w-2xl px-4 py-12">
+    <h1 class="text-2xl font-semibold tracking-tight">
+      Edit exam / assignment
+    </h1>
+    <p class="mt-1 text-sm text-ink-muted">
+      File: {p.original_filename} (replace not supported yet. Delete and re-upload
+      to change the file).
+    </p>
+    <form
+      method="POST"
+      action="/api/instructor/archive/paper/update"
+      class="mt-6 space-y-3 text-sm"
+    >
+      <input type="hidden" name="id" value={p.id} />
+      <label class="block">
+        <span class="text-ink-muted">Kind</span>
+        <select
+          name="kind"
+          required
+          class="mt-1 rounded border border-slate-300 px-2 py-1"
+        >
+          {
+            ['exam', 'assignment'].map((k) => (
+              <option value={k} selected={k === p.kind}>
+                {k}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-ink-muted">Title</span>
+        <input
+          name="title"
+          required
+          value={p.title}
+          class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+        />
+      </label>
+      <div class="flex gap-3">
+        <label class="block">
+          <span class="text-ink-muted">Term</span>
+          <select
+            name="semester_term"
+            required
+            class="mt-1 rounded border border-slate-300 px-2 py-1"
+          >
+            {
+              ['spring', 'summer', 'fall'].map((t) => (
+                <option value={t} selected={t === p.semester_term}>
+                  {t}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-ink-muted">Year</span>
+          <input
+            name="semester_year"
+            type="number"
+            min="2020"
+            max="2100"
+            required
+            value={p.semester_year}
+            class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+      </div>
+      <fieldset class="block">
+        <legend class="text-ink-muted">Lessons covered</legend>
+        <div class="mt-1 space-y-1">
+          {
+            lessons.map((l) => (
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="covers"
+                  value={l.slug}
+                  checked={covers.has(l.slug)}
+                />
+                <span>{l.title}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="published" checked={p.published} />
+        <span>Published (visible to students)</span>
+      </label>
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+          >Save</button
+        >
+        <a
+          href="/instructor/archive"
+          class="px-3 py-1.5 text-ink-muted underline">Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</BaseLayout>

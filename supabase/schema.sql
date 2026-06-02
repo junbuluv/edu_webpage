@@ -731,3 +731,52 @@ alter table public.archive_videos enable row level security;
 -- Intentionally NO policies: PostgREST/anon/authenticated cannot read or
 -- write. The service-role admin client (which bypasses RLS) is the only
 -- accessor, used server-side behind isContentManager + ownership checks.
+
+-- =========================================================================
+-- archive_papers --- instructor-uploaded exam/assignment files (PDF/docx)
+-- surfaced in the course archive as gated signed-URL downloads. RLS-locked;
+-- service-role only (convention #6). Bytes live in Storage, not Postgres.
+-- =========================================================================
+create table if not exists public.archive_papers (
+  id uuid primary key default gen_random_uuid(),
+  course_slug text not null,
+  kind text not null,
+  title text not null,
+  semester_term text not null,
+  semester_year integer not null,
+  covers text[] not null default '{}',
+  storage_path text not null,
+  original_filename text not null,
+  content_type text not null,
+  size_bytes integer not null,
+  created_by uuid not null references public.profiles(id) on delete restrict,
+  published boolean not null default true,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  -- updated_at is maintained by the mutation API (set to now() on update).
+  updated_at timestamptz not null default now(),
+  check (kind in ('exam', 'assignment')),
+  check (semester_term in ('spring', 'summer', 'fall')),
+  check (semester_year between 2020 and 2100)
+);
+
+create index if not exists archive_papers_live_idx
+  on public.archive_papers (course_slug)
+  where deleted_at is null and published;
+
+alter table public.archive_papers enable row level security;
+-- No policies: service-role only (instructor UI gates in app code).
+
+-- Private Storage bucket for paper files. Access only via service-role
+-- createSignedUrl(); no public reads. Idempotent.
+-- Wrapped so a stock Postgres without Supabase's `storage` schema (e.g. the
+-- schema-roundtrip CI stub) doesn't abort. Real Supabase has storage.buckets.
+do $$ begin
+  insert into storage.buckets (id, name, public)
+  values ('archive-papers', 'archive-papers', false)
+  on conflict (id) do nothing;
+exception
+  -- best-effort: skip on a stock Postgres without Supabase's `storage`
+  -- schema/table or where the role lacks privilege (e.g. the CI stub).
+  when others then null;
+end $$;
