@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin } from '@lib/roles';
+import { isAdmin, isStaff } from '@lib/roles';
 
 const user = Astro.locals.user;
 const supabase = Astro.locals.supabase;
+const viewerIsStaff = isStaff(Astro.locals.profile?.role);
 
 const lessons = (
   await getCollection(
@@ -68,15 +69,30 @@ const showWorkshopTeaser = totalWorkshopCount > 0;
       interactive — drag a slider, watch the model respond, then test yourself.
     </p>
 
-    <p class="mt-4 text-sm">
-      <a href="/eco-1002/instructors" class="text-accent underline">
-        Meet your instructors →
+    <div class="mt-5 flex flex-wrap gap-3">
+      <a
+        href="/eco-1002/archive"
+        class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+      >
+        Course archive — notes, exams &amp; videos →
       </a>
-      <span class="mx-2 text-ink-muted">·</span>
-      <a href="/eco-1002/archive" class="text-accent underline">
-        Course archive →
+      {
+        viewerIsStaff && (
+          <a
+            href="/instructor/archive?course=eco-1002"
+            class="rounded border border-accent px-4 py-2 text-sm font-medium text-accent hover:bg-accent/5"
+          >
+            ＋ Manage archive content
+          </a>
+        )
+      }
+      <a
+        href="/eco-1002/instructors"
+        class="rounded border border-slate-300 px-4 py-2 text-sm text-ink-muted hover:border-accent"
+      >
+        Meet your instructors
       </a>
-    </p>
+    </div>
 
     {
       showWorkshopTeaser && (
