@@ -4,6 +4,10 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import LessonProgressButton from '@components/lesson/LessonProgressButton';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { findPrevNext } from '@lib/lesson/sequence';
+import { canViewCourse } from '@lib/archive/access';
+import { fetchArchiveVideosForLesson } from '@lib/archive/db';
+import { normalizeLessonSlug } from '@lib/archive/build';
+import { isContentManager } from '@lib/roles';
 
 interface Props {
   lesson: CollectionEntry<'lessons'>;
@@ -25,6 +29,13 @@ if (!article && data.quizSlug) {
 }
 
 const { prev, next } = findPrevNext(lesson, allLessons);
+
+const lessonSlug = normalizeLessonSlug(lesson.id);
+const role = Astro.locals.profile?.role ?? 'student';
+const canSeeVideos = await canViewCourse(Astro.locals, data.course);
+const lessonVideos = canSeeVideos
+  ? await fetchArchiveVideosForLesson(data.course, lessonSlug)
+  : [];
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
@@ -52,6 +63,51 @@ const { prev, next } = findPrevNext(lesson, allLessons);
     <div class="prose mt-10">
       <slot />
     </div>
+
+    {
+      canSeeVideos && (
+        <section class="mt-10">
+          <h2 class="text-lg font-semibold">Lecture videos</h2>
+          {lessonVideos.length === 0 ? (
+            <p class="mt-2 text-sm text-ink-muted">
+              No videos for this lesson yet.
+            </p>
+          ) : (
+            <ul class="mt-3 space-y-4">
+              {lessonVideos.map((v) => (
+                <li>
+                  <p class="text-sm font-medium">{v.title}</p>
+                  <div class="mt-2 aspect-video w-full">
+                    <iframe
+                      class="h-full w-full rounded"
+                      src={
+                        v.provider === 'youtube'
+                          ? `https://www.youtube-nocookie.com/embed/${v.video_id}`
+                          : `https://player.vimeo.com/video/${v.video_id}`
+                      }
+                      title={v.title}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {isContentManager(role) && (
+            <p class="mt-3 text-sm">
+              <a
+                href={`/instructor/archive?course=${data.course}&lesson=${lessonSlug}`}
+                class="text-accent underline"
+              >
+                ＋ Add a video for this lesson →
+              </a>
+            </p>
+          )}
+        </section>
+      )
+    }
 
     {article && <FurtherReadingCard article={article} variant="lesson" />}
 
