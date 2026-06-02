@@ -776,7 +776,7 @@ do $$ begin
   values ('archive-papers', 'archive-papers', false)
   on conflict (id) do nothing;
 exception
-  when undefined_table then null;
-  when undefined_schema then null;
-  when insufficient_privilege then null;
+  -- best-effort: skip on a stock Postgres without Supabase's `storage`
+  -- schema/table or where the role lacks privilege (e.g. the CI stub).
+  when others then null;
 end $$;
