@@ -11,6 +11,16 @@ interface Q {
   answer: number;
   explanation: string;
 }
+export type RawQuestion = {
+  type: QType;
+  id?: string;
+  prompt?: string;
+  choices?: string[];
+  correctIndex?: number;
+  correctIndices?: number[];
+  answer?: number;
+  explanation?: string;
+};
 interface LessonOpt {
   slug: string;
   title: string;
@@ -29,7 +39,7 @@ interface Props {
     covers: string[];
     passing_score: number;
     published?: boolean;
-    questions: Q[];
+    questions: RawQuestion[];
   };
 }
 
@@ -43,6 +53,20 @@ const blankQ = (): Q => ({
   answer: 0,
   explanation: '',
 });
+
+function normalizeQ(raw: RawQuestion): Q {
+  const b = blankQ();
+  return {
+    type: raw.type,
+    id: raw.id ?? b.id,
+    prompt: raw.prompt ?? '',
+    choices: raw.choices && raw.choices.length >= 2 ? raw.choices : ['', ''],
+    correctIndex: typeof raw.correctIndex === 'number' ? raw.correctIndex : 0,
+    correctIndices: Array.isArray(raw.correctIndices) ? raw.correctIndices : [],
+    answer: typeof raw.answer === 'number' ? raw.answer : 0,
+    explanation: raw.explanation ?? '',
+  };
+}
 
 export default function ArchiveQuizBuilder({
   action,
@@ -65,7 +89,7 @@ export default function ArchiveQuizBuilder({
   const [covers, setCovers] = useState<string[]>(initial?.covers ?? []);
   const [published, setPublished] = useState(initial?.published ?? true);
   const [questions, setQuestions] = useState<Q[]>(
-    initial?.questions?.length ? initial.questions : [blankQ()],
+    initial?.questions?.length ? initial.questions.map(normalizeQ) : [blankQ()],
   );
   const [error, setError] = useState<string | null>(null);
 

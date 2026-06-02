@@ -5,7 +5,9 @@ import { getAdminClient } from '@lib/supabase/admin';
 import { isContentManager, isAdmin } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
-import ArchiveQuizBuilder from '@components/archive/ArchiveQuizBuilder';
+import ArchiveQuizBuilder, {
+  type RawQuestion,
+} from '@components/archive/ArchiveQuizBuilder';
 
 const user = Astro.locals.user;
 const role = Astro.locals.profile?.role ?? 'student';
@@ -65,7 +67,7 @@ const lessons = (
         covers: row.covers,
         passing_score: Number(row.passing_score),
         published: row.published,
-        questions: row.questions as any[],
+        questions: row.questions as RawQuestion[],
       }}
     />
 
