@@ -191,6 +191,18 @@ export default function ArchiveBrowser({ items, facets }: Props) {
                   </div>
                 )}
               </>
+            ) : item.fileUrl ? (
+              <a
+                href={item.fileUrl}
+                target="_blank"
+                rel="noopener"
+                className="mt-1 block font-medium text-accent hover:underline"
+              >
+                {item.title}{' '}
+                <span className="text-xs text-ink-muted">
+                  (download{item.fileName ? ` · ${item.fileName}` : ''})
+                </span>
+              </a>
             ) : (
               <a
                 href={item.href}
