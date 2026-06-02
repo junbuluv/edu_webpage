@@ -37,7 +37,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { error } = await admin
     .from('archive_papers')
     .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
   if (error) return err('delete_failed');
 
   return new Response(null, {
