@@ -17,6 +17,8 @@ export interface ArchiveItem {
   searchText: string; // lowercased haystack for keyword match
   provider?: 'youtube' | 'vimeo';
   videoId?: string;
+  fileUrl?: string; // signed download URL for file-papers
+  fileName?: string; // original filename for file-papers
 }
 
 // Plain inputs (decoupled from Astro CollectionEntry so build.ts is alias-free).
@@ -49,6 +51,17 @@ export interface VideoInput {
   provider: 'youtube' | 'vimeo';
   videoId: string;
   semester: Semester;
+}
+
+export interface PaperInput {
+  id: string;
+  course: string;
+  kind: 'exam' | 'assignment';
+  title: string;
+  covers: string[];
+  semester: Semester;
+  fileUrl: string;
+  fileName: string;
 }
 
 export interface LessonRef {

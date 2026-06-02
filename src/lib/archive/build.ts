@@ -5,6 +5,7 @@ import type {
   Facets,
   LessonInput,
   LessonRef,
+  PaperInput,
   QuizInput,
   Semester,
   VideoInput,
@@ -28,6 +29,7 @@ export function buildArchiveItems(input: {
   lessons: LessonInput[];
   quizzes: QuizInput[];
   videos: VideoInput[];
+  papers?: PaperInput[];
   course: string;
 }): ArchiveItem[] {
   const { course } = input;
@@ -99,6 +101,26 @@ export function buildArchiveItems(input: {
       searchText: [v.title, v.description ?? '', units.join(' ')]
         .join(' ')
         .toLowerCase(),
+    });
+  }
+
+  // File papers (uploaded exam/assignment files)
+  for (const p of input.papers ?? []) {
+    if (p.course !== course) continue;
+    const lessonSlugs = p.covers.map(normalizeLessonSlug);
+    const units = unitsFor(lessonSlugs, unitBySlug);
+    items.push({
+      id: `${p.kind}:paper:${p.id}`,
+      type: p.kind,
+      title: p.title,
+      course,
+      href: '',
+      lessonSlugs,
+      units,
+      semester: p.semester,
+      searchText: [p.title, units.join(' ')].join(' ').toLowerCase(),
+      fileUrl: p.fileUrl,
+      fileName: p.fileName,
     });
   }
 
