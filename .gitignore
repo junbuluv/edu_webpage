@@ -35,3 +35,6 @@ materials/
 # Supabase generated types are committed (safe to remove this line if you regen often)
 # src/lib/supabase/database.types.ts
 .playwright-mcp/
+
+# Claude Code runtime artifacts (machine-local; tracked .claude/ content stays)
+.claude/scheduled_tasks.lock
