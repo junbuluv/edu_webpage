@@ -1,12 +1,13 @@
 import { getCollection } from 'astro:content';
 import type { CourseSlug } from '@lib/courses';
 import { buildArchiveItems, deriveFacets, normalizeLessonSlug } from './build';
-import { fetchArchiveVideos } from './db';
+import { fetchArchiveVideos, fetchArchivePapers, signPaperUrl } from './db';
 import type {
   ArchiveItem,
   Facets,
   LessonInput,
   LessonRef,
+  PaperInput,
   QuizInput,
   VideoInput,
 } from './types';
@@ -65,7 +66,24 @@ export async function loadArchiveForCourse(
 
   const videos: VideoInput[] = [...gitVideos, ...dbVideos];
 
-  const items = buildArchiveItems({ lessons, quizzes, videos, course });
+  const paperRows = await fetchArchivePapers(course);
+  const papers: PaperInput[] = [];
+  for (const r of paperRows) {
+    const fileUrl = await signPaperUrl(r.storage_path);
+    if (!fileUrl) continue; // skip papers whose file can't be signed
+    papers.push({
+      id: r.id,
+      course: r.course_slug,
+      kind: r.kind,
+      title: r.title,
+      covers: r.covers,
+      semester: { term: r.semester_term, year: r.semester_year },
+      fileUrl,
+      fileName: r.original_filename,
+    });
+  }
+
+  const items = buildArchiveItems({ lessons, quizzes, videos, papers, course });
 
   const lessonIndex: LessonRef[] = lessons
     .filter((l) => !l.draft)
