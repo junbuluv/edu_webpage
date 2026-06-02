@@ -145,6 +145,57 @@ export type Database = {
         };
         Relationships: [];
       };
+      archive_quizzes: {
+        Row: {
+          id: string;
+          course_slug: string;
+          kind: 'exam' | 'assignment';
+          title: string;
+          semester_term: 'spring' | 'summer' | 'fall';
+          semester_year: number;
+          covers: string[];
+          questions: Json;
+          passing_score: number;
+          created_by: string;
+          published: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_slug: string;
+          kind: 'exam' | 'assignment';
+          title: string;
+          semester_term: 'spring' | 'summer' | 'fall';
+          semester_year: number;
+          covers?: string[];
+          questions: Json;
+          passing_score?: number;
+          created_by: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_slug?: string;
+          kind?: 'exam' | 'assignment';
+          title?: string;
+          semester_term?: 'spring' | 'summer' | 'fall';
+          semester_year?: number;
+          covers?: string[];
+          questions?: Json;
+          passing_score?: number;
+          created_by?: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       archive_papers: {
         Row: {
           id: string;
