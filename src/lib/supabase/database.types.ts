@@ -145,6 +145,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      archive_papers: {
+        Row: {
+          id: string;
+          course_slug: string;
+          kind: 'exam' | 'assignment';
+          title: string;
+          semester_term: 'spring' | 'summer' | 'fall';
+          semester_year: number;
+          covers: string[];
+          storage_path: string;
+          original_filename: string;
+          content_type: string;
+          size_bytes: number;
+          created_by: string;
+          published: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_slug: string;
+          kind: 'exam' | 'assignment';
+          title: string;
+          semester_term: 'spring' | 'summer' | 'fall';
+          semester_year: number;
+          covers?: string[];
+          storage_path: string;
+          original_filename: string;
+          content_type: string;
+          size_bytes: number;
+          created_by: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_slug?: string;
+          kind?: 'exam' | 'assignment';
+          title?: string;
+          semester_term?: 'spring' | 'summer' | 'fall';
+          semester_year?: number;
+          covers?: string[];
+          storage_path?: string;
+          original_filename?: string;
+          content_type?: string;
+          size_bytes?: number;
+          created_by?: string;
+          published?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       enrollments: {
         Row: {
           user_id: string;
