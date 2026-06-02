@@ -45,7 +45,7 @@ interface Props {
 
 const blankQ = (): Q => ({
   type: 'multiple_choice',
-  id: `q${Math.floor(performance.now() * 1000) % 1_000_000}`,
+  id: `q-${crypto.randomUUID().slice(0, 8)}`,
   prompt: '',
   choices: ['', ''],
   correctIndex: 0,

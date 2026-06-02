@@ -73,6 +73,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const path = `${course}/${id}/${sanitize(file.name)}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
+  // Defense-in-depth: verify magic bytes match the declared type.
+  const isPdf =
+    bytes[0] === 0x25 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x44 &&
+    bytes[3] === 0x46; // %PDF
+  const isZip =
+    bytes[0] === 0x50 &&
+    bytes[1] === 0x4b &&
+    bytes[2] === 0x03 &&
+    bytes[3] === 0x04; // PK\x03\x04 (docx)
+  const sigOk = file.type === 'application/pdf' ? isPdf : isZip;
+  if (!sigOk) return err('bad_file_type');
+
   const up = await admin.storage
     .from('archive-papers')
     .upload(path, bytes, { contentType: file.type, upsert: false });

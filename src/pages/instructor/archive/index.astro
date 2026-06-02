@@ -50,6 +50,42 @@ const ecoLessons = canAddVideo
 
 const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
+
+const OK_MESSAGES: Record<string, string> = {
+  created: 'Video added.',
+  updated: 'Video updated.',
+  deleted: 'Video removed.',
+  paper_created: 'File uploaded.',
+  paper_updated: 'Exam/assignment updated.',
+  paper_deleted: 'Exam/assignment removed.',
+  quiz_created: 'Quiz created.',
+  quiz_updated: 'Quiz updated.',
+  quiz_deleted: 'Quiz removed.',
+};
+const ERROR_MESSAGES: Record<string, string> = {
+  unauthenticated: 'Please sign in.',
+  forbidden: 'You do not have permission to manage archive content.',
+  not_course_instructor: 'You are not an instructor for that course.',
+  not_owner: 'You can only edit items you created.',
+  invalid_input: 'Some fields were missing or invalid.',
+  invalid_course: 'Unknown course.',
+  invalid_lesson: 'One of the selected lessons is not valid for that course.',
+  invalid_video_id: 'The video ID is not valid for the selected provider.',
+  missing_file: 'Please choose a file to upload.',
+  bad_file_type: 'Only PDF or Word (.docx) files are allowed.',
+  file_too_large: 'The file is too large (max 25 MB).',
+  upload_failed: 'Could not upload the file. Please try again.',
+  invalid_payload: 'The form could not be read. Please try again.',
+  invalid_questions: 'One or more questions are incomplete or invalid.',
+  insert_failed: 'Could not save. Please try again.',
+  update_failed: 'Could not save changes. Please try again.',
+  delete_failed: 'Could not remove the item. Please try again.',
+  not_found: 'That item no longer exists.',
+};
+const okMessage = ok ? (OK_MESSAGES[ok] ?? 'Saved.') : null;
+const errorMessage = error
+  ? (ERROR_MESSAGES[error] ?? 'Something went wrong.')
+  : null;
 ---
 
 <BaseLayout title="Archive content">
@@ -65,16 +101,16 @@ const error = Astro.url.searchParams.get('error');
     </p>
 
     {
-      ok && (
+      okMessage && (
         <p class="mt-6 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
-          Saved ({ok}).
+          {okMessage}
         </p>
       )
     }
     {
-      error && (
+      errorMessage && (
         <p class="mt-6 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          Could not complete the action: {error}.
+          {errorMessage}
         </p>
       )
     }

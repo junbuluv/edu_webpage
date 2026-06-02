@@ -82,7 +82,7 @@ const lessonVideos = canSeeVideos
                       class="h-full w-full rounded"
                       src={
                         v.provider === 'youtube'
-                          ? `https://www.youtube-nocookie.com/embed/${v.video_id}`
+                          ? `https://www.youtube-nocookie.com/embed/${v.video_id}?rel=0`
                           : `https://player.vimeo.com/video/${v.video_id}`
                       }
                       title={v.title}
