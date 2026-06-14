@@ -31,6 +31,7 @@ if (actorIds.length > 0) {
 // Banner for the role-assignment form (?ok= / ?error= per convention #16).
 const ROLE_OK: Record<string, string> = {
   role_set: 'Role updated.',
+  role_unchanged: 'That user already has that role; nothing changed.',
 };
 const ROLE_ERR: Record<string, string> = {
   unauthenticated: 'Please sign in.',
@@ -42,6 +43,8 @@ const ROLE_ERR: Record<string, string> = {
     'That user is an admin; admin roles are managed via SQL, not here.',
   lookup_failed: 'Could not look up that account right now. Please try again.',
   update_failed: 'Could not update the role. Please try again.',
+  role_set_unaudited:
+    'Role updated, but it could not be written to the audit log. Please report this to an admin.',
 };
 const okParam = Astro.url.searchParams.get('ok');
 const errParam = Astro.url.searchParams.get('error');

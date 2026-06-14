@@ -61,8 +61,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const outcome = classifyRoleAssign({
     requestedRole,
     emailFound: true,
-    targetIsAdmin: currentRole === 'admin',
+    currentRole,
   });
+  // A no-op (target already has this role) is benign: skip the redundant
+  // UPDATE and the misleading 'set role X -> X' audit entry it would write.
+  if (outcome === 'no_change') return ok('role_unchanged');
   if (outcome !== 'ok') return err(outcome);
 
   const { error } = await admin
@@ -71,7 +74,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .eq('id', targetId);
   if (error) return err('update_failed');
 
-  await logDisclosureSafe({
+  // The role change has already committed. Record it — but a privilege change
+  // must not land with no audit trail and no signal. logDisclosureSafe returns
+  // false when the audit write fails (convention #10 fail-open), so surface
+  // that to the admin instead of silently reporting plain success.
+  const audited = await logDisclosureSafe({
     actorId: user.id,
     actorRole: role as 'instructor' | 'ta' | 'admin',
     action: 'promote_role',
@@ -82,5 +89,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
     request,
   });
 
-  return ok('role_set');
+  return audited ? ok('role_set') : err('role_set_unaudited');
 };
