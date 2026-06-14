@@ -16,12 +16,12 @@ test('isAssignableRole accepts the three assignable roles, rejects admin/garbage
   assert.ok(!isAssignableRole('superuser'));
 });
 
-test('happy path: valid role, account exists, target not admin → ok', () => {
+test('happy path: valid role, account exists, target not admin, role changes → ok', () => {
   assert.equal(
     classifyRoleAssign({
       requestedRole: 'instructor',
       emailFound: true,
-      targetIsAdmin: false,
+      currentRole: 'student',
     }),
     'ok',
   );
@@ -33,7 +33,7 @@ test("requesting 'admin' is rejected as invalid_role before anything else", () =
     classifyRoleAssign({
       requestedRole: 'admin',
       emailFound: true,
-      targetIsAdmin: true,
+      currentRole: 'admin',
     }),
     'invalid_role',
   );
@@ -41,7 +41,7 @@ test("requesting 'admin' is rejected as invalid_role before anything else", () =
     classifyRoleAssign({
       requestedRole: 'garbage',
       emailFound: false,
-      targetIsAdmin: false,
+      currentRole: 'student',
     }),
     'invalid_role',
   );
@@ -52,7 +52,7 @@ test('unknown email → no_account (when requested role is valid)', () => {
     classifyRoleAssign({
       requestedRole: 'ta',
       emailFound: false,
-      targetIsAdmin: false,
+      currentRole: 'student',
     }),
     'no_account',
   );
@@ -63,7 +63,39 @@ test('existing admin target cannot be modified', () => {
     classifyRoleAssign({
       requestedRole: 'student',
       emailFound: true,
-      targetIsAdmin: true,
+      currentRole: 'admin',
+    }),
+    'cannot_modify_admin',
+  );
+});
+
+test('same role requested → no_change (no UPDATE, no audit entry)', () => {
+  assert.equal(
+    classifyRoleAssign({
+      requestedRole: 'instructor',
+      emailFound: true,
+      currentRole: 'instructor',
+    }),
+    'no_change',
+  );
+  assert.equal(
+    classifyRoleAssign({
+      requestedRole: 'student',
+      emailFound: true,
+      currentRole: 'student',
+    }),
+    'no_change',
+  );
+});
+
+test('admin guard outranks the no_change check', () => {
+  // currentRole 'admin' never reports no_change even though admin is not an
+  // assignable requested value: the admin guard fires first.
+  assert.equal(
+    classifyRoleAssign({
+      requestedRole: 'ta',
+      emailFound: true,
+      currentRole: 'admin',
     }),
     'cannot_modify_admin',
   );
