@@ -119,7 +119,7 @@ as you change the return on new investment:
 
 <DDMValuation client:load />
 
-_Baseline: $EPS_1 = \$5$, $r_E = 10\%$, return on new investment $= 12\%$.
+_Baseline: EPS₁ = \$5, $r_E = 10\%$, return on new investment $= 12\%$.
 Because 12% is above $r_E$, retaining earnings adds value; drag the return
 below 10% and watch the same growth start to destroy it._
 
@@ -155,12 +155,14 @@ fragile, which motivates models that lean less on dividend forecasts.
 ## The total-payout model
 
 Many firms return far more cash through **share repurchases** than
-through dividends. A pure DDM, which counts only dividends per share,
-misses that cash entirely.
+through dividends. A dividend-discount model can still handle
+repurchases, but only when the forecast tracks both dividends per
+share and the falling share count caused by buybacks.
 
-The fix: discount _total_ payouts (dividends plus repurchases) to get
-the value of total equity, then divide by shares outstanding. Growth
-here applies to total payouts, not to per-share dividends.
+A total-payout model is often a simpler alternative: discount
+dividends plus repurchases to get total equity value, then divide by
+shares outstanding. Growth here applies to total payouts, not to
+per-share dividends.
 
 <BarFigure
   client:load
@@ -177,7 +179,7 @@ here applies to total payouts, not to per-share dividends.
     { key: 'buybacks', name: 'Share repurchases ($B)', color: '#aa4643' },
   ]}
   yAxisLabel="USD billions"
-  caption="Apple's cash returned to shareholders, approximate fiscal-year figures from 10-K cash flow statements. Repurchases run roughly five to six times dividends. A dividend-only model would value the smaller of the two streams and badly understate the equity."
+  caption="Apple's cash returned to shareholders, approximate fiscal-year figures from 10-K cash flow statements. Repurchases run roughly five to six times dividends. A dividend forecast that holds both per-share payouts and share count fixed would miss this effect; a consistent DDM or total-payout model does not."
   credit="Apple Inc. 10-K cash flow statements via SEC EDGAR"
   creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
 />

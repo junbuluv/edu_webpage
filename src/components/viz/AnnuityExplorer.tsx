@@ -14,7 +14,8 @@ import {
 // The chart plots PV against the discount rate r so students can see the
 // claim the prose only states: long-duration streams are extremely sensitive
 // to r (a $1,000 perpetuity is worth $20,000 at 5% and $40,000 at 2.5%).
-// Growing streams require r > g; the curve blows up as r approaches g.
+// Only a growing perpetuity requires r > g. A finite growing annuity remains
+// well-defined at and below g.
 
 type Stream = 'perpetuity' | 'growing-perp' | 'annuity' | 'growing-annuity';
 
@@ -62,7 +63,7 @@ function pv(type: Stream, C: number, r: number, g: number, T: number): number {
 export default function AnnuityExplorer() {
   const [s, setS] = useState<State>(baseline);
 
-  const rMin = isGrowing(s.type) ? s.g + 0.005 : 0.01;
+  const rMin = s.type === 'growing-perp' ? s.g + 0.005 : 0.01;
 
   const data = useMemo(() => {
     const pts: { r: number; pv: number }[] = [];
@@ -85,7 +86,13 @@ export default function AnnuityExplorer() {
           <button
             key={t}
             type="button"
-            onClick={() => setS((x) => ({ ...x, type: t }))}
+            onClick={() =>
+              setS((x) => ({
+                ...x,
+                type: t,
+                r: t === 'growing-perp' ? Math.max(x.r, x.g + 0.005) : x.r,
+              }))
+            }
             className={
               'rounded border px-2.5 py-1 text-sm ' +
               (s.type === t
@@ -111,7 +118,7 @@ export default function AnnuityExplorer() {
         <Slider
           label="Discount rate r"
           v={s.r}
-          min={0.01}
+          min={rMin}
           max={0.15}
           step={0.0025}
           fmt={pct}
@@ -125,7 +132,16 @@ export default function AnnuityExplorer() {
             max={0.1}
             step={0.0025}
             fmt={pct}
-            onChange={(v) => setS((x) => ({ ...x, g: v }))}
+            onChange={(v) =>
+              setS((x) => ({
+                ...x,
+                g: v,
+                r:
+                  x.type === 'growing-perp'
+                    ? Math.max(x.r, v + 0.005)
+                    : x.r,
+              }))
+            }
           />
         )}
         {isFinite_(s.type) && (
@@ -218,8 +234,9 @@ export default function AnnuityExplorer() {
       <p className="mt-2 text-xs text-ink-muted">
         The red dot is your chosen r. Drag r left and watch PV climb steeply:
         halving the rate roughly doubles the value of a perpetual stream. For
-        growing streams the curve diverges as r approaches g, which is why the r
-        − g gap dominates a Gordon-model valuation.
+        {s.type === 'growing-perp'
+          ? ' For a growing perpetuity, the curve diverges as r approaches g; the r − g gap dominates a Gordon-model valuation.'
+          : ' Finite annuities remain well-defined even when growth equals or exceeds the discount rate.'}
       </p>
     </div>
   );

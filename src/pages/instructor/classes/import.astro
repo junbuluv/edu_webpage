@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin as isAdminRole, isStaff as isStaffRole } from '@lib/roles';
+import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
 import { COURSE_SLUGS, isCourseSlug, type CourseSlug } from '@lib/courses';
 import {
   previewImport,
@@ -11,11 +11,11 @@ import {
 } from '@lib/instructor/roster-import';
 import { logDisclosureSafe } from '@lib/audit';
 
-// Staff-gated by middleware (/instructor prefix), but guard explicitly
-// rather than defaulting an absent profile to 'instructor'.
+// The route is staff-gated by middleware, but roster mutation is restricted
+// to instructors and admins; teaching assistants are read-only.
 const user = Astro.locals.user!;
 const rawRole = Astro.locals.profile?.role;
-if (!isStaffRole(rawRole)) return new Response(null, { status: 403 });
+if (!isInstructor(rawRole)) return new Response(null, { status: 403 });
 const role = rawRole as 'instructor' | 'ta' | 'admin';
 const isAdmin = isAdminRole(role);
 

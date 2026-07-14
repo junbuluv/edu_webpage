@@ -21,9 +21,14 @@ import {
 //   EBIT          = EBITDA - D&A
 //   Tax           = EBIT * tax
 //   NOPAT         = EBIT - Tax
-//   ΔWC           = wcRate * (Revenue - prev Revenue)
-//   CapEx         = capex0 (year 1 only) + maintCapex
-//   FCF           = NOPAT + D&A - ΔWC - CapEx
+//   t = 0 FCF     = -initial CapEx - initial working capital
+//   ΔWC           = wcRate * (Revenue - prior-year Revenue)
+//   Operating FCF = NOPAT + D&A - ΔWC - maintenance CapEx
+//   Terminal value = FCF_(T+1) / (r - g)
+//
+// A Gordon terminal value represents a continuing business, so its working
+// capital remains invested. A working-capital release belongs only to a
+// finite-life project with no going-concern terminal value.
 
 interface State {
   revenue0: number;
@@ -35,6 +40,7 @@ interface State {
   maintCapex: number;
   horizon: number;
   discount: number;
+  terminalGrowth: number;
 }
 
 const baseline: State = {
@@ -44,9 +50,10 @@ const baseline: State = {
   tax: 0.25,
   wcRate: 0.1,
   capex0: 800,
-  maintCapex: 50,
+  maintCapex: 0,
   horizon: 8,
   discount: 0.1,
+  terminalGrowth: 0.02,
 };
 
 function compute(s: State) {
@@ -60,6 +67,7 @@ function compute(s: State) {
     nopat: number;
     dWC: number;
     capex: number;
+    terminalValue: number;
     fcf: number;
     pv: number;
     cumNPV: number;
@@ -67,7 +75,27 @@ function compute(s: State) {
     capexNeg: number;
   }> = [];
   let prevRev = s.revenue0;
-  let cum = 0;
+  const initialWC = s.wcRate * s.revenue0;
+  const initialFcf = -s.capex0 - initialWC;
+  let cum = initialFcf;
+  rows.push({
+    t: 0,
+    revenue: 0,
+    cogs: 0,
+    da: 0,
+    ebit: 0,
+    taxAmt: 0,
+    nopat: 0,
+    dWC: initialWC,
+    capex: s.capex0,
+    terminalValue: 0,
+    fcf: initialFcf,
+    pv: initialFcf,
+    cumNPV: cum,
+    dWCNeg: -initialWC,
+    capexNeg: -s.capex0,
+  });
+
   for (let t = 1; t <= s.horizon; t++) {
     const revenue = s.revenue0 * Math.pow(1 + s.growth, t - 1);
     const cogs = revenue * (1 - s.margin);
@@ -76,9 +104,25 @@ function compute(s: State) {
     const ebit = ebitda - da;
     const taxAmt = Math.max(0, ebit * s.tax);
     const nopat = ebit - taxAmt;
-    const dWC = s.wcRate * (revenue - prevRev);
-    const capex = (t === 1 ? s.capex0 : 0) + s.maintCapex;
-    const fcf = nopat + da - dWC - capex;
+    const dWC = t === 1 ? 0 : s.wcRate * (revenue - prevRev);
+    const capex = s.maintCapex;
+    const operatingFcf = nopat + da - dWC - capex;
+    let terminalValue = 0;
+    if (t === s.horizon) {
+      const revenueNext = revenue * (1 + s.terminalGrowth);
+      // In the continuing period, replacement CapEx and D&A are both set to
+      // maintenance CapEx. This keeps the terminal asset base intact rather
+      // than depreciating the initial project asset forever.
+      const terminalDA = s.maintCapex;
+      const terminalEbit = revenueNext * s.margin - terminalDA;
+      const terminalTax = Math.max(0, terminalEbit * s.tax);
+      const terminalNopat = terminalEbit - terminalTax;
+      const terminalDWC = s.wcRate * (revenueNext - revenue);
+      const terminalFcf =
+        terminalNopat + terminalDA - s.maintCapex - terminalDWC;
+      terminalValue = terminalFcf / (s.discount - s.terminalGrowth);
+    }
+    const fcf = operatingFcf + terminalValue;
     const pv = fcf / Math.pow(1 + s.discount, t);
     cum += pv;
     rows.push({
@@ -91,6 +135,7 @@ function compute(s: State) {
       nopat,
       dWC,
       capex,
+      terminalValue,
       fcf,
       pv,
       cumNPV: cum,
@@ -167,13 +212,31 @@ export default function CashflowWaterfall() {
           onChange={(v) => setS((x) => ({ ...x, capex0: v }))}
         />
         <Slider
+          label="Maintenance CapEx"
+          v={s.maintCapex}
+          min={0}
+          max={500}
+          step={25}
+          fmt={(v) => `$${v.toFixed(0)}`}
+          onChange={(v) => setS((x) => ({ ...x, maintCapex: v }))}
+        />
+        <Slider
           label="Discount rate"
           v={s.discount}
-          min={0.03}
+          min={0.06}
           max={0.25}
           step={0.005}
           fmt={(v) => (v * 100).toFixed(1) + '%'}
           onChange={(v) => setS((x) => ({ ...x, discount: v }))}
+        />
+        <Slider
+          label="Terminal growth"
+          v={s.terminalGrowth}
+          min={0}
+          max={0.04}
+          step={0.005}
+          fmt={(v) => (v * 100).toFixed(1) + '%'}
+          onChange={(v) => setS((x) => ({ ...x, terminalGrowth: v }))}
         />
         <Slider
           label="Horizon"
@@ -184,6 +247,13 @@ export default function CashflowWaterfall() {
           fmt={(v) => `${v.toFixed(0)} yrs`}
           onChange={(v) => setS((x) => ({ ...x, horizon: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           NPV ={' '}
           <strong className={npv >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
@@ -215,6 +285,12 @@ export default function CashflowWaterfall() {
               <ReferenceLine y={0} stroke="#94a3b8" />
               <Bar dataKey="nopat" name="NOPAT" stackId="a" fill="#059669" />
               <Bar dataKey="da" name="+ D&A" stackId="a" fill="#10b981" />
+              <Bar
+                dataKey="terminalValue"
+                name="Terminal value"
+                stackId="a"
+                fill="#2563eb"
+              />
               <Bar dataKey="dWCNeg" name="− ΔWC" stackId="a" fill="#f97316" />
               <Bar
                 dataKey="capexNeg"
@@ -264,6 +340,13 @@ export default function CashflowWaterfall() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <p className="md:col-span-2 text-xs text-ink-muted">
+        Initial CapEx and working capital are invested at t = 0. The final year
+        includes a Gordon terminal value derived from next year’s revenue,
+        operating margin, maintenance CapEx, and additional working capital.
+        Because the business continues, working capital is not released.
+      </p>
     </div>
   );
 }

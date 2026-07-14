@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isStaff } from '@lib/roles';
+import { isAdmin, isInstructor } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
-import { instructorOwnsCourse } from '@lib/archive/access';
+import { canManageClass } from '@lib/instructor/class-access';
 import { logDisclosureSafe } from '@lib/audit';
 
 const SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
@@ -36,10 +36,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         });
 
   if (!user) return fail('unauthenticated');
-  if (!isStaff(role)) return fail('forbidden');
+  if (!isInstructor(role)) return fail('forbidden');
   if (!isCourseSlug(course) || !semester || !userId)
     return fail('invalid_input');
-  if (!(await instructorOwnsCourse(user.id, course, role)))
+  if (!(await canManageClass(user.id, course, semester, role)))
     return fail('not_course_instructor');
 
   let section: string | null = null;
@@ -49,12 +49,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const admin = getAdminClient();
-  const { error } = await admin
+  let query = admin
     .from('enrollments')
     .update({ student_name: studentName, section })
     .eq('user_id', userId)
     .eq('course_slug', course)
     .eq('semester', semester);
+  if (!isAdmin(role)) query = query.eq('instructor_id', user.id);
+  const { error } = await query;
   if (error) return fail('update_failed');
 
   await logDisclosureSafe({

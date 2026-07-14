@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getAdminClient, listAllAuthUsers } from '@lib/supabase/admin';
-import { isStaff } from '@lib/roles';
+import { isInstructor } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
-import { instructorOwnsCourse } from '@lib/archive/access';
+import { canManageClass } from '@lib/instructor/class-access';
 import { classifyEnroll } from '@lib/instructor/enroll-classify';
 import { logDisclosureSafe } from '@lib/audit';
 
@@ -45,9 +45,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
         });
 
   if (!user) return fail('unauthenticated');
-  if (!isStaff(role)) return fail('forbidden');
+  if (!isInstructor(role)) return fail('forbidden');
   if (!isCourseSlug(course) || !semester) return fail('invalid_input');
-  if (!(await instructorOwnsCourse(user.id, course, role)))
+  if (!(await canManageClass(user.id, course, semester, role, true)))
     return fail('not_course_instructor');
   if (!email) return fail('invalid_input');
 

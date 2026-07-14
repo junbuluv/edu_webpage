@@ -23,8 +23,8 @@ const params = { a: 800, b: 40, g: 1.5, m: 0.4, c: 0.05 };
 
 function solve(s: ADASSnapshot) {
   const { a, b, g, m, c } = params;
-  const P = (c * a + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
-  const Y = a - b * P + g * s.G + m * s.M;
+  const P = (c * (a + s.A0) + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
+  const Y = a + s.A0 - b * P + g * s.G + m * s.M;
   return { Y, P };
 }
 
@@ -33,7 +33,7 @@ function buildSeries(s: ADASSnapshot) {
   const Ys = Array.from({ length: 41 }, (_, i) => 600 + i * 20);
   return Ys.map((Y) => ({
     Y,
-    AD: (a - Y + g * s.G + m * s.M) / b,
+    AD: (a + s.A0 - Y + g * s.G + m * s.M) / b,
     SRAS: s.Pe + c * (Y - s.Yn),
   }));
 }

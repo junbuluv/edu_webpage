@@ -6,6 +6,7 @@ import {
   type GradableQuestion,
 } from '@lib/quiz/grade';
 import { canViewCourse } from '@lib/archive/access';
+import { getAdminClient } from '@lib/supabase/admin';
 
 // Server-side quiz grading. The quiz (including answer keys + explanations)
 // is loaded here from the content collection and never shipped to the client;
@@ -53,5 +54,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
     answers,
     quiz.passingScore,
   );
+
+  if (locals.user) {
+    try {
+      const { error } = await getAdminClient().from('quiz_attempts').insert({
+        user_id: locals.user.id,
+        quiz_slug: quiz.slug,
+        course_slug: quiz.course,
+        score: result.score,
+        max_score: result.maxScore,
+        answers: answers as never,
+      });
+      if (error) console.error('[quiz/grade] attempt_save_failed', error);
+    } catch (error) {
+      console.error('[quiz/grade] attempt_save_failed', error);
+    }
+  }
+
   return json(result);
 };

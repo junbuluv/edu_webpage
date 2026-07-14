@@ -7,6 +7,7 @@ export type UserRole = 'student' | 'instructor' | 'ta' | 'admin';
 
 const STAFF_ROLES = new Set<UserRole>(['instructor', 'ta', 'admin']);
 const ADMIN_ROLES = new Set<UserRole>(['admin']);
+const INSTRUCTOR_ROLES = new Set<UserRole>(['instructor', 'admin']);
 
 export function isStaff(role: UserRole | null | undefined): boolean {
   return role ? STAFF_ROLES.has(role) : false;
@@ -14,6 +15,10 @@ export function isStaff(role: UserRole | null | undefined): boolean {
 
 export function isAdmin(role: UserRole | null | undefined): boolean {
   return role ? ADMIN_ROLES.has(role) : false;
+}
+
+export function isInstructor(role: UserRole | null | undefined): boolean {
+  return role ? INSTRUCTOR_ROLES.has(role) : false;
 }
 
 const CONTENT_MANAGER_ROLES = new Set<UserRole>(['instructor', 'admin']);

@@ -150,37 +150,36 @@ those cases constantly. Use NPV.
 ## Profitability index: choosing under a constraint
 
 NPV says take every positive-NPV project. Reality often imposes a
-limit: a fixed capital budget, one scarce engineering team, a single
-factory line. When one resource binds, ranking by NPV alone can
-overspend it. Rank instead by the **profitability index**, the value
-created per unit of the scarce resource:
+fixed capital budget. When capital is the single binding resource,
+rank projects by the **profitability index**:
 
 $$
-\text{PI} = \frac{\text{NPV}}{\text{Resource consumed}}.
+\text{PI} = \frac{\text{PV of future cash inflows}}{\text{Initial investment}}
+= 1 + \frac{\text{NPV}}{\text{Initial investment}}.
 $$
 
-Take projects in descending PI order until the resource runs out.
+For divisible projects with capital as the only binding resource, take
+projects in descending PI order until the budget runs out. For
+all-or-nothing projects, use PI as a screening heuristic and compare
+the feasible combinations.
 
 Worked example. A \$100M capital budget and three independent
 projects:
 
-| Project | Investment | NPV   | PI = NPV / Investment |
+| Project | Investment | NPV   | PI                    |
 | ------- | ---------- | ----- | --------------------- |
-| A       | \$100M     | \$40M | 0.40                  |
-| B       | \$50M      | \$30M | 0.60                  |
-| C       | \$50M      | \$25M | 0.50                  |
+| A       | \$100M     | \$40M | 1.40                  |
+| B       | \$50M      | \$30M | 1.60                  |
+| C       | \$50M      | \$25M | 1.50                  |
 
 Ranking by raw NPV grabs A first (\$40M NPV), which exhausts the
-budget for a total of \$40M. Ranking by PI takes B (0.60) then C
-(0.50), which also fits in \$100M but creates \$30M + \$25M = \$55M.
-The profitability index wins because it spends each scarce dollar
-where it produces the most value.
+budget for a total of \$40M. Ranking by PI takes B (1.60) then C
+(1.50), which also fits in \$100M but creates \$30M + \$25M = \$55M.
+In this example, the PI ranking is feasible and value-maximizing.
 
-The rule has limits. It assumes a single binding constraint and
-projects you can take whole. With two constraints at once, or
-lumpy all-or-nothing projects, PI ranking can mislead and you need
-explicit optimization. Within those limits it is the right tie-break
-when you cannot fund everything positive.
+The rule has limits. It assumes a single binding constraint. With two
+constraints at once, or lumpy all-or-nothing projects, PI ranking can
+mislead and you need explicit optimization.
 
 ## Practical decision template
 

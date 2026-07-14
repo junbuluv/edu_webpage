@@ -45,6 +45,7 @@ export type Database = {
         Row: {
           user_id: string;
           lesson_slug: string;
+          course_slug: string | null;
           status: 'started' | 'completed';
           completed_at: string | null;
           updated_at: string;
@@ -52,12 +53,14 @@ export type Database = {
         Insert: {
           user_id: string;
           lesson_slug: string;
+          course_slug?: string | null;
           status?: 'started' | 'completed';
           completed_at?: string | null;
         };
         Update: {
           user_id?: string;
           lesson_slug?: string;
+          course_slug?: string | null;
           status?: 'started' | 'completed';
           completed_at?: string | null;
         };
@@ -68,6 +71,7 @@ export type Database = {
           id: string;
           user_id: string;
           quiz_slug: string;
+          course_slug: string | null;
           score: number;
           max_score: number;
           answers: Json;
@@ -77,6 +81,7 @@ export type Database = {
           id?: string;
           user_id: string;
           quiz_slug: string;
+          course_slug?: string | null;
           score: number;
           max_score: number;
           answers: Json;
@@ -85,6 +90,7 @@ export type Database = {
           id?: string;
           user_id?: string;
           quiz_slug?: string;
+          course_slug?: string | null;
           score?: number;
           max_score?: number;
           answers?: Json;

@@ -109,8 +109,9 @@ export async function listClasses(
 
 /**
  * Full roster + per-student monitoring signals for one (course, semester)
- * class. Enforces ownership in app code: a non-admin caller must be the
- * instructor_id on at least one enrollment in the class.
+ * class. Non-admin callers receive only the rows they own in that
+ * course-semester, so co-taught sections never disclose another instructor's
+ * roster.
  *
  * @param nowMs current time (injected so at-risk evaluation is testable)
  * @param opts.withEmail skip the auth.users email lookup when only counts
@@ -135,20 +136,18 @@ export async function loadClassRoster(
     instructor_id: string;
     student_name: string | null;
     section: string | null;
-  }>((from, to) =>
-    admin
+  }>((from, to) => {
+    let query = admin
       .from('enrollments')
       .select('user_id, instructor_id, student_name, section')
       .eq('course_slug', course)
-      .eq('semester', semester)
-      .range(from, to),
-  );
+      .eq('semester', semester);
+    if (!isAdmin) query = query.eq('instructor_id', instructorId);
+    return query.range(from, to);
+  });
   if (enrollmentRes.error) return { kind: 'error' };
   const roster = enrollmentRes.rows;
   if (roster.length === 0) return { kind: 'not_found' };
-  if (!isAdmin && !roster.some((r) => r.instructor_id === instructorId)) {
-    return { kind: 'forbidden' };
-  }
   const userIds = roster.map((r) => r.user_id);
   const userIdSet = new Set(userIds);
 

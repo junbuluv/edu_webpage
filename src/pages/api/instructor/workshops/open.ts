@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
+import { getEntry } from 'astro:content';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isStaff } from '@lib/roles';
+import { isInstructor } from '@lib/roles';
+import { isCourseSlug } from '@lib/courses';
+import { instructorOwnsCourse } from '@lib/archive/access';
 
 // Open a new workshop_administrations row for one workshop window.
 // Instructor only. Posted as form data (so the page's plain <form>
@@ -34,9 +37,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const notes = String(form.get('notes') ?? '').trim() || null;
 
   if (!user) return errorRedirect(workshopSlug, 'unauthenticated');
-  if (!isStaff(role)) return errorRedirect(workshopSlug, 'forbidden');
+  if (!isInstructor(role)) return errorRedirect(workshopSlug, 'forbidden');
 
-  if (!workshopSlug || !courseSlug || !weekOf || !opensAt || !closesAt) {
+  if (
+    !workshopSlug ||
+    !isCourseSlug(courseSlug) ||
+    !weekOf ||
+    !opensAt ||
+    !closesAt
+  ) {
+    return errorRedirect(workshopSlug, 'invalid_input');
+  }
+
+  const workshop = await getEntry('workshops', workshopSlug);
+  if (!workshop || workshop.data.course !== courseSlug) {
     return errorRedirect(workshopSlug, 'invalid_input');
   }
 
@@ -50,22 +64,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return errorRedirect(workshopSlug, 'invalid_input');
   }
 
-  // Admin role: must be instructor for this course in some enrollment row.
-  if (role === 'instructor') {
-    const adminClient = getAdminClient();
-    // One enrollments row per enrolled student, so this returns MANY rows for
-    // a real class. Use limit(1) + array check — .maybeSingle() errors
-    // (PGRST116) on >1 row, wrongly denying a course with 2+ students.
-    const { data: enr } = await adminClient
-      .from('enrollments')
-      .select('user_id')
-      .eq('instructor_id', user.id)
-      .eq('course_slug', courseSlug)
-      .limit(1);
-    if (!enr || enr.length === 0) {
-      return errorRedirect(workshopSlug, 'not_course_instructor');
-    }
-  }
+  if (!(await instructorOwnsCourse(user.id, courseSlug, role)))
+    return errorRedirect(workshopSlug, 'not_course_instructor');
 
   const admin = getAdminClient();
   const { error } = await admin.from('workshop_administrations').insert({

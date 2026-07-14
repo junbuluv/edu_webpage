@@ -68,6 +68,13 @@ create policy "profiles_self_update"
   on public.profiles for update
   using (auth.uid() = id);
 
+-- RLS can identify the row a user owns, but cannot restrict which columns
+-- they update. Keep the preference fields client-writable while withholding
+-- role and identity fields from authenticated PostgREST clients.
+revoke update on table public.profiles from anon, authenticated;
+grant update (display_name, active_course_slug, tos_accepted_at)
+  on table public.profiles to authenticated;
+
 -- Auto-create profile row on new signup, computing email_hmac from
 -- auth.users.email using the session-level secret.
 --
@@ -179,19 +186,39 @@ create trigger on_auth_user_created
 create table if not exists public.lesson_progress (
   user_id uuid not null references public.profiles(id) on delete cascade,
   lesson_slug text not null,
+  course_slug text,
   status progress_status not null default 'started',
   completed_at timestamptz,
   updated_at timestamptz not null default now(),
   primary key (user_id, lesson_slug)
 );
 
+alter table public.lesson_progress add column if not exists course_slug text;
+update public.lesson_progress
+  set course_slug = split_part(lesson_slug, '/', 1)
+  where course_slug is null
+    and split_part(lesson_slug, '/', 1) in ('eco-1002', 'fin-3610');
+do $$ begin
+  alter table public.lesson_progress
+    add constraint lesson_progress_course_chk
+    check (course_slug in ('eco-1002', 'fin-3610'));
+exception when duplicate_object then null; end $$;
+create index if not exists lesson_progress_user_course_idx
+  on public.lesson_progress (user_id, course_slug, updated_at desc);
+
 alter table public.lesson_progress enable row level security;
 
 drop policy if exists "lesson_progress_self_all" on public.lesson_progress;
-create policy "lesson_progress_self_all"
-  on public.lesson_progress for all
+drop policy if exists "lesson_progress_self_read" on public.lesson_progress;
+create policy "lesson_progress_self_read"
+  on public.lesson_progress for select
   using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  ;
+
+-- Lesson status is authoritative progress data. Only server-side handlers
+-- using the service role may write it after validating the lesson collection.
+revoke insert, update, delete on table public.lesson_progress
+  from anon, authenticated;
 
 -- =========================================================================
 -- quiz_attempts --- append-only attempts log
@@ -200,14 +227,30 @@ create table if not exists public.quiz_attempts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   quiz_slug text not null,
+  course_slug text,
   score numeric not null,
   max_score numeric not null,
   answers jsonb not null,
   submitted_at timestamptz not null default now()
 );
 
+alter table public.quiz_attempts add column if not exists course_slug text;
+update public.quiz_attempts
+  set course_slug = case
+    when quiz_slug like 'eco-1002-%' then 'eco-1002'
+    when quiz_slug like 'fin-3610-%' then 'fin-3610'
+  end
+  where course_slug is null;
+do $$ begin
+  alter table public.quiz_attempts
+    add constraint quiz_attempts_course_chk
+    check (course_slug in ('eco-1002', 'fin-3610'));
+exception when duplicate_object then null; end $$;
+
 create index if not exists quiz_attempts_user_quiz_idx
   on public.quiz_attempts (user_id, quiz_slug, submitted_at desc);
+create index if not exists quiz_attempts_user_course_idx
+  on public.quiz_attempts (user_id, course_slug, submitted_at desc);
 
 alter table public.quiz_attempts enable row level security;
 
@@ -217,9 +260,8 @@ create policy "quiz_attempts_self_read"
   using (auth.uid() = user_id);
 
 drop policy if exists "quiz_attempts_self_insert" on public.quiz_attempts;
-create policy "quiz_attempts_self_insert"
-  on public.quiz_attempts for insert
-  with check (auth.uid() = user_id);
+revoke insert, update, delete on table public.quiz_attempts
+  from anon, authenticated;
 
 -- =========================================================================
 -- enrollments --- which students an instructor may legitimately read.
@@ -282,9 +324,8 @@ create policy "enrollments_admin_read"
 -- Replace the permissive instructor-read policy on quiz_attempts with one
 -- scoped by enrollment: an instructor sees attempts only for students they
 -- have an active enrollment row for in the same course as the quiz.
--- We assume quiz_slug encodes the course as a prefix like "macro-..."; the
--- application layer is responsible for ensuring enrollment + quiz course
--- prefixes align. For now we scope by student-instructor relationship only.
+-- Server-side grading tags each attempt with the quiz's content-collection
+-- course, so this policy requires that same course and roster ownership.
 -- Drop both the legacy short name and the current name so this block
 -- is idempotent regardless of which version a project was last on.
 drop policy if exists "quiz_attempts_instructor_read" on public.quiz_attempts;
@@ -298,12 +339,13 @@ create policy "quiz_attempts_instructor_read_scoped"
       join public.profiles p on p.id = auth.uid()
       where e.user_id = quiz_attempts.user_id
         and e.instructor_id = auth.uid()
-        and p.role in ('instructor', 'ta', 'admin')
+        and e.course_slug = quiz_attempts.course_slug
+        and p.role in ('instructor', 'admin')
     )
   );
 
--- Same scoping for lesson_progress instructor reads (new policy, additive
--- to the existing student-self-all policy).
+-- Same scoping for lesson_progress instructor reads; students retain their
+-- separate self-read policy above.
 drop policy if exists "lesson_progress_instructor_read_scoped" on public.lesson_progress;
 create policy "lesson_progress_instructor_read_scoped"
   on public.lesson_progress for select
@@ -314,7 +356,8 @@ create policy "lesson_progress_instructor_read_scoped"
       join public.profiles p on p.id = auth.uid()
       where e.user_id = lesson_progress.user_id
         and e.instructor_id = auth.uid()
-        and p.role in ('instructor', 'ta', 'admin')
+        and e.course_slug = lesson_progress.course_slug
+        and p.role in ('instructor', 'admin')
     )
   );
 
@@ -404,7 +447,7 @@ end;
 $$;
 
 revoke all on function public.log_disclosure(text, uuid, text, jsonb) from public;
-grant execute on function public.log_disclosure(text, uuid, text, jsonb) to authenticated;
+revoke execute on function public.log_disclosure(text, uuid, text, jsonb) from authenticated;
 
 -- =========================================================================
 -- Retention jobs (pg_cron)
@@ -636,10 +679,22 @@ create index if not exists workshop_admins_instructor_idx
 alter table public.workshop_administrations enable row level security;
 
 drop policy if exists "workshop_admins_authenticated_read" on public.workshop_administrations;
-create policy "workshop_admins_authenticated_read"
+drop policy if exists "workshop_admins_course_read" on public.workshop_administrations;
+create policy "workshop_admins_course_read"
   on public.workshop_administrations for select
   to authenticated
-  using (true);
+  using (
+    instructor_id = auth.uid()
+    or exists (
+      select 1 from public.enrollments e
+      where e.user_id = auth.uid()
+        and e.course_slug = workshop_administrations.course_slug
+    )
+    or exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
 
 -- Inserts/updates/deletes via service-role only (instructor UI uses it
 -- under a verified instructor role server-side).
@@ -678,12 +733,19 @@ create policy "workshop_attendance_instructor_read_scoped"
   on public.workshop_attendance for select
   using (
     exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+    or exists (
       select 1
       from public.workshop_administrations a
       join public.enrollments e
         on e.user_id = workshop_attendance.user_id
        and e.course_slug = a.course_slug
        and e.instructor_id = auth.uid()
+      join public.profiles p
+        on p.id = auth.uid()
+       and p.role = 'instructor'
       where a.id = workshop_attendance.administration_id
         and a.instructor_id = auth.uid()
     )

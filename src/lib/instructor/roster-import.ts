@@ -115,10 +115,7 @@ function isOwnedByOther(
   isAdmin: boolean,
 ): boolean {
   if (isAdmin || existing.size === 0) return false;
-  for (const r of existing.values()) {
-    if (r.instructor_id === instructorId) return false;
-  }
-  return true;
+  return [...existing.values()].some((r) => r.instructor_id !== instructorId);
 }
 
 async function planImport(

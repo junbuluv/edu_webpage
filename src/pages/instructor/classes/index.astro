@@ -1,11 +1,12 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin as isAdminRole, roleLabel } from '@lib/roles';
+import { isAdmin as isAdminRole, isInstructor, roleLabel } from '@lib/roles';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
+if (!isInstructor(role)) return new Response(null, { status: 403 });
 const isAdmin = isAdminRole(role);
 
 const classes = await listClasses(user.id, isAdmin);

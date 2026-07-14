@@ -2,6 +2,5 @@
 // Permanent redirect: this page was renamed to /auth/signin so the page
 // name matches the corresponding API handler at /api/auth/signin.
 // Preserving query string so ?next=<path> and ?error=<msg> survive.
-const target = '/auth/signin' + Astro.url.search;
-return Astro.redirect(target, 301);
+return Astro.redirect('/auth/signin' + Astro.url.search, 301);
 ---

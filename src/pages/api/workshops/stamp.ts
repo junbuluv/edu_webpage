@@ -75,8 +75,8 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       .select('user_id')
       .eq('user_id', locals.user.id)
       .eq('course_slug', administration.course_slug)
-      .maybeSingle();
-    if (!enrollment) {
+      .limit(1);
+    if ((enrollment ?? []).length === 0) {
       return json({ ok: false, reason: 'not_enrolled' }, 403);
     }
   }

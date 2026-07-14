@@ -56,9 +56,10 @@ they offset.
 **Correlation** $\rho_{ij} = \text{Cov}(R_i, R_j) / (\sigma_i \sigma_j)$.
 Covariance normalized to $[-1, 1]$.
 
-## Historical record (US, 1926-2024)
+## Stylized long-run US evidence
 
-Compounded annual real returns (in 2024 dollars):
+Illustrative annualized real compound returns and annual standard
+deviations:
 
 | Asset class                        | Mean return | Std dev |
 | ---------------------------------- | ----------- | ------- |
@@ -67,6 +68,14 @@ Compounded annual real returns (in 2024 dollars):
 | Corporate bonds (investment grade) | ~3.5%       | ~9%     |
 | Large-cap stocks (S&P 500)         | ~7.5%       | ~17%    |
 | Small-cap stocks                   | ~9%         | ~22%    |
+
+These are rounded teaching benchmarks, not estimates from one
+matched index set. Exact figures vary with the sample, inflation
+deflator, and portfolio definition. For reproducible US equity and
+Treasury-bill return series, use the [Kenneth R. French Data
+Library](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library.html);
+the equity series include dividends and are reconstructed as their
+underlying CRSP data are revised.
 
 The **equity risk premium** — the expected excess return of stocks
 over T-bills — has averaged 5-7% over the long run. It's compensation
@@ -145,8 +154,8 @@ Two stocks: A has $E[R_A] = 12\%$, $\sigma_A = 30\%$. B has $E[R_B]
 50/50 portfolio:
 
 - $E[R_p] = 0.5 \times 12 + 0.5 \times 8 = 10\%$ (linear).
-- $\sigma_p^2 = 0.25 \times 900 + 0.25 \times 400 + 2 \times 0.25 \times 30 \times 20 \times 0.3 = 325$
-- $\sigma_p = \sqrt{325} \approx 18\%$ (less than 25%, the average).
+- $\sigma_p^2 = 0.25 \times 900 + 0.25 \times 400 + 2 \times 0.25 \times 30 \times 20 \times 0.3 = 415$
+- $\sigma_p = \sqrt{415} \approx 20.4\%$ (less than 25%, the average).
 
 You got an average return at less-than-average risk. That's
 diversification at work.

@@ -15,9 +15,9 @@ import {
 // With MM-with-taxes intuition: as D/E rises, tax shield lowers WACC up to
 // a point, but financial-distress costs eventually offset.
 //
-// We let the user set base rE, rD, tax, and a distress-cost parameter
-// alpha. Effective rD grows quadratically with D/V beyond a kink to capture
-// rising default risk.
+// We let the user set rU, rD, tax, and a distress-cost parameter alpha.
+// The credit spread and expected distress cost grow quadratically beyond a
+// kink, so leverage can eventually raise rather than only lower WACC.
 
 interface State {
   baseRE: number;
@@ -37,12 +37,12 @@ function rdAt(s: State, dv: number) {
 }
 
 function reAt(s: State, dv: number) {
-  // MM II: rE rises with leverage. r_E = r_U + (D/E) * (r_U - r_D) * (1 - t)
-  // Use baseRE as r_U for simplicity.
+  // MM II around the unlevered debt rate. Expected distress is added to WACC
+  // through the debt spread below rather than cancelling inside rE.
   if (dv >= 0.999) return 10; // avoid div by zero
   const ev = 1 - dv;
   const de = dv / ev;
-  return s.baseRE + de * (s.baseRE - rdAt(s, dv)) * (1 - s.tax);
+  return s.baseRE + de * (s.baseRE - s.baseRD) * (1 - s.tax);
 }
 
 function waccAt(s: State, dv: number) {
@@ -79,19 +79,25 @@ export default function WACCVisualizer() {
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap gap-6">
         <Slider
-          label="Unlevered cost of equity"
+          label="Unlevered cost of capital rᵁ"
           v={s.baseRE}
           min={0.05}
           max={0.25}
           step={0.005}
           fmt={(v) => (v * 100).toFixed(1) + '%'}
-          onChange={(v) => setS((x) => ({ ...x, baseRE: v }))}
+          onChange={(v) =>
+            setS((x) => ({
+              ...x,
+              baseRE: v,
+              baseRD: Math.min(x.baseRD, v - 0.005),
+            }))
+          }
         />
         <Slider
-          label="Risk-free debt rate"
+          label="Base debt rate (below rᵁ)"
           v={s.baseRD}
           min={0.01}
-          max={0.1}
+          max={Math.min(0.1, s.baseRE - 0.005)}
           step={0.0025}
           fmt={(v) => (v * 100).toFixed(2) + '%'}
           onChange={(v) => setS((x) => ({ ...x, baseRD: v }))}
@@ -114,6 +120,13 @@ export default function WACCVisualizer() {
           fmt={(v) => v.toFixed(2)}
           onChange={(v) => setS((x) => ({ ...x, distress: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setS(baseline)}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           Optimal D/V ≈ <strong>{(optimal.dv * 100).toFixed(0)}%</strong>, min
           WACC ≈ <strong>{(optimal.wacc * 100).toFixed(2)}%</strong>

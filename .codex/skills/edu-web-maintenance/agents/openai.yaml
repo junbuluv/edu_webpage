@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Econ & Finance Studio"
+  short_description: "Safely maintain the courseware site"
+  default_prompt: "Use $edu-web-maintenance to implement and verify this change in Baruch Econ & Finance Studio."

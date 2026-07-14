@@ -26,8 +26,8 @@ const { data: enrollment } = await supabase
   .select('user_id')
   .eq('user_id', user.id)
   .eq('course_slug', workshop.data.course)
-  .maybeSingle();
-const enrolled = !!enrollment;
+  .limit(1);
+const enrolled = (enrollment ?? []).length > 0;
 const canView = enrolled || viewerIsAdmin;
 
 // Pull this workshop's administrations across all sections, sorted by
