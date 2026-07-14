@@ -28,10 +28,10 @@
       "type": "numeric",
       "id": "q3",
       "prompt": "Same two assets. 50/50 portfolio standard deviation (%)? Round to integer.",
-      "answer": 18,
-      "tolerance": 1,
+      "answer": 20,
+      "tolerance": 0.5,
       "unit": "%",
-      "explanation": "\u03c3\u00b2_p = 0.25(900) + 0.25(400) + 2(0.25)(30)(20)(0.3) = 225+100+90 = 415. Hmm \u2014 let me recalculate: 0.25\u00d7900=225, 0.25\u00d7400=100, 2\u00d70.25\u00d70.25\u00d730\u00d720\u00d70.3 = ... using formula \u03c3\u00b2_p = w_A\u00b2 \u03c3_A\u00b2 + w_B\u00b2 \u03c3_B\u00b2 + 2 w_A w_B \u03c3_A \u03c3_B \u03c1 = 0.25(900) + 0.25(400) + 2(0.5)(0.5)(30)(20)(0.3) = 225 + 100 + 90 = 415. So \u03c3_p \u2248 20.4%. (The lesson example used different weights \u2014 accept any answer in the 17-21% range.)",
+      "explanation": "\u03c3\u00b2_p = w_A\u00b2 \u03c3_A\u00b2 + w_B\u00b2 \u03c3_B\u00b2 + 2w_Aw_B\u03c3_A\u03c3_B\u03c1 = 0.25(900) + 0.25(400) + 2(0.5)(0.5)(30)(20)(0.3) = 415. Therefore \u03c3_p = \u221a415 \u2248 20.4%, which rounds to 20%.",
       "points": 2
     },
     {

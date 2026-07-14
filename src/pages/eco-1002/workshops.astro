@@ -21,8 +21,8 @@ if (user && supabase) {
     .select('user_id')
     .eq('user_id', user.id)
     .eq('course_slug', 'eco-1002')
-    .maybeSingle();
-  enrolled = !!data;
+    .limit(1);
+  enrolled = (data ?? []).length > 0;
 }
 const canSeeOpenWindows = enrolled || viewerIsAdmin;
 

@@ -36,15 +36,15 @@
     {
       "type": "multi_select",
       "id": "q3",
-      "prompt": "Which of the following raise the steady-state capital per worker k*?",
+      "prompt": "Which of the following unambiguously raise the steady-state capital per worker k*?",
       "choices": [
         "A higher savings rate s",
         "A higher population growth rate n",
         "A higher depreciation rate \u03b4",
         "A higher capital share \u03b1"
       ],
-      "correctIndices": [0, 3],
-      "explanation": "Higher s and higher \u03b1 raise k*. Higher n or higher \u03b4 raise the break-even line, lowering k*.",
+      "correctIndices": [0],
+      "explanation": "A higher saving rate raises k*. Higher n or higher \u03b4 raise the break-even line, lowering k*. The effect of \u03b1 is conditional: k* = [s/(n+\u03b4)]^(1/(1\u2212\u03b1)), so a higher \u03b1 raises k* only when s/(n+\u03b4) exceeds 1.",
       "points": 2
     },
     {

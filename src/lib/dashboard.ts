@@ -160,7 +160,8 @@ export async function getDashboardData(
         .select('semester')
         .eq('user_id', userId)
         .eq('course_slug', courseSlug)
-        .maybeSingle(),
+        .order('enrolled_at', { ascending: false })
+        .limit(1),
     ]);
 
   const lessons = [...allLessons].sort((a, b) => {
@@ -187,7 +188,7 @@ export async function getDashboardData(
   return {
     course,
     instructors,
-    enrolledSemester: enrollmentRows.data?.semester ?? null,
+    enrolledSemester: enrollmentRows.data?.[0]?.semester ?? null,
     stats: {
       lessonsCompleted,
       lessonsTotal: lessons.length,

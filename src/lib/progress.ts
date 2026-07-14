@@ -34,23 +34,29 @@ export async function markLessonStatus(
   lessonSlug: string,
   status: 'started' | 'completed',
 ) {
-  const supabase = getSupabaseBrowserClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    await supabase.from('lesson_progress').upsert({
-      user_id: user.id,
-      lesson_slug: lessonSlug,
-      status,
-      completed_at: status === 'completed' ? new Date().toISOString() : null,
-    });
-  }
-
   const map = readLocal<ProgressMap>(LS_PROGRESS, {});
   map[lessonSlug] = { status, updatedAt: new Date().toISOString() };
   writeLocal(LS_PROGRESS, map);
+
+  let user: { id: string } | null = null;
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return;
+  }
+  if (!user) return;
+
+  try {
+    await fetch('/api/progress/lesson', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lessonSlug, status }),
+    });
+  } catch {
+    // The local record remains available if the network is temporarily down.
+  }
 }
 
 export async function recordQuizAttempt(args: {
@@ -59,21 +65,6 @@ export async function recordQuizAttempt(args: {
   maxScore: number;
   answers: unknown;
 }) {
-  const supabase = getSupabaseBrowserClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    await supabase.from('quiz_attempts').insert({
-      user_id: user.id,
-      quiz_slug: args.quizSlug,
-      score: args.score,
-      max_score: args.maxScore,
-      answers: args.answers as never,
-    });
-  }
-
   const log = readLocal<AttemptLog>(LS_ATTEMPTS, []);
   log.push({ ...args, submittedAt: new Date().toISOString() });
   writeLocal(LS_ATTEMPTS, log);

@@ -2,13 +2,14 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getEntry } from 'astro:content';
 import RosterTable from '@components/instructor/RosterTable.astro';
-import { isAdmin as isAdminRole, isStaff } from '@lib/roles';
+import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 import { logDisclosureSafe } from '@lib/audit';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
+if (!isInstructor(role)) return new Response(null, { status: 403 });
 const isAdmin = isAdminRole(role);
 
 const courseParam = Astro.params.course;
@@ -133,9 +134,7 @@ const courseEntry = await getEntry('courses', course);
 const courseCode = courseEntry?.data.code ?? course;
 const semesterQs = encodeURIComponent(semester);
 
-// canManage: the viewer reached this roster (loadClassRoster already enforced
-// ownership / admin), so any staff here may manage enrollments.
-const canManage = isStaff(role);
+const canManage = isInstructor(role);
 const okMsg = Astro.url.searchParams.get('ok');
 const errMsg = Astro.url.searchParams.get('error');
 const ENROLL_OK: Record<string, string> = {

@@ -57,16 +57,18 @@ export async function loadArchiveForCourse(
   }));
   const quizzes: QuizInput[] = [...gitQuizzes, ...dbQuizzes];
 
-  const gitVideos: VideoInput[] = videoEntries.map((v) => ({
-    slug: v.data.slug,
-    course: v.data.course,
-    title: v.data.title,
-    lessonSlug: v.data.lessonSlug,
-    description: v.data.description,
-    provider: v.data.provider,
-    videoId: v.data.videoId,
-    semester: v.data.semester,
-  }));
+  const gitVideos: VideoInput[] = videoEntries
+    .filter((v) => !v.data.draft)
+    .map((v) => ({
+      slug: v.data.slug,
+      course: v.data.course,
+      title: v.data.title,
+      lessonSlug: v.data.lessonSlug,
+      description: v.data.description,
+      provider: v.data.provider,
+      videoId: v.data.videoId,
+      semester: v.data.semester,
+    }));
 
   const dbVideoRows = await fetchArchiveVideos(course);
   const dbVideos: VideoInput[] = dbVideoRows.map((r) => ({

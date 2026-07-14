@@ -2,7 +2,7 @@
 
 import type { ADASSnapshot } from './presets';
 
-const KEYS = ['G', 'M', 'Pe', 'Yn'] as const;
+const KEYS = ['G', 'M', 'A0', 'Pe', 'Yn'] as const;
 
 export function readADASFromURL(): Partial<ADASSnapshot> {
   if (typeof window === 'undefined') return {};

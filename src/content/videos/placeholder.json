@@ -1,0 +1,10 @@
+{
+  "slug": "unpublished-content-placeholder",
+  "title": "Unpublished video placeholder",
+  "course": "eco-1002",
+  "lessonSlug": "eco-1002/fed-balance-sheet",
+  "semester": { "term": "fall", "year": 2026 },
+  "provider": "youtube",
+  "videoId": "placeholder",
+  "draft": true
+}

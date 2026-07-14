@@ -36,5 +36,8 @@ materials/
 # src/lib/supabase/database.types.ts
 .playwright-mcp/
 
+# Supabase CLI linked-project metadata (machine-local)
+supabase/.temp/
+
 # Claude Code runtime artifacts (machine-local; tracked .claude/ content stays)
 .claude/scheduled_tasks.lock

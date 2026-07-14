@@ -1,0 +1,4 @@
+interface:
+  display_name: "Econ Studio Supabase Changes"
+  short_description: "Make secure, compatible data changes"
+  default_prompt: "Use $edu-web-supabase to implement and verify this data or access-control change."

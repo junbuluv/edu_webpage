@@ -15,7 +15,7 @@ import {
 // weight w in asset 1 (1-w in asset 2):
 //   E[R_p] = w·E[R1] + (1-w)·E[R2]
 //   σ_p²   = w²σ1² + (1-w)²σ2² + 2·w·(1-w)·ρ·σ1·σ2
-// Lowering the correlation ρ bows the frontier left: the same expected
+// Lowering the correlation ρ bows the long-only opportunity set left: the same expected
 // return at lower risk. That leftward bow is the diversification benefit.
 // Adding a risk-free asset, the best risky mix is the tangent (max-Sharpe)
 // portfolio; the line from R_f through it is the capital market line.
@@ -51,7 +51,7 @@ export default function EfficientFrontier() {
   const [s, setS] = useState<State>(baseline);
 
   const { frontier, tangent, minVar } = useMemo(() => {
-    // Long-only frontier (w in [0,1]) so the drawn curve and the tangent /
+    // Long-only opportunity set (w in [0,1]) so the drawn curve and tangent /
     // min-variance scans below cover the same set: the tangent dot then sits
     // exactly on the visible curve.
     const pts: { x: number; y: number }[] = [];
@@ -90,7 +90,7 @@ export default function EfficientFrontier() {
         <Slider
           label="E[R₁]"
           v={s.er1}
-          min={0}
+          min={s.rf + 0.005}
           max={0.25}
           step={0.005}
           fmt={pct}
@@ -108,7 +108,7 @@ export default function EfficientFrontier() {
         <Slider
           label="E[R₂]"
           v={s.er2}
-          min={0}
+          min={s.rf + 0.005}
           max={0.25}
           step={0.005}
           fmt={pct}
@@ -126,8 +126,8 @@ export default function EfficientFrontier() {
         <Slider
           label="Correlation ρ"
           v={s.rho}
-          min={-1}
-          max={1}
+          min={-0.95}
+          max={0.95}
           step={0.05}
           fmt={(v) => v.toFixed(2)}
           onChange={(v) => setS((x) => ({ ...x, rho: v }))}
@@ -139,7 +139,14 @@ export default function EfficientFrontier() {
           max={0.08}
           step={0.0025}
           fmt={pct}
-          onChange={(v) => setS((x) => ({ ...x, rf: v }))}
+          onChange={(v) =>
+            setS((x) => ({
+              ...x,
+              rf: v,
+              er1: Math.max(x.er1, v + 0.005),
+              er2: Math.max(x.er2, v + 0.005),
+            }))
+          }
         />
       </div>
 
@@ -191,7 +198,7 @@ export default function EfficientFrontier() {
             />
             <Legend verticalAlign="top" height={24} />
             <Scatter
-              name="Frontier (vary weights)"
+              name="Opportunity set (all weights)"
               data={frontier}
               line={{ stroke: '#2563eb' }}
               fill="#2563eb"
@@ -226,12 +233,15 @@ export default function EfficientFrontier() {
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-ink-muted">
-        Drag correlation ρ down toward -1 and watch the blue frontier bow left:
-        the same expected return becomes reachable at lower risk. That leftward
-        bow is diversification. The green capital market line, drawn from the
-        risk-free rate through the tangent portfolio, is the best risk-return
-        trade-off any investor can reach by mixing the risk-free asset with that
-        one tangent portfolio.
+        The controls keep correlation strictly between −1 and 1 and both risky
+        expected returns above Rf, so the tangent portfolio has positive excess
+        return and nonzero risk. Drag correlation ρ down toward -1 and watch the
+        blue opportunity set bow left: the same expected return becomes reachable
+        at lower risk. The upper branch from the minimum-variance portfolio is the
+        efficient frontier; its lower branch is dominated. The green capital market
+        line, drawn from the risk-free rate through the tangent portfolio, is the
+        best risk-return trade-off any investor can reach by mixing the risk-free
+        asset with that one tangent portfolio.
       </p>
     </div>
   );

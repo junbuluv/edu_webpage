@@ -22,14 +22,38 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   const userId = locals.user.id;
   const admin = getAdminClient();
 
-  // Cascade order: app rows first (have FK to profiles), then auth.users.
-  // profiles row has ON DELETE CASCADE from auth.users, so deleting the
-  // auth user removes profiles too. But lesson_progress/quiz_attempts also
-  // cascade from profiles. Explicit deletes give clearer audit visibility
-  // even if cascading would handle it.
-  await admin.from('quiz_attempts').delete().eq('user_id', userId);
-  await admin.from('lesson_progress').delete().eq('user_id', userId);
-  await admin.from('enrollments').delete().eq('user_id', userId);
+  const checks = await Promise.all([
+    admin
+      .from('enrollments')
+      .select('user_id', { count: 'exact', head: true })
+      .eq('instructor_id', userId),
+    admin
+      .from('workshop_administrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('instructor_id', userId),
+    admin
+      .from('archive_videos')
+      .select('id', { count: 'exact', head: true })
+      .eq('created_by', userId),
+    admin
+      .from('archive_papers')
+      .select('id', { count: 'exact', head: true })
+      .eq('created_by', userId),
+    admin
+      .from('archive_quizzes')
+      .select('id', { count: 'exact', head: true })
+      .eq('created_by', userId),
+  ]);
+  if (checks.some((result) => result.error)) {
+    return redirect(
+      '/account/delete?error=Could not verify account ownership. Please try again.',
+    );
+  }
+  if (checks.some((result) => (result.count ?? 0) > 0)) {
+    return redirect(
+      '/account/delete?error=Transfer or remove your instructor-managed classes, workshops, and archive content before deleting this account.',
+    );
+  }
 
   const { error: authErr } = await admin.auth.admin.deleteUser(userId);
   if (authErr) {

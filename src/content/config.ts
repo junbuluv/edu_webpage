@@ -185,6 +185,7 @@ const videos = defineCollection({
       videoId: z.string().min(1),
       description: z.string().optional(),
       durationMinutes: z.number().positive().optional(),
+      draft: z.boolean().default(false),
     })
     .refine((d) => d.course === 'eco-1002', {
       message: 'videos are only supported for eco-1002',
