@@ -2,7 +2,7 @@
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import CourseSwitcher from '@components/course/CourseSwitcher';
-import { listAvailableCourses } from '@lib/dashboard';
+import { listAvailableCourses, type AvailableCourse } from '@lib/dashboard';
 import { isStaff, isAdmin } from '@lib/roles';
 
 interface Props {
@@ -18,8 +18,14 @@ const user = Astro.locals.user;
 const profile = Astro.locals.profile;
 const supabase = Astro.locals.supabase;
 
-const switcherCourses =
-  user && supabase ? await listAvailableCourses(supabase, user.id) : [];
+let switcherCourses: AvailableCourse[] = [];
+if (user && supabase) {
+  try {
+    switcherCourses = await listAvailableCourses(supabase, user.id);
+  } catch (error) {
+    console.error('[layout] course_switcher_unavailable', error);
+  }
+}
 const switcherProps = switcherCourses.map((c) => ({
   slug: c.slug,
   code: c.code,
@@ -44,13 +50,16 @@ const viewerIsAdmin = isAdmin(profile?.role);
   <body class="min-h-screen flex flex-col">
     <header class="border-b border-slate-200 bg-white">
       <div
-        class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between"
+        class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3"
       >
         <a href="/" class="font-semibold text-lg tracking-tight">
           <span class="sm:hidden">Baruch Studio</span>
           <span class="hidden sm:inline">Baruch Econ &amp; Finance Studio</span>
         </a>
-        <nav class="flex items-center gap-4 text-sm">
+        <nav
+          class="hidden items-center gap-3 text-sm xl:flex"
+          aria-label="Primary navigation"
+        >
           <a href="/eco-1002" class="text-ink-muted hover:text-ink">ECO 1002</a>
           <a href="/fin-3610" class="text-ink-muted hover:text-ink">FIN 3610</a>
           <a href="/practice" class="text-ink-muted hover:text-ink">Practice</a>
@@ -59,9 +68,10 @@ const viewerIsAdmin = isAdmin(profile?.role);
               <>
                 {switcherProps.length > 0 && (
                   <CourseSwitcher
-                    client:load
+                    client:media="(min-width: 1280px)"
                     courses={switcherProps}
                     activeSlug={activeCourseSlug}
+                    staffViewer={viewerIsStaff}
                   />
                 )}
                 <a href="/dashboard" class="text-ink-muted hover:text-ink">
@@ -93,6 +103,83 @@ const viewerIsAdmin = isAdmin(profile?.role);
             )
           }
         </nav>
+
+        <details class="group xl:hidden">
+          <summary
+            class="cursor-pointer list-none rounded border border-slate-300 px-3 py-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden"
+          >
+            Menu
+          </summary>
+          <nav
+            class="absolute right-4 top-[calc(100%-0.25rem)] z-50 mt-2 flex min-w-52 flex-col gap-1 rounded-lg border border-slate-200 bg-white p-2 text-sm shadow-lg"
+            aria-label="Mobile navigation"
+          >
+            <a class="rounded px-3 py-2 hover:bg-slate-50" href="/eco-1002"
+              >ECO 1002</a
+            >
+            <a class="rounded px-3 py-2 hover:bg-slate-50" href="/fin-3610"
+              >FIN 3610</a
+            >
+            <a class="rounded px-3 py-2 hover:bg-slate-50" href="/practice"
+              >Practice</a
+            >
+            {
+              user ? (
+                <>
+                  {switcherProps.length > 0 && (
+                    <div class="px-3 py-2">
+                      <CourseSwitcher
+                        client:media="(max-width: 1279px)"
+                        courses={switcherProps}
+                        activeSlug={activeCourseSlug}
+                        staffViewer={viewerIsStaff}
+                        wide
+                      />
+                    </div>
+                  )}
+                  <div class="my-1 border-t border-slate-100" />
+                  <a
+                    class="rounded px-3 py-2 hover:bg-slate-50"
+                    href="/dashboard"
+                  >
+                    Dashboard
+                  </a>
+                  {viewerIsStaff && (
+                    <a
+                      class="rounded px-3 py-2 hover:bg-slate-50"
+                      href="/instructor"
+                    >
+                      Manage
+                    </a>
+                  )}
+                  {viewerIsAdmin && (
+                    <a
+                      class="rounded px-3 py-2 hover:bg-slate-50"
+                      href="/admin"
+                    >
+                      Admin
+                    </a>
+                  )}
+                  <form method="POST" action="/api/auth/signout">
+                    <button
+                      class="w-full rounded px-3 py-2 text-left hover:bg-slate-50"
+                      type="submit"
+                    >
+                      Sign out
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <a
+                  class="mt-1 rounded bg-accent px-3 py-2 text-center font-medium text-white"
+                  href="/auth/signin"
+                >
+                  Sign in
+                </a>
+              )
+            }
+          </nav>
+        </details>
       </div>
     </header>
 

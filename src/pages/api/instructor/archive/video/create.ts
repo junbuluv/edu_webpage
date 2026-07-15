@@ -26,7 +26,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
 
-  const form = await request.formData();
+  if (!user) return err('unauthenticated');
+  if (!isContentManager(role)) return err('forbidden');
+
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return err('invalid_input');
+  }
   const course = String(form.get('course_slug') ?? '');
   const lessonSlug = String(form.get('lesson_slug') ?? '');
   const term = String(form.get('semester_term') ?? '');
@@ -41,14 +49,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ? Math.floor(durationRaw)
       : null;
 
-  if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
   if (course !== 'eco-1002') return err('invalid_course');
   if (!(await instructorOwnsCourse(user.id, course, role)))
     return err('not_course_instructor');
 
   if (
     !title ||
+    title.length > 200 ||
+    (description?.length ?? 0) > 2000 ||
+    (durationMinutes != null && durationMinutes > 1440) ||
     !videoId ||
     !TERMS.has(term) ||
     !PROVIDERS.has(provider) ||

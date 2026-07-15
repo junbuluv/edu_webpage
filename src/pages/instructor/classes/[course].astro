@@ -6,6 +6,7 @@ import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 import { logDisclosureSafe } from '@lib/audit';
+import { isUuid } from '@lib/workshop-policy';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
@@ -21,11 +22,25 @@ const course = courseParam;
 // Semester comes from ?semester=; default to this instructor's newest
 // class for the course.
 let semester = Astro.url.searchParams.get('semester');
-if (!semester) {
-  const classes = await listClasses(user.id, isAdmin);
+let scopedInstructorId = isAdmin
+  ? Astro.url.searchParams.get('instructor')
+  : user.id;
+if (scopedInstructorId && !isUuid(scopedInstructorId)) {
+  return Astro.redirect('/instructor/classes');
+}
+if (!semester || !scopedInstructorId) {
+  let classes;
+  try {
+    classes = await listClasses(user.id, isAdmin);
+  } catch {
+    return new Response('Could not load classes right now. Please try again.', {
+      status: 503,
+    });
+  }
   const newest = classes.find((c) => c.course === course);
   if (!newest) return Astro.redirect('/instructor/classes');
   semester = newest.semester;
+  scopedInstructorId = newest.instructorId;
 }
 
 const wantsCsv = Astro.url.searchParams.get('format') === 'csv';
@@ -35,6 +50,7 @@ const result = await loadClassRoster(
   course,
   semester,
   Date.now(),
+  { instructorId: scopedInstructorId },
 );
 
 if (result.kind === 'forbidden') return new Response(null, { status: 403 });
@@ -50,9 +66,51 @@ if (result.kind === 'error') {
   );
 }
 const roster = result.roster;
+let instructorOptions = [
+  {
+    id: scopedInstructorId,
+    label: scopedInstructorId,
+  },
+];
+if (isAdmin) {
+  try {
+    const matchingClasses = (await listClasses(user.id, true)).filter(
+      (item) => item.course === course && item.semester === semester,
+    );
+    const currentClass = matchingClasses.find(
+      (item) => item.instructorId === scopedInstructorId,
+    );
+    const options = [
+      ...(currentClass ? [currentClass] : []),
+      ...matchingClasses.filter(
+        (item) =>
+          item.assignmentActive && item.instructorId !== scopedInstructorId,
+      ),
+    ];
+    instructorOptions = options.map((item) => ({
+      id: item.instructorId,
+      label: `${item.instructorName ?? item.instructorId}${
+        item.assignmentActive ? '' : ' (current, inactive)'
+      }`,
+    }));
+  } catch {
+    return new Response('Could not load instructor assignments right now.', {
+      status: 503,
+    });
+  }
+}
 
 // CSV export branch.
 if (wantsCsv) {
+  if (roster.dataIncomplete || roster.emailLookupFailed) {
+    return new Response(
+      'Roster export is temporarily unavailable because some student data could not be loaded. Please retry.',
+      {
+        status: 503,
+        headers: { 'cache-control': 'private, no-store' },
+      },
+    );
+  }
   const esc = (v: string | number | null) => {
     let s = v == null ? '' : String(v);
     // Neutralize spreadsheet formula injection: a cell starting with one of
@@ -63,6 +121,7 @@ if (wantsCsv) {
   const header = [
     'name',
     'email',
+    'section',
     'lessons_completed',
     'lessons_total',
     'quizzes_taken',
@@ -78,6 +137,7 @@ if (wantsCsv) {
       [
         esc(s.name),
         esc(s.email),
+        esc(s.section),
         s.lessonsCompleted,
         s.lessonsTotal,
         s.quizzesTaken,
@@ -107,6 +167,8 @@ if (wantsCsv) {
         'attachment; filename="' +
         (course + '-' + semester).replace(/[^A-Za-z0-9._-]+/g, '_') +
         '-roster.csv"',
+      'cache-control': 'private, no-store',
+      'x-content-type-options': 'nosniff',
     },
   });
 }
@@ -133,8 +195,9 @@ const visibleStudents = riskOnly
 const courseEntry = await getEntry('courses', course);
 const courseCode = courseEntry?.data.code ?? course;
 const semesterQs = encodeURIComponent(semester);
+const instructorQs = encodeURIComponent(scopedInstructorId);
 
-const canManage = isInstructor(role);
+const canManage = isAdmin || roster.assignmentActive;
 const okMsg = Astro.url.searchParams.get('ok');
 const errMsg = Astro.url.searchParams.get('error');
 const ENROLL_OK: Record<string, string> = {
@@ -150,6 +213,8 @@ const ENROLL_ERR: Record<string, string> = {
   forbidden: 'You do not have permission to manage this roster.',
   invalid_input: 'Some required fields were missing.',
   invalid_section: 'That section is not valid for this course.',
+  invalid_instructor: 'Choose an active instructor assignment for this class.',
+  not_found: 'That enrollment no longer exists or belongs to another class.',
   lookup_failed: 'Could not look up that account right now. Please try again.',
   insert_failed: 'Could not add the student. Please try again.',
   update_failed: 'Could not save changes. Please try again.',
@@ -179,6 +244,13 @@ const importSummary =
       {courseCode}
       <span class="ml-2 text-base font-normal text-ink-muted">{semester}</span>
     </h1>
+    {
+      isAdmin && (
+        <p class="mt-1 text-sm text-ink-muted">
+          Instructor assignment: {scopedInstructorId}
+        </p>
+      )
+    }
     <p class="mt-2 text-sm text-ink-muted">
       <a href="/instructor/classes" class="text-accent underline"
         >← All classes</a
@@ -195,6 +267,14 @@ const importSummary =
       )
     }
 
+    {
+      !roster.assignmentActive && !isAdmin && (
+        <div class="mt-4 rounded border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
+          This historical class is read-only because its teaching assignment is
+          inactive.
+        </div>
+      )
+    }
     {
       okText && (
         <div class="mt-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
@@ -219,14 +299,18 @@ const importSummary =
         }
       </p>
       <div class="flex gap-2">
+        {
+          roster.assignmentActive && (
+            <a
+              href={`/instructor/classes/import?course=${course}&semester=${semesterQs}&instructor=${instructorQs}`}
+              class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
+            >
+              Import roster
+            </a>
+          )
+        }
         <a
-          href={`/instructor/classes/import?course=${course}&semester=${semesterQs}`}
-          class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
-        >
-          Import roster
-        </a>
-        <a
-          href={`/instructor/classes/${course}?semester=${semesterQs}&format=csv`}
+          href={`/instructor/classes/${course}?semester=${semesterQs}&instructor=${instructorQs}&format=csv`}
           class="rounded border border-slate-300 px-2 py-1 text-sm hover:border-accent"
         >
           Download CSV
@@ -254,7 +338,7 @@ const importSummary =
     }
 
     {
-      canManage && (
+      canManage && roster.assignmentActive && (
         <details class="mt-6 rounded-lg border border-slate-200 p-4">
           <summary class="cursor-pointer text-sm font-medium">
             Add a student
@@ -266,6 +350,11 @@ const importSummary =
           >
             <input type="hidden" name="course_slug" value={course} />
             <input type="hidden" name="semester" value={semester} />
+            <input
+              type="hidden"
+              name="instructor_id"
+              value={scopedInstructorId}
+            />
             <label class="block">
               <span class="text-ink-muted">Student email</span>
               <input
@@ -287,6 +376,7 @@ const importSummary =
                 <span class="text-ink-muted">Section</span>
                 <select
                   name="section"
+                  required
                   class="mt-1 rounded border border-slate-300 px-2 py-1"
                 >
                   <option value="">—</option>
@@ -314,7 +404,7 @@ const importSummary =
 
     <nav class="mt-6 flex gap-2 text-xs" aria-label="Filter">
       <a
-        href={`/instructor/classes/${course}?semester=${semesterQs}`}
+        href={`/instructor/classes/${course}?semester=${semesterQs}&instructor=${instructorQs}`}
         aria-current={riskOnly ? undefined : 'page'}
         class:list={[
           'rounded-full border px-3 py-1 font-medium',
@@ -326,7 +416,7 @@ const importSummary =
         All ({roster.students.length})
       </a>
       <a
-        href={`/instructor/classes/${course}?semester=${semesterQs}&risk=only`}
+        href={`/instructor/classes/${course}?semester=${semesterQs}&instructor=${instructorQs}&risk=only`}
         aria-current={riskOnly ? 'page' : undefined}
         class:list={[
           'rounded-full border px-3 py-1 font-medium',
@@ -354,6 +444,8 @@ const importSummary =
           semester={semester}
           usesSections={usesSections}
           canManage={canManage}
+          instructorId={scopedInstructorId}
+          instructorOptions={instructorOptions}
         />
       )
     }

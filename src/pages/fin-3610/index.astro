@@ -26,13 +26,15 @@ for (const l of lessons) {
 const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
 let enrolled = false;
 let openWorkshopCount = 0;
+let workshopStatusUnavailable = Boolean(user && !supabase);
 if (user && supabase) {
-  const { data: enrollment } = await supabase
+  const { data: enrollment, error } = await supabase
     .from('enrollments')
     .select('user_id')
     .eq('user_id', user.id)
     .eq('course_slug', 'fin-3610')
     .limit(1);
+  workshopStatusUnavailable = error != null && !viewerIsAdmin;
   enrolled = (enrollment ?? []).length > 0;
 }
 const workshopContent = await getCollection(
@@ -42,12 +44,14 @@ const workshopContent = await getCollection(
 const totalWorkshopCount = workshopContent.length;
 if ((enrolled || viewerIsAdmin) && supabase) {
   const nowIso = new Date().toISOString();
-  const { data: openAdmins } = await supabase
+  const { data: openAdmins, error } = await supabase
     .from('workshop_administrations')
     .select('id')
     .eq('course_slug', 'fin-3610')
+    .is('cancelled_at', null)
     .lte('opens_at', nowIso)
     .gt('closes_at', nowIso);
+  workshopStatusUnavailable ||= error != null;
   openWorkshopCount = (openAdmins ?? []).length;
 }
 const showWorkshopTeaser = totalWorkshopCount > 0;
@@ -103,9 +107,14 @@ const showWorkshopTeaser = totalWorkshopCount > 0;
                 {totalWorkshopCount} weekly small-group session
                 {totalWorkshopCount === 1 ? '' : 's'} for this course, one per
                 unit. Geofenced stamp-in attendance.
-                {openWorkshopCount > 0 && (
+                {!workshopStatusUnavailable && openWorkshopCount > 0 && (
                   <span class="ml-1 font-medium text-emerald-700">
                     {openWorkshopCount} open right now.
+                  </span>
+                )}
+                {workshopStatusUnavailable && (
+                  <span class="ml-1 font-medium text-amber-800">
+                    Live window status is temporarily unavailable.
                   </span>
                 )}
                 {viewerIsAdmin && !enrolled && (

@@ -4,7 +4,7 @@ import { getAdminClient } from '@lib/supabase/admin';
 
 type Body = {
   lessonSlug?: unknown;
-  status?: unknown;
+  operation?: unknown;
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -17,41 +17,63 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ error: 'invalid_json' }, 400);
   }
 
-  const lessonSlug = typeof body.lessonSlug === 'string' ? body.lessonSlug : null;
-  const status = body.status === 'started' || body.status === 'completed'
-    ? body.status
-    : null;
-  if (!lessonSlug || !status) return json({ error: 'invalid_input' }, 400);
+  const lessonSlug =
+    typeof body.lessonSlug === 'string' ? body.lessonSlug : null;
+  const operation =
+    body.operation === 'start' ||
+    body.operation === 'complete' ||
+    body.operation === 'reset'
+      ? body.operation
+      : null;
+  if (!lessonSlug || !operation) {
+    return json({ error: 'invalid_input' }, 400);
+  }
 
   const lesson = await getEntry('lessons', lessonSlug);
-  if (!lesson || lesson.data.draft) return json({ error: 'lesson_not_found' }, 404);
+  if (!lesson || lesson.data.draft)
+    return json({ error: 'lesson_not_found' }, 404);
 
   try {
-    const { error } = await getAdminClient().from('lesson_progress').upsert(
+    const { data: outcome, error } = await getAdminClient().rpc(
+      'record_lesson_progress',
       {
-        user_id: locals.user.id,
-        lesson_slug: lesson.slug,
-        course_slug: lesson.data.course,
-        status,
-        completed_at: status === 'completed' ? new Date().toISOString() : null,
+        p_user_id: locals.user.id,
+        p_lesson_slug: lesson.slug,
+        p_course_slug: lesson.data.course,
+        p_operation: operation,
       },
-      { onConflict: 'user_id,lesson_slug' },
     );
     if (error) {
       console.error('[progress/lesson] save_failed', error);
       return json({ error: 'save_failed' }, 500);
     }
+    if (outcome === 'ambiguous') {
+      return json({ error: 'enrollment_scope_ambiguous' }, 409);
+    }
+    if (
+      outcome !== 'started' &&
+      outcome !== 'completed' &&
+      outcome !== 'reset'
+    ) {
+      console.error('[progress/lesson] unexpected_outcome', outcome);
+      return json({ error: 'save_failed' }, 500);
+    }
+    return json({
+      ok: true,
+      status: outcome === 'completed' ? 'completed' : 'started',
+    });
   } catch (error) {
     console.error('[progress/lesson] save_failed', error);
     return json({ error: 'save_failed' }, 500);
   }
-
-  return json({ ok: true });
 };
 
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'private, no-store',
+    },
   });
 }

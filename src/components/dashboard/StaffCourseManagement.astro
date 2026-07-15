@@ -1,6 +1,7 @@
 ---
 import type { StaffMetrics, TimeRange } from '@lib/staff-dashboard';
 import type { CourseSlug } from '@lib/courses';
+import { formatNewYorkDateTime } from '@lib/workshop-policy';
 
 interface Props {
   metrics: StaffMetrics;
@@ -37,6 +38,7 @@ const baseDashboardLink = `/dashboard?course=${courseSlug}`;
           return (
             <a
               href={`${baseDashboardLink}&range=${r}`}
+              aria-current={active ? 'page' : undefined}
               class:list={[
                 'rounded border px-2 py-0.5',
                 active
@@ -61,7 +63,15 @@ const baseDashboardLink = `/dashboard?course=${courseSlug}`;
   }
 
   {
-    metrics?.kind === 'workshop' && (
+    metrics?.kind === 'workshop' && metrics.dataUnavailable ? (
+      <p
+        role="alert"
+        class="mt-4 rounded border border-amber-300 bg-white p-3 text-sm text-amber-950"
+      >
+        Workshop metrics are temporarily unavailable. Refresh before relying on
+        attendance totals.
+      </p>
+    ) : metrics?.kind === 'workshop' ? (
       <div class="mt-4 space-y-4">
         <dl class="grid grid-cols-3 gap-3">
           <div class="rounded bg-white p-3">
@@ -99,9 +109,8 @@ const baseDashboardLink = `/dashboard?course=${courseSlug}`;
                   >
                     {s.workshop_slug}
                   </a>
-                  <code class="truncate text-ink-muted">{s.user_id}</code>
                   <span class="text-ink-muted">
-                    {new Date(s.stamped_at).toLocaleString()}
+                    {formatNewYorkDateTime(s.stamped_at)} ET
                   </span>
                 </li>
               ))}
@@ -115,6 +124,6 @@ const baseDashboardLink = `/dashboard?course=${courseSlug}`;
           </a>
         </p>
       </div>
-    )
+    ) : null
   }
 </section>

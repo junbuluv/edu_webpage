@@ -19,7 +19,7 @@ if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
 if (!id) return new Response(null, { status: 404 });
 
 const admin = getAdminClient();
-const { data: v } = await admin
+const { data: v, error: videoError } = await admin
   .from('archive_videos')
   .select(
     'id, course_slug, lesson_slug, semester_term, semester_year, title, provider, video_id, description, duration_minutes, published, created_by',
@@ -28,6 +28,9 @@ const { data: v } = await admin
   .is('deleted_at', null)
   .maybeSingle();
 
+if (videoError) {
+  return new Response('Could not load this video right now.', { status: 503 });
+}
 if (!v) return new Response(null, { status: 404 });
 if (!(await instructorOwnsCourse(user.id, v.course_slug, role))) {
   return Astro.redirect('/instructor/archive?error=not_course_instructor');
@@ -57,6 +60,7 @@ const ecoLessons = (
         <input
           name="title"
           required
+          maxlength="200"
           value={v.title}
           class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
         />
@@ -138,6 +142,7 @@ const ecoLessons = (
         <span class="text-ink-muted">Description</span>
         <input
           name="description"
+          maxlength="2000"
           value={v.description ?? ''}
           class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
         />
@@ -148,6 +153,7 @@ const ecoLessons = (
           name="duration_minutes"
           type="number"
           min="1"
+          max="1440"
           value={v.duration_minutes ?? ''}
           class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
         />

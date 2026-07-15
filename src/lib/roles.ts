@@ -1,7 +1,7 @@
-// Single source of truth for who counts as "staff" (can manage
-// workshops, view rosters, take instructor actions). Keep this list in
-// sync with the user_role enum in supabase/schema.sql and any RLS
-// policies that gate on instructor authority.
+// Single source of truth for staff identity. Individual capabilities remain
+// narrower: teaching assistants have read-only archive access, while instructor
+// actions require isInstructor. Keep these sets in sync with the user_role enum
+// and the corresponding RLS policies.
 
 export type UserRole = 'student' | 'instructor' | 'ta' | 'admin';
 

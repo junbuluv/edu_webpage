@@ -22,7 +22,7 @@ if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
 if (!id) return new Response(null, { status: 404 });
 
 const admin = getAdminClient();
-const { data: row } = await admin
+const { data: row, error: quizError } = await admin
   .from('archive_quizzes')
   .select(
     'id, course_slug, kind, title, semester_term, semester_year, covers, questions, passing_score, published, created_by',
@@ -30,6 +30,9 @@ const { data: row } = await admin
   .eq('id', id)
   .is('deleted_at', null)
   .maybeSingle();
+if (quizError) {
+  return new Response('Could not load this quiz right now.', { status: 503 });
+}
 if (!row) return new Response(null, { status: 404 });
 if (!(await instructorOwnsCourse(user.id, row.course_slug, role))) {
   return Astro.redirect('/instructor/archive?error=not_course_instructor');

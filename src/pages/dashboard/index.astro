@@ -8,40 +8,66 @@ import {
   resolveActiveCourse,
   listAvailableCourses,
   getDashboardData,
+  type AvailableCourse,
+  type CourseDashboardData,
 } from '@lib/dashboard';
 import { loadStaffMetrics, parseRange } from '@lib/staff-dashboard';
-import { isStaff } from '@lib/roles';
+import { isInstructor } from '@lib/roles';
+import type { CourseSlug } from '@lib/courses';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
 
 const courseParam = Astro.url.searchParams.get('course');
-const resolution = await resolveActiveCourse(supabase, user, courseParam);
+let activeSlug: CourseSlug | null = null;
+let availableCourses: AvailableCourse[] = [];
+let data: CourseDashboardData | null = null;
+let dashboardUnavailable = false;
 
-if (resolution.kind === 'redirect') {
-  return Astro.redirect(resolution.to);
+try {
+  const resolution = await resolveActiveCourse(supabase, user, courseParam);
+  if (resolution.kind === 'redirect') return Astro.redirect(resolution.to);
+  activeSlug = resolution.courseSlug;
+  availableCourses = await listAvailableCourses(supabase, user.id);
+  data = activeSlug
+    ? await getDashboardData(supabase, user.id, activeSlug)
+    : null;
+} catch (error) {
+  dashboardUnavailable = true;
+  console.error('[dashboard] load_failed', error);
 }
 
-const activeSlug = resolution.courseSlug;
-const availableCourses = await listAvailableCourses(supabase, user.id);
-const data = activeSlug
-  ? await getDashboardData(supabase, user.id, activeSlug)
-  : null;
-
-// Staff section: only renders for instructor / ta / admin AND when a
-// course is active. Range comes from ?range= param (default = week).
-const viewerIsStaff = isStaff(Astro.locals.profile?.role);
+// Management metrics follow workshop RLS: instructors and admins only.
+const viewerCanManage = isInstructor(Astro.locals.profile?.role);
 const range = parseRange(Astro.url.searchParams.get('range'));
-const staffMetrics =
-  viewerIsStaff && activeSlug && data
-    ? await loadStaffMetrics(supabase, activeSlug, range)
-    : null;
+let staffMetrics: Awaited<ReturnType<typeof loadStaffMetrics>> | null = null;
+let staffMetricsUnavailable = false;
+if (viewerCanManage && activeSlug && data) {
+  try {
+    staffMetrics = await loadStaffMetrics(supabase, activeSlug, range);
+  } catch (error) {
+    staffMetricsUnavailable = true;
+    console.error('[dashboard] staff_metrics_failed', error);
+  }
+}
 ---
 
 <BaseLayout title="Dashboard">
   <div class="mx-auto max-w-4xl px-4 py-10">
     <h1 class="text-3xl font-semibold tracking-tight">Your dashboard</h1>
     <p class="mt-2 text-ink-muted">Signed in as {user.email}</p>
+
+    {
+      dashboardUnavailable && (
+        <div
+          role="alert"
+          class="mt-8 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          Dashboard data is temporarily unavailable. Your saved work has not
+          been reset; refresh to try again.
+        </div>
+      )
+    }
 
     {
       availableCourses.length > 0 && (
@@ -57,13 +83,21 @@ const staffMetrics =
     {
       data && (
         <div class="mt-8 space-y-10">
-          {viewerIsStaff && staffMetrics && activeSlug && (
+          {viewerCanManage && staffMetrics && activeSlug && (
             <StaffCourseManagement
               metrics={staffMetrics}
               courseSlug={activeSlug}
               courseCode={data.course.data.code}
               range={range}
             />
+          )}
+          {viewerCanManage && staffMetricsUnavailable && (
+            <div
+              role="alert"
+              class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+            >
+              Class-management metrics are temporarily unavailable.
+            </div>
           )}
           {data.enrolledSemester === null && (
             <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
@@ -103,7 +137,7 @@ const staffMetrics =
                       href={`/practice/${a.quiz_slug}`}
                       class="text-accent underline"
                     >
-                      {a.quiz_slug}
+                      {a.title}
                     </a>
                     <span class="text-sm text-ink-muted">
                       {a.score} / {a.max_score} ·{' '}
@@ -123,7 +157,7 @@ const staffMetrics =
     }
 
     {
-      !data && availableCourses.length === 0 && (
+      !dashboardUnavailable && !data && availableCourses.length === 0 && (
         <div class="mt-10 rounded border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900">
           <p class="font-medium">You don't have any active courses yet.</p>
           <p class="mt-2">

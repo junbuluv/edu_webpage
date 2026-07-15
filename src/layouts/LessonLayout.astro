@@ -6,6 +6,7 @@ import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { findPrevNext } from '@lib/lesson/sequence';
 import { canViewCourse } from '@lib/archive/access';
 import { fetchArchiveVideosForLesson } from '@lib/archive/db';
+import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import { isContentManager } from '@lib/roles';
 
@@ -32,10 +33,39 @@ const { prev, next } = findPrevNext(lesson, allLessons);
 
 const lessonSlug = normalizeLessonSlug(lesson.id);
 const role = Astro.locals.profile?.role ?? 'student';
-const canSeeVideos = await canViewCourse(Astro.locals, data.course);
-const lessonVideos = canSeeVideos
-  ? await fetchArchiveVideosForLesson(data.course, lessonSlug)
-  : [];
+let canSeeVideos = false;
+let lessonVideos: Awaited<ReturnType<typeof fetchArchiveVideosForLesson>> = [];
+let videosUnavailable = false;
+try {
+  canSeeVideos = await canViewCourse(Astro.locals, data.course);
+  lessonVideos = canSeeVideos
+    ? await fetchArchiveVideosForLesson(data.course, lessonSlug)
+    : [];
+} catch (error) {
+  if (!(error instanceof ArchiveServiceUnavailableError)) {
+    console.error('[lesson] video_load_failed', error);
+  }
+  videosUnavailable = true;
+}
+
+let initialProgressStatus: 'started' | 'completed' | null = null;
+let initialProgressStatusKnown = !Astro.locals.user;
+if (Astro.locals.user && Astro.locals.supabase) {
+  const { data: progress, error: progressError } = await Astro.locals.supabase
+    .from('lesson_progress')
+    .select('status')
+    .eq('user_id', Astro.locals.user.id)
+    .eq('lesson_slug', lesson.slug)
+    .maybeSingle();
+  if (progressError) {
+    console.error('[lesson] progress_read_failed', {
+      code: progressError.code,
+    });
+  } else {
+    initialProgressStatus = progress?.status ?? null;
+    initialProgressStatusKnown = true;
+  }
+}
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
@@ -63,6 +93,18 @@ const lessonVideos = canSeeVideos
     <div class="prose mt-10">
       <slot />
     </div>
+
+    {
+      videosUnavailable && (
+        <div
+          role="status"
+          class="mt-10 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          Lecture videos are temporarily unavailable. The lesson and practice
+          activities still work; refresh later to retry the video library.
+        </div>
+      )
+    }
 
     {
       canSeeVideos && (
@@ -114,7 +156,13 @@ const lessonVideos = canSeeVideos
     <div
       class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6"
     >
-      <LessonProgressButton client:load lessonSlug={lesson.slug} />
+      <LessonProgressButton
+        client:load
+        lessonSlug={lesson.slug}
+        initialStatus={initialProgressStatus}
+        initialStatusKnown={initialProgressStatusKnown}
+        signedIn={Boolean(Astro.locals.user)}
+      />
       {
         data.quizSlug && (
           <a

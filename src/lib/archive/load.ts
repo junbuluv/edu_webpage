@@ -5,7 +5,6 @@ import {
   fetchArchiveVideos,
   fetchArchivePapers,
   fetchArchiveQuizzes,
-  signPaperUrl,
 } from './db';
 import type {
   ArchiveItem,
@@ -46,7 +45,11 @@ export async function loadArchiveForCourse(
     semester: q.data.semester ?? null,
   }));
 
-  const dbQuizRows = await fetchArchiveQuizzes(course);
+  const [dbQuizRows, dbVideoRows, paperRows] = await Promise.all([
+    fetchArchiveQuizzes(course),
+    fetchArchiveVideos(course),
+    fetchArchivePapers(course),
+  ]);
   const dbQuizzes: QuizInput[] = dbQuizRows.map((r) => ({
     slug: r.id,
     course: r.course_slug,
@@ -70,7 +73,6 @@ export async function loadArchiveForCourse(
       semester: v.data.semester,
     }));
 
-  const dbVideoRows = await fetchArchiveVideos(course);
   const dbVideos: VideoInput[] = dbVideoRows.map((r) => ({
     slug: r.id,
     course: r.course_slug,
@@ -84,22 +86,18 @@ export async function loadArchiveForCourse(
 
   const videos: VideoInput[] = [...gitVideos, ...dbVideos];
 
-  const paperRows = await fetchArchivePapers(course);
-  const papers: PaperInput[] = [];
-  for (const r of paperRows) {
-    const fileUrl = await signPaperUrl(r.storage_path);
-    if (!fileUrl) continue; // skip papers whose file can't be signed
-    papers.push({
+  const papers: PaperInput[] = paperRows.map((r) => {
+    return {
       id: r.id,
       course: r.course_slug,
       kind: r.kind,
       title: r.title,
       covers: r.covers,
       semester: { term: r.semester_term, year: r.semester_year },
-      fileUrl,
+      fileUrl: `/api/archive/papers/${r.id}`,
       fileName: r.original_filename,
-    });
-  }
+    };
+  });
 
   const items = buildArchiveItems({ lessons, quizzes, videos, papers, course });
 

@@ -148,6 +148,13 @@ export default function EfficientFrontier() {
             }))
           }
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
@@ -233,15 +240,18 @@ export default function EfficientFrontier() {
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-ink-muted">
-        The controls keep correlation strictly between −1 and 1 and both risky
-        expected returns above Rf, so the tangent portfolio has positive excess
-        return and nonzero risk. Drag correlation ρ down toward -1 and watch the
-        blue opportunity set bow left: the same expected return becomes reachable
-        at lower risk. The upper branch from the minimum-variance portfolio is the
-        efficient frontier; its lower branch is dominated. The green capital market
-        line, drawn from the risk-free rate through the tangent portfolio, is the
-        best risk-return trade-off any investor can reach by mixing the risk-free
-        asset with that one tangent portfolio.
+        Current parameters: asset 1 E[R] = {pct(s.er1)}, σ = {pct(s.sd1)}; asset
+        2 E[R] = {pct(s.er2)}, σ = {pct(s.sd2)}; ρ = {s.rho.toFixed(2)}; and Rf
+        = {pct(s.rf)}. The controls keep correlation strictly between −1 and 1
+        and both risky expected returns above Rf, so the tangent portfolio has
+        positive excess return and nonzero risk. Drag correlation ρ down toward
+        -1 and watch the blue opportunity set bow left: the same expected return
+        becomes reachable at lower risk. The upper branch from the
+        minimum-variance portfolio is the efficient frontier; its lower branch
+        is dominated. The green capital market line, drawn from the risk-free
+        rate through the tangent portfolio, is the best risk-return trade-off
+        any investor can reach by mixing the risk-free asset with that one
+        tangent portfolio.
       </p>
     </div>
   );

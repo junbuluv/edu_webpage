@@ -9,15 +9,26 @@ const error = Astro.url.searchParams.get('error');
   <div class="mx-auto max-w-xl py-16 px-4">
     <h1 class="text-2xl font-semibold">Delete your account</h1>
     <p class="mt-3 text-ink-muted">
-      This permanently removes your profile, lesson progress, quiz attempts, and
-      authentication record for <strong>{user.email}</strong>. It cannot be
-      undone.
+      This permanently removes your profile, lesson progress, quiz attempts,
+      workshop attendance, enrollments, and authentication record for <strong
+        >{user.email}</strong
+      >. The workshop-device cookie is cleared. Audit records required for
+      accountability may remain under the applicable retention schedule. This
+      cannot be undone.
+    </p>
+    <p class="mt-3 text-sm text-ink-muted">
+      Staff accounts that own teaching assignments, workshop history, or archive
+      content require admin-assisted offboarding so institutional records retain
+      a responsible owner.
     </p>
 
     {
       error && (
-        <div class="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {decodeURIComponent(error)}
+        <div
+          role="alert"
+          class="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+        >
+          {error}
         </div>
       )
     }

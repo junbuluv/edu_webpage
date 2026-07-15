@@ -22,7 +22,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
 
-  const form = await request.formData();
+  if (!user) return err('unauthenticated');
+  if (!isContentManager(role)) return err('forbidden');
+
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return err('invalid_input');
+  }
   const id = String(form.get('id') ?? '');
   const kind = String(form.get('kind') ?? '');
   const title = String(form.get('title') ?? '').trim();
@@ -31,17 +39,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const covers = form.getAll('covers').map(String).filter(Boolean);
   const published = form.get('published') != null;
 
-  if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
   if (!id) return err('invalid_input');
 
   const admin = getAdminClient();
-  const { data: row } = await admin
+  const { data: row, error: lookupError } = await admin
     .from('archive_papers')
     .select('course_slug, created_by')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
+  if (lookupError) return err('update_failed');
   if (!row) return err('not_found');
   if (!(await instructorOwnsCourse(user.id, row.course_slug, role)))
     return err('not_course_instructor');
@@ -49,6 +56,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (
     !title ||
+    title.length > 200 ||
+    covers.length > 100 ||
+    new Set(covers).size !== covers.length ||
+    covers.some((cover) => cover.length > 200) ||
     !KINDS.has(kind) ||
     !TERMS.has(term) ||
     !Number.isInteger(year) ||
@@ -64,20 +75,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const valid = new Set(lessons.map((l) => normalizeLessonSlug(l.id)));
   if (covers.some((c) => !valid.has(c))) return err('invalid_lesson');
 
-  const { error } = await admin
-    .from('archive_papers')
-    .update({
-      kind: kind as 'exam' | 'assignment',
+  const { data: updated, error } = await admin.rpc('mutate_archive_item', {
+    p_actor_id: user.id,
+    p_resource: 'paper',
+    p_id: id,
+    p_operation: 'update',
+    p_patch: {
+      kind,
       title,
-      semester_term: term as 'spring' | 'summer' | 'fall',
+      semester_term: term,
       semester_year: year,
       covers,
       published,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .is('deleted_at', null);
+    },
+  });
   if (error) return err('update_failed');
+  if (!updated) return err('not_found');
 
   await logDisclosureSafe({
     actorId: user.id,

@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Unit tests
+        run: npm test
+
       - name: Type check
         run: npm run typecheck
         env:
@@ -68,41 +71,180 @@ jobs:
       PGDATABASE: postgres
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # Minimal stand-ins for the Supabase Auth surface that schema.sql
-      # references via FK + trigger + policy + grant. We don't run the
-      # trigger or exercise the policies — we just need the names to
-      # resolve so DDL applies cleanly.
+      # Minimal Supabase Auth/role stand-ins used by schema and RLS tests.
       - name: Create auth stub
-        run: |
-          psql -v ON_ERROR_STOP=1 <<'SQL'
-          create schema if not exists auth;
-          create table if not exists auth.users (
-            id uuid primary key default gen_random_uuid(),
-            email text,
-            last_sign_in_at timestamptz,
-            email_confirmed_at timestamptz
-          );
-          create or replace function auth.uid() returns uuid
-            language sql stable as $$ select null::uuid $$;
-          -- Supabase-provided roles used in GRANT/REVOKE and policy TO
-          -- clauses. Vanilla Postgres has none of these.
-          do $$ begin create role anon nologin;
-            exception when duplicate_object then null; end $$;
-          do $$ begin create role authenticated nologin;
-            exception when duplicate_object then null; end $$;
-          do $$ begin create role service_role nologin;
-            exception when duplicate_object then null; end $$;
-          SQL
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/auth_stub.sql
 
       - name: Apply schema.sql (first run)
         run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
 
       - name: Apply schema.sql (second run, should be a no-op)
         run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+      - name: Exercise synthetic RLS identities
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
+
+      - name: Exercise pre-audit upgrade and migration idempotence
+        run: |
+          createdb --maintenance-db=postgres workshop_upgrade
+          export PGDATABASE=workshop_upgrade
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/auth_stub.sql
+          git show 6e5ef3073b0813b6136360fb69296d198e69ee72:supabase/schema.sql > /tmp/pre_workshop_integrity.sql
+          psql -v ON_ERROR_STOP=1 -f /tmp/pre_workshop_integrity.sql
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          insert into auth.users (
+            id, email, aud, role, created_at, updated_at, email_confirmed_at
+          ) values
+            (
+              '00000000-0000-0000-0000-000000000301',
+              'migration-owner@example.test', 'authenticated', 'authenticated',
+              now(), now(), now()
+            ),
+            (
+              '00000000-0000-0000-0000-000000000302',
+              'migration-student@example.test', 'authenticated', 'authenticated',
+              now(), now(), now()
+            ),
+            (
+              '00000000-0000-0000-0000-000000000303',
+              'migration-demoted-owner@example.test', 'authenticated', 'authenticated',
+              now(), now(), now()
+            );
+          update public.profiles
+             set role = 'instructor'
+           where id = '00000000-0000-0000-0000-000000000301';
+          insert into public.enrollments (
+            user_id, course_slug, instructor_id, semester
+          ) values
+            (
+              '00000000-0000-0000-0000-000000000302', 'eco-1002',
+              '00000000-0000-0000-0000-000000000301', 'fall-2026'
+            ),
+            (
+              '00000000-0000-0000-0000-000000000302', 'fin-3610',
+              '00000000-0000-0000-0000-000000000303', 'fall-1970'
+            );
+          insert into public.lesson_progress (
+            user_id, lesson_slug, course_slug, status
+          ) values (
+            '00000000-0000-0000-0000-000000000302',
+            'eco-1002/migration-fixture', 'eco-1002', 'started'
+          );
+          insert into public.quiz_attempts (
+            user_id, quiz_slug, course_slug, score, max_score, answers
+          ) values (
+            '00000000-0000-0000-0000-000000000302',
+            'eco-1002-migration-fixture', 'eco-1002', 1, 1, '{}'::jsonb
+          );
+          insert into public.workshop_administrations (
+            workshop_slug, course_slug, section, week_of, instructor_id,
+            opens_at, closes_at, required_lat, required_lng,
+            required_radius_meters, notes
+          ) values (
+            'eco-1002-migration-fixture', 'eco-1002', 'CML', '2026-07-13',
+            '00000000-0000-0000-0000-000000000301',
+            '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00',
+            40.74000, -73.98300, 200, 'Legacy upgrade fixture'
+          );
+          SQL
+          if psql -1 -v ON_ERROR_STOP=1 -f supabase/migrations/20260714203000_workshop_integrity.sql; then
+            echo 'unmapped legacy workshop unexpectedly passed the migration guard' >&2
+            exit 1
+          fi
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          alter table public.workshop_administrations
+            add column if not exists semester text;
+          update public.workshop_administrations
+             set semester = 'fall-2026'
+           where workshop_slug = 'eco-1002-migration-fixture';
+          SQL
+          psql -1 -v ON_ERROR_STOP=1 -f supabase/migrations/20260714203000_workshop_integrity.sql
+          psql -1 -v ON_ERROR_STOP=1 -f supabase/migrations/20260714203000_workshop_integrity.sql
+          psql -1 -v ON_ERROR_STOP=1 -f supabase/migrations/20260714230000_feature_integrity.sql
+          psql -1 -v ON_ERROR_STOP=1 -f supabase/migrations/20260714230000_feature_integrity.sql
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (
+              select 1 from public.workshop_administrations
+               where workshop_slug = 'eco-1002-migration-fixture'
+                 and semester = 'fall-2026'
+                 and schedule_version = 1
+            ) then
+              raise exception 'legacy workshop row was not preserved as version 1';
+            end if;
+            if not exists (
+              select 1 from public.teaching_assignments
+               where instructor_id = '00000000-0000-0000-0000-000000000301'
+                 and course_slug = 'eco-1002'
+                 and semester = 'fall-2026'
+                 and active
+            ) then
+              raise exception 'legacy workshop owner did not receive an active teaching assignment';
+            end if;
+            if not exists (
+              select 1 from public.offering_lesson_progress
+               where user_id = '00000000-0000-0000-0000-000000000302'
+                 and lesson_slug = 'eco-1002/migration-fixture'
+                 and semester = 'fall-2026'
+                 and instructor_id = '00000000-0000-0000-0000-000000000301'
+            ) then
+              raise exception 'unambiguous legacy lesson progress was not scoped';
+            end if;
+            if not exists (
+              select 1 from public.quiz_attempts
+               where user_id = '00000000-0000-0000-0000-000000000302'
+                 and quiz_slug = 'eco-1002-migration-fixture'
+                 and semester = 'fall-2026'
+                 and instructor_id = '00000000-0000-0000-0000-000000000301'
+            ) then
+              raise exception 'unambiguous legacy quiz attempt was not scoped';
+            end if;
+            if not exists (
+              select 1 from public.teaching_assignments
+               where instructor_id = '00000000-0000-0000-0000-000000000303'
+                 and course_slug = 'fin-3610'
+                 and semester = 'fall-1970'
+                 and not active
+            ) then
+              raise exception 'demoted legacy owner did not retain an inactive assignment';
+            end if;
+          end $$;
+          delete from public.quiz_attempts
+           where quiz_slug = 'eco-1002-migration-fixture';
+          delete from public.lesson_progress
+           where lesson_slug = 'eco-1002/migration-fixture';
+          delete from public.offering_lesson_progress
+           where lesson_slug = 'eco-1002/migration-fixture';
+          delete from public.enrollments
+           where user_id = '00000000-0000-0000-0000-000000000302'
+             and (
+               (course_slug = 'eco-1002' and semester = 'fall-2026')
+               or (course_slug = 'fin-3610' and semester = 'fall-1970')
+             );
+          delete from public.workshop_administrations
+           where workshop_slug = 'eco-1002-migration-fixture';
+          delete from public.teaching_assignments
+           where instructor_id = '00000000-0000-0000-0000-000000000301'
+             and course_slug = 'eco-1002'
+             and semester = 'fall-2026';
+          delete from public.teaching_assignments
+           where instructor_id = '00000000-0000-0000-0000-000000000303'
+             and course_slug = 'fin-3610'
+             and semester = 'fall-1970';
+          delete from auth.users
+           where id in (
+             '00000000-0000-0000-0000-000000000301',
+             '00000000-0000-0000-0000-000000000302',
+             '00000000-0000-0000-0000-000000000303'
+           );
+          SQL
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
 
   # Deterministic copyright gate over lesson MDX + quiz JSON: missing figure
   # credit, external/hotlinked images, references to the gitignored materials/

@@ -23,13 +23,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
 
-  const form = await request.formData();
-  let p: Record<string, unknown>;
+  if (!user) return err('unauthenticated');
+  if (!isContentManager(role)) return err('forbidden');
+
+  let form: FormData;
   try {
-    p = JSON.parse(String(form.get('payload') ?? '')) as Record<
-      string,
-      unknown
-    >;
+    form = await request.formData();
+  } catch {
+    return err('invalid_payload');
+  }
+  let p: Record<string, unknown>;
+  const rawPayload = String(form.get('payload') ?? '');
+  if (rawPayload.length > 1_000_000) return err('invalid_payload');
+  try {
+    p = JSON.parse(rawPayload) as Record<string, unknown>;
   } catch {
     return err('invalid_payload');
   }
@@ -45,17 +52,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const passing = Number(p.passing_score ?? 0.7);
   const published = p.published === true;
 
-  if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
   if (!id) return err('invalid_input');
 
   const admin = getAdminClient();
-  const { data: row } = await admin
+  const { data: row, error: lookupError } = await admin
     .from('archive_quizzes')
     .select('course_slug, created_by')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
+  if (lookupError) return err('update_failed');
   if (!row) return err('not_found');
   if (!(await instructorOwnsCourse(user.id, row.course_slug, role)))
     return err('not_course_instructor');
@@ -63,6 +69,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (
     !title ||
+    title.length > 200 ||
+    covers.length > 100 ||
+    new Set(covers).size !== covers.length ||
+    covers.some((cover) => cover.length > 200) ||
     !KINDS.has(kind) ||
     !TERMS.has(term) ||
     !Number.isInteger(year) ||
@@ -82,22 +92,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const valid = new Set(lessons.map((l) => normalizeLessonSlug(l.id)));
   if (covers.some((c) => !valid.has(c))) return err('invalid_lesson');
 
-  const { error } = await admin
-    .from('archive_quizzes')
-    .update({
-      kind: kind as 'exam' | 'assignment',
+  const { data: updated, error } = await admin.rpc('mutate_archive_item', {
+    p_actor_id: user.id,
+    p_resource: 'quiz',
+    p_id: id,
+    p_operation: 'update',
+    p_patch: {
+      kind,
       title,
-      semester_term: term as 'spring' | 'summer' | 'fall',
+      semester_term: term,
       semester_year: year,
       covers,
       questions: parsed.data,
       passing_score: passing,
       published,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .is('deleted_at', null);
+    },
+  });
   if (error) return err('update_failed');
+  if (!updated) return err('not_found');
 
   await logDisclosureSafe({
     actorId: user.id,

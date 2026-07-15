@@ -10,18 +10,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { logNetExports, solveLogExchangeRate } from '@lib/viz/model-math';
 
 // Mankiw-style small open economy:
 //   S - I = NX  (net capital outflow = net exports)
 //   NX is a downward-sloping function of the real exchange rate ε:
-//       NX(ε) = NX0 - bNX * ε
+//       NX(ε) = NX0 - bNX * ln(ε)
 //   Capital outflow (S - I) is given (set by the loanable-funds market).
 // Equilibrium ε* clears NX(ε) = S - I.
 //
 // Sliders:
-//   - World interest rate r_world (shifts I)
+//   - World interest rate r_world (raises S and lowers I in this calibration)
 //   - Domestic saving rate (shifts S)
-//   - Tariff wedge (shifts NX0 right — protectionism raises NX at any ε)
+//   - Tariff wedge (shifts NX0 upward — protectionism raises NX at any ε)
 
 interface State {
   rWorld: number;
@@ -31,18 +32,18 @@ interface State {
 
 const baseline: State = { rWorld: 5, savingRate: 1.0, tariff: 0 };
 
-// Calibrated so the baseline equilibrium ε lies near 1.1 (chart domain
-// 0.5–2.5). With baseline (rWorld=5, savingRate=1, tariff=0):
+// Calibrated so the baseline equilibrium ε lies near 1.15. With baseline
+// (rWorld=5, savingRate=1, tariff=0):
 //   S = S0 + bS_r·5 = 1500 + 100 = 1600
 //   I = I0 − bI_r·5 = 1700 − 200 = 1500
 //   capOutflow = S − I = 100
-//   NX0 − bNX·ε = capOutflow  ⇒  ε = (900−100)/700 ≈ 1.14
+//   NX0 − bNX·ln(ε) = capOutflow  ⇒  ε = exp((200−100)/700) ≈ 1.15
 const params = {
   S0: 1500,
   bS_r: 20,
   I0: 1700,
   bI_r: 40,
-  NX0_base: 900,
+  NX0_base: 200,
   bNX: 700,
 };
 
@@ -54,21 +55,17 @@ function computeFlows(s: State) {
 
 function equilibriumFX(s: State, capOutflow: number) {
   const NX0 = params.NX0_base + s.tariff;
-  // NX(ε) = NX0 - bNX*ε = capOutflow
-  // ε = (NX0 - capOutflow) / bNX
-  return (NX0 - capOutflow) / params.bNX;
+  return solveLogExchangeRate(capOutflow, NX0, params.bNX);
 }
 
 function buildSeries(s: State, epsStar: number) {
   const NX0 = params.NX0_base + s.tariff;
-  // Build the line over a domain that always includes the current
-  // equilibrium with some margin on both sides.
-  const lo = Math.min(0.2, epsStar - 0.5);
-  const hi = Math.max(2.5, epsStar + 0.5);
-  const step = (hi - lo) / 40;
+  const lo = Math.max(0.05, Math.min(0.2, epsStar * 0.5));
+  const hi = Math.max(2.5, epsStar * 1.5);
+  const ratio = hi / lo;
   return Array.from({ length: 41 }, (_, i) => {
-    const eps = lo + i * step;
-    return { eps, NX: NX0 - params.bNX * eps };
+    const eps = lo * Math.pow(ratio, i / 40);
+    return { eps, NX: logNetExports(eps, NX0, params.bNX) };
   });
 }
 
@@ -109,6 +106,7 @@ export default function OpenEconomyFX() {
           onChange={(v) => setS((x) => ({ ...x, tariff: v }))}
         />
         <button
+          type="button"
           onClick={() => setS(baseline)}
           className="self-end text-sm text-ink-muted underline"
         >
@@ -132,6 +130,8 @@ export default function OpenEconomyFX() {
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
             <XAxis
               dataKey="eps"
+              type="number"
+              domain={[data[0].eps, data[data.length - 1].eps]}
               tickFormatter={(v) => v.toFixed(1)}
               label={{
                 value: 'Real exchange rate ε',
@@ -172,12 +172,20 @@ export default function OpenEconomyFX() {
       </div>
 
       <p className="mt-3 text-xs text-ink-muted">
-        A small open economy takes the world real rate as given. Higher domestic
-        saving raises S − I (more capital flowing abroad), which requires a
-        weaker domestic currency (lower ε) to generate the offsetting trade
-        surplus. Tariffs shift the NX curve right but don't change the
-        equilibrium quantity of NX — they just appreciate the currency. Trade
-        balance is set by saving-investment, not by protection.
+        Current parameters: r* = {s.rWorld.toFixed(2)}%, saving multiplier ={' '}
+        {s.savingRate.toFixed(2)}x, and trade-policy wedge = $
+        {s.tariff.toFixed(0)}B. Annual flows are USD billions: S = $1500B ×
+        saving multiplier + $20B × r*, and I = $1700B − $40B × r*, with r* in
+        percentage points. The calibrated trade curve is NX(ε) = $
+        {(params.NX0_base + s.tariff).toFixed(0)}B − ${params.bNX.toFixed(0)}B
+        ln(ε), whose positive domain guarantees ε &gt; 0. A small open economy
+        takes the world real rate as given. Higher domestic saving raises S − I
+        (more capital flowing abroad), which requires a weaker domestic currency
+        (lower ε) to generate the offsetting trade surplus. Tariffs shift the NX
+        curve upward but, in this experiment, don't change the equilibrium
+        quantity of NX because S and I are held fixed with respect to the
+        tariff. Channels through saving, investment, income, expectations, or
+        retaliation are outside this benchmark.
       </p>
     </div>
   );

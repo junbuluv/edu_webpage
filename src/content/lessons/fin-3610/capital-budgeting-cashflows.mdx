@@ -32,8 +32,11 @@ $$
 
 Where:
 
-- **NOPAT** = EBIT × (1 − tax rate). Operating profit, after taxes,
-  before any financing costs. (Net income would also subtract
+- **NOPAT** = EBIT × (1 − tax rate) when EBIT is positive. Operating
+  profit, after taxes, before any financing costs. The simulation sets
+  current tax to zero when EBIT is negative; multiplying a loss by $(1-t)$
+  would instead assume the project can use the tax shield immediately
+  against other taxable income. (Net income would also subtract
   interest expense; FCF deliberately excludes interest because the
   cost of debt is captured in the discount rate, not the cash flows.)
 - **D&A** added back because it's a non-cash deduction.
@@ -46,6 +49,20 @@ In practice this is a two-step forecast. First project the project's
 convert those earnings to free cash flow with the adjustments above.
 Earnings are an accounting story; free cash flow is the cash the
 project actually throws off, and only the cash drives NPV.
+
+Keep gross profit and operating profit distinct:
+
+$$
+\begin{aligned}
+\text{EBITDA}
+  &= \text{Revenue} - \text{COGS} - \text{Cash operating expenses}, \\
+\text{EBIT}
+  &= \text{EBITDA} - \text{D\&A}.
+\end{aligned}
+$$
+
+Gross margin determines revenue minus COGS. It is not an EBITDA
+margin unless cash operating expenses are zero.
 
 <BarFigure
   client:load
@@ -68,7 +85,7 @@ project actually throws off, and only the cash drives NPV.
     { key: 'capex', name: 'CapEx ($B)', color: '#aa4643' },
   ]}
   yAxisLabel="USD billions"
-  caption="Apple's annual operating cash flow and capital expenditures, fiscal years 2014–2024. The simple back-of-envelope free cash flow (OCF − CapEx) runs roughly $50B in 2014 and over $100B by 2024, with FY22 the peak ($122B OCF, $11B CapEx → ~$111B FCF). This is the cash stream that the discount rate will eventually price."
+  caption="Apple's annual operating cash flow and capital expenditures, fiscal years 2014–2024. OCF − CapEx is a cash-flow-statement proxy for levered free cash flow: roughly $50B in 2014 and over $100B by 2024, with FY22 near $111B. It is not automatically the NOPAT-based project FCF above, and the appropriate discount rate must match the cash-flow measure."
   credit="Apple Inc. 10-K cash flow statements via SEC EDGAR"
   creditHref="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K"
 />
@@ -103,8 +120,11 @@ not. Do not include it in NPV. The decision is forward-looking;
 sunk costs are backward-looking.
 
 **4. Exclude financing cash flows.** Interest, principal, and
-dividends are not in FCF. They belong in the discount rate.
-Including them double-counts the cost of capital.
+dividends are not in project FCF. Interest-bearing financing affects the
+cost of capital; principal repayments and dividends are distributions to
+capital providers, not inputs to the discount rate. Keeping all three out
+of project FCF separates the operating project from how it is financed and
+avoids double-counting financing effects.
 
 **5. Allocate overhead carefully.** A new product line is often
 charged a share of corporate overhead (HR, the head office, existing
@@ -115,9 +135,11 @@ when the accountants assign a slice of them to the project.
 ## Working capital — the hidden cost of growth
 
 Growing firms tie up cash in working capital even when they're
-profitable. Each new dollar of revenue typically requires an extra
-\$0.10-\$0.20 of working capital (accounts receivable + inventory −
-accounts payable). For a fast-growing project:
+profitable. As an **illustrative calibration**, the simulation allows a
+project to require \$0.10-\$0.20 of working capital per revenue dollar
+(accounts receivable + inventory − accounts payable). The right ratio is
+industry- and business-model-specific and should come from comparable
+firms or the project's operating plan. For a fast-growing project:
 
 - ΔAR rises with sales (booked revenue not yet collected).
 - ΔInventory rises with sales (cash spent on product not yet sold).
@@ -145,10 +167,13 @@ $$
 TV_T = \frac{FCF_{T+1}}{r - g}.
 $$
 
-The total PV is then the explicit forecast plus $TV_T / (1+r)^T$.
-Be conservative with $g$: long-run terminal growth shouldn't exceed
-the long-run growth of the broader economy (call it 2-3% in real
-terms).
+The formula requires $r>g$; otherwise the growing perpetuity does not
+have a finite positive value. The cash flow, $r$, and $g$ must also share
+the same nominal or real basis. The total PV is then the explicit forecast
+plus $TV_T / (1+r)^T$. Be conservative with $g$: a real-cash-flow model
+might use a low single-digit real growth rate, whereas a nominal model
+must pair nominal growth with a nominal discount rate. In either case,
+terminal growth should not outpace the broader economy indefinitely.
 
 **Exit multiple.** Assume the project (or business) sells in year
 $T$ for some multiple of its EBITDA or EBIT. Used heavily in
@@ -163,11 +188,22 @@ both (next lesson).
 
 ## A worked summary
 
-Suppose a 5-year project with year-1 revenue \$1,000, growing 5%
-annually, gross margin 30%, tax rate 25%, working capital at 10% of
-sales, initial CapEx \$800 with 5-year straight-line depreciation,
-no maintenance CapEx. Discount rate 10%. Terminal value via Gordon
-with $g = 2\%$.
+Suppose a continuing project has an 8-year explicit forecast, year-1
+revenue of \$1,000, 5% annual growth, a 30% gross margin, cash operating
+expenses equal to 12% of sales, a 25% tax rate, working capital equal to
+10% of sales, and \$800 of initial CapEx with 8-year straight-line
+depreciation. Annual sustaining CapEx is \$100, matching the original
+asset's annual D&A in this simplified forecast. The discount rate is 10%,
+and terminal value uses $g = 2\%$ with continuing working-capital and
+fixed-asset reinvestment.
+
+In year 1, COGS is \$700 and cash operating expenses are \$120, so
+EBITDA is $1{,}000 - 700 - 120 = \$180$. D&A is \$100, EBIT is \$80,
+and NOPAT is $80(1 - 0.25) = \$60$. Because the initial working-capital
+investment is paid at $t=0$, year-1 FCF is
+$60 + 100 - 100 = \$60$. In the terminal calculation, sustaining CapEx
+continues and grows with the asset base; setting it to zero would describe
+an asset-light operation or produce an optimistic continuing value.
 
 The interactive viz above calculates all this in real time. Slide
 the inputs and watch NPV move. The lesson here is that NPV is

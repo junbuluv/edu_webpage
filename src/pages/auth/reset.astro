@@ -14,7 +14,7 @@ const error = Astro.url.searchParams.get('error');
     {
       error && (
         <div class="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {decodeURIComponent(error)}
+          {error}
         </div>
       )
     }

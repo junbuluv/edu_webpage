@@ -4,6 +4,7 @@ import ArchiveBrowser from '@components/archive/ArchiveBrowser';
 import { loadArchiveForCourse } from '@lib/archive/load';
 import { canViewCourse } from '@lib/archive/access';
 import { isStaff } from '@lib/roles';
+import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
 
 const COURSE = 'eco-1002' as const;
 const user = Astro.locals.user;
@@ -16,13 +17,23 @@ if (!user) {
     `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
   );
 }
-const canView = await canViewCourse(Astro.locals, COURSE);
+let canView = false;
+let archiveUnavailable = false;
 const role = Astro.locals.profile?.role;
 const staff = isStaff(role);
-
-const { items, facets } = canView
-  ? await loadArchiveForCourse(COURSE)
-  : { items: [], facets: { types: [], semesters: [], units: [], lessons: [] } };
+let archive = {
+  items: [],
+  facets: { types: [], semesters: [], units: [], lessons: [] },
+} as Awaited<ReturnType<typeof loadArchiveForCourse>>;
+try {
+  canView = await canViewCourse(Astro.locals, COURSE);
+  if (canView) archive = await loadArchiveForCourse(COURSE);
+} catch (error) {
+  if (!(error instanceof ArchiveServiceUnavailableError)) throw error;
+  archiveUnavailable = true;
+  Astro.response.status = 503;
+}
+const { items, facets } = archive;
 ---
 
 <BaseLayout title="ECO 1002 — Archive">
@@ -38,8 +49,23 @@ const { items, facets } = canView
     </p>
 
     {
-      !canView ? (
-        <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm">
+      archiveUnavailable ? (
+        <div
+          role="alert"
+          class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
+        >
+          <p class="font-medium">
+            The course archive is temporarily unavailable.
+          </p>
+          <p class="mt-1">
+            Refresh in a moment. Your materials have not been removed.
+          </p>
+        </div>
+      ) : !canView ? (
+        <div
+          role="status"
+          class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm"
+        >
           <p class="font-medium">You're not enrolled in ECO 1002.</p>
           <p class="mt-1 text-ink-muted">
             The course archive is available to enrolled students. Ask your

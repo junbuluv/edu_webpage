@@ -1,24 +1,30 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin } from '@lib/roles';
+import { isAdmin, isInstructor } from '@lib/roles';
 import { isCourseSlug, type CourseSlug } from '@lib/courses';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
 const role = Astro.locals.profile?.role ?? 'student';
+if (!isInstructor(role)) return new Response(null, { status: 403 });
 
-// Admins see all courses; instructor/ta see only courses where
-// they're listed as instructor_id on at least one enrollment row.
+// Admins see all courses; instructors see courses with active assignments.
 const allCoursesCollection = await getCollection('courses');
 const instructorCourses = new Set<CourseSlug>();
 if (isAdmin(role)) {
   for (const c of allCoursesCollection) instructorCourses.add(c.data.slug);
 } else {
-  const { data: rows } = await supabase
-    .from('enrollments')
+  const { data: rows, error } = await supabase
+    .from('teaching_assignments')
     .select('course_slug')
-    .eq('instructor_id', user.id);
+    .eq('instructor_id', user.id)
+    .eq('active', true);
+  if (error) {
+    return new Response('Could not load teaching assignments right now.', {
+      status: 503,
+    });
+  }
   for (const r of rows ?? []) {
     if (isCourseSlug(r.course_slug)) instructorCourses.add(r.course_slug);
   }
@@ -35,11 +41,17 @@ const visible = allWorkshops.filter((w) =>
 
 // For each visible workshop, count this-week's open administrations.
 const nowIso = new Date().toISOString();
-const { data: openAdmins } = await supabase
+const { data: openAdmins, error: openAdminsError } = await supabase
   .from('workshop_administrations')
   .select('workshop_slug, section, opens_at, closes_at')
+  .is('cancelled_at', null)
   .lte('opens_at', nowIso)
   .gt('closes_at', nowIso);
+if (openAdminsError) {
+  return new Response('Could not load open workshop windows right now.', {
+    status: 503,
+  });
+}
 
 const openCountBySlug = new Map<string, number>();
 for (const a of openAdmins ?? []) {
@@ -142,9 +154,8 @@ const tabCourses = [...instructorCourses].sort((a, b) => {
     {
       instructorCourses.size === 0 && (
         <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-          You're not listed as the instructor for any course yet. Ask an admin
-          to add an enrollment row with your user id as the
-          <code>instructor_id</code> for the courses you teach.
+          You do not have an active teaching assignment yet. Ask an admin to
+          assign the course and semester you teach.
         </p>
       )
     }

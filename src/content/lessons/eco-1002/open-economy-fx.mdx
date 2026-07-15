@@ -8,7 +8,7 @@ summary: "Trade balance as the mirror of saving minus investment; how the real e
 learningObjectives:
   - 'State the saving-investment identity for an open economy: S − I = NX.'
   - 'Predict the real exchange rate response to a saving or investment shock.'
-  - "Explain why tariffs don't change the trade balance in this framework."
+  - 'Explain tariff neutrality when saving and investment are held fixed in the benchmark model.'
 prerequisites:
   - 'Saving, Investment, and Crowding Out (prior lesson)'
 estimatedMinutes: 20
@@ -19,7 +19,7 @@ furtherReading:
   url: 'https://www.bloomberg.com/news/articles/2025-05-23/dollar-s-2025-loss-reaches-7-on-trump-s-new-tariff-threats'
   source: 'Bloomberg'
   date: '2025-05'
-  why: 'Direct open-economy FX case: Trump 2025 tariffs were expected to strengthen the dollar but instead drove it down 7% YTD as the policy uncertainty/retaliation channel dominated.'
+  why: 'Open-economy FX case: tariff threats coincided with a 7% year-to-date dollar decline, illustrating that uncertainty, retaliation, and other asset-market forces can outweigh the textbook tariff channel.'
 ---
 
 import OpenEconomyFX from '@components/viz/OpenEconomyFX';
@@ -27,9 +27,10 @@ import Figure from '@components/mdx/Figure';
 
 ## The fundamental identity
 
-In any open economy, what a country saves and doesn't invest at home must
-flow somewhere — by accounting, it flows abroad as a net capital
-outflow, which is exactly equal to net exports:
+In the simplified national-income framework used here, what a country
+saves and does not invest at home becomes net acquisition of foreign
+assets. Abstracting from international income and transfers, the current
+account is net exports, so:
 
 $$
 S - I = NX.
@@ -37,8 +38,10 @@ $$
 
 If the US saves more than it invests, $S - I > 0$, so $NX > 0$: the US
 runs a trade surplus and accumulates foreign assets. If the US invests
-more than it saves, $NX < 0$: a trade deficit, financed by foreign
-borrowing.
+more than it saves, $NX < 0$: a trade deficit financed by foreigners
+acquiring domestic debt, equity, real estate, or other assets—not only by
+bank lending. In fuller balance-of-payments accounts, $S-I$ maps to the
+current account, which also includes net income and transfers.
 
 ## The real exchange rate is the price that clears trade
 
@@ -47,6 +50,27 @@ trade for one unit of US goods. A higher $\varepsilon$ (a stronger dollar
 in real terms) makes US exports more expensive and imports cheaper,
 reducing $NX$.
 
+The simulation uses a positive-domain trade schedule:
+
+$$
+NX(\varepsilon) = \overline{NX} - b\ln(\varepsilon),
+\qquad b > 0,\; \varepsilon > 0.
+$$
+
+Its loanable-funds side is explicit as well (all flow amounts are annual
+USD billions, and $r^*$ is entered in percentage points):
+
+$$
+S(r^*,m_S)=1500m_S+20r^*,
+\qquad
+I(r^*)=1700-40r^*.
+$$
+
+Thus the world-rate slider raises saving by \$20B and lowers investment by
+\$40B per percentage point; the saving-multiplier slider changes the
+intercept. The calibrated trade schedule starts from
+$\overline{NX}=200$ billion USD and $b=700$ billion USD.
+
 Equilibrium $\varepsilon^*$ is whatever value makes $NX(\varepsilon) =
 S - I$. If saving rises, the right-hand side rises, so $NX$ must rise,
 which requires $\varepsilon$ to fall — a weaker real dollar.
@@ -54,7 +78,7 @@ which requires $\varepsilon$ to fall — a weaker real dollar.
 <Figure
   src="/figures/eco-1002/open-economy-fx/usd-broad-index-2006-2024.png"
   alt="The nominal broad US dollar index, daily, from 2006 to 2024."
-  caption="The dollar against a basket of major trading-partner currencies since 2006 (index value, not a single bilateral rate). Notable moves: 2008–2009 flight-to-safety surge, 2014–2015 strong-dollar period as the Fed exited ZLB ahead of others, 2022 spike alongside the Fed's aggressive tightening, partial reversal through 2023. The model in this lesson is what determines this index in the long run."
+  caption="Nominal dollar index against a basket of major trading-partner currencies since 2006. This is context, not the model's real exchange rate: with E measured as foreign currency per dollar, the modeled object is ε = EP/P*, so relative price levels are also required. The nominal index is therefore only an imperfect short-run proxy."
   credit="FRED, St. Louis Fed (DTWEXBGS)"
   creditHref="https://fred.stlouisfed.org/series/DTWEXBGS"
 />
@@ -65,15 +89,16 @@ Try raising the **world real rate** (slider) and watch what happens.
 Higher world $r$ pulls capital out of the US, lowers investment, raises
 $S - I$, and weakens the dollar to boost net exports.
 
-## Why tariffs don't work the way people think
+## Tariff neutrality in the benchmark model
 
-Try sliding the **tariff** lever. A protective tariff shifts the $NX$
-curve right at any given $\varepsilon$. But the equilibrium quantity of
-$NX$ doesn't change — it's still equal to $S - I$. What changes is
-$\varepsilon$: the dollar appreciates by exactly enough to offset the
-tariff. American consumers pay more for imports, but the trade balance
-doesn't move.
+Try sliding the **tariff** lever. In this experiment the tariff shifts
+$NX(\varepsilon)$ upward while **holding $S$ and $I$ fixed**. Equilibrium
+$NX$ therefore remains $S-I$, and $\varepsilon$ rises until the stronger
+real dollar offsets the initial trade-schedule shift. This is a
+trade-balance-neutrality result, not a claim about who bears the tariff.
 
-This is the **incidence of tariffs** result that surprises non-economists:
-saving and investment determine the trade balance, and a tariff just
-changes the prices at which trade happens.
+Outside the benchmark, tariffs can change government saving, investment,
+income, expectations, pass-through, and foreign retaliation. Any of those
+channels can move $S-I$ or reshape the trade schedule, so neither a fixed
+trade balance nor complete consumer pass-through is a universal empirical
+prediction.

@@ -6,7 +6,7 @@ const error = Astro.url.searchParams.get('error');
 ---
 
 <BaseLayout title="Sign in">
-  <div class="mx-auto max-w-md py-16">
+  <div class="mx-auto max-w-md px-4 py-16">
     <h1 class="text-2xl font-semibold mb-2">Sign in</h1>
     <p class="text-ink-muted mb-8">
       Track your progress across courses and review past quiz attempts.
@@ -14,8 +14,11 @@ const error = Astro.url.searchParams.get('error');
 
     {
       error && (
-        <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {decodeURIComponent(error)}
+        <div
+          role="alert"
+          class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+        >
+          {error}
         </div>
       )
     }

@@ -14,10 +14,11 @@ const emailPattern = `^[^@\\s]+@(${ALLOWED_EMAIL_DOMAINS.map((d) =>
   d.replace(/\./g, '\\.'),
 ).join('|')})$`;
 const allowedList = allowedDomainsHumanList();
+Astro.response.headers.set('Cache-Control', 'no-store');
 ---
 
 <BaseLayout title="Create account">
-  <div class="mx-auto max-w-md py-16">
+  <div class="mx-auto max-w-md px-4 py-16">
     <h1 class="text-2xl font-semibold mb-2">Create account</h1>
     <p class="text-ink-muted mb-2">
       For Baruch College students, faculty, and staff.
@@ -30,8 +31,11 @@ const allowedList = allowedDomainsHumanList();
 
     {
       error && (
-        <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {decodeURIComponent(error)}
+        <div
+          role="alert"
+          class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+        >
+          {error}
         </div>
       )
     }
@@ -50,6 +54,22 @@ const allowedList = allowedDomainsHumanList();
           placeholder="firstname.lastname@baruchmail.cuny.edu"
           class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
         />
+      </label>
+      <label class="flex items-start gap-2 text-sm text-ink-muted">
+        <input
+          name="accept_terms"
+          type="checkbox"
+          value="yes"
+          required
+          class="mt-1"
+        />
+        <span>
+          I accept the <a class="text-accent underline" href="/terms"
+            >Terms of Service</a
+          >
+          {' '}and acknowledge the{' '}
+          <a class="text-accent underline" href="/privacy">Privacy Policy</a>.
+        </span>
       </label>
       <label class="block">
         <span class="text-sm font-medium">Password</span>

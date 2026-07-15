@@ -26,7 +26,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
 
-  const form = await request.formData();
+  if (!user) return err('unauthenticated');
+  if (!isContentManager(role)) return err('forbidden');
+
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return err('invalid_input');
+  }
   const id = String(form.get('id') ?? '');
   const lessonSlug = String(form.get('lesson_slug') ?? '');
   const term = String(form.get('semester_term') ?? '');
@@ -43,17 +51,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // Unchecked checkbox is absent from formData; presence => published.
   const published = form.get('published') != null;
 
-  if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
   if (!id) return err('invalid_input');
 
   const admin = getAdminClient();
-  const { data: row } = await admin
+  const { data: row, error: lookupError } = await admin
     .from('archive_videos')
     .select('course_slug, created_by')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
+  if (lookupError) return err('update_failed');
   if (!row) return err('not_found');
 
   if (!(await instructorOwnsCourse(user.id, row.course_slug, role)))
@@ -62,6 +69,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (
     !title ||
+    title.length > 200 ||
+    (description?.length ?? 0) > 2000 ||
+    (durationMinutes != null && durationMinutes > 1440) ||
     !videoId ||
     !TERMS.has(term) ||
     !PROVIDERS.has(provider) ||
@@ -80,22 +90,25 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const validSlugs = new Set(lessons.map((l) => normalizeLessonSlug(l.id)));
   if (!validSlugs.has(lessonSlug)) return err('invalid_lesson');
 
-  const { error } = await admin
-    .from('archive_videos')
-    .update({
+  const { data: updated, error } = await admin.rpc('mutate_archive_item', {
+    p_actor_id: user.id,
+    p_resource: 'video',
+    p_id: id,
+    p_operation: 'update',
+    p_patch: {
       lesson_slug: lessonSlug,
-      semester_term: term as 'spring' | 'summer' | 'fall',
+      semester_term: term,
       semester_year: year,
       title,
-      provider: provider as 'youtube' | 'vimeo',
+      provider,
       video_id: videoId,
       description,
       duration_minutes: durationMinutes,
       published,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id);
+    },
+  });
   if (error) return err('update_failed');
+  if (!updated) return err('not_found');
 
   await logDisclosureSafe({
     actorId: user.id,

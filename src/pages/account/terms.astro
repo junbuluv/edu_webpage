@@ -1,0 +1,71 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { CURRENT_TERMS_VERSION, hasAcceptedCurrentTerms } from '@lib/auth/terms';
+import { safeNext } from '@lib/auth/safe-next';
+
+const next = safeNext(Astro.url.searchParams.get('next') ?? '/dashboard');
+const error = Astro.url.searchParams.get('error');
+const accepted = hasAcceptedCurrentTerms(Astro.locals.profile);
+Astro.response.headers.set('Cache-Control', 'no-store');
+---
+
+<BaseLayout title="Review account terms">
+  <div class="mx-auto max-w-xl px-4 py-16">
+    <h1 class="text-2xl font-semibold">Review account terms</h1>
+    <p class="mt-3 text-ink-muted">
+      Account features store progress, quiz attempts, and workshop attendance.
+      Review the current policies before continuing.
+    </p>
+
+    {
+      error && (
+        <p role="alert" class="mt-5 rounded border border-rose-300 bg-rose-50 p-3 text-sm text-rose-800">
+          Acceptance could not be saved. Please retry.
+        </p>
+      )
+    }
+
+    <div class="mt-6 flex gap-4 text-sm">
+      <a class="text-accent underline" href="/terms">Terms of Service</a>
+      <a class="text-accent underline" href="/privacy">Privacy Policy</a>
+    </div>
+
+    {
+      accepted ? (
+        <a
+          class="mt-8 inline-block rounded bg-accent px-4 py-2 font-medium text-white"
+          href={next}
+        >
+          Continue
+        </a>
+      ) : (
+        <form method="POST" action="/api/account/terms" class="mt-8">
+          <input type="hidden" name="next" value={next} />
+          <input
+            type="hidden"
+            name="policy_version"
+            value={CURRENT_TERMS_VERSION}
+          />
+          <label class="flex items-start gap-3 text-sm text-ink-muted">
+            <input
+              name="accept_terms"
+              type="checkbox"
+              value="yes"
+              required
+              class="mt-1"
+            />
+            <span>
+              I accept the Terms of Service and acknowledge the Privacy Policy.
+            </span>
+          </label>
+          <button
+            type="submit"
+            class="mt-5 rounded bg-accent px-4 py-2 font-medium text-white hover:bg-blue-700"
+          >
+            Accept and continue
+          </button>
+        </form>
+      )
+    }
+  </div>
+</BaseLayout>

@@ -10,7 +10,7 @@ per-student progress tracking.
 
 ## Quick start
 
-Requirements: **Node 22+** (Supabase realtime needs native WebSocket).
+Requirements: **Node 22.x** (the same major version used by Vercel and CI).
 
 ```bash
 # 1. Install deps
@@ -43,20 +43,20 @@ Now `/dashboard` shows per-user lesson progress and quiz attempt history.
 
 ## What's in here
 
-| Path | Purpose |
-|---|---|
-| `src/content/lessons/` | MDX lessons grouped by course (`macro/`, etc.). Frontmatter is typed in `src/content/config.ts`. |
-| `src/content/quizzes/` | JSON quiz banks. Schema enforced by Zod via the same config file. |
-| `src/components/viz/` | React islands for charts and simulations (Recharts). |
-| `src/components/quiz/` | The auto-grading `<Quiz/>` island. |
-| `src/lib/supabase/` | Server + browser Supabase clients, hand-written `database.types.ts` placeholder until you run `npm run supabase:types`. |
-| `src/lib/progress.ts` | Writes progress to Supabase when signed in, localStorage otherwise. |
-| `src/middleware.ts` | Attaches `Astro.locals.supabase` (nullable) and `Astro.locals.user`; gates `/dashboard`. |
-| `supabase/schema.sql` | DB schema (profiles, lesson_progress, quiz_attempts) with RLS. |
-| `.github/workflows/ci.yml` | CI on every PR: typecheck + build, Node 22. |
-| `.github/CODEOWNERS`, `.github/pull_request_template.md` | Review routing + PR checklist. |
-| `CONTRIBUTING.md` | How to add lessons, quizzes, visualizations, schema changes. |
-| `gstack_upstream/` | Reference clone of Garry Tan's gstack toolkit (gitignored). Not a dependency. |
+| Path                                                     | Purpose                                                                                                                 |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `src/content/lessons/`                                   | MDX lessons grouped by course (`macro/`, etc.). Frontmatter is typed in `src/content/config.ts`.                        |
+| `src/content/quizzes/`                                   | JSON quiz banks. Schema enforced by Zod via the same config file.                                                       |
+| `src/components/viz/`                                    | React islands for charts and simulations (Recharts).                                                                    |
+| `src/components/quiz/`                                   | The auto-grading `<Quiz/>` island.                                                                                      |
+| `src/lib/supabase/`                                      | Server + browser Supabase clients, hand-written `database.types.ts` placeholder until you run `npm run supabase:types`. |
+| `src/lib/progress.ts`                                    | Writes progress to Supabase when signed in, localStorage otherwise.                                                     |
+| `src/middleware.ts`                                      | Attaches `Astro.locals.supabase` (nullable) and `Astro.locals.user`; gates `/dashboard`.                                |
+| `supabase/schema.sql`                                    | DB schema (profiles, lesson_progress, quiz_attempts) with RLS.                                                          |
+| `.github/workflows/ci.yml`                               | CI on every PR: typecheck + build, Node 22.                                                                             |
+| `.github/CODEOWNERS`, `.github/pull_request_template.md` | Review routing + PR checklist.                                                                                          |
+| `CONTRIBUTING.md`                                        | How to add lessons, quizzes, visualizations, schema changes.                                                            |
+| `gstack_upstream/`                                       | Reference clone of Garry Tan's gstack toolkit (gitignored). Not a dependency.                                           |
 
 ## Adding a lesson
 
@@ -87,21 +87,28 @@ authoring guide.
 - **Recharts** for charts (Plotly is wired in `astro.config.mjs` for heavier
   financial visualizations like yield curves and Monte Carlo waterfalls)
 - **Supabase** (Postgres + auth + RLS) for accounts and progress
-- **Node 22+** required
+- **Node 22.x** required (matches the Vercel runtime)
 
 ## Deploying
 
 Designed for Vercel preview deploys: import the repo at <https://vercel.com>,
-add the three env vars under Settings → Environment Variables for both
+add these env vars under Settings → Environment Variables for both
 Production and Preview:
 
-| Var | Scope |
-|---|---|
-| `PUBLIC_SUPABASE_URL` | Production + Preview + Development |
-| `PUBLIC_SUPABASE_ANON_KEY` | Production + Preview + Development |
-| `PUBLIC_SITE_URL` | Production = your prod URL; Preview = leave empty (Vercel auto-injects) |
+| Var                         | Scope                                                                             |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `PUBLIC_SUPABASE_URL`       | Production + Preview + Development                                                |
+| `PUBLIC_SUPABASE_ANON_KEY`  | Production + Preview + Development                                                |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production + Preview + Development; sensitive                                     |
+| `PUBLIC_SITE_URL`           | Production = your prod URL; Preview may be empty (uses the Vercel/request origin) |
+| `PII_HMAC_SECRET`           | Production + Preview + Development; sensitive                                     |
+| `CRON_SECRET`               | Random 16+ character value; sensitive                                             |
 
-Every PR then gets its own preview URL.
+Every PR then gets its own preview URL. `vercel.json` also registers the daily
+cleanup for expired direct-upload intents; Vercel sends `CRON_SECRET` to that
+endpoint as a bearer token. In Supabase Auth URL Configuration, keep the exact
+production callback and add `https://*-<team-or-account-slug>.vercel.app/**`
+so confirmation and recovery links may return to Vercel previews.
 
 ## Repository workflow
 

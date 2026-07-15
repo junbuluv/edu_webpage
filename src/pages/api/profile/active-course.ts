@@ -22,18 +22,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .eq('id', locals.user.id);
 
   if (error) {
-    // Surface Supabase's actual error so callers (and the user) can
-    // distinguish missing-column from RLS denial from a network blip.
-    return json(
-      {
-        ok: false,
-        reason: 'update_failed',
-        detail: error.message,
-        code: error.code,
-        hint: error.hint,
-      },
-      500,
-    );
+    console.error('[profile/active-course] update_failed', error);
+    return json({ ok: false, reason: 'update_failed' }, 500);
   }
 
   return json({ ok: true, redirectTo: `/dashboard?course=${slug}` });
@@ -42,7 +32,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'no-store',
+    },
   });
 }
 
