@@ -1,8 +1,11 @@
 ---
 import type { RosterStudent } from '@lib/instructor/class-roster';
+import { WEEKLY_CELL_SYMBOL } from '@lib/attendance-weekly';
 
 interface Props {
   students: RosterStudent[];
+  /** week_of Mondays for the per-week attendance columns. */
+  weeks: string[];
   lessonsTotal: number;
   course: string;
   semester: string;
@@ -14,6 +17,7 @@ interface Props {
 
 const {
   students,
+  weeks,
   lessonsTotal,
   course,
   semester,
@@ -49,6 +53,16 @@ function lastSeen(iso: string | null): string {
         <th class="px-3 py-2 font-medium">Quizzes</th>
         <th class="px-3 py-2 font-medium">Avg</th>
         <th class="px-3 py-2 font-medium">Attend</th>
+        {
+          weeks.map((w) => (
+            <th
+              class="px-2 py-2 text-center font-medium whitespace-nowrap"
+              title={`Week of ${w}`}
+            >
+              {w.slice(5).replace('-', '/')}
+            </th>
+          ))
+        }
         <th class="px-3 py-2 font-medium">Last seen</th>
         <th class="px-3 py-2 font-medium">Flag</th>
         {canManage && <th class="px-3 py-2 font-medium">Manage</th>}
@@ -81,6 +95,20 @@ function lastSeen(iso: string | null): string {
             <td class="px-3 py-2 tabular-nums">{s.quizzesTaken}</td>
             <td class="px-3 py-2 tabular-nums">{pct(s.avgBestScore)}</td>
             <td class="px-3 py-2 tabular-nums">{s.attendanceCount}</td>
+            {s.weeklyCells.map((cell) => (
+              <td
+                class={`px-2 py-2 text-center ${
+                  cell === 'attended'
+                    ? 'text-emerald-600'
+                    : cell === 'missed'
+                      ? 'text-rose-600'
+                      : 'text-slate-400'
+                }`}
+                title={cell}
+              >
+                {WEEKLY_CELL_SYMBOL[cell]}
+              </td>
+            ))}
             <td class="px-3 py-2 whitespace-nowrap text-ink-muted">
               {lastSeen(s.lastActiveAt)}
             </td>
