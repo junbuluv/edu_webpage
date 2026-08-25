@@ -8,7 +8,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
 export default defineConfig({
-  site: 'https://edu-webpage-fawn.vercel.app',
+  site: 'https://baruchfinance.com',
   output: 'server',
   adapter: vercel(),
   // Astro 5's built-in CSRF check (security.checkOrigin) compares the

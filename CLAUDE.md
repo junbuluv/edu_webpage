@@ -322,10 +322,14 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   cross-site browser mutations before auth or body parsing. Keep this guard in
   place if proxy header behavior changes.
 - **`site:` in `astro.config.mjs` must match the deployed origin.** Currently
-  set to `https://edu-webpage-fawn.vercel.app`. Affects sitemap.xml URLs,
-  `<link rel="canonical">` tags, and `Astro.site`. Update when moving to a
-  custom domain (e.g., `econ.baruch.cuny.edu`) — single-line PR, plus
-  updating Supabase Auth URL Configuration + `PUBLIC_SITE_URL` env var.
+  set to `https://baruchfinance.com` (custom domain, Cloudflare Registrar +
+  Cloudflare DNS in DNS-only mode, cut over 2026-08-25; the old
+  `edu-webpage-fawn.vercel.app` alias still serves). Affects sitemap.xml
+  URLs, `<link rel="canonical">` tags, and `Astro.site`. If the origin ever
+  changes again: single-line PR here, plus updating Supabase Auth URL
+  Configuration + `PUBLIC_SITE_URL` env var. Auth email is custom SMTP via
+  Resend (`noreply@baruchfinance.com`, domain verified in Resend;
+  SPF/DKIM records live in Cloudflare DNS).
   Supabase's Redirect URLs must also include the exact production callback and
   `https://*-<team-or-account-slug>.vercel.app/**` for preview auth links.
 
