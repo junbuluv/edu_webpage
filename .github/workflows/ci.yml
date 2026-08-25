@@ -229,6 +229,12 @@ jobs:
              );
           delete from public.workshop_administrations
            where workshop_slug = 'eco-1002-migration-fixture';
+          -- guard_teaching_assignment_state forbids deleting active rows
+          update public.teaching_assignments set active = false
+           where (instructor_id = '00000000-0000-0000-0000-000000000301'
+                  and course_slug = 'eco-1002' and semester = 'fall-2026')
+              or (instructor_id = '00000000-0000-0000-0000-000000000303'
+                  and course_slug = 'fin-3610' and semester = 'fall-1970');
           delete from public.teaching_assignments
            where instructor_id = '00000000-0000-0000-0000-000000000301'
              and course_slug = 'eco-1002'
