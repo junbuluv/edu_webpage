@@ -1,5 +1,3 @@
-import { getSupabaseBrowserClient } from './supabase/browser';
-
 const LS_PROGRESS = 'edu_web:lesson_progress';
 const LS_ATTEMPTS = 'edu_web:quiz_attempts';
 const MAX_LOCAL_ATTEMPTS = 200;
@@ -108,36 +106,14 @@ export async function markLessonStatus(
     shouldQueue ? operation : undefined,
   );
 
-  let user: { id: string } | null = null;
-  try {
-    const supabase = getSupabaseBrowserClient();
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch {
-    if (options.expectRemote || shouldQueue) {
-      return {
-        status: optimisticStatus,
-        sync: localSaved ? 'queued' : 'storage_failed',
-        pendingOperation: operation,
-      };
-    }
-    return {
-      status: optimisticStatus,
-      sync: localSaved ? 'local' : 'storage_failed',
-    };
-  }
-  if (!user) {
-    if (options.expectRemote || shouldQueue) {
-      return {
-        status: optimisticStatus,
-        sync: localSaved
-          ? options.expectRemote
-            ? 'failed'
-            : 'queued'
-          : 'storage_failed',
-        pendingOperation: operation,
-      };
-    }
+  // Whether the visitor is signed in is decided server-side (the session
+  // lives in httpOnly cookies the browser Supabase client cannot read, so
+  // asking it auth.getUser() here always returned null and silently kept
+  // signed-in progress local-only). Trust the caller's expectRemote flag —
+  // it comes from Astro.locals.user — and let /api/progress/lesson
+  // authenticate via the request cookies. A 401 below means the session
+  // expired mid-visit; the operation stays queued for retry.
+  if (!options.expectRemote && !shouldQueue) {
     return {
       status: optimisticStatus,
       sync: localSaved ? 'local' : 'storage_failed',
