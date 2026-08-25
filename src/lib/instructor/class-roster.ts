@@ -25,6 +25,7 @@ import {
   evaluateRisk,
   type RiskResult,
 } from '@lib/progress-aggregate';
+import { buildWeeklyAttendance, type WeeklyCell } from '@lib/attendance-weekly';
 
 export interface InstructorClass {
   course: CourseSlug;
@@ -49,6 +50,8 @@ export interface RosterStudent {
   quizzesTaken: number;
   avgBestScore: number | null;
   attendanceCount: number;
+  /** Per-week attendance cell aligned with ClassRoster.weeks. */
+  weeklyCells: WeeklyCell[];
   risk: RiskResult;
 }
 
@@ -59,6 +62,8 @@ export interface ClassRoster {
   assignmentActive: boolean;
   lessonsTotal: number;
   closedWindowCount: number;
+  /** Distinct week_of Mondays of this class's workshop windows, sorted. */
+  weeks: string[];
   students: RosterStudent[];
   atRiskCount: number;
   /** True when the auth.users email lookup failed; emails render as "—". */
@@ -329,10 +334,11 @@ export async function loadClassRoster(
         closes_at: string;
         instructor_id: string;
         section: string | null;
+        week_of: string;
       }>((from, to) => {
         const query = admin
           .from('workshop_administrations')
-          .select('id, closes_at, instructor_id, section')
+          .select('id, closes_at, instructor_id, section, week_of')
           .eq('course_slug', course)
           .eq('semester', semester)
           .eq('instructor_id', scopedInstructorId)
@@ -361,6 +367,7 @@ export async function loadClassRoster(
   ).length;
 
   const attendanceByUser = new Map<string, number>();
+  const rosterStamps: { user_id: string; administration_id: string }[] = [];
   let attendanceError: string | null = null;
   if (adminIds.length > 0) {
     const stampsRes = await selectAllRowsInBatches<
@@ -385,6 +392,7 @@ export async function loadClassRoster(
       if (!administration) {
         continue;
       }
+      rosterStamps.push(s);
       if ((sectionById.get(s.user_id) ?? null) !== administration.section) {
         continue;
       }
@@ -394,6 +402,19 @@ export async function loadClassRoster(
       );
     }
   }
+
+  // Weekly matrix over this instructor's non-cancelled windows.
+  const weekly = buildWeeklyAttendance(
+    adminRows.map((a) => ({
+      id: a.id,
+      week_of: a.week_of,
+      section: a.section,
+      closes_at: a.closes_at,
+    })),
+    rosterStamps,
+    new Map(userIds.map((id) => [id, sectionById.get(id) ?? null])),
+    nowMs,
+  );
 
   const dataIncomplete = Boolean(
     profileRes.error ||
@@ -497,6 +518,8 @@ export async function loadClassRoster(
       quizzesTaken: countDistinctQuizzes(attempts),
       avgBestScore,
       attendanceCount,
+      weeklyCells:
+        weekly.cellsByUser.get(id) ?? weekly.weeks.map(() => 'ineligible'),
       risk,
     };
   });
@@ -516,6 +539,7 @@ export async function loadClassRoster(
       assignmentActive: assignment.active,
       lessonsTotal,
       closedWindowCount,
+      weeks: weekly.weeks,
       students,
       atRiskCount: students.filter((s) => s.risk.atRisk).length,
       emailLookupFailed: withEmail && userIds.length > 0 && emailById === null,

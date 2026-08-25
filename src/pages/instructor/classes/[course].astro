@@ -7,6 +7,7 @@ import { isCourseSlug } from '@lib/courses';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 import { logDisclosureSafe } from '@lib/audit';
 import { isUuid } from '@lib/workshop-policy';
+import { weeklyCellCsv } from '@lib/attendance-weekly';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
@@ -127,6 +128,7 @@ if (wantsCsv) {
     'quizzes_taken',
     'avg_best_score',
     'attendance',
+    ...roster.weeks.map((w) => `week_${w}`),
     'last_active',
     'at_risk',
     'risk_reasons',
@@ -143,6 +145,7 @@ if (wantsCsv) {
         s.quizzesTaken,
         s.avgBestScore == null ? '' : Math.round(s.avgBestScore * 100) / 100,
         s.attendanceCount,
+        ...s.weeklyCells.map(weeklyCellCsv),
         esc(s.lastActiveAt),
         s.risk.atRisk ? 'yes' : 'no',
         esc(s.risk.reasons.join('; ')),
@@ -439,6 +442,7 @@ const importSummary =
       ) : (
         <RosterTable
           students={visibleStudents}
+          weeks={roster.weeks}
           lessonsTotal={roster.lessonsTotal}
           course={course}
           semester={semester}

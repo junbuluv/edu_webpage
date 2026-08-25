@@ -8,6 +8,7 @@ import {
 } from '@lib/progress-aggregate';
 import { fetchArchiveQuizzes } from '@lib/archive/db';
 import { isUuid } from '@lib/workshop-policy';
+import { buildWeeklyAttendance, type WeeklyCell } from '@lib/attendance-weekly';
 
 export type AvailableCourse = {
   slug: CourseSlug;
@@ -38,6 +39,16 @@ export type CourseDashboardData = {
     max_score: number;
     submitted_at: string;
   }>;
+  /** Weekly workshop attendance for the signed-in student. Null when the
+   *  student has no visible workshop windows (not enrolled, or none
+   *  scheduled). RLS limits the administration read to windows matching
+   *  the student's own enrollment. */
+  attendance: {
+    weeks: Array<{ weekOf: string; cell: WeeklyCell }>;
+    attendedCount: number;
+    /** A window the student can stamp into right now, if any. */
+    openNow: { workshopSlug: string; closesAt: string } | null;
+  } | null;
 };
 
 export type ResolveResult =
@@ -223,6 +234,67 @@ export async function getDashboardData(
     title: quizTitleBySlug.get(attempt.quiz_slug) ?? 'Archived quiz',
   }));
 
+  // Weekly workshop attendance. The administrations RLS policy already
+  // limits rows to windows matching this student's enrollment (course,
+  // semester, instructor, and section-or-null), so no extra filtering is
+  // needed beyond dropping cancelled windows. Failures degrade to null —
+  // the dashboard card simply doesn't render.
+  let attendance: CourseDashboardData['attendance'] = null;
+  try {
+    const [adminRes, stampRes] = await Promise.all([
+      supabase
+        .from('workshop_administrations')
+        .select('id, workshop_slug, section, week_of, opens_at, closes_at')
+        .eq('course_slug', courseSlug)
+        .is('cancelled_at', null),
+      supabase
+        .from('workshop_attendance')
+        .select('administration_id')
+        .eq('user_id', userId),
+    ]);
+    if (!adminRes.error && !stampRes.error && (adminRes.data ?? []).length) {
+      const nowMs = Date.now();
+      const admins = adminRes.data ?? [];
+      const weekly = buildWeeklyAttendance(
+        // RLS pre-filtered to eligible windows; null section = all match.
+        admins.map((a) => ({
+          id: a.id,
+          week_of: a.week_of,
+          section: null,
+          closes_at: a.closes_at,
+        })),
+        (stampRes.data ?? []).map((s) => ({
+          user_id: userId,
+          administration_id: s.administration_id,
+        })),
+        new Map([[userId, null]]),
+        nowMs,
+      );
+      const cells = weekly.cellsByUser.get(userId) ?? [];
+      const stamped = new Set(
+        (stampRes.data ?? []).map((s) => s.administration_id),
+      );
+      const open = admins.find(
+        (a) =>
+          !stamped.has(a.id) &&
+          Date.parse(a.opens_at) <= nowMs &&
+          Date.parse(a.closes_at) >= nowMs,
+      );
+      attendance = {
+        weeks: weekly.weeks.map((weekOf, i) => ({
+          weekOf,
+          cell: cells[i] ?? 'ineligible',
+        })),
+        attendedCount: cells.filter((c) => c === 'attended').length,
+        openNow: open
+          ? { workshopSlug: open.workshop_slug, closesAt: open.closes_at }
+          : null,
+      };
+    }
+  } catch (error) {
+    console.error('[dashboard] attendance_unavailable', error);
+  }
+
   return {
     course,
     instructors,
@@ -236,6 +308,7 @@ export async function getDashboardData(
     lessons,
     progressBySlug,
     quizAttempts,
+    attendance,
   };
 }
 
