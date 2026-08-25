@@ -3,7 +3,8 @@ import BaseLayout from './BaseLayout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import LessonProgressButton from '@components/lesson/LessonProgressButton';
 import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
-import { findPrevNext } from '@lib/lesson/sequence';
+import LessonSidebar from '@components/lesson/LessonSidebar';
+import { compareLessons, findPrevNext } from '@lib/lesson/sequence';
 import { canViewCourse } from '@lib/archive/access';
 import { fetchArchiveVideosForLesson } from '@lib/archive/db';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
@@ -30,6 +31,35 @@ if (!article && data.quizSlug) {
 }
 
 const { prev, next } = findPrevNext(lesson, allLessons);
+
+// Sidebar: course lessons grouped by unit in reading order.
+const courseLessons = allLessons
+  .filter((l) => l.data.course === data.course && !l.data.draft)
+  .sort(compareLessons);
+const sidebarUnits: {
+  unit: string;
+  lessons: { slug: string; title: string }[];
+}[] = [];
+for (const l of courseLessons) {
+  const last = sidebarUnits[sidebarUnits.length - 1];
+  const entry = { slug: l.slug, title: l.data.title };
+  if (last && last.unit === l.data.unit) last.lessons.push(entry);
+  else sidebarUnits.push({ unit: l.data.unit, lessons: [entry] });
+}
+
+// Server-known completions (signed-in only; RLS scopes the read to the
+// user). Anonymous/local progress is merged client-side by the island.
+let serverCompleted: string[] = [];
+if (Astro.locals.supabase && Astro.locals.user) {
+  const { data: rows } = await Astro.locals.supabase
+    .from('lesson_progress')
+    .select('lesson_slug')
+    .eq('user_id', Astro.locals.user.id)
+    .eq('status', 'completed');
+  serverCompleted = (rows ?? [])
+    .map((r) => r.lesson_slug)
+    .filter((s) => s.startsWith(`${data.course}/`));
+}
 
 const lessonSlug = normalizeLessonSlug(lesson.id);
 const role = Astro.locals.profile?.role ?? 'student';
@@ -69,150 +99,164 @@ if (Astro.locals.user && Astro.locals.supabase) {
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
-  <article class="mx-auto max-w-3xl px-4 py-10">
-    <p class="text-sm uppercase tracking-wide text-accent font-medium">
-      {data.course} · {data.unit}
-    </p>
-    <h1 class="text-3xl font-semibold tracking-tight mt-2">{data.title}</h1>
-    <p class="mt-3 text-ink-muted">{data.summary}</p>
+  <div
+    class="mx-auto max-w-6xl px-4 py-10 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10"
+  >
+    <LessonSidebar
+      client:load
+      units={sidebarUnits}
+      currentSlug={lesson.slug}
+      courseCode={data.course.toUpperCase().replace('-', ' ')}
+      courseHref={`/${data.course}`}
+      serverCompleted={serverCompleted}
+    />
+    <article class="mx-auto w-full max-w-3xl lg:mx-0">
+      <p class="text-sm uppercase tracking-wide text-accent font-medium">
+        {data.course} · {data.unit}
+      </p>
+      <h1 class="text-3xl font-semibold tracking-tight mt-2">{data.title}</h1>
+      <p class="mt-3 text-ink-muted">{data.summary}</p>
 
-    <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
-      <span>⏱ {data.estimatedMinutes} min</span>
-      {data.tags.length > 0 && <span>Tags: {data.tags.join(', ')}</span>}
-    </div>
+      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
+        <span>⏱ {data.estimatedMinutes} min</span>
+        {data.tags.length > 0 && <span>Tags: {data.tags.join(', ')}</span>}
+      </div>
 
-    <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
-        Learning objectives
-      </h2>
-      <ul class="mt-2 list-disc pl-5 space-y-1">
-        {data.learningObjectives.map((o) => <li>{o}</li>)}
-      </ul>
-    </section>
-
-    <div class="prose mt-10">
-      <slot />
-    </div>
-
-    {
-      videosUnavailable && (
-        <div
-          role="status"
-          class="mt-10 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+      <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
+        <h2
+          class="text-sm font-semibold uppercase tracking-wide text-ink-muted"
         >
-          Lecture videos are temporarily unavailable. The lesson and practice
-          activities still work; refresh later to retry the video library.
-        </div>
-      )
-    }
+          Learning objectives
+        </h2>
+        <ul class="mt-2 list-disc pl-5 space-y-1">
+          {data.learningObjectives.map((o) => <li>{o}</li>)}
+        </ul>
+      </section>
 
-    {
-      canSeeVideos && (
-        <section class="mt-10">
-          <h2 class="text-lg font-semibold">Lecture videos</h2>
-          {lessonVideos.length === 0 ? (
-            <p class="mt-2 text-sm text-ink-muted">
-              No videos for this lesson yet.
-            </p>
+      <div class="prose mt-10">
+        <slot />
+      </div>
+
+      {
+        videosUnavailable && (
+          <div
+            role="status"
+            class="mt-10 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            Lecture videos are temporarily unavailable. The lesson and practice
+            activities still work; refresh later to retry the video library.
+          </div>
+        )
+      }
+
+      {
+        canSeeVideos && (
+          <section class="mt-10">
+            <h2 class="text-lg font-semibold">Lecture videos</h2>
+            {lessonVideos.length === 0 ? (
+              <p class="mt-2 text-sm text-ink-muted">
+                No videos for this lesson yet.
+              </p>
+            ) : (
+              <ul class="mt-3 space-y-4">
+                {lessonVideos.map((v) => (
+                  <li>
+                    <p class="text-sm font-medium">{v.title}</p>
+                    <div class="mt-2 aspect-video w-full">
+                      <iframe
+                        class="h-full w-full rounded"
+                        src={
+                          v.provider === 'youtube'
+                            ? `https://www.youtube-nocookie.com/embed/${v.video_id}?rel=0`
+                            : `https://player.vimeo.com/video/${v.video_id}`
+                        }
+                        title={v.title}
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {isContentManager(role) && (
+              <p class="mt-3 text-sm">
+                <a
+                  href={`/instructor/archive?course=${data.course}&lesson=${lessonSlug}`}
+                  class="text-accent underline"
+                >
+                  ＋ Add a video for this lesson →
+                </a>
+              </p>
+            )}
+          </section>
+        )
+      }
+
+      {article && <FurtherReadingCard article={article} variant="lesson" />}
+
+      <div
+        class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6"
+      >
+        <LessonProgressButton
+          client:load
+          lessonSlug={lesson.slug}
+          initialStatus={initialProgressStatus}
+          initialStatusKnown={initialProgressStatusKnown}
+          signedIn={Boolean(Astro.locals.user)}
+        />
+        {
+          data.quizSlug && (
+            <a
+              href={`/practice/${data.quizSlug}`}
+              class="rounded bg-accent px-4 py-2 text-white font-medium"
+            >
+              Practice quiz →
+            </a>
+          )
+        }
+      </div>
+
+      <nav
+        class="mt-8 grid gap-3 border-t border-slate-200 pt-6 md:grid-cols-2"
+        aria-label="Lesson navigation"
+      >
+        {
+          prev ? (
+            <a
+              href={`/lessons/${prev.slug}`}
+              class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
+            >
+              <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+                ← Previous lesson
+              </span>
+              <span class="mt-1 font-medium text-ink">{prev.data.title}</span>
+            </a>
           ) : (
-            <ul class="mt-3 space-y-4">
-              {lessonVideos.map((v) => (
-                <li>
-                  <p class="text-sm font-medium">{v.title}</p>
-                  <div class="mt-2 aspect-video w-full">
-                    <iframe
-                      class="h-full w-full rounded"
-                      src={
-                        v.provider === 'youtube'
-                          ? `https://www.youtube-nocookie.com/embed/${v.video_id}?rel=0`
-                          : `https://player.vimeo.com/video/${v.video_id}`
-                      }
-                      title={v.title}
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-          {isContentManager(role) && (
-            <p class="mt-3 text-sm">
-              <a
-                href={`/instructor/archive?course=${data.course}&lesson=${lessonSlug}`}
-                class="text-accent underline"
-              >
-                ＋ Add a video for this lesson →
-              </a>
-            </p>
-          )}
-        </section>
-      )
-    }
-
-    {article && <FurtherReadingCard article={article} variant="lesson" />}
-
-    <div
-      class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6"
-    >
-      <LessonProgressButton
-        client:load
-        lessonSlug={lesson.slug}
-        initialStatus={initialProgressStatus}
-        initialStatusKnown={initialProgressStatusKnown}
-        signedIn={Boolean(Astro.locals.user)}
-      />
-      {
-        data.quizSlug && (
-          <a
-            href={`/practice/${data.quizSlug}`}
-            class="rounded bg-accent px-4 py-2 text-white font-medium"
-          >
-            Practice quiz →
-          </a>
-        )
-      }
-    </div>
-
-    <nav
-      class="mt-8 grid gap-3 border-t border-slate-200 pt-6 md:grid-cols-2"
-      aria-label="Lesson navigation"
-    >
-      {
-        prev ? (
-          <a
-            href={`/lessons/${prev.slug}`}
-            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
-          >
-            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
-              ← Previous lesson
-            </span>
-            <span class="mt-1 font-medium text-ink">{prev.data.title}</span>
-          </a>
-        ) : (
-          <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-ink-muted">
-            You're at the first lesson in this course.
-          </div>
-        )
-      }
-      {
-        next ? (
-          <a
-            href={`/lessons/${next.slug}`}
-            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5 md:items-end md:text-right"
-          >
-            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
-              Next lesson →
-            </span>
-            <span class="mt-1 font-medium text-ink">{next.data.title}</span>
-          </a>
-        ) : (
-          <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-right text-sm text-ink-muted">
-            You've reached the end of this course.
-          </div>
-        )
-      }
-    </nav>
-  </article>
+            <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-ink-muted">
+              You're at the first lesson in this course.
+            </div>
+          )
+        }
+        {
+          next ? (
+            <a
+              href={`/lessons/${next.slug}`}
+              class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5 md:items-end md:text-right"
+            >
+              <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+                Next lesson →
+              </span>
+              <span class="mt-1 font-medium text-ink">{next.data.title}</span>
+            </a>
+          ) : (
+            <div class="rounded-lg border border-dashed border-slate-200 px-4 py-3 text-right text-sm text-ink-muted">
+              You've reached the end of this course.
+            </div>
+          )
+        }
+      </nav>
+    </article>
+  </div>
 </BaseLayout>
