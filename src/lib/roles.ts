@@ -1,12 +1,13 @@
-// Single source of truth for who counts as "staff" (can manage
-// workshops, view rosters, take instructor actions). Keep this list in
-// sync with the user_role enum in supabase/schema.sql and any RLS
-// policies that gate on instructor authority.
+// Single source of truth for staff identity. Individual capabilities remain
+// narrower: teaching assistants have read-only archive access, while instructor
+// actions require isInstructor. Keep these sets in sync with the user_role enum
+// and the corresponding RLS policies.
 
 export type UserRole = 'student' | 'instructor' | 'ta' | 'admin';
 
 const STAFF_ROLES = new Set<UserRole>(['instructor', 'ta', 'admin']);
 const ADMIN_ROLES = new Set<UserRole>(['admin']);
+const INSTRUCTOR_ROLES = new Set<UserRole>(['instructor', 'admin']);
 
 export function isStaff(role: UserRole | null | undefined): boolean {
   return role ? STAFF_ROLES.has(role) : false;
@@ -14,6 +15,10 @@ export function isStaff(role: UserRole | null | undefined): boolean {
 
 export function isAdmin(role: UserRole | null | undefined): boolean {
   return role ? ADMIN_ROLES.has(role) : false;
+}
+
+export function isInstructor(role: UserRole | null | undefined): boolean {
+  return role ? INSTRUCTOR_ROLES.has(role) : false;
 }
 
 const CONTENT_MANAGER_ROLES = new Set<UserRole>(['instructor', 'admin']);

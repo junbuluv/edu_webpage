@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 import type { Database } from './database.types';
+import { parseCookieHeader } from './cookies';
 
 const COOKIE_OPTIONS: CookieOptionsWithName = {
   path: '/',
@@ -57,20 +58,6 @@ export function createSupabaseServerClient(
       },
     },
   });
-}
-
-function parseCookieHeader(header: string) {
-  return header
-    .split(';')
-    .map((pair) => pair.trim())
-    .filter(Boolean)
-    .map((pair) => {
-      const eq = pair.indexOf('=');
-      return {
-        name: pair.slice(0, eq),
-        value: decodeURIComponent(pair.slice(eq + 1)),
-      };
-    });
 }
 
 function serializeCookie(

@@ -5,12 +5,14 @@
 // State vector matches ADASChart's State interface:
 //   G   government spending
 //   M   nominal money supply
+//   A0  autonomous private demand
 //   Pe  expected price level (SRAS shifter)
 //   Yn  natural rate of output
 
 export interface ADASSnapshot {
   G: number;
   M: number;
+  A0: number;
   Pe: number;
   Yn: number;
 }
@@ -24,7 +26,8 @@ export interface ADASPreset {
 
 export const ADAS_BASELINE: ADASSnapshot = {
   G: 100,
-  M: 600,
+  M: 375,
+  A0: 0,
   Pe: 2.5,
   Yn: 1000,
 };
@@ -39,29 +42,29 @@ export const ADAS_PRESETS: ADASPreset[] = [
   {
     id: 'demand-boom',
     label: 'Demand boom (consumer optimism + fiscal stimulus)',
-    state: { G: 200, M: 700, Pe: 2.5, Yn: 1000 },
+    state: { G: 160, M: 425, A0: 60, Pe: 2.5, Yn: 1000 },
     blurb:
       'AD shifts right. Y rises above Yn (positive output gap); P also rises. Classic short-run boom.',
   },
   {
     id: 'oil-shock-1973',
     label: '1973 oil shock (supply contraction)',
-    state: { G: 100, M: 600, Pe: 3.5, Yn: 900 },
+    state: { G: 100, M: 375, A0: 0, Pe: 3.5, Yn: 900 },
     blurb:
       'SRAS shifts left (Pe up, Yn down). Stagflation: Y falls, P rises. Both AD-AS curves tell the same story.',
   },
   {
     id: 'demand-collapse-2008',
     label: '2008 demand collapse',
-    state: { G: 100, M: 600, Pe: 2.5, Yn: 1000 },
+    state: { G: 100, M: 375, A0: -100, Pe: 2.5, Yn: 1000 },
     blurb:
       'Before Fed/Congress respond: AD shifts left as consumers and firms cut spending. Y falls below Yn; P falls.',
   },
   {
     id: 'pandemic-2020',
     label: '2020 pandemic (combined shock)',
-    state: { G: 250, M: 1000, Pe: 2.8, Yn: 950 },
+    state: { G: 250, M: 700, A0: -220, Pe: 2.8, Yn: 950 },
     blurb:
-      'Huge fiscal + monetary response (AD strongly right) against supply-side disruptions (Yn down, Pe up). Net: Y stable but P rises noticeably.',
+      'Fiscal and monetary support offsets a private-demand contraction while supply is constrained. Output ends near potential, but P rises noticeably.',
   },
 ];

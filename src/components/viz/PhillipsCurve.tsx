@@ -72,6 +72,13 @@ export default function PhillipsCurve() {
           step={0.1}
           onChange={(v) => setState((s) => ({ ...s, u: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setState({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           Today's inflation π = <strong>{today.toFixed(2)}%</strong>
         </div>
@@ -118,6 +125,12 @@ export default function PhillipsCurve() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <p className="mt-3 text-xs text-ink-muted">
+        Current parameters: πᵉ = {state.piE.toFixed(1)}%, uₙ ={' '}
+        {state.un.toFixed(1)}%, β = {state.beta.toFixed(2)}, and selected u ={' '}
+        {state.u.toFixed(1)}%. The curve holds expected inflation and the
+        natural unemployment rate fixed while unemployment moves.
+      </p>
     </div>
   );
 }

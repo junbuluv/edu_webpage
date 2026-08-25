@@ -2,6 +2,8 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { isAdmin } from '@lib/roles';
+import { formatWeekOf } from '@lib/workshop-policy';
+import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
 
 // Public list page: anyone (including guests) can see the titles,
 // summaries, and lesson links. Open-window details (section / week_of /
@@ -13,18 +15,22 @@ const supabase = Astro.locals.supabase;
 const role = Astro.locals.profile?.role ?? 'student';
 const viewerIsAdmin = isAdmin(role);
 const isGuest = !user;
+const termsAccepted = !user || hasAcceptedCurrentTerms(Astro.locals.profile);
 
 let enrolled = false;
-if (user && supabase) {
-  const { data } = await supabase
+let enrollmentUnavailable = Boolean(user && termsAccepted && !supabase);
+if (user && supabase && termsAccepted) {
+  const { data, error } = await supabase
     .from('enrollments')
     .select('user_id')
     .eq('user_id', user.id)
     .eq('course_slug', 'eco-1002')
-    .maybeSingle();
-  enrolled = !!data;
+    .limit(1);
+  enrollmentUnavailable = error != null && !viewerIsAdmin;
+  enrolled = (data ?? []).length > 0;
 }
-const canSeeOpenWindows = enrolled || viewerIsAdmin;
+const canSeeOpenWindows =
+  termsAccepted && !enrollmentUnavailable && (enrolled || viewerIsAdmin);
 
 const workshops = (
   await getCollection('workshops', (w) => w.data.course === 'eco-1002')
@@ -34,21 +40,28 @@ const nowIso = new Date().toISOString();
 type AdminRow = {
   id: string;
   workshop_slug: string;
+  semester: string;
   section: 'CML' | 'CTL' | 'CWL' | 'CRL';
   opens_at: string;
   closes_at: string;
   week_of: string;
 };
 let admins: AdminRow[] = [];
+let windowsUnavailable = false;
 if (canSeeOpenWindows && supabase) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('workshop_administrations')
-    .select('id, workshop_slug, section, opens_at, closes_at, week_of')
+    .select(
+      'id, workshop_slug, semester, section, opens_at, closes_at, week_of',
+    )
     .eq('course_slug', 'eco-1002')
+    .is('cancelled_at', null)
     .gt('closes_at', nowIso)
     .order('opens_at', { ascending: true });
+  windowsUnavailable = error != null;
   admins = (data ?? []) as AdminRow[];
 }
+const dataUnavailable = enrollmentUnavailable || windowsUnavailable;
 const adminsBySlug = new Map<string, AdminRow[]>();
 for (const a of admins) {
   const arr = adminsBySlug.get(a.workshop_slug) ?? [];
@@ -82,6 +95,37 @@ function statusOf(
     </p>
 
     {
+      user && !termsAccepted && (
+        <div
+          role="alert"
+          class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          Accept the current{' '}
+          <a
+            class="font-medium underline"
+            href={`/account/terms?next=${encodeURIComponent('/eco-1002/workshops')}`}
+          >
+            terms
+          </a>{' '}
+          to view live workshop windows.
+        </div>
+      )
+    }
+
+    {
+      dataUnavailable && (
+        <div
+          role="alert"
+          class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          Enrollment or live workshop-window data is temporarily unavailable.
+          You can still browse workshop content, but do not rely on the schedule
+          until you refresh successfully.
+        </div>
+      )
+    }
+
+    {
       isGuest && (
         <div class="mt-8 rounded border border-sky-300 bg-sky-50 p-4 text-sm text-sky-900">
           <p>
@@ -98,20 +142,24 @@ function statusOf(
     }
 
     {
-      user && !enrolled && !viewerIsAdmin && (
-        <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-          <p class="font-medium">You're not enrolled in ECO 1002.</p>
-          <p class="mt-2">
-            You can browse the workshop list below, but open session windows and
-            stamp-in are only available to enrolled students. Ask your
-            instructor to add you to the roster.
-          </p>
-        </div>
-      )
+      user &&
+        termsAccepted &&
+        !dataUnavailable &&
+        !enrolled &&
+        !viewerIsAdmin && (
+          <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+            <p class="font-medium">You're not enrolled in ECO 1002.</p>
+            <p class="mt-2">
+              You can browse the workshop list below, but open session windows
+              and stamp-in are only available to enrolled students. Ask your
+              instructor to add you to the roster.
+            </p>
+          </div>
+        )
     }
 
     {
-      viewerIsAdmin && !enrolled && (
+      viewerIsAdmin && termsAccepted && !enrolled && (
         <div class="mt-8 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
           <strong>Admin view.</strong> You're seeing this page without being
           enrolled in ECO 1002.
@@ -146,6 +194,7 @@ function statusOf(
                 </p>
 
                 {canSeeOpenWindows &&
+                  !dataUnavailable &&
                   (wAdmins.length === 0 ? (
                     <p class="mt-3 rounded bg-slate-50 px-3 py-2 text-xs text-ink-muted">
                       No section windows scheduled. Your instructor will open
@@ -158,8 +207,9 @@ function statusOf(
                         return (
                           <li class="flex items-center justify-between gap-3 rounded bg-slate-50 px-3 py-1.5 text-xs">
                             <span>
-                              Section <strong>{a.section}</strong> · week of{' '}
-                              {new Date(a.week_of).toLocaleDateString()}
+                              {a.semester} · Section{' '}
+                              <strong>{a.section}</strong> · week of{' '}
+                              {formatWeekOf(a.week_of)}
                             </span>
                             <span
                               class={`rounded px-1.5 py-0.5 font-semibold uppercase ${

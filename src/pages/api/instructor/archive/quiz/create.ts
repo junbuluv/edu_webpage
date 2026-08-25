@@ -35,10 +35,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const role = locals.profile?.role ?? 'student';
 
-  const form = await request.formData();
-  let p: Payload;
+  if (!user) return err('unauthenticated');
+  if (!isContentManager(role)) return err('forbidden');
+
+  let form: FormData;
   try {
-    p = JSON.parse(String(form.get('payload') ?? '')) as Payload;
+    form = await request.formData();
+  } catch {
+    return err('invalid_payload');
+  }
+  let p: Payload;
+  const rawPayload = String(form.get('payload') ?? '');
+  if (rawPayload.length > 1_000_000) return err('invalid_payload');
+  try {
+    p = JSON.parse(rawPayload) as Payload;
   } catch {
     return err('invalid_payload');
   }
@@ -53,13 +63,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     : [];
   const passing = Number(p.passing_score ?? 0.7);
 
-  if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
   if (!isCourseSlug(course)) return err('invalid_course');
   if (!(await instructorOwnsCourse(user.id, course, role)))
     return err('not_course_instructor');
   if (
     !title ||
+    title.length > 200 ||
+    covers.length > 100 ||
+    new Set(covers).size !== covers.length ||
+    covers.some((cover) => cover.length > 200) ||
     !KINDS.has(kind) ||
     !TERMS.has(term) ||
     !Number.isInteger(year) ||

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 
-const lastUpdated = '2026-05-23';
+const lastUpdated = '2026-07-14';
 ---
 
 <BaseLayout title="Privacy Policy">
@@ -22,24 +22,51 @@ const lastUpdated = '2026-05-23';
     </p>
     <ul>
       <li>
-        Your email address (held only in the authentication system; not
-        duplicated into the application database — only an HMAC-SHA256
-        derivative is kept for "is this email already registered?" lookups).
+        Your email address, held in the authentication system. It is not
+        duplicated in plaintext in the application database.
       </li>
       <li>An account identifier (random UUID).</li>
-      <li>An account role (student, instructor, or admin).</li>
+      <li>
+        An account role (student, teaching assistant, instructor, or admin).
+      </li>
       <li>An optional display name you set.</li>
-      <li>The timestamp at which you accepted the Terms of Service.</li>
+      <li>
+        The policy version, timestamp, and account flow through which you
+        accepted the Terms of Service.
+      </li>
     </ul>
     <p>When you use the Service we additionally store:</p>
     <ul>
       <li>Per-lesson progress markers ("started" / "completed").</li>
       <li>Quiz attempts: your answers, score, and submission timestamp.</li>
       <li>
-        For staff disclosures only: an audit record containing the actor's ID,
-        the action taken, the target student's ID, and a salted HMAC of the
-        actor's IP address and User-Agent (the raw IP and User-Agent are not
-        stored).
+        Workshop attendance: the workshop session, timestamp, and whether
+        attendance was verified by the one-time location check, the workshop
+        window, or an instructor's manual correction. A manual correction also
+        records the instructor and their stated reason.
+      </li>
+      <li>
+        For location-enabled workshop attendance, your browser sends one
+        latitude/longitude reading when you press the stamp-in button. The
+        server uses it to make the geofence decision and does not retain the
+        coordinates. The Service does not request background location.
+      </li>
+      <li>
+        A random workshop-device cookie, retained for up to 180 days, helps
+        prevent multiple accounts from stamping in from the same browser. For
+        new attendance stamps, the application database stores only an
+        HMAC-SHA256 derivative scoped to one workshop session, not the raw
+        cookie identifier or a token that can link the browser across different
+        workshops. The cookie is issued only when a signed-in user visits the
+        protected workshop area.
+      </li>
+      <li>
+        For staff roster access, exports, and management actions: an audit
+        record containing the actor's account identifier, the action and
+        resource, an optional target-student identifier when one student is
+        addressed, and an HMAC of the actor's IP address and User-Agent (the raw
+        IP and User-Agent are not stored). The actor identifier is set to null
+        if that staff account is later deleted.
       </li>
     </ul>
 
@@ -73,18 +100,21 @@ const lastUpdated = '2026-05-23';
     <ul>
       <li>
         <strong>You</strong> can see your own profile, lesson progress, and quiz attempts
-        at any time via your dashboard.
+        and your own workshop attendance at any time via your dashboard or the relevant
+        workshop page.
       </li>
       <li>
         <strong>Instructors</strong> can see lesson progress and quiz attempts only
-        for students who are enrolled in their own courses (this is enforced in the
-        database by row-level security joining on an enrollment record).
+        for students who are enrolled in their own courses. Workshop attendance is
+        limited to the instructor-owned course, semester, and section. These boundaries
+        are enforced in the database and rechecked by server routes.
       </li>
       <li>
         <strong>Administrators</strong> (the project owner only) can read all records.
-        Every administrator and instructor read of an individual student's record
-        is recorded in an audit log retained for the life of the underlying education
-        record.
+        The Service attempts to audit staff roster-page access, exports, and management
+        actions; actions directed at one student include that student's account identifier.
+        A failed best-effort audit write is logged server-side, and availability-sensitive
+        operations may continue.
       </li>
       <li>
         <strong>Nobody else.</strong> We do not sell, rent, or share records with
@@ -95,30 +125,57 @@ const lastUpdated = '2026-05-23';
     <h2>5. How long we keep records</h2>
     <ul>
       <li>
-        Inactive accounts (no sign-in for 24 months) are automatically deleted,
-        along with all associated lesson progress and quiz attempts.
+        Inactive student accounts are automatically deleted 24 months after the
+        later of account creation or last sign-in, along with directly
+        associated progress, quiz, enrollment, and attendance rows. Staff
+        accounts that still own rosters, workshop schedules, or archive content
+        or any archive-upload authorization are skipped until those records are
+        transferred or removed.
+      </li>
+      <li>Quiz attempts older than 730 days are automatically purged.</li>
+      <li>
+        Workshop attendance is retained with the related education record until
+        account deletion or the institution's applicable retention schedule. New
+        attendance stamps do not retain submitted coordinates. Older attendance
+        rows may still contain a raw legacy browser identifier, submitted
+        coordinates, and HMACs of the request IP address or User-Agent. Those
+        fields are blocked from student and instructor database access, remain
+        unchanged until the project owner separately approves a retention scrub,
+        and are not populated by new stamps. The browser cookie expires after at
+        most 180 days and is cleared after successful account deletion.
       </li>
       <li>
-        Quiz attempts older than two academic years are purged unless explicitly
-        retained by an instructor.
+        Audit records are retained until an administrator applies the
+        institution's approved audit-retention schedule. They may outlive the
+        underlying account or education record; deleting a staff account nulls
+        its actor identifier, while resource and target identifiers can remain.
       </li>
       <li>
-        Audit log records are retained for as long as the underlying education
-        record they reference, per FERPA § 99.32.
+        Unfinished staff archive uploads are removed after their upload
+        authorization expires. When a staff member deletes an archive paper, its
+        database row and stored file are permanently removed after a 24-hour
+        recovery window. Finalized upload-authorization records are removed
+        after 30 days.
       </li>
     </ul>
 
     <h2>6. Your rights</h2>
     <p>You can at any time:</p>
     <ul>
-      <li><strong>Access</strong> your records via the dashboard.</li>
+      <li>
+        <strong>Access</strong> your records via the dashboard and relevant workshop
+        pages.
+      </li>
       <li>
         <strong>Update</strong> your display name from your account settings.
       </li>
       <li>
-        <strong>Delete</strong> your account and all associated data via the "Delete
-        account" flow under your dashboard. This action is irreversible and completes
-        within 30 days.
+        <strong>Delete</strong> your account and directly associated education records
+        via the "Delete account" flow under your dashboard. This action is irreversible.
+        Staff accounts that own institutional records require an administrator to
+        transfer that ownership before removing sign-in access. Accountability or
+        disclosure-audit records may remain for the institution's applicable retention
+        period.
       </li>
       <li>
         <strong>Export</strong> your records — contact us and we will provide a machine-readable
@@ -140,8 +197,17 @@ const lastUpdated = '2026-05-23';
         database provider Supabase).
       </li>
       <li>
-        Per-row access control is enforced in the database via PostgreSQL
-        row-level security, not in application code alone.
+        Student and ordinary staff reads use PostgreSQL row-level security.
+        Server-only pages and routes that require elevated database access
+        recheck either the signed-in user's own record identifier or the staff
+        role, instructor ownership, semester, and section before reading or
+        changing records.
+      </li>
+      <li>
+        Location checks are a convenience control rather than conclusive proof
+        of physical presence. If browser permissions or accuracy prevent a
+        successful check, students may ask their instructor for manual
+        verification.
       </li>
       <li>
         IP addresses and User-Agent strings in our audit log are stored only as
@@ -169,7 +235,7 @@ const lastUpdated = '2026-05-23';
     <p>
       Questions about this policy, requests to exercise your rights, or reports
       of suspected privacy violations may be sent to the project owner at <a
-        href="mailto:privacy@example.com">privacy@example.com</a
+        href="mailto:hyunjun.yoo@baruch.cuny.edu">hyunjun.yoo@baruch.cuny.edu</a
       >. We will respond within 30 days.
     </p>
 

@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { getAdminClient } from '@lib/supabase/admin';
+import { getCollection } from 'astro:content';
+import {
+  getAdminClient,
+  listAllAuthUsers,
+  selectAllRows,
+  selectAllRowsInBatches,
+} from '@lib/supabase/admin';
 
 const user = Astro.locals.user!;
 const profile = Astro.locals.profile!;
@@ -8,29 +14,90 @@ const profile = Astro.locals.profile!;
 // Recent management activity from the audit log (read-only). Admin-gated by
 // middleware; read via service-role since audit_log has no read RLS policy.
 const admin = getAdminClient();
-const { data: events } = await admin
+const { data: events, error: auditError } = await admin
   .from('audit_log')
-  .select('id, ts, actor_id, actor_role, action, target_resource')
+  .select(
+    'id, ts, actor_id, actor_role, action, target_user_id, target_resource',
+  )
   .order('ts', { ascending: false })
   .limit(50);
 
-const actorIds = [
+const assignmentResult = await selectAllRows<{
+  instructor_id: string;
+  course_slug: string;
+  semester: string;
+  active: boolean;
+  assigned_by: string | null;
+  assigned_at: string;
+}>((from, to) =>
+  admin
+    .from('teaching_assignments')
+    .select(
+      'instructor_id, course_slug, semester, active, assigned_by, assigned_at',
+    )
+    .order('active', { ascending: false })
+    .order('assigned_at', { ascending: false })
+    .order('instructor_id', { ascending: true })
+    .order('course_slug', { ascending: true })
+    .order('semester', { ascending: true })
+    .range(from, to),
+);
+
+let emailById = new Map<string, string>();
+let emailLookupFailed = false;
+try {
+  emailById = new Map(
+    (await listAllAuthUsers(admin))
+      .filter((account) => account.email)
+      .map((account) => [account.id, account.email!]),
+  );
+} catch {
+  emailLookupFailed = true;
+}
+
+const profileIds = [
   ...new Set(
-    (events ?? []).map((e) => e.actor_id).filter((x): x is string => !!x),
+    [
+      ...(events ?? []).flatMap((event) => [
+        event.actor_id,
+        event.target_user_id,
+      ]),
+      ...assignmentResult.rows.flatMap((assignment) => [
+        assignment.instructor_id,
+        assignment.assigned_by,
+      ]),
+    ].filter((value): value is string => !!value),
   ),
 ];
-let actorNameById = new Map<string, string | null>();
-if (actorIds.length > 0) {
-  const { data: profs } = await admin
-    .from('profiles')
-    .select('id, display_name')
-    .in('id', actorIds);
-  actorNameById = new Map((profs ?? []).map((p) => [p.id, p.display_name]));
+let profileNameById = new Map<string, string | null>();
+if (profileIds.length > 0) {
+  const profs = await selectAllRowsInBatches<
+    { id: string; display_name: string | null },
+    string
+  >(profileIds, (batch, from, to) =>
+    admin
+      .from('profiles')
+      .select('id, display_name')
+      .in('id', batch)
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
+  profileNameById = new Map(
+    profs.rows.map((profile) => [profile.id, profile.display_name]),
+  );
 }
+
+const courseMeta = new Map(
+  (await getCollection('courses')).map((course) => [
+    course.data.slug,
+    course.data,
+  ]),
+);
 
 // Banner for the role-assignment form (?ok= / ?error= per convention #16).
 const ROLE_OK: Record<string, string> = {
   role_set: 'Role updated.',
+  role_unchanged: 'That user already has that role; nothing changed.',
 };
 const ROLE_ERR: Record<string, string> = {
   unauthenticated: 'Please sign in.',
@@ -42,15 +109,103 @@ const ROLE_ERR: Record<string, string> = {
     'That user is an admin; admin roles are managed via SQL, not here.',
   lookup_failed: 'Could not look up that account right now. Please try again.',
   update_failed: 'Could not update the role. Please try again.',
+  role_in_use:
+    'Deactivate all of this instructor’s teaching assignments before changing their role.',
+  use_offboarding:
+    'This staff account still owns institutional records. Use the staff offboarding form below to transfer ownership and revoke access safely.',
+  role_set_unaudited:
+    'Role updated, but it could not be written to the audit log. Please report this to an admin.',
 };
 const okParam = Astro.url.searchParams.get('ok');
 const errParam = Astro.url.searchParams.get('error');
 const roleOkText = okParam ? (ROLE_OK[okParam] ?? null) : null;
 const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
+
+const ASSIGNMENT_OK: Record<string, string> = {
+  saved: 'Teaching assignment saved and activated.',
+  deactivated: 'Teaching assignment deactivated.',
+  removed: 'Unused teaching assignment removed.',
+  unchanged: 'That teaching assignment already has the requested status.',
+  saved_unaudited:
+    'Teaching assignment saved, but the audit entry failed. Please investigate the audit service.',
+};
+const ASSIGNMENT_ERR: Record<string, string> = {
+  unauthenticated: 'Please sign in.',
+  forbidden: 'You do not have permission to manage teaching assignments.',
+  invalid_input: 'Enter a valid instructor, course, and semester.',
+  no_account: 'No account found for that email. The person must sign up first.',
+  not_instructor:
+    'Set this account’s role to instructor before assigning a class.',
+  lookup_failed: 'Could not load assignment data right now. Please try again.',
+  not_found: 'That teaching assignment no longer exists.',
+  live_workshops:
+    'Close or cancel all current and scheduled workshop windows before deactivating this assignment.',
+  deactivate_first: 'Deactivate the teaching assignment before removing it.',
+  assignment_in_use:
+    'This assignment still owns enrollment or workshop records, so it must remain as historical provenance.',
+  save_failed: 'Could not save the teaching assignment. Please try again.',
+};
+const assignmentOkParam = Astro.url.searchParams.get('assignment_ok');
+const assignmentErrParam = Astro.url.searchParams.get('assignment_error');
+const assignmentOkText = assignmentOkParam
+  ? (ASSIGNMENT_OK[assignmentOkParam] ?? null)
+  : null;
+const assignmentErrText = assignmentErrParam
+  ? (ASSIGNMENT_ERR[assignmentErrParam] ?? null)
+  : null;
+
+const OFFBOARD_OK: Record<string, string> = {
+  completed:
+    'Staff access was removed and owned course records were transferred to the successor.',
+};
+const OFFBOARD_ERR: Record<string, string> = {
+  unauthenticated: 'Please sign in.',
+  forbidden: 'You do not have permission to offboard staff accounts.',
+  invalid_input:
+    'Enter two different account emails and type the confirmation phrase exactly.',
+  lookup_failed:
+    'Could not look up those accounts right now. Please try again.',
+  no_account: 'Both email addresses must belong to existing accounts.',
+  cannot_offboard_self: 'You cannot offboard your own admin account.',
+  cannot_offboard_admin:
+    'Admin accounts cannot be removed with this workflow; use the SQL-only admin process.',
+  target_not_staff: 'The account being removed must be an instructor or TA.',
+  successor_not_instructor:
+    'The successor account must currently have the instructor role.',
+  cleanup_failed:
+    'Pending paper uploads could not be cleaned up. Ownership may already be transferred, but no account was deleted; retry the same request.',
+  transfer_failed:
+    'Owned records could not be transferred. No account was deleted; please try again.',
+  transfer_rejected:
+    'The database rejected this transfer. No account was deleted; review the selected accounts.',
+  invalid_roles:
+    'The database no longer sees the selected accounts as eligible staff. No account was deleted; refresh and retry.',
+  conflict:
+    'The successor already owns a conflicting live workshop window. Resolve that schedule conflict before retrying; no account was deleted.',
+  audit_failed:
+    'The records were transferred, but the required audit entry failed. Retry this same offboarding request.',
+  auth_delete_failed:
+    'The records were transferred, but sign-in access could not be removed. Retry this same offboarding request.',
+};
+const offboardOkParam = Astro.url.searchParams.get('offboard_ok');
+const offboardErrParam = Astro.url.searchParams.get('offboard_error');
+const offboardOkText = offboardOkParam
+  ? (OFFBOARD_OK[offboardOkParam] ?? null)
+  : null;
+const offboardErrText = offboardErrParam
+  ? (OFFBOARD_ERR[offboardErrParam] ??
+    'The staff account could not be offboarded. No account was deleted; please try again.')
+  : null;
+
+const nyDateTime = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'America/New_York',
+});
 ---
 
 <BaseLayout title="Admin">
-  <div class="mx-auto max-w-3xl px-4 py-12">
+  <div class="mx-auto max-w-5xl px-4 py-12">
     <p class="text-xs uppercase tracking-wide text-accent font-medium">Admin</p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">
       Site administration
@@ -85,6 +240,7 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
       <form
         method="POST"
         action="/api/admin/assign-role"
+        data-confirm="Change this account's role? Choosing student or TA can revoke staff capabilities."
         class="mt-4 flex flex-wrap items-end gap-3 text-sm"
       >
         <label class="block flex-1">
@@ -118,14 +274,312 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
       </form>
 
       <p class="mt-3 text-xs text-ink-muted">
-        Assigning instructor or ta lets the user teach; assign them to a
-        specific course from the roster (Manage, then classes). Other admin
-        actions go through SQL; see <a
+        An instructor role permits teaching tools, but course authority starts
+        only after an active teaching assignment is added below. Teaching
+        assistants retain read-only archive access. Other admin actions go
+        through SQL; see <a
           class="text-accent underline"
           href="https://github.com/junbuluv/edu_webpage/blob/main/CONTRIBUTING.md"
           >CONTRIBUTING.md</a
         >.
       </p>
+    </section>
+
+    <section class="mt-10 rounded-lg border border-slate-200 p-5">
+      <h2 class="text-lg font-semibold">Teaching assignments</h2>
+      <p class="mt-1 text-sm text-ink-muted">
+        Assign an instructor to an exact course and semester before importing
+        students, opening workshops, or managing that course’s archive.
+        Deactivation preserves historical records while removing write access.
+      </p>
+
+      {
+        assignmentOkText && (
+          <p class="mt-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+            {assignmentOkText}
+          </p>
+        )
+      }
+      {
+        assignmentErrText && (
+          <p class="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            {assignmentErrText}
+          </p>
+        )
+      }
+
+      <form
+        method="POST"
+        action="/api/admin/teaching-assignment"
+        class="mt-4 grid gap-3 text-sm md:grid-cols-[2fr_1fr_1fr_auto] md:items-end"
+      >
+        <input type="hidden" name="action" value="assign" />
+        <label class="block">
+          <span class="text-ink-muted">Instructor email</span>
+          <input
+            name="email"
+            type="email"
+            required
+            maxlength="254"
+            placeholder="instructor@baruch.cuny.edu"
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+        <label class="block">
+          <span class="text-ink-muted">Course</span>
+          <select
+            name="course_slug"
+            required
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          >
+            {
+              [...courseMeta].map(([slug, course]) => (
+                <option value={slug}>{course.code}</option>
+              ))
+            }
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-ink-muted">Semester</span>
+          <input
+            name="semester"
+            required
+            maxlength="64"
+            placeholder="Fall 2026"
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+        <button
+          type="submit"
+          class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+        >
+          Assign
+        </button>
+      </form>
+
+      {
+        emailLookupFailed && (
+          <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            Account emails could not be loaded; assignments are shown by profile
+            name or user id.
+          </p>
+        )
+      }
+      {
+        assignmentResult.error && (
+          <p class="mt-3 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            Existing assignments could not be loaded completely. Refresh before
+            making status changes.
+          </p>
+        )
+      }
+
+      {
+        assignmentResult.rows.length === 0 ? (
+          <p class="mt-5 text-sm text-ink-muted">
+            No teaching assignments yet.
+          </p>
+        ) : (
+          <div class="mt-5 overflow-x-auto rounded border border-slate-200">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-ink-muted">
+                <tr>
+                  <th class="px-3 py-2 font-medium">Instructor</th>
+                  <th class="px-3 py-2 font-medium">Course</th>
+                  <th class="px-3 py-2 font-medium">Semester</th>
+                  <th class="px-3 py-2 font-medium">Status</th>
+                  <th class="px-3 py-2 font-medium">
+                    <span class="sr-only">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {assignmentResult.rows.map((assignment) => (
+                  <tr>
+                    <td class="px-3 py-2">
+                      {profileNameById.get(assignment.instructor_id) ??
+                        emailById.get(assignment.instructor_id) ??
+                        assignment.instructor_id}
+                      {profileNameById.get(assignment.instructor_id) &&
+                        emailById.get(assignment.instructor_id) && (
+                          <span class="block text-xs text-ink-muted">
+                            {emailById.get(assignment.instructor_id)}
+                          </span>
+                        )}
+                    </td>
+                    <td class="px-3 py-2">
+                      {courseMeta.get(
+                        assignment.course_slug as 'eco-1002' | 'fin-3610',
+                      )?.code ?? assignment.course_slug}
+                    </td>
+                    <td class="px-3 py-2">{assignment.semester}</td>
+                    <td class="px-3 py-2">
+                      <span
+                        class:list={[
+                          'rounded px-2 py-0.5 text-xs font-semibold uppercase',
+                          assignment.active
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-100 text-slate-600',
+                        ]}
+                      >
+                        {assignment.active ? 'active' : 'inactive'}
+                      </span>
+                    </td>
+                    <td class="px-3 py-2 text-right">
+                      <div class="flex justify-end gap-3">
+                        <form
+                          method="POST"
+                          action="/api/admin/teaching-assignment"
+                          data-confirm={
+                            assignment.active
+                              ? `Deactivate ${emailById.get(assignment.instructor_id) ?? assignment.instructor_id} for ${assignment.course_slug} ${assignment.semester}? This revokes access to that class.`
+                              : undefined
+                          }
+                        >
+                          <input
+                            type="hidden"
+                            name="action"
+                            value={
+                              assignment.active ? 'deactivate' : 'activate'
+                            }
+                          />
+                          <input
+                            type="hidden"
+                            name="instructor_id"
+                            value={assignment.instructor_id}
+                          />
+                          <input
+                            type="hidden"
+                            name="course_slug"
+                            value={assignment.course_slug}
+                          />
+                          <input
+                            type="hidden"
+                            name="semester"
+                            value={assignment.semester}
+                          />
+                          <button
+                            type="submit"
+                            class="text-xs font-medium text-accent underline"
+                          >
+                            {assignment.active ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </form>
+                        {!assignment.active && (
+                          <form
+                            method="POST"
+                            action="/api/admin/teaching-assignment"
+                            data-confirm="Remove this unused teaching assignment?"
+                          >
+                            <input type="hidden" name="action" value="remove" />
+                            <input
+                              type="hidden"
+                              name="instructor_id"
+                              value={assignment.instructor_id}
+                            />
+                            <input
+                              type="hidden"
+                              name="course_slug"
+                              value={assignment.course_slug}
+                            />
+                            <input
+                              type="hidden"
+                              name="semester"
+                              value={assignment.semester}
+                            />
+                            <button
+                              type="submit"
+                              class="text-xs font-medium text-red-700 underline"
+                            >
+                              Remove
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+    </section>
+
+    <section class="mt-10 rounded-lg border border-red-200 p-5">
+      <h2 class="text-lg font-semibold">Offboard an instructor or TA</h2>
+      <p class="mt-1 text-sm text-ink-muted">
+        Transfer the staff member's teaching, workshop, enrollment, progress,
+        quiz, and archive ownership to an active instructor, then permanently
+        remove the former staff member's sign-in account. Student records are
+        preserved. This operation is retry-safe but cannot be undone.
+      </p>
+
+      {
+        offboardOkText && (
+          <p class="mt-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+            {offboardOkText}
+          </p>
+        )
+      }
+      {
+        offboardErrText && (
+          <p class="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            {offboardErrText}
+          </p>
+        )
+      }
+
+      <form
+        method="POST"
+        action="/api/admin/offboard-staff"
+        class="mt-4 grid gap-4 text-sm md:grid-cols-2"
+        data-confirm="Permanently remove this staff member's sign-in account after transferring all owned records?"
+      >
+        <label class="block">
+          <span class="text-ink-muted">Staff email to remove</span>
+          <input
+            name="target_email"
+            type="email"
+            required
+            autocomplete="off"
+            placeholder="former.staff@baruch.cuny.edu"
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+        <label class="block">
+          <span class="text-ink-muted">Successor instructor email</span>
+          <input
+            name="successor_email"
+            type="email"
+            required
+            autocomplete="off"
+            placeholder="current.instructor@baruch.cuny.edu"
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-ink-muted">
+            Type <strong>offboard staff account</strong> to confirm
+          </span>
+          <input
+            name="confirm"
+            type="text"
+            required
+            autocomplete="off"
+            pattern="offboard staff account"
+            class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          />
+        </label>
+        <div class="md:col-span-2">
+          <button
+            type="submit"
+            class="rounded bg-red-700 px-4 py-2 font-medium text-white hover:bg-red-800"
+          >
+            Transfer records and remove account
+          </button>
+        </div>
+      </form>
     </section>
 
     <section class="mt-12">
@@ -138,7 +592,11 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
       </p>
 
       {
-        !events || events.length === 0 ? (
+        auditError ? (
+          <p class="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            Audit activity could not be loaded. Refresh to try again.
+          </p>
+        ) : !events || events.length === 0 ? (
           <p class="mt-4 text-sm text-ink-muted">No audited events yet.</p>
         ) : (
           <div class="mt-4 overflow-x-auto rounded-lg border border-slate-200">
@@ -148,6 +606,7 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
                   <th class="px-3 py-2 font-medium">When</th>
                   <th class="px-3 py-2 font-medium">Actor</th>
                   <th class="px-3 py-2 font-medium">Action</th>
+                  <th class="px-3 py-2 font-medium">Person</th>
                   <th class="px-3 py-2 font-medium">Target</th>
                 </tr>
               </thead>
@@ -155,11 +614,13 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
                 {events.map((e) => (
                   <tr>
                     <td class="px-3 py-2 whitespace-nowrap text-ink-muted">
-                      {new Date(e.ts).toLocaleString()}
+                      {nyDateTime.format(new Date(e.ts))}
                     </td>
                     <td class="px-3 py-2">
                       {e.actor_id
-                        ? (actorNameById.get(e.actor_id) ?? '—')
+                        ? (profileNameById.get(e.actor_id) ??
+                          emailById.get(e.actor_id) ??
+                          e.actor_id.slice(0, 8))
                         : '—'}
                       {e.actor_role && (
                         <span class="ml-1 text-xs text-ink-muted">
@@ -169,6 +630,13 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
                     </td>
                     <td class="px-3 py-2">
                       <code class="text-xs">{e.action}</code>
+                    </td>
+                    <td class="px-3 py-2 text-xs text-ink-muted">
+                      {e.target_user_id
+                        ? (profileNameById.get(e.target_user_id) ??
+                          emailById.get(e.target_user_id) ??
+                          e.target_user_id.slice(0, 8))
+                        : '—'}
                     </td>
                     <td class="px-3 py-2 text-xs text-ink-muted">
                       {e.target_resource ?? '—'}
@@ -183,3 +651,27 @@ const roleErrText = errParam ? (ROLE_ERR[errParam] ?? null) : null;
     </section>
   </div>
 </BaseLayout>
+
+<script>
+  let adminConfirmController: AbortController | null = null;
+
+  function initializeAdminConfirmations() {
+    adminConfirmController?.abort();
+    adminConfirmController = new AbortController();
+    document.addEventListener(
+      'submit',
+      (event) => {
+        if (!(event.target instanceof HTMLFormElement)) return;
+        const message = event.target.dataset.confirm;
+        if (message && !window.confirm(message)) event.preventDefault();
+      },
+      { capture: true, signal: adminConfirmController.signal },
+    );
+  }
+
+  document.addEventListener('astro:page-load', initializeAdminConfirmations);
+  document.addEventListener('astro:before-swap', () =>
+    adminConfirmController?.abort(),
+  );
+  initializeAdminConfirmations();
+</script>

@@ -50,7 +50,7 @@ Email this verbatim to a new collaborator:
 1.  Accept the GitHub invite (email link, or visit github.com/junbuluv/edu_webpage).
 2.  git clone https://github.com/junbuluv/edu_webpage.git
 3.  cd edu_webpage && npm install
-4.  Node 22+ required. Check with `node -v`.
+4.  Node 22.x required. Check with `node -v`.
 5.  Create your own free Supabase project at supabase.com.
 6.  In your Supabase SQL Editor, paste the entire supabase/schema.sql and Run.
 7.  cp .env.example .env, then fill in:
@@ -59,6 +59,7 @@ Email this verbatim to a new collaborator:
       - SUPABASE_SERVICE_ROLE_KEY    your project's service-role key
       - PII_HMAC_SECRET              generate with: openssl rand -hex 32
       - PUBLIC_SITE_URL              http://localhost:4321
+      - CRON_SECRET                  generate with: openssl rand -hex 32
 8.  In your Supabase SQL Editor, run:
       alter database postgres set app.pii_hmac_secret = '<same as PII_HMAC_SECRET>';
     (If Supabase rejects this with 42501 permission denied, it's the
@@ -69,8 +70,10 @@ Email this verbatim to a new collaborator:
       - Authentication → URL Configuration → Site URL: http://localhost:4321
       - Authentication → URL Configuration → Redirect URLs → Add URL:
           http://localhost:4321/auth/callback
-    Without this, the email link in the confirmation message returns
-    "redirect_url not allowed."
+    Signup and password-recovery links both pass through this callback so
+    the server can exchange Supabase's PKCE code before continuing. Without
+    it, email links return "redirect_url not allowed" or reach the reset
+    form without an authenticated recovery session.
 10. npm run dev
 11. http://localhost:4321 should load. Hero typing effect should run.
 12. Sign up at /auth/signup; if Supabase's email goes to spam (common on
@@ -198,7 +201,7 @@ sibling repo or use Git LFS on a private branch.
 
 ## Opening a workshop section
 
-Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is tracked via stamp-in with three barriers: open/close window, geofence, and one-stamp-per-device.
+Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is scoped to a course, semester, and (for ECO) section, then checked against the open window, geofence, and protected per-device token.
 
 **Two course models:**
 
@@ -206,21 +209,21 @@ Workshops are weekly small-group sessions tied to a lesson. Content lives in `sr
 - **FIN 3610** runs one workshop window per week, no per-day sections. The `section` column is `NULL` for FIN administrations.
 
 **From the instructor UI** (recommended):
-`/instructor/workshops/<slug>` — fill the form, set the open/close window, click the open button. The form shows a section picker only for ECO.
+`/instructor/workshops/<slug>` — choose the semester, set New York-local opening and closing times, verify the meeting coordinates, then open the window. The app derives the Monday `week_of`, rejects daylight-saving ambiguities, and shows a section picker only for ECO. Use the same page to reveal discussion prompts and record a manual attendance correction. Cancelled windows are retained for audit continuity and no longer block opening a replacement in the same week.
 
 **Or via SQL (ECO 1002 with section):**
 
 ```sql
 insert into public.workshop_administrations (
-  workshop_slug, course_slug, section, week_of, instructor_id,
+  workshop_slug, course_slug, semester, section, week_of, instructor_id,
   opens_at, closes_at,
-  required_lat, required_lng, required_radius_meters,
+  required_lat, required_lng, required_radius_meters, location_label,
   notes
 ) values (
-  'eco-1002-is-lm-intro', 'eco-1002', 'CML', '2027-03-15',
+  'eco-1002-is-lm-intro', 'eco-1002', 'spring-2027', 'CML', '2027-03-15',
   (select id from auth.users where email = 'you@baruch.cuny.edu'),
-  '2027-03-15 22:00:00+00', '2027-03-15 23:30:00+00',
-  40.7411, -73.9837, 200,
+  '2027-03-15 14:00:00-04', '2027-03-15 15:30:00-04',
+  40.7411, -73.9837, 200, '55 Lexington Ave',
   'Bring laptops. Form groups of 3-4.'
 );
 ```
@@ -229,28 +232,103 @@ insert into public.workshop_administrations (
 
 ```sql
 insert into public.workshop_administrations (
-  workshop_slug, course_slug, section, week_of, instructor_id,
+  workshop_slug, course_slug, semester, section, week_of, instructor_id,
   opens_at, closes_at,
-  required_lat, required_lng, required_radius_meters,
+  required_lat, required_lng, required_radius_meters, location_label,
   notes
 ) values (
-  'fin-3610-unit-2-time-money', 'fin-3610', null, '2027-03-15',
+  'fin-3610-unit-2-time-money', 'fin-3610', 'spring-2027', null, '2027-03-15',
   (select id from auth.users where email = 'you@baruch.cuny.edu'),
-  '2027-03-15 22:00:00+00', '2027-03-15 23:30:00+00',
-  40.7411, -73.9837, 200,
+  '2027-03-15 14:00:00-04', '2027-03-15 15:30:00-04',
+  40.7411, -73.9837, 200, '55 Lexington Ave',
   'Bring laptops. Form groups of 3-4.'
 );
 ```
 
 Two partial unique indexes enforce no-duplicates per mode:
 
-- `(workshop_slug, section, week_of) where section is not null` — ECO can't double-open the same section in the same week.
-- `(workshop_slug, week_of) where section is null` — FIN can't double-open the same workshop in the same week.
+- `(workshop_slug, semester, section, week_of, instructor_id)` for current ECO rows.
+- `(workshop_slug, semester, week_of, instructor_id)` for current FIN rows.
+
+Cancelled rows are excluded from both indexes. Student database access is column-scoped: schedules expose only the location label and `geofence_required` flag, never target coordinates, radius, instructor notes, protected device tokens, or correction metadata.
+
+### Mapping legacy workshop semesters before migration
+
+The workshop-integrity migration never infers academic terms from a date, slug, or course. Before `supabase db push`, the project owner must map every existing administration to its confirmed term.
+
+1. Inspect the existing rows:
+
+   ```sql
+   select id, workshop_slug, course_slug, section, instructor_id, week_of, opens_at, closes_at
+   from public.workshop_administrations
+   order by opens_at, id;
+   ```
+
+2. Add the pending column if it is absent, then update **each ID explicitly** using the owner-confirmed term:
+
+   ```sql
+   alter table public.workshop_administrations
+     add column if not exists semester text,
+     add column if not exists location_label text,
+     add column if not exists cancelled_at timestamptz;
+
+   update public.workshop_administrations
+      set location_label = '55 Lexington Ave'
+    where location_label is null;
+
+   update public.workshop_administrations
+      set semester = 'fall-2026'
+    where id = '<confirmed-administration-uuid>';
+   ```
+
+3. Verify that no administration remains unmapped:
+
+   ```sql
+   select id, workshop_slug, opens_at
+   from public.workshop_administrations
+   where semester is null;
+   ```
+
+4. Check every legacy row against the other hardened constraints. This query
+   reports identifiers and violation names without returning stored
+   coordinates:
+
+   ```sql
+   select id, workshop_slug,
+     array_remove(array[
+       case when char_length(semester) not between 1 and 64 then 'semester_length' end,
+       case when course_slug not in ('eco-1002', 'fin-3610') then 'course_slug' end,
+       case when (required_lat is null) <> (required_lng is null) then 'coordinate_pair' end,
+       case when required_lat is not null and required_lat not between -90 and 90 then 'latitude_range' end,
+       case when required_lng is not null and required_lng not between -180 and 180 then 'longitude_range' end,
+       case when required_radius_meters not between 10 and 50000 then 'radius' end,
+       case when closes_at <= opens_at then 'window_order' end,
+       case when cancelled_at is not null and cancelled_at > opens_at then 'cancellation_time' end,
+       case when char_length(location_label) not between 1 and 120 then 'location_label_length' end,
+       case when notes is not null and char_length(notes) > 200 then 'notes_length' end
+     ], null) as violations
+   from public.workshop_administrations
+   where char_length(semester) not between 1 and 64
+      or course_slug not in ('eco-1002', 'fin-3610')
+      or (required_lat is null) <> (required_lng is null)
+      or (required_lat is not null and required_lat not between -90 and 90)
+      or (required_lng is not null and required_lng not between -180 and 180)
+      or required_radius_meters not between 10 and 50000
+      or closes_at <= opens_at
+      or (cancelled_at is not null and cancelled_at > opens_at)
+      or char_length(location_label) not between 1 and 120
+      or (notes is not null and char_length(notes) > 200)
+   order by opens_at, id;
+   ```
+
+5. Only after both verification queries return zero rows, run
+   `supabase db push` from the repository root. Do not use a bulk guessed term
+   or infer a term from the workshop date.
 
 ### Querying who stamped in
 
 ```sql
-select u.email, a.stamped_at, a.client_lat, a.client_lng
+select u.email, a.stamped_at, a.verification_method, a.correction_reason
 from public.workshop_attendance a
 join auth.users u on u.id = a.user_id
 where a.administration_id = '<uuid>'
@@ -261,7 +339,7 @@ Or export the whole workshop as CSV: `/instructor/workshops/<slug>?format=csv`.
 
 ### Honest caveat on the device check
 
-The `(administration_id, device_id)` unique constraint catches the common "Bob hands phone to Alice" or "Alice opens Bob's account on her own phone" pattern, because the device cookie predates the login. It does NOT catch students who clear cookies between sessions, use private browsing, or own two devices. Pair with an in-room headcount.
+The unique protected device token catches the common "Bob hands phone to Alice" or "Alice opens Bob's account on her own phone" pattern when the authenticated workshop cookie persists across account switches in the same browser. The database stores an administration-scoped HMAC rather than the raw cookie, so a database export cannot correlate the browser across workshops. It does NOT catch students who clear cookies, use private browsing, spoof coordinates, or own two devices. Pair it with in-room verification and use the audited manual-correction tool for false negatives. A mistaken manual mark can be removed from the instructor page only after a second reason and confirmation; the removal request is written to the audit log first.
 
 ## Bootstrapping the first admin
 
@@ -309,8 +387,13 @@ created. The canonical roster of _current_ admins lives in the
 
 ## Managing classes and archive content (in-app)
 
-Role promotion stays SQL-only (above), but day-to-day class and content
-management now has in-app surfaces for staff:
+Admin-role promotion stays SQL-only, but day-to-day role, teaching assignment,
+class, and content management has in-app surfaces:
+
+- **Teaching authority** — `/admin` sets student/instructor/TA roles and creates
+  an explicit course + semester assignment. Student enrollment rows never
+  confer instructor authority. Deactivate an assignment to remove write access;
+  unused inactive assignments can be removed.
 
 - **Roster CRUD** — `/instructor/classes/<course>` lets an instructor/admin
   add, drop, and edit individual students (add by email, edit display
@@ -318,7 +401,9 @@ management now has in-app surfaces for staff:
   `/instructor/classes/import`. No SQL needed for either.
 - **Course archive** — `/instructor/archive` (staff only) manages
   prior-term videos, exam/assignment file uploads, and authored quizzes;
-  students/staff browse at `/{course}/archive`. Videos are ECO-1002 only.
+  students/staff browse at `/{course}/archive`. Videos are ECO-1002 only. Files
+  up to 25 MB upload browser-to-Supabase through a durable, expiring upload
+  intent; finalization verifies size, MIME, and PDF/DOCX structure.
 
 All write paths use the service-role admin client behind an app-side
 ownership check (instructor must own the course, or be admin) and are
@@ -328,9 +413,9 @@ recorded in `audit_log` (`manage_enrollment` / `manage_archive`).
 
 ### PII HMAC
 
-Any value that is (a) personally identifying and (b) **not** a display name
-is HMAC'd with `PII_HMAC_SECRET` before storage. The helper lives at
-`src/lib/crypto/pii.ts`:
+Sensitive request identifiers that need equality matching without retaining
+the raw value are HMAC'd with `PII_HMAC_SECRET` before application-database
+storage. The helper lives at `src/lib/crypto/pii.ts`:
 
 ```ts
 import { hmacPII, hmacPIIHex } from '@lib/crypto/pii';
@@ -340,26 +425,30 @@ const e_hmac = hmacPIIHex('alice@school.edu');
 
 What we HMAC today:
 
-- `profiles.email_hmac` — written by the `handle_new_user()` trigger
+- `profiles.email_hmac` — optional lookup index; it remains `NULL` unless the
+  database secret is configured and the operator runs the documented backfill
 - `audit_log.client_ip_hmac`, `audit_log.user_agent_hmac` — written by `logDisclosure()`
+- workshop device identifiers — scoped to one workshop administration before
+  being passed to the attendance RPC
 
 **Two places need the secret in sync:**
 
 1. **Application side (`PII_HMAC_SECRET` env var)** — used by
-   `src/lib/crypto/pii.ts` for HMAC'ing IP/UA in `logDisclosure` and
-   for looking up users by email via `findProfileIdByEmail`.
-2. **Database side (`app.pii_hmac_secret` session var)** — used by the
-   `handle_new_user()` trigger when stamping `email_hmac` on signup.
+   `src/lib/crypto/pii.ts` for HMAC'ing IP/UA, workshop device identifiers,
+   and optional email lookups.
+2. **Database side (`app.pii_hmac_secret` session var)** — used only when
+   manually backfilling the optional `profiles.email_hmac` lookup index.
    Set it once per Supabase project:
    ```sql
    alter database postgres set app.pii_hmac_secret = '<same value as PII_HMAC_SECRET>';
    ```
    New connections pick up the value automatically.
 
-If either side has a mismatched (or missing) secret, signups still
-succeed but `email_hmac` lookups will miss. Run `select
-public.backfill_email_hmac();` after configuring the secret to fill in
-any rows that signed up before the secret was set.
+If either side has a mismatched (or missing) secret, signups still succeed and
+normal account management continues through the server-only Auth Admin API,
+but the optional `email_hmac` helper will miss. Run `select
+public.backfill_email_hmac();` after configuring the database secret if that
+lookup index is needed.
 
 **Rotation.** Rotate `PII_HMAC_SECRET` annually or on suspected exposure:
 
@@ -383,18 +472,25 @@ any rows that signed up before the secret was set.
 
 ### Retention jobs
 
-Two `pg_cron`-scheduled functions enforce the retention policy stated in
-the Privacy Policy:
+Two `pg_cron`-scheduled functions and one authenticated Vercel cron route
+enforce the retention policy stated in the Privacy Policy:
 
 - `public.purge_inactive_accounts(p_months integer default 24)` —
-  deletes `auth.users` rows whose `last_sign_in_at` is older than the
-  cutoff. Cascades through `public.profiles` and the rest of the
-  per-user tables.
+  deletes `auth.users` rows whose later `created_at`/`last_sign_in_at`
+  timestamp is older than the cutoff. It skips staff accounts that still
+  own enrollments, workshop schedules, archive content, or an archive-upload
+  authorization so one restricted foreign key cannot abort the whole batch;
+  eligible rows cascade through `public.profiles` and per-user tables.
 - `public.purge_old_quiz_attempts(p_days integer default 730)` —
   deletes `quiz_attempts` older than the cutoff.
+- `/api/cron/archive-upload-cleanup` — removes expired, unfinished archive
+  uploads; permanently removes soft-deleted archive paper rows and files after
+  24 hours; and removes finalized upload-authorizations after 30 days. Vercel
+  invokes it daily at 07:00 UTC using `CRON_SECRET`.
 
 Each run writes an `audit_log` row with the count purged in
-`metadata.count`. `actor_id` is `null` (system action).
+`metadata.count`. The inactive-account job also records
+`metadata.skipped_owned_records`. `actor_id` is `null` (system action).
 
 Schedules (UTC):
 
@@ -444,17 +540,20 @@ chokepoint is enforced by RLS denying all writes from anon/student clients.
 
 The Supabase schema is high-blast-radius. To change it:
 
-1. Edit `supabase/schema.sql`. Keep it idempotent — every change should be
-   safe to re-run.
-2. Run it against a scratch Supabase project; confirm RLS policies still
-   block cross-user reads.
-3. Regenerate types: `npm run supabase:types`.
-4. Commit both the SQL and the regenerated `database.types.ts`.
-5. Tag the schema PR with `db:` in the title so reviewers know to check RLS.
+1. Add an idempotent, timestamped file under `supabase/migrations/` and mirror
+   the resulting current state in `supabase/schema.sql`.
+2. Link only an isolated scratch project. Apply the migration twice with
+   `supabase db query --linked --file ...`, then apply `supabase/schema.sql`
+   twice.
+3. Run `supabase/tests/security_hardening_rls.sql` against that scratch
+   project and check `supabase db advisors --linked --type all`.
+4. Regenerate types: `npm run supabase:types`.
+5. Commit the migration, schema snapshot, RLS fixture, and regenerated
+   `database.types.ts` together.
+6. Tag the schema PR with `db:` in the title so reviewers know to check RLS.
 
-When we adopt the Supabase CLI workflow, schema changes move to
-`supabase/migrations/<timestamp>_<name>.sql`. Until then, the single
-`schema.sql` is the source of truth.
+Never use the production link for scratch verification. For a release, apply
+the reviewed migrations before deploying app code that calls their new RPCs.
 
 ## Before requesting review
 
@@ -488,11 +587,13 @@ If yes-no-yes, it's probably fine. Otherwise expect pushback.
 
 ## CI
 
-GitHub Actions runs two jobs on every PR (see `.github/workflows/ci.yml`):
+GitHub Actions runs three verification jobs on every PR (see
+`.github/workflows/ci.yml`):
 
 **`verify`** (required by branch protection):
 
 - `npm ci`
+- `npm test`
 - `npm run typecheck`
 - `npm run build`
 
@@ -502,9 +603,14 @@ GitHub Actions runs two jobs on every PR (see `.github/workflows/ci.yml`):
   stub (`anon` / `authenticated` / `service_role` roles, `auth.users`
   table, `auth.uid()` function).
 - Applies `supabase/schema.sql` twice via `psql -v ON_ERROR_STOP=1`.
+- Exercises synthetic student, instructor, admin, and cross-user RLS cases.
+- Replays the pre-audit upgrade path and applies each new migration twice.
 - The second apply is what catches idempotency regressions —
   drop/create policy name mismatches, ALTER TYPE + use-in-same-txn
   errors, and similar bugs that only surface on a re-paste.
+
+**`copyright-gate`** scans lesson and quiz content for missing provenance,
+hotlinked assets, and disallowed source patterns.
 
 A red `verify` blocks merge. A red `schema-roundtrip` is a strong
 signal that re-running `schema.sql` against an existing project
@@ -519,36 +625,50 @@ PRs on a broken `main`.
 
 ## Deployment to Vercel
 
-The site deploys to Vercel via the `@astrojs/vercel` adapter. There's no
-`vercel.json` — all configuration lives in Vercel's UI. The Astro config
-in `astro.config.mjs` is the canonical place for build-time settings.
+The site deploys to Vercel via the `@astrojs/vercel` adapter. `vercel.json`
+registers the once-daily expired-upload cleanup; `astro.config.mjs` remains the
+canonical place for Astro build-time settings.
 
 ### First-time setup (per Vercel project)
 
 1. Vercel dashboard → **Add New → Project** → import `junbuluv/edu_webpage`.
 2. Framework preset auto-detects as **Astro**. Accept defaults.
-3. Project Settings → **Environment Variables** → add the following five with
-   **all three environment scopes** (Production, Preview, Development)
-   checked. The "all three scopes" detail is critical — if Production isn't
-   checked on a Supabase var, the prod runtime gets `undefined` and every
-   authenticated request redirects to `/auth/setup-required`:
+3. Project Settings → **Environment Variables** → add the following six. Give
+   every variable except `PUBLIC_SITE_URL` all three scopes (Production,
+   Preview, Development). Scope `PUBLIC_SITE_URL` to Production; previews use
+   Vercel's deployment URL automatically. If Production isn't checked on a
+   Supabase var, the prod runtime gets `undefined` and every authenticated
+   request redirects to `/auth/setup-required`:
 
-   | Variable                    | Value                                   | Notes                          |
-   | --------------------------- | --------------------------------------- | ------------------------------ |
-   | `PUBLIC_SUPABASE_URL`       | Supabase project URL                    | From Supabase → Settings → API |
-   | `PUBLIC_SUPABASE_ANON_KEY`  | anon public JWT (`eyJ...`)              | Same panel                     |
-   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`)             | Mark as Sensitive              |
-   | `PUBLIC_SITE_URL`           | `https://<your-deploy>.vercel.app`      | Update for custom domains      |
-   | `PII_HMAC_SECRET`           | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive              |
+   | Variable                    | Value                                   | Notes                                        |
+   | --------------------------- | --------------------------------------- | -------------------------------------------- |
+   | `PUBLIC_SUPABASE_URL`       | Supabase project URL                    | From Supabase → Settings → API               |
+   | `PUBLIC_SUPABASE_ANON_KEY`  | anon public JWT (`eyJ...`)              | Same panel                                   |
+   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`)             | Mark as Sensitive                            |
+   | `PUBLIC_SITE_URL`           | `https://<your-deploy>.vercel.app`      | Production scope; update for custom domains  |
+   | `PII_HMAC_SECRET`           | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive                            |
+   | `CRON_SECRET`               | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive; secures the daily cleanup |
 
 4. Update Supabase Authentication → **URL Configuration**:
    - **Site URL**: same as `PUBLIC_SITE_URL`
    - **Redirect URLs**: add `<site>/auth/callback`
+   - **Redirect URLs**: also add
+     `https://*-<team-or-account-slug>.vercel.app/**` for previews
 
-5. Push to `main` (or trigger a manual deploy) → Vercel builds and
+   Both signup confirmation and password recovery use this callback. The
+   recovery callback then forwards the authenticated session to
+   `/auth/reset`; that route does not need a separate Supabase redirect URL.
+
+5. Supabase Authentication → **Attack Protection** → enable leaked-password
+   protection. The database advisor reports a warning while this is disabled.
+
+6. Apply all reviewed Supabase migrations to the target project and confirm
+   `supabase migration list` shows matching local and remote versions.
+
+7. Push to `main` (or trigger a manual deploy) → Vercel builds and
    deploys ~30–90 s.
 
-6. End-to-end verify with `curl`:
+8. End-to-end verify with `curl`:
 
    ```bash
    SITE=https://<your-deploy>.vercel.app
@@ -579,15 +699,14 @@ If empty: Vercel didn't pick up the push. Force a redeploy via Vercel UI:
 **Deployments → `⋯` menu on latest → Redeploy → uncheck "Use existing
 Build Cache" → Redeploy**. Takes ~60–90 s.
 
-### Astro CSRF check
+### Mutation origin check
 
 `astro.config.mjs` sets `security: { checkOrigin: false }`. Astro 5's
-default-true setting compares request `Origin` to a URL Astro derives
-from `Host` headers, which Vercel's edge layer doesn't preserve reliably
-— every legitimate same-origin POST gets 403 "Cross-site POST form
-submissions are forbidden." SameSite=Lax cookies remain the actual CSRF
-defense. Re-enable if/when the upstream Astro/Vercel header-source issue
-is fixed.
+default-true setting compares request `Origin` to a URL Astro derives from
+headers that differ behind Vercel. `src/middleware.ts` replaces it with a
+proxy-aware check against the request, forwarded host, `PUBLIC_SITE_URL`, and
+Vercel deployment hosts; it also rejects `Sec-Fetch-Site: cross-site` and
+oversized app mutation bodies. SameSite cookies remain an additional defense.
 
 ### Auth URL convention
 

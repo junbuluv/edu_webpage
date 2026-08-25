@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import PaperUploadForm from '@components/archive/PaperUploadForm';
 import { getCollection } from 'astro:content';
 import { isStaff, isAdmin, isContentManager } from '@lib/roles';
 import { loadInstructorArchive } from '@lib/instructor/archive-manage';
@@ -18,10 +19,16 @@ if (!isStaff(role)) {
   return Astro.redirect('/dashboard');
 }
 
-const { courses, videos, papers, quizzes } = await loadInstructorArchive(
-  user.id,
-  role,
-);
+let archive;
+try {
+  archive = await loadInstructorArchive(user.id, role);
+} catch {
+  return new Response(
+    'Archive records are temporarily unavailable. Please try again.',
+    { status: 503 },
+  );
+}
+const { courses, videos, papers, quizzes } = archive;
 const canManage = isContentManager(role);
 const editableVideos = partitionByOwnership(videos, {
   userId: user.id,
@@ -52,13 +59,13 @@ const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 
 const OK_MESSAGES: Record<string, string> = {
-  created: 'Video added.',
+  created: 'Video added as hidden. Review and publish it when ready.',
   updated: 'Video updated.',
   deleted: 'Video removed.',
-  paper_created: 'File uploaded.',
+  paper_created: 'File uploaded as hidden. Review and publish it when ready.',
   paper_updated: 'Exam/assignment updated.',
   paper_deleted: 'Exam/assignment removed.',
-  quiz_created: 'Quiz created.',
+  quiz_created: 'Quiz created as hidden. Review and publish it when ready.',
   quiz_updated: 'Quiz updated.',
   quiz_deleted: 'Quiz removed.',
 };
@@ -86,6 +93,7 @@ const okMessage = ok ? (OK_MESSAGES[ok] ?? 'Saved.') : null;
 const errorMessage = error
   ? (ERROR_MESSAGES[error] ?? 'Something went wrong.')
   : null;
+const currentYear = new Date().getFullYear();
 ---
 
 <BaseLayout title="Archive content">
@@ -97,19 +105,26 @@ const errorMessage = error
     <p class="mt-3 text-ink-muted">
       Add lecture videos (ECO 1002) and past exams/assignments to the course
       archive. Enrolled students see published items; you can edit, hide, or
-      remove what you created.
+      remove what you created. Every new item starts hidden so it can be
+      reviewed before students see it.
     </p>
 
     {
       okMessage && (
-        <p class="mt-6 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+        <p
+          role="status"
+          class="mt-6 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800"
+        >
           {okMessage}
         </p>
       )
     }
     {
       errorMessage && (
-        <p class="mt-6 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        <p
+          role="alert"
+          class="mt-6 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+        >
           {errorMessage}
         </p>
       )
@@ -130,7 +145,8 @@ const errorMessage = error
           <h2 class="text-lg font-semibold">Add a video</h2>
           <p class="mt-1 text-sm text-ink-muted">
             Videos link to YouTube or Vimeo. Paste the video's ID, not a file.
-            (To upload an exam or assignment file, use the section below.)
+            New videos start hidden. To upload an exam or assignment file, use
+            the section below.
           </p>
           <form
             method="POST"
@@ -143,6 +159,7 @@ const errorMessage = error
               <input
                 name="title"
                 required
+                maxlength="200"
                 class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
               />
             </label>
@@ -217,6 +234,7 @@ const errorMessage = error
               <span class="text-ink-muted">Description (optional)</span>
               <input
                 name="description"
+                maxlength="2000"
                 class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
               />
             </label>
@@ -226,6 +244,7 @@ const errorMessage = error
                 name="duration_minutes"
                 type="number"
                 min="1"
+                max="1440"
                 class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
               />
             </label>
@@ -270,6 +289,7 @@ const errorMessage = error
                     <form
                       method="POST"
                       action="/api/instructor/archive/video/delete"
+                      data-confirm={`Delete “${v.title}”? This hides it from students.`}
                     >
                       <input type="hidden" name="id" value={v.id} />
                       <button type="submit" class="text-red-600 underline">
@@ -307,92 +327,12 @@ const errorMessage = error
 
       {
         canManage && manageCourses.length > 0 && (
-          <form
-            method="POST"
-            action="/api/instructor/archive/paper/create"
-            enctype="multipart/form-data"
-            class="mt-4 space-y-3 rounded-lg border border-slate-200 p-5 text-sm"
-          >
-            <h3 class="font-medium">Upload a file</h3>
-            <label class="block">
-              <span class="text-ink-muted">Course</span>
-              <select
-                name="course_slug"
-                required
-                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-              >
-                {manageCourses.map((c) => (
-                  <option value={c} selected={c === prefillCourse}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label class="block">
-              <span class="text-ink-muted">Kind</span>
-              <select
-                name="kind"
-                required
-                class="mt-1 rounded border border-slate-300 px-2 py-1"
-              >
-                <option value="exam">Exam</option>
-                <option value="assignment">Assignment</option>
-              </select>
-            </label>
-            <label class="block">
-              <span class="text-ink-muted">Title</span>
-              <input
-                name="title"
-                required
-                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-              />
-            </label>
-            <div class="flex gap-3">
-              <label class="block">
-                <span class="text-ink-muted">Term</span>
-                <select
-                  name="semester_term"
-                  required
-                  class="mt-1 rounded border border-slate-300 px-2 py-1"
-                >
-                  <option value="spring">Spring</option>
-                  <option value="summer">Summer</option>
-                  <option value="fall">Fall</option>
-                </select>
-              </label>
-              <label class="block">
-                <span class="text-ink-muted">Year</span>
-                <input
-                  name="semester_year"
-                  type="number"
-                  min="2020"
-                  max="2100"
-                  required
-                  class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
-                />
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-ink-muted">File (PDF or .docx)</span>
-              <input
-                name="file"
-                type="file"
-                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                required
-                class="mt-1 block w-full text-sm"
-              />
-            </label>
-            <button
-              type="submit"
-              class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
-            >
-              Upload
-            </button>
-            <p class="text-xs text-ink-muted">
-              Tip: link lessons to this paper later by editing it. (Covers
-              default to none.)
-            </p>
-          </form>
+          <PaperUploadForm
+            courses={manageCourses}
+            prefillCourse={prefillCourse}
+            defaultYear={currentYear}
+            client:load
+          />
         )
       }
 
@@ -426,6 +366,7 @@ const errorMessage = error
                   <form
                     method="POST"
                     action="/api/instructor/archive/paper/delete"
+                    data-confirm={`Delete “${p.title}”? This hides it from students.`}
                   >
                     <input type="hidden" name="id" value={p.id} />
                     <button type="submit" class="text-red-600 underline">
@@ -498,6 +439,7 @@ const errorMessage = error
                   <form
                     method="POST"
                     action="/api/instructor/archive/quiz/delete"
+                    data-confirm={`Delete “${q.title}”? This hides it from students.`}
                   >
                     <input type="hidden" name="id" value={q.id} />
                     <button type="submit" class="text-red-600 underline">
@@ -523,3 +465,27 @@ const errorMessage = error
     </section>
   </div>
 </BaseLayout>
+
+<script>
+  let archiveConfirmController: AbortController | null = null;
+
+  function initializeArchiveConfirmations() {
+    archiveConfirmController?.abort();
+    archiveConfirmController = new AbortController();
+    document.addEventListener(
+      'submit',
+      (event) => {
+        if (!(event.target instanceof HTMLFormElement)) return;
+        const message = event.target.dataset.confirm;
+        if (message && !window.confirm(message)) event.preventDefault();
+      },
+      { capture: true, signal: archiveConfirmController.signal },
+    );
+  }
+
+  document.addEventListener('astro:page-load', initializeArchiveConfirmations);
+  document.addEventListener('astro:before-swap', () =>
+    archiveConfirmController?.abort(),
+  );
+  initializeArchiveConfirmations();
+</script>

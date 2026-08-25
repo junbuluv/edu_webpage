@@ -29,8 +29,8 @@ function steadyStateK({ s, n, d, alpha }: State) {
   return Math.pow(s / (n + d), 1 / (1 - alpha));
 }
 
-function buildCurves({ s, n, d, alpha }: State) {
-  const ks = Array.from({ length: 80 }, (_, i) => i * 0.2);
+function buildCurves({ s, n, d, alpha }: State, maxK: number) {
+  const ks = Array.from({ length: 81 }, (_, i) => (i * maxK) / 80);
   return ks.map((k) => ({
     k,
     y: Math.pow(k, alpha),
@@ -53,8 +53,11 @@ function simulate({ s, n, d, alpha }: State, T = 80, k0 = 1) {
 
 export default function SolowGrowth() {
   const [state, setState] = useState<State>(initial);
-  const curves = useMemo(() => buildCurves(state), [state]);
   const kss = useMemo(() => steadyStateK(state), [state]);
+  const curves = useMemo(
+    () => buildCurves(state, Math.max(16, kss * 1.15)),
+    [state, kss],
+  );
   const path = useMemo(() => simulate(state), [state]);
 
   return (
@@ -96,6 +99,13 @@ export default function SolowGrowth() {
           onChange={(v) => setState((x) => ({ ...x, alpha: v }))}
           fmt={(v) => v.toFixed(2)}
         />
+        <button
+          type="button"
+          onClick={() => setState({ ...initial })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="text-sm text-ink-muted self-end">
           Steady-state k* ≈ <strong>{kss.toFixed(2)}</strong>, y* ≈{' '}
           <strong>{Math.pow(kss, state.alpha).toFixed(2)}</strong>

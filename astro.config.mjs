@@ -16,8 +16,9 @@ export default defineConfig({
   // headers. On Vercel, x-forwarded-host vs Host can produce a mismatch
   // that rejects legitimate same-origin POSTs with a 403. We rely on
   // SameSite=Lax cookies (the actual CSRF defense for the auth flow)
-  // and disable Astro's secondary check. Re-enable here if/when the
-  // Astro Vercel adapter resolves the header-source issue upstream.
+  // and disable Astro's built-in comparison. src/middleware.ts applies a
+  // proxy-aware Origin / Sec-Fetch-Site check using forwarded and configured
+  // Vercel hosts instead.
   security: { checkOrigin: false },
   integrations: [
     react(),

@@ -1,11 +1,13 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseServerClient } from '@lib/supabase/server';
-import { COURSE_SLUGS, type CourseSlug, isCourseSlug } from '@lib/courses';
+import { type CourseSlug, isCourseSlug } from '@lib/courses';
 import {
   computeAvgBestScore,
   countDistinctQuizzes,
 } from '@lib/progress-aggregate';
+import { fetchArchiveQuizzes } from '@lib/archive/db';
+import { isUuid } from '@lib/workshop-policy';
 
 export type AvailableCourse = {
   slug: CourseSlug;
@@ -31,6 +33,7 @@ export type CourseDashboardData = {
   progressBySlug: Map<string, 'started' | 'completed'>;
   quizAttempts: Array<{
     quiz_slug: string;
+    title: string;
     score: number;
     max_score: number;
     submitted_at: string;
@@ -43,6 +46,13 @@ export type ResolveResult =
 
 type EnrollmentRow = { course_slug: string; semester: string };
 type AnyClient = NonNullable<SupabaseServerClient>;
+
+export class DashboardUnavailableError extends Error {
+  constructor(context: string) {
+    super(`Dashboard data unavailable: ${context}`);
+    this.name = 'DashboardUnavailableError';
+  }
+}
 
 /**
  * Resolution ladder for which course the dashboard should display:
@@ -67,16 +77,17 @@ export async function resolveActiveCourse(
 
   // 1. Honor explicit ?course=X for any valid course slug.
   if (courseParam && isCourseSlug(courseParam)) {
-    void persistActiveCourse(supabase, user.id, courseParam);
+    await persistActiveCourse(supabase, user.id, courseParam);
     return { kind: 'render', courseSlug: courseParam };
   }
 
   // 2. Stored preference.
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('active_course_slug')
     .eq('id', user.id)
     .maybeSingle();
+  if (profileError) throw new DashboardUnavailableError('profile');
 
   const stored = profile?.active_course_slug;
   if (stored && isCourseSlug(stored)) {
@@ -137,31 +148,44 @@ export async function getDashboardData(
   const course = await getEntry('courses', courseSlug);
   if (!course) return null;
 
-  const [allLessons, allInstructors, progressRows, quizRows, enrollmentRows] =
-    await Promise.all([
-      getCollection(
-        'lessons',
-        (l) => !l.data.draft && l.data.course === courseSlug,
-      ),
-      getCollection('instructors', (i) => i.data.courses.includes(courseSlug)),
-      supabase
-        .from('lesson_progress')
-        .select('lesson_slug, status, updated_at')
-        .eq('user_id', userId)
-        .like('lesson_slug', `${courseSlug}/%`),
-      supabase
-        .from('quiz_attempts')
-        .select('quiz_slug, score, max_score, submitted_at')
-        .eq('user_id', userId)
-        .like('quiz_slug', `${courseSlug}-%`)
-        .order('submitted_at', { ascending: false }),
-      supabase
-        .from('enrollments')
-        .select('semester')
-        .eq('user_id', userId)
-        .eq('course_slug', courseSlug)
-        .maybeSingle(),
-    ]);
+  const [
+    allLessons,
+    allInstructors,
+    catalogQuizzes,
+    progressRows,
+    quizRows,
+    enrollmentRows,
+  ] = await Promise.all([
+    getCollection(
+      'lessons',
+      (l) => !l.data.draft && l.data.course === courseSlug,
+    ),
+    getCollection('instructors', (i) => i.data.courses.includes(courseSlug)),
+    getCollection('quizzes', (quiz) => quiz.data.course === courseSlug),
+    supabase
+      .from('lesson_progress')
+      .select('lesson_slug, status, updated_at')
+      .eq('user_id', userId)
+      .like('lesson_slug', `${courseSlug}/%`),
+    supabase
+      .from('quiz_attempts')
+      .select('quiz_slug, score, max_score, submitted_at')
+      .eq('user_id', userId)
+      .eq('course_slug', courseSlug)
+      .order('submitted_at', { ascending: false }),
+    supabase
+      .from('enrollments')
+      .select('semester')
+      .eq('user_id', userId)
+      .eq('course_slug', courseSlug)
+      .order('enrolled_at', { ascending: false })
+      .limit(1),
+  ]);
+
+  if (progressRows.error)
+    throw new DashboardUnavailableError('lesson progress');
+  if (quizRows.error) throw new DashboardUnavailableError('quiz attempts');
+  if (enrollmentRows.error) throw new DashboardUnavailableError('enrollment');
 
   const lessons = [...allLessons].sort((a, b) => {
     if (a.data.unit !== b.data.unit)
@@ -182,12 +206,27 @@ export async function getDashboardData(
     (s) => s === 'completed',
   ).length;
 
-  const quizAttempts = quizRows.data ?? [];
+  const quizTitleBySlug = new Map(
+    catalogQuizzes.map((quiz) => [quiz.data.slug, quiz.data.title]),
+  );
+  if ((quizRows.data ?? []).some((attempt) => isUuid(attempt.quiz_slug))) {
+    try {
+      for (const quiz of await fetchArchiveQuizzes(courseSlug)) {
+        quizTitleBySlug.set(quiz.id, quiz.title);
+      }
+    } catch (error) {
+      console.error('[dashboard] archive_quiz_titles_unavailable', error);
+    }
+  }
+  const quizAttempts = (quizRows.data ?? []).map((attempt) => ({
+    ...attempt,
+    title: quizTitleBySlug.get(attempt.quiz_slug) ?? 'Archived quiz',
+  }));
 
   return {
     course,
     instructors,
-    enrolledSemester: enrollmentRows.data?.semester ?? null,
+    enrolledSemester: enrollmentRows.data?.[0]?.semester ?? null,
     stats: {
       lessonsCompleted,
       lessonsTotal: lessons.length,
@@ -206,10 +245,11 @@ async function fetchEnrollments(
   supabase: AnyClient,
   userId: string,
 ): Promise<EnrollmentRow[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('enrollments')
     .select('course_slug, semester')
     .eq('user_id', userId);
+  if (error) throw new DashboardUnavailableError('enrollments');
   return data ?? [];
 }
 
@@ -217,29 +257,25 @@ async function fetchActivityCourseSlugs(
   supabase: AnyClient,
   userId: string,
 ): Promise<Set<CourseSlug>> {
-  const [{ data: lessons }, { data: quizzes }] = await Promise.all([
+  const [lessonResult, quizResult] = await Promise.all([
     supabase
       .from('lesson_progress')
-      .select('lesson_slug')
+      .select('course_slug')
       .eq('user_id', userId),
-    supabase.from('quiz_attempts').select('quiz_slug').eq('user_id', userId),
+    supabase.from('quiz_attempts').select('course_slug').eq('user_id', userId),
   ]);
+  if (lessonResult.error)
+    throw new DashboardUnavailableError('lesson activity');
+  if (quizResult.error) throw new DashboardUnavailableError('quiz activity');
 
   const slugs = new Set<CourseSlug>();
-  for (const row of lessons ?? []) {
-    const slug = row.lesson_slug.split('/', 1)[0];
-    if (isCourseSlug(slug)) slugs.add(slug);
+  for (const row of lessonResult.data ?? []) {
+    const slug = row.course_slug;
+    if (slug && isCourseSlug(slug)) slugs.add(slug);
   }
-  for (const row of quizzes ?? []) {
-    // Quiz slugs are 'eco-1002-...' or 'fin-3610-...'. Match against
-    // known slugs rather than splitting on '-' (course slugs themselves
-    // contain hyphens).
-    for (const cs of COURSE_SLUGS) {
-      if (row.quiz_slug.startsWith(`${cs}-`)) {
-        slugs.add(cs);
-        break;
-      }
-    }
+  for (const row of quizResult.data ?? []) {
+    const slug = row.course_slug;
+    if (slug && isCourseSlug(slug)) slugs.add(slug);
   }
   return slugs;
 }
@@ -249,10 +285,11 @@ async function persistActiveCourse(
   userId: string,
   slug: CourseSlug,
 ): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('profiles')
     .update({ active_course_slug: slug })
     .eq('id', userId);
+  if (error) console.error('[dashboard] active_course_persist_failed', error);
 }
 
 async function sortByCourseOrder(slugs: CourseSlug[]): Promise<CourseSlug[]> {

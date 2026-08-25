@@ -103,6 +103,13 @@ export default function DDMValuation() {
           fmt={(v) => (v * 100).toFixed(1) + '%'}
           onChange={(v) => setS((x) => ({ ...x, rE: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
       </div>
 
       <div className="md:col-span-2 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
@@ -181,6 +188,9 @@ export default function DDMValuation() {
           </ResponsiveContainer>
         </div>
         <p className="mt-2 text-xs text-ink-muted">
+          Current parameters: EPS₁ = ${s.eps1.toFixed(2)}, retention ={' '}
+          {(s.retention * 100).toFixed(0)}%, return on new investment ={' '}
+          {(s.roi * 100).toFixed(1)}%, and r_E = {(s.rE * 100).toFixed(1)}%.{' '}
           When the return on new investment exceeds r_E, the curve rises above
           the benchmark: retaining and reinvesting creates value. When it is
           below r_E, the curve falls and the same growth destroys value. Equal

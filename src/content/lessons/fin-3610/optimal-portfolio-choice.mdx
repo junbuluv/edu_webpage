@@ -46,8 +46,10 @@ curve bows further to the left (lower risk for a given return). At
 $\rho = -1$ the curve kinks and can reach $\sigma = 0$: two perfectly
 negatively correlated assets can be combined into a riskless position.
 
-Drag the correlation slider and watch the frontier bow. Then note how
-the risk-free rate picks out a single tangent portfolio:
+Drag the correlation slider and watch the long-only opportunity set bow.
+Only the branch above its minimum-variance point is the efficient
+frontier; the lower branch is dominated. Then note how the risk-free
+rate picks out a single tangent portfolio:
 
 <EfficientFrontier client:load />
 
@@ -88,9 +90,9 @@ bills, $\sigma = 0$, return $R_f$). Combine the risk-free asset
 with any risky portfolio $P$ at weights $w$ and $1-w$:
 
 - $E[R_{\text{combined}}] = w R_f + (1-w) E[R_P]$
-- $\sigma_{\text{combined}} = (1-w) \sigma_P$ (since $\sigma_f = 0$)
+- $\sigma_{\text{combined}} = |1-w| \sigma_P$ (since $\sigma_f = 0$)
 
-Eliminate $w$: $\frac{\sigma_{\text{combined}}}{\sigma_P} = 1 - w$,
+For $w \le 1$, eliminate $w$: $\frac{\sigma_{\text{combined}}}{\sigma_P} = 1 - w$,
 so combined return is a _linear_ function of combined risk, starting
 at $R_f$ when $w = 1$.
 

@@ -12,7 +12,7 @@ quizzes are JSON; progress + auth live in Supabase. Public repo at
 - **MDX** with `remark-math` + `rehype-katex` for inline/display math
 - **Recharts** for most charts; Plotly available for heavier finance visualizations
 - **Supabase** (Postgres + auth + RLS) — see `supabase/schema.sql`
-- **Node 22+** required (Supabase realtime needs native WebSocket; enforced in `package.json#engines` and CI)
+- **Node 22.x** required (matches Vercel and CI; enforced in `package.json#engines` and `.nvmrc`)
 
 Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@content/*`, `@/*`.
 
@@ -83,8 +83,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   checks. `isContentManager` (instructor|admin, **TA read-only**) gates
   content mutation and is deliberately narrower than `isStaff` (which
   includes `ta`)
-- Device cookie: `src/lib/device.ts` — middleware issues a `device_id`
-  UUID cookie used by the workshop stamp uniqueness constraint
+- Device cookie: `src/lib/device.ts` — middleware issues a short-lived
+  `workshop_device_id` UUID cookie; workshop attendance stores only its HMAC
+  for uniqueness, never the raw cookie or submitted coordinates
 - Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
   tween honoring `prefers-reduced-motion`)
 - MDX components in `src/components/mdx/`: `ScenarioPlayer`,
@@ -293,11 +294,13 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
 
 - **Env vars must be set manually in Vercel UI.** The Supabase-Vercel
   Integration is a separate install from the Supabase-GitHub Integration
-  and most setups have only the latter. Five vars need to exist in
-  Project Settings → Environment Variables, with **all three environment
-  scopes** (Production, Preview, Development) checked: `PUBLIC_SUPABASE_URL`,
-  `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PUBLIC_SITE_URL`,
-  `PII_HMAC_SECRET`. If Production scope is unchecked on any of them, the
+  and most setups have only the latter. Five vars need **all three environment
+  scopes** (Production, Preview, Development): `PUBLIC_SUPABASE_URL`,
+  `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PII_HMAC_SECRET`,
+  and `CRON_SECRET`. Set `PUBLIC_SITE_URL` to the canonical URL in Production;
+  Preview may leave it unset because auth callbacks fall back to Vercel's
+  deployment URL. If Production scope is unchecked on any required runtime
+  secret, the
   prod runtime gets `undefined` and middleware redirects every authenticated
   request to `/auth/setup-required`.
 - **Production auto-deploy from `main` is not reliable.** Several merges to
@@ -313,18 +316,18 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   current `main` from your machine. A duplicate auto-created project
   (`edu-webpage-m3av`) was deleted — if a second project reappears wired to
   this same repo it double-deploys every push; remove it.
-- **Astro 5's `security.checkOrigin` is disabled** in `astro.config.mjs`.
-  The default-true setting compares request `Origin` to a URL Astro derives
-  from `Host` headers, which Vercel's edge layer doesn't preserve reliably —
-  every legitimate same-origin POST gets 403 "Cross-site POST form
-  submissions are forbidden". `SameSite=Lax` session cookies remain the
-  actual CSRF defense for the auth flow. Re-enable if/when the upstream
-  Astro/Vercel header-source issue is fixed.
+- **Astro 5's built-in `security.checkOrigin` is disabled** in
+  `astro.config.mjs`; `src/middleware.ts` performs the replacement check. It
+  accepts the request/forwarded/configured Vercel origins and rejects
+  cross-site browser mutations before auth or body parsing. Keep this guard in
+  place if proxy header behavior changes.
 - **`site:` in `astro.config.mjs` must match the deployed origin.** Currently
   set to `https://edu-webpage-fawn.vercel.app`. Affects sitemap.xml URLs,
   `<link rel="canonical">` tags, and `Astro.site`. Update when moving to a
   custom domain (e.g., `econ.baruch.cuny.edu`) — single-line PR, plus
   updating Supabase Auth URL Configuration + `PUBLIC_SITE_URL` env var.
+  Supabase's Redirect URLs must also include the exact production callback and
+  `https://*-<team-or-account-slug>.vercel.app/**` for preview auth links.
 
 ## Common tasks
 

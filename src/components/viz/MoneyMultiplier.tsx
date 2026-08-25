@@ -11,8 +11,8 @@ import {
 } from 'recharts';
 
 // Simple deposit multiplier:  m_simple = 1 / r
-// Full money multiplier (Hubbard Ch 14):
-//   M = m * MB,  with  m = (1 + C/D) / ((C/D) + (R/D))
+// Full transaction-money multiplier (a stylized M1 proxy):
+//   M1 = m * MB,  with  m = (1 + C/D) / ((C/D) + (R/D))
 // Where:
 //   C/D = currency-deposit ratio (public's choice)
 //   R/D = reserve-deposit ratio = r_required + r_excess
@@ -34,26 +34,26 @@ function multiplier(s: State) {
   return (1 + s.currencyRatio) / (s.currencyRatio + s.reserveRatio);
 }
 
-function moneySupply(s: State) {
+function transactionMoney(s: State) {
   return s.monetaryBase * multiplier(s);
 }
 
 function decompose(s: State) {
-  const M = moneySupply(s);
-  const D = M / (1 + s.currencyRatio); // M = C + D, C = (C/D)*D
+  const M1 = transactionMoney(s);
+  const D = M1 / (1 + s.currencyRatio); // M1 = C + D, C = (C/D)*D
   const C = s.currencyRatio * D;
   const R = s.reserveRatio * D;
-  return { M, C, D, R };
+  return { M1, C, D, R };
 }
 
 export default function MoneyMultiplier() {
   const [state, setState] = useState<State>(baseline);
   const m = useMemo(() => multiplier(state), [state]);
-  const { M, C, D, R } = useMemo(() => decompose(state), [state]);
+  const { M1, C, D, R } = useMemo(() => decompose(state), [state]);
 
   const chartData = [
     { name: 'Monetary base', currency: state.monetaryBase - R, reserves: R },
-    { name: 'Money supply', currency: C, deposits: D },
+    { name: 'Modeled M1', currency: C, deposits: D },
   ];
 
   return (
@@ -96,7 +96,7 @@ export default function MoneyMultiplier() {
 
       <div className="mt-3 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
         <Stat label="Multiplier m" value={m.toFixed(2)} />
-        <Stat label="Money supply M" value={`$${M.toFixed(0)}B`} />
+        <Stat label="Modeled M1" value={`$${M1.toFixed(0)}B`} />
         <Stat label="Deposits D" value={`$${D.toFixed(0)}B`} />
         <Stat label="Currency C" value={`$${C.toFixed(0)}B`} />
       </div>
@@ -132,11 +132,11 @@ export default function MoneyMultiplier() {
       </div>
 
       <p className="mt-3 text-xs text-ink-muted">
-        Money supply <code>M = m · MB</code> where
+        This stylized transaction-money model uses <code>M1 = m · MB</code> where
         <code> m = (1 + C/D) / ((C/D) + (R/D))</code>. As banks hold more excess
         reserves (R/D ↑) or the public holds more cash (C/D ↑), the multiplier
-        shrinks. This is why QE's effect on M depends on what banks do with the
-        new reserves.
+        shrinks. It does not model M2, whose ratio to the monetary base is a
+        descriptive aggregate rather than this deposit-multiplier identity.
       </p>
     </div>
   );

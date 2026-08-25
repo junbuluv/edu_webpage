@@ -53,7 +53,8 @@ export async function listAllAuthUsers(
 
 /**
  * Page through a PostgREST query past the default 1000-row response cap.
- * `makeQuery(from, to)` must return the query with `.range(from, to)` applied.
+ * `makeQuery(from, to)` must apply a stable, unique ordering before
+ * `.range(from, to)` so OFFSET pagination cannot skip or duplicate tied rows.
  * Returns { rows, error }; never throws, so callers can degrade gracefully.
  */
 export async function selectAllRows<T>(
@@ -70,6 +71,32 @@ export async function selectAllRows<T>(
     const page = data ?? [];
     rows.push(...page);
     if (page.length < pageSize) break;
+  }
+  return { rows, error: null };
+}
+
+/**
+ * Page a query while also bounding large `.in(...)` filters. PostgREST puts
+ * filter values in the URL, so pagination alone does not protect a large
+ * roster from proxy URL limits.
+ */
+export async function selectAllRowsInBatches<T, V>(
+  values: readonly V[],
+  makeQuery: (
+    batch: V[],
+    from: number,
+    to: number,
+  ) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+  batchSize = 100,
+): Promise<{ rows: T[]; error: string | null }> {
+  const rows: T[] = [];
+  for (let start = 0; start < values.length; start += batchSize) {
+    const batch = values.slice(start, start + batchSize) as V[];
+    const result = await selectAllRows<T>((from, to) =>
+      makeQuery(batch, from, to),
+    );
+    rows.push(...result.rows);
+    if (result.error) return { rows, error: result.error };
   }
   return { rows, error: null };
 }

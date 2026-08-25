@@ -26,7 +26,7 @@ import {
 } from '@lib/adas/url-state';
 
 // Short-run AD-AS in (Y, P).
-//   AD:   Y = a - b*P + g*G + m*M
+//   AD:   Y = a + A0 - b*P + g*G + m*M
 //   SRAS: P = Pe + c*(Y - Yn)
 
 type State = ADASSnapshot;
@@ -35,8 +35,8 @@ const params = { a: 800, b: 40, g: 1.5, m: 0.4, c: 0.05 };
 
 function solve(s: State) {
   const { a, b, g, m, c } = params;
-  const P = (c * a + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
-  const Y = a - b * P + g * s.G + m * s.M;
+  const P = (c * (a + s.A0) + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
+  const Y = a + s.A0 - b * P + g * s.G + m * s.M;
   return { Y, P };
 }
 
@@ -45,7 +45,7 @@ function buildSeries(s: State) {
   const Ys = Array.from({ length: 41 }, (_, i) => 600 + i * 20);
   return Ys.map((Y) => ({
     Y,
-    AD: (a - Y + g * s.G + m * s.M) / b,
+    AD: (a + s.A0 - Y + g * s.G + m * s.M) / b,
     SRAS: s.Pe + c * (Y - s.Yn),
   }));
 }
@@ -74,12 +74,13 @@ export default function ADASChart() {
 
   const G = useAnimatedValue(state.G, { durationMs: 220 });
   const M = useAnimatedValue(state.M, { durationMs: 220 });
+  const A0 = useAnimatedValue(state.A0, { durationMs: 220 });
   const Pe = useAnimatedValue(state.Pe, { durationMs: 220 });
   const Yn = useAnimatedValue(state.Yn, { durationMs: 220 });
-  const animated: State = { G, M, Pe, Yn };
+  const animated: State = { G, M, A0, Pe, Yn };
 
-  const data = useMemo(() => buildSeries(animated), [G, M, Pe, Yn]);
-  const eq = useMemo(() => solve(animated), [G, M, Pe, Yn]);
+  const data = useMemo(() => buildSeries(animated), [G, M, A0, Pe, Yn]);
+  const eq = useMemo(() => solve(animated), [G, M, A0, Pe, Yn]);
 
   const baseline = useMemo(() => solve(ADAS_BASELINE), []);
   const deltaY = eq.Y - baseline.Y;
@@ -128,6 +129,7 @@ export default function ADASChart() {
       (p) =>
         Math.abs(p.state.G - state.G) < 0.5 &&
         Math.abs(p.state.M - state.M) < 0.5 &&
+        Math.abs(p.state.A0 - state.A0) < 0.5 &&
         Math.abs(p.state.Pe - state.Pe) < 0.05 &&
         Math.abs(p.state.Yn - state.Yn) < 0.5,
     )?.id ?? '';
@@ -175,6 +177,15 @@ export default function ADASChart() {
           step={1}
           decimals={0}
           onChange={(v) => setState((s) => ({ ...s, M: v }))}
+        />
+        <ParamControl
+          label="Private demand A₀"
+          value={state.A0}
+          min={-200}
+          max={200}
+          step={5}
+          decimals={0}
+          onChange={(v) => setState((s) => ({ ...s, A0: v }))}
         />
         <ParamControl
           label="Expected price Pᵉ"
@@ -313,8 +324,8 @@ export default function ADASChart() {
       {compareMode && pinned && (
         <div className="mt-4">
           <CompareScenarios
-            leftLabel={`Pinned: G=${pinned.G.toFixed(0)}, M=${pinned.M.toFixed(0)}, Pᵉ=${pinned.Pe.toFixed(2)}, Yₙ=${pinned.Yn.toFixed(0)}`}
-            rightLabel={`Current: G=${state.G.toFixed(0)}, M=${state.M.toFixed(0)}, Pᵉ=${state.Pe.toFixed(2)}, Yₙ=${state.Yn.toFixed(0)}`}
+            leftLabel={`Pinned: G=${pinned.G.toFixed(0)}, M=${pinned.M.toFixed(0)}, A₀=${pinned.A0.toFixed(0)}, Pᵉ=${pinned.Pe.toFixed(2)}, Yₙ=${pinned.Yn.toFixed(0)}`}
+            rightLabel={`Current: G=${state.G.toFixed(0)}, M=${state.M.toFixed(0)}, A₀=${state.A0.toFixed(0)}, Pᵉ=${state.Pe.toFixed(2)}, Yₙ=${state.Yn.toFixed(0)}`}
             left={<ADASScenarioView state={pinned} />}
             right={<ADASScenarioView state={state} />}
             caption="Drag AD or SRAS on the live chart, tweak sliders, or pick another preset to see how equilibrium moves relative to your pinned snapshot."
@@ -324,8 +335,8 @@ export default function ADASChart() {
 
       <p className="mt-4 text-xs text-ink-muted">
         Short-run AD-AS. AD slopes down in (Y, P); SRAS slopes up around Yₙ.
-        Demand shocks shift AD; supply shocks change Pᵉ or Yₙ. Drag the AD or
-        SRAS pill on the right edge, use sliders, or pick a preset.
+        Demand shocks change A₀, G, or M; supply shocks change Pᵉ or Yₙ. Drag
+        the AD or SRAS pill on the right edge, use sliders, or pick a preset.
       </p>
     </div>
   );

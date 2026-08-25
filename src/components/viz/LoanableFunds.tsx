@@ -10,6 +10,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import {
+  loanableFundsEquilibrium,
+  loanableFundsRateDomain,
+} from '@lib/viz/model-math';
 
 // Loanable funds market:
 //   Demand for loanable funds (investment): I(r) = I0 - bI * r
@@ -36,20 +40,21 @@ const params = {
 function solve(s: State) {
   const I0 = params.I0_base * s.expReturn;
   const S0 = params.S0_base * s.privSavingRate;
-  // I(r) = S(r):  I0 - bI*r = S0 + bS*r - deficit
-  //   I0 - S0 + deficit = (bI + bS) * r
-  const rStar = (I0 - S0 + s.deficit) / (params.bI + params.bS);
-  const iStar = I0 - params.bI * rStar;
-  // private saving alone at r*
-  const sPrivStar = S0 + params.bS * rStar;
-  return { rStar, iStar, sPrivStar };
+  const result = loanableFundsEquilibrium(
+    I0,
+    S0,
+    params.bI,
+    params.bS,
+    s.deficit,
+  );
+  return { rStar: result.realRate, iStar: result.quantity, I0, S0 };
 }
 
-function buildSeries(s: State) {
+function buildSeries(s: State, rateMinimum: number, rateMaximum: number) {
   const I0 = params.I0_base * s.expReturn;
   const S0 = params.S0_base * s.privSavingRate;
-  return Array.from({ length: 41 }, (_, i) => {
-    const r = i * 0.5; // 0 to 20%
+  return Array.from({ length: 61 }, (_, i) => {
+    const r = rateMinimum + (i / 60) * (rateMaximum - rateMinimum);
     return {
       r,
       I: I0 - params.bI * r,
@@ -61,10 +66,35 @@ function buildSeries(s: State) {
 
 export default function LoanableFunds() {
   const [s, setS] = useState<State>(baseline);
-  const data = useMemo(() => buildSeries(s), [s]);
   const eq = useMemo(() => solve(s), [s]);
-  const baseEq = useMemo(() => solve(baseline), []);
-  const crowdOut = baseEq.iStar - eq.iStar;
+  const rateDomain = useMemo(
+    () =>
+      loanableFundsRateDomain(
+        eq.I0,
+        eq.S0,
+        params.bI,
+        params.bS,
+        s.deficit,
+        eq.rStar,
+      ),
+    [eq, s.deficit],
+  );
+  const data = useMemo(
+    () => buildSeries(s, rateDomain.minimum, rateDomain.maximum),
+    [s, rateDomain],
+  );
+  const noDeficitEq = useMemo(() => solve({ ...s, deficit: 0 }), [s]);
+  const crowdOut = noDeficitEq.iStar - eq.iStar;
+  const quantityDomain = useMemo(() => {
+    const quantities = data.flatMap((row) => [row.I, row.S, row.Sprivate]);
+    const minimum = Math.min(eq.iStar, ...quantities);
+    const maximum = Math.max(eq.iStar, ...quantities);
+    const padding = Math.max(25, (maximum - minimum) * 0.05);
+    return [Math.max(0, minimum - padding), maximum + padding] as [
+      number,
+      number,
+    ];
+  }, [data, eq.iStar]);
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -97,6 +127,7 @@ export default function LoanableFunds() {
           onChange={(v) => setS((x) => ({ ...x, expReturn: v }))}
         />
         <button
+          type="button"
           onClick={() => setS(baseline)}
           className="self-end text-sm text-ink-muted underline"
         >
@@ -113,7 +144,7 @@ export default function LoanableFunds() {
             <span
               className={crowdOut > 0 ? 'text-rose-700' : 'text-emerald-700'}
             >
-              crowding-out vs baseline: ${crowdOut.toFixed(0)}B
+              deficit effect on investment: ${crowdOut.toFixed(0)}B
             </span>
           </>
         )}
@@ -129,7 +160,7 @@ export default function LoanableFunds() {
             <XAxis
               dataKey="I"
               type="number"
-              domain={['auto', 'auto']}
+              domain={quantityDomain}
               tickFormatter={(v) => `$${v.toFixed(0)}B`}
               label={{
                 value: 'Loanable funds quantity',
@@ -141,7 +172,7 @@ export default function LoanableFunds() {
             <YAxis
               dataKey="r"
               type="number"
-              domain={[0, 20]}
+              domain={[rateDomain.minimum, rateDomain.maximum]}
               label={{
                 value: 'Real interest rate r (%)',
                 angle: -90,
@@ -190,10 +221,16 @@ export default function LoanableFunds() {
       </div>
 
       <p className="mt-3 text-xs text-ink-muted">
-        A government budget deficit (positive value) means the government is
-        borrowing from the same pool of saving that firms use to invest. That
-        shifts the supply of loanable funds left, raises the real rate, and
-        reduces equilibrium investment — <strong>crowding out</strong>.
+        Current parameters: deficit = ${s.deficit.toFixed(0)}B, private-saving
+        multiplier = {s.privSavingRate.toFixed(2)}x, and investment-demand
+        multiplier = {s.expReturn.toFixed(2)}x. The calibrated slopes are bI ={' '}
+        {params.bI} and bS = {params.bS} billion dollars per percentage point.
+        The axes expand to include the clearing rate, including a negative real
+        rate when strong saving or a surplus requires one. A government budget
+        deficit (positive value) means the government is borrowing from the same
+        pool of saving that firms use to invest. That shifts the supply of
+        loanable funds left, raises the real rate, and reduces equilibrium
+        investment — <strong>crowding out</strong>.
       </p>
     </div>
   );

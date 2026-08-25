@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { irrForCashflows } from '@lib/viz/model-math';
 
 // TVM + NPV calculator. CF stream: CF0 (initial outflow, negative) +
 // {C_1, C_2, ..., C_T} with growth rate g applied to a base annual cash
@@ -56,26 +57,11 @@ function npvAt(s: State, r: number) {
 }
 
 function irr(s: State): number | null {
-  // Bisect on r ∈ [-0.99, 5]. NPV typically decreasing in r when CF0<0.
-  let lo = -0.99,
-    hi = 5;
-  let nLo = npvAt(s, lo),
-    nHi = npvAt(s, hi);
-  if (Number.isNaN(nLo) || Number.isNaN(nHi)) return null;
-  if (nLo * nHi > 0) return null;
-  for (let i = 0; i < 80; i++) {
-    const mid = (lo + hi) / 2;
-    const nMid = npvAt(s, mid);
-    if (Math.abs(nMid) < 1e-6) return mid;
-    if (nLo * nMid < 0) {
-      hi = mid;
-      nHi = nMid;
-    } else {
-      lo = mid;
-      nLo = nMid;
-    }
-  }
-  return (lo + hi) / 2;
+  return irrForCashflows(
+    Array.from({ length: s.horizon + 1 }, (_, period) =>
+      period === 0 ? s.cf0 : s.baseCF * Math.pow(1 + s.growth, period - 1),
+    ),
+  );
 }
 
 export default function TVMNPV() {
@@ -140,6 +126,13 @@ export default function TVMNPV() {
           fmt={(v) => v.toFixed(0)}
           onChange={(v) => setS((x) => ({ ...x, horizon: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           NPV ={' '}
           <strong
@@ -223,6 +216,13 @@ export default function TVMNPV() {
           </ResponsiveContainer>
         </div>
       </div>
+      <p className="md:col-span-2 text-xs text-ink-muted">
+        Current parameters: CF₀ = ${s.cf0.toFixed(0)}, first annual cash flow =
+        ${s.baseCF.toFixed(0)}, growth = {(s.growth * 100).toFixed(1)}%, r ={' '}
+        {(s.rate * 100).toFixed(1)}%, and T = {s.horizon} years. Cash flows grow
+        from the year-1 base and are discounted at the same rate shown in the
+        sensitivity chart.
+      </p>
     </div>
   );
 }

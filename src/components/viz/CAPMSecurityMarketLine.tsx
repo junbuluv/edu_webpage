@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { paddedReturnDomain } from '@lib/viz/model-math';
 
 // CAPM: E[R_i] = R_f + beta_i * (E[R_m] - R_f)
 // SML is the line in (beta, E[R]) space.
@@ -56,6 +57,14 @@ export default function CAPMSecurityMarketLine() {
       })),
     [s, assets],
   );
+  const returnDomain = useMemo(
+    () =>
+      paddedReturnDomain([
+        ...line.map((point) => point.exp),
+        ...points.map((point) => point.observed),
+      ]),
+    [line, points],
+  );
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -78,6 +87,13 @@ export default function CAPMSecurityMarketLine() {
           fmt={(v) => (v * 100).toFixed(1) + '%'}
           onChange={(v) => setS((x) => ({ ...x, mrp: v }))}
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           Slope of SML = MRP = <strong>{(s.mrp * 100).toFixed(1)}%</strong>
         </div>
@@ -103,7 +119,7 @@ export default function CAPMSecurityMarketLine() {
             />
             <YAxis
               type="number"
-              domain={[0, 0.25]}
+              domain={returnDomain}
               tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
               label={{
                 value: 'expected / observed return',
@@ -137,38 +153,44 @@ export default function CAPMSecurityMarketLine() {
         </ResponsiveContainer>
       </div>
 
-      <table className="mt-4 w-full text-sm">
-        <thead className="text-left text-ink-muted">
-          <tr>
-            <th className="py-1">Asset</th>
-            <th>β</th>
-            <th>Observed</th>
-            <th>CAPM E[R]</th>
-            <th>α</th>
-          </tr>
-        </thead>
-        <tbody>
-          {points.map((p) => (
-            <tr key={p.name} className="border-t border-slate-100">
-              <td className="py-1.5">{p.name}</td>
-              <td>{p.beta.toFixed(2)}</td>
-              <td>{(p.observed * 100).toFixed(1)}%</td>
-              <td>{(p.expected * 100).toFixed(1)}%</td>
-              <td
-                className={p.alpha >= 0 ? 'text-emerald-700' : 'text-rose-700'}
-              >
-                {p.alpha >= 0 ? '+' : ''}
-                {(p.alpha * 100).toFixed(1)}%
-              </td>
+      <div className="mt-4 overflow-x-auto">
+        <table className="min-w-[34rem] w-full text-sm">
+          <thead className="text-left text-ink-muted">
+            <tr>
+              <th className="py-1">Asset</th>
+              <th>β</th>
+              <th>Observed</th>
+              <th>CAPM E[R]</th>
+              <th>α</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {points.map((p) => (
+              <tr key={p.name} className="border-t border-slate-100">
+                <td className="py-1.5">{p.name}</td>
+                <td>{p.beta.toFixed(2)}</td>
+                <td>{(p.observed * 100).toFixed(1)}%</td>
+                <td>{(p.expected * 100).toFixed(1)}%</td>
+                <td
+                  className={
+                    p.alpha >= 0 ? 'text-emerald-700' : 'text-rose-700'
+                  }
+                >
+                  {p.alpha >= 0 ? '+' : ''}
+                  {(p.alpha * 100).toFixed(1)}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <p className="mt-3 text-xs text-ink-muted">
-        Points above the SML have positive α (mispriced cheap / outperforming).
-        Below the line ⇒ negative α. In a CAPM-efficient market, α = 0 for every
-        asset on average.
+        Current parameters: Rf = {(s.rf * 100).toFixed(2)}% and market risk
+        premium = {(s.mrp * 100).toFixed(1)}%; observed asset returns and betas
+        are held fixed. Points above the SML have positive α (mispriced cheap /
+        outperforming). Below the line ⇒ negative α. In a CAPM-efficient market,
+        α = 0 for every asset on average.
       </p>
     </div>
   );

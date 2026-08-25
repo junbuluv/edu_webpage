@@ -1,35 +1,51 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin as isAdminRole, roleLabel } from '@lib/roles';
+import { isAdmin as isAdminRole, isInstructor, roleLabel } from '@lib/roles';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
+if (!isInstructor(role)) return new Response(null, { status: 403 });
 const isAdmin = isAdminRole(role);
 
-const classes = await listClasses(user.id, isAdmin);
+let classes;
+try {
+  classes = await listClasses(user.id, isAdmin);
+} catch {
+  return new Response('Could not load classes right now. Please try again.', {
+    status: 503,
+  });
+}
 
 // At-risk count per class. Reuses the roster loader without the email
 // lookup (cheaper, no PII pulled just for a count).
 const now = Date.now();
 const atRiskByKey = new Map<string, number>();
-await Promise.all(
-  classes.map(async (c) => {
-    const res = await loadClassRoster(
-      user.id,
-      isAdmin,
-      c.course,
-      c.semester,
-      now,
-      {
-        withEmail: false,
-      },
-    );
-    if (res.kind === 'ok')
-      atRiskByKey.set(`${c.course}::${c.semester}`, res.roster.atRiskCount);
-  }),
-);
+const riskUnavailableKeys = new Set<string>();
+for (let start = 0; start < classes.length; start += 4) {
+  await Promise.all(
+    classes.slice(start, start + 4).map(async (c) => {
+      const key = `${c.instructorId}::${c.course}::${c.semester}`;
+      const res = await loadClassRoster(
+        user.id,
+        isAdmin,
+        c.course,
+        c.semester,
+        now,
+        {
+          withEmail: false,
+          instructorId: c.instructorId,
+        },
+      );
+      if (res.kind === 'ok' && !res.roster.dataIncomplete) {
+        atRiskByKey.set(key, res.roster.atRiskCount);
+      } else {
+        riskUnavailableKeys.add(key);
+      }
+    }),
+  );
+}
 
 const courseMeta = new Map(
   (await getCollection('courses')).map((c) => [c.data.slug, c.data]),
@@ -49,13 +65,20 @@ const roleDisplay = roleLabel(role);
       lesson progress, quiz performance, workshop attendance, and an at-risk
       flag.
     </p>
+    <p class="mt-4">
+      <a
+        href="/instructor/classes/import"
+        class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+      >
+        {isAdmin ? 'Provision or import a class' : 'Import roster'}
+      </a>
+    </p>
 
     {
       classes.length === 0 && (
         <p class="mt-10 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-          No classes found. You appear as the instructor on a class once an
-          admin adds <code>enrollments</code> rows with your user id as the
-          <code>instructor_id</code> for a course and semester.
+          No active teaching assignments found. An admin must assign the
+          instructor to a course and semester before students can be imported.
         </p>
       )
     }
@@ -64,7 +87,9 @@ const roleDisplay = roleLabel(role);
       {
         classes.map((c) => {
           const meta = courseMeta.get(c.course);
-          const atRisk = atRiskByKey.get(`${c.course}::${c.semester}`) ?? 0;
+          const key = `${c.instructorId}::${c.course}::${c.semester}`;
+          const atRisk = atRiskByKey.get(key) ?? 0;
+          const riskUnavailable = riskUnavailableKeys.has(key);
           return (
             <li class="rounded-lg border border-slate-200 p-5">
               <div class="flex flex-wrap items-center justify-between gap-3">
@@ -78,17 +103,28 @@ const roleDisplay = roleLabel(role);
                   {meta?.title && (
                     <p class="text-sm text-ink-muted">{meta.title}</p>
                   )}
+                  {isAdmin && (
+                    <p class="mt-1 text-xs text-ink-muted">
+                      Instructor:{' '}
+                      {c.instructorName ?? c.instructorId.slice(0, 8)} ·{' '}
+                      {c.assignmentActive ? 'active' : 'inactive'}
+                    </p>
+                  )}
                   <p class="mt-1 text-xs text-ink-muted">
                     {c.studentCount} student{c.studentCount === 1 ? '' : 's'}
-                    {atRisk > 0 && (
+                    {riskUnavailable ? (
+                      <span class="ml-2 rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
+                        Risk data unavailable
+                      </span>
+                    ) : atRisk > 0 ? (
                       <span class="ml-2 rounded bg-amber-100 px-2 py-0.5 font-semibold uppercase text-amber-800">
                         ⚠ {atRisk} at-risk
                       </span>
-                    )}
+                    ) : null}
                   </p>
                 </div>
                 <a
-                  href={`/instructor/classes/${c.course}?semester=${encodeURIComponent(c.semester)}`}
+                  href={`/instructor/classes/${c.course}?semester=${encodeURIComponent(c.semester)}&instructor=${encodeURIComponent(c.instructorId)}`}
                   class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
                 >
                   Open roster →

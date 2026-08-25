@@ -16,6 +16,7 @@ import {
   getAdminClient,
   listAllAuthUsers,
   selectAllRows,
+  selectAllRowsInBatches,
 } from '@lib/supabase/admin';
 import { type CourseSlug, isCourseSlug } from '@lib/courses';
 import {
@@ -28,6 +29,9 @@ import {
 export interface InstructorClass {
   course: CourseSlug;
   semester: string;
+  instructorId: string;
+  instructorName: string | null;
+  assignmentActive: boolean;
   studentCount: number;
   /** Most recent enrolled_at in the class — used to sort newest-first. */
   latestEnrolledAt: string;
@@ -35,6 +39,7 @@ export interface InstructorClass {
 
 export interface RosterStudent {
   userId: string;
+  instructorId: string;
   name: string | null;
   section: string | null;
   email: string | null;
@@ -50,6 +55,8 @@ export interface RosterStudent {
 export interface ClassRoster {
   course: CourseSlug;
   semester: string;
+  instructorId: string;
+  assignmentActive: boolean;
   lessonsTotal: number;
   closedWindowCount: number;
   students: RosterStudent[];
@@ -76,29 +83,94 @@ export async function listClasses(
   isAdmin: boolean,
 ): Promise<InstructorClass[]> {
   const admin = getAdminClient();
-  let query = admin
-    .from('enrollments')
-    .select('course_slug, semester, enrolled_at');
-  if (!isAdmin) query = query.eq('instructor_id', instructorId);
-  const { data } = await query;
+  const assignmentRes = await selectAllRows<{
+    instructor_id: string;
+    course_slug: string;
+    semester: string;
+    active: boolean;
+    assigned_at: string;
+  }>((from, to) => {
+    let query = admin
+      .from('teaching_assignments')
+      .select('instructor_id, course_slug, semester, active, assigned_at');
+    if (!isAdmin) {
+      query = query.eq('instructor_id', instructorId).eq('active', true);
+    }
+    return query
+      .order('instructor_id', { ascending: true })
+      .order('course_slug', { ascending: true })
+      .order('semester', { ascending: true })
+      .range(from, to);
+  });
+  if (assignmentRes.error) throw new Error(assignmentRes.error);
 
   const byKey = new Map<string, InstructorClass>();
-  for (const r of data ?? []) {
-    if (!isCourseSlug(r.course_slug)) continue;
-    const key = `${r.course_slug}::${r.semester}`;
-    const existing = byKey.get(key);
-    if (!existing) {
-      byKey.set(key, {
-        course: r.course_slug,
-        semester: r.semester,
-        studentCount: 1,
-        latestEnrolledAt: r.enrolled_at,
-      });
-    } else {
-      existing.studentCount += 1;
-      if (r.enrolled_at > existing.latestEnrolledAt) {
-        existing.latestEnrolledAt = r.enrolled_at;
-      }
+  for (const row of assignmentRes.rows) {
+    if (!isCourseSlug(row.course_slug)) continue;
+    const key = `${row.instructor_id}::${row.course_slug}::${row.semester}`;
+    byKey.set(key, {
+      course: row.course_slug,
+      semester: row.semester,
+      instructorId: row.instructor_id,
+      instructorName: null,
+      assignmentActive: row.active,
+      studentCount: 0,
+      latestEnrolledAt: row.assigned_at,
+    });
+  }
+
+  const enrollmentRes = await selectAllRows<{
+    instructor_id: string;
+    course_slug: string;
+    semester: string;
+    enrolled_at: string;
+  }>((from, to) => {
+    let query = admin
+      .from('enrollments')
+      .select('instructor_id, course_slug, semester, enrolled_at');
+    if (!isAdmin) query = query.eq('instructor_id', instructorId);
+    return query
+      .order('instructor_id', { ascending: true })
+      .order('course_slug', { ascending: true })
+      .order('semester', { ascending: true })
+      .order('user_id', { ascending: true })
+      .range(from, to);
+  });
+  if (enrollmentRes.error) throw new Error(enrollmentRes.error);
+  for (const row of enrollmentRes.rows) {
+    const key = `${row.instructor_id}::${row.course_slug}::${row.semester}`;
+    const entry = byKey.get(key);
+    if (!entry) continue;
+    entry.studentCount += 1;
+    if (row.enrolled_at > entry.latestEnrolledAt) {
+      entry.latestEnrolledAt = row.enrolled_at;
+    }
+  }
+
+  const instructorIds = [
+    ...new Set([...byKey.values()].map((c) => c.instructorId)),
+  ];
+  if (instructorIds.length > 0) {
+    const profileRes = await selectAllRowsInBatches<
+      {
+        id: string;
+        display_name: string | null;
+      },
+      string
+    >(instructorIds, (batch, from, to) =>
+      admin
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', batch)
+        .order('id', { ascending: true })
+        .range(from, to),
+    );
+    if (profileRes.error) throw new Error(profileRes.error);
+    const names = new Map(
+      profileRes.rows.map((profile) => [profile.id, profile.display_name]),
+    );
+    for (const entry of byKey.values()) {
+      entry.instructorName = names.get(entry.instructorId) ?? null;
     }
   }
 
@@ -109,8 +181,9 @@ export async function listClasses(
 
 /**
  * Full roster + per-student monitoring signals for one (course, semester)
- * class. Enforces ownership in app code: a non-admin caller must be the
- * instructor_id on at least one enrollment in the class.
+ * class. Non-admin callers receive only the rows they own in that
+ * course-semester, so co-taught sections never disclose another instructor's
+ * roster.
  *
  * @param nowMs current time (injected so at-risk evaluation is testable)
  * @param opts.withEmail skip the auth.users email lookup when only counts
@@ -122,10 +195,24 @@ export async function loadClassRoster(
   course: CourseSlug,
   semester: string,
   nowMs: number,
-  opts: { withEmail?: boolean } = {},
+  opts: { withEmail?: boolean; instructorId?: string } = {},
 ): Promise<RosterResult> {
   const withEmail = opts.withEmail ?? true;
   const admin = getAdminClient();
+  const scopedInstructorId = isAdmin ? opts.instructorId : instructorId;
+  if (!scopedInstructorId) return { kind: 'forbidden' };
+
+  let assignmentQuery = admin
+    .from('teaching_assignments')
+    .select('active')
+    .eq('instructor_id', scopedInstructorId)
+    .eq('course_slug', course)
+    .eq('semester', semester);
+  if (!isAdmin) assignmentQuery = assignmentQuery.eq('active', true);
+  const { data: assignment, error: assignmentError } =
+    await assignmentQuery.maybeSingle();
+  if (assignmentError) return { kind: 'error' };
+  if (!assignment) return { kind: 'not_found' };
 
   // 1. Roster + ownership. Paginated, and an actual query error is reported
   // as 'error' (not 'not_found') so a transient failure doesn't masquerade
@@ -135,20 +222,17 @@ export async function loadClassRoster(
     instructor_id: string;
     student_name: string | null;
     section: string | null;
-  }>((from, to) =>
-    admin
+  }>((from, to) => {
+    let query = admin
       .from('enrollments')
       .select('user_id, instructor_id, student_name, section')
       .eq('course_slug', course)
       .eq('semester', semester)
-      .range(from, to),
-  );
+      .eq('instructor_id', scopedInstructorId);
+    return query.order('user_id', { ascending: true }).range(from, to);
+  });
   if (enrollmentRes.error) return { kind: 'error' };
   const roster = enrollmentRes.rows;
-  if (roster.length === 0) return { kind: 'not_found' };
-  if (!isAdmin && !roster.some((r) => r.instructor_id === instructorId)) {
-    return { kind: 'forbidden' };
-  }
   const userIds = roster.map((r) => r.user_id);
   const userIdSet = new Set(userIds);
 
@@ -161,6 +245,8 @@ export async function loadClassRoster(
     sectionById.set(r.user_id, r.section ?? null);
   }
 
+  const emptyRows = <T>() => Promise.resolve({ rows: [] as T[], error: null });
+
   // 2. Course-level facts + per-student source rows, in parallel. Each
   // table read is paginated past the 1000-row PostgREST cap so a large
   // class isn't silently truncated.
@@ -170,48 +256,90 @@ export async function loadClassRoster(
         'lessons',
         (l) => !l.data.draft && l.data.course === course,
       ),
-      selectAllRows<{ id: string; display_name: string | null }>((from, to) =>
-        admin
-          .from('profiles')
-          .select('id, display_name')
-          .in('id', userIds)
-          .range(from, to),
-      ),
+      userIds.length > 0
+        ? selectAllRowsInBatches<
+            { id: string; display_name: string | null },
+            string
+          >(userIds, (batch, from, to) =>
+            admin
+              .from('profiles')
+              .select('id, display_name')
+              .in('id', batch)
+              .order('id', { ascending: true })
+              .range(from, to),
+          )
+        : emptyRows<{ id: string; display_name: string | null }>(),
+      userIds.length > 0
+        ? selectAllRowsInBatches<
+            {
+              user_id: string;
+              lesson_slug: string;
+              status: string;
+              updated_at: string;
+            },
+            string
+          >(userIds, (batch, from, to) =>
+            admin
+              .from('offering_lesson_progress')
+              .select('user_id, lesson_slug, status, updated_at')
+              .in('user_id', batch)
+              .eq('course_slug', course)
+              .eq('semester', semester)
+              .eq('instructor_id', scopedInstructorId)
+              .order('user_id', { ascending: true })
+              .order('lesson_slug', { ascending: true })
+              .range(from, to),
+          )
+        : emptyRows<{
+            user_id: string;
+            lesson_slug: string;
+            status: string;
+            updated_at: string;
+          }>(),
+      userIds.length > 0
+        ? selectAllRowsInBatches<
+            {
+              user_id: string;
+              quiz_slug: string;
+              score: number;
+              max_score: number;
+              submitted_at: string;
+            },
+            string
+          >(userIds, (batch, from, to) =>
+            admin
+              .from('quiz_attempts')
+              .select('user_id, quiz_slug, score, max_score, submitted_at')
+              .in('user_id', batch)
+              .eq('course_slug', course)
+              .eq('semester', semester)
+              .eq('instructor_id', scopedInstructorId)
+              .order('id', { ascending: true })
+              .range(from, to),
+          )
+        : emptyRows<{
+            user_id: string;
+            quiz_slug: string;
+            score: number;
+            max_score: number;
+            submitted_at: string;
+          }>(),
       selectAllRows<{
-        user_id: string;
-        lesson_slug: string;
-        status: string;
-        updated_at: string;
-      }>((from, to) =>
-        admin
-          .from('lesson_progress')
-          .select('user_id, lesson_slug, status, updated_at')
-          .in('user_id', userIds)
-          .like('lesson_slug', `${course}/%`)
-          .range(from, to),
-      ),
-      selectAllRows<{
-        user_id: string;
-        quiz_slug: string;
-        score: number;
-        max_score: number;
-        submitted_at: string;
-      }>((from, to) =>
-        admin
-          .from('quiz_attempts')
-          .select('user_id, quiz_slug, score, max_score, submitted_at')
-          .in('user_id', userIds)
-          .like('quiz_slug', `${course}-%`)
-          .range(from, to),
-      ),
-      selectAllRows<{ id: string; closes_at: string }>((from, to) =>
-        admin
+        id: string;
+        closes_at: string;
+        instructor_id: string;
+        section: string | null;
+      }>((from, to) => {
+        const query = admin
           .from('workshop_administrations')
-          .select('id, closes_at')
+          .select('id, closes_at, instructor_id, section')
           .eq('course_slug', course)
-          .range(from, to),
-      ),
-      withEmail ? fetchEmails() : Promise.resolve(null),
+          .eq('semester', semester)
+          .eq('instructor_id', scopedInstructorId)
+          .is('cancelled_at', null);
+        return query.order('id', { ascending: true }).range(from, to);
+      }),
+      withEmail && userIds.length > 0 ? fetchEmails() : Promise.resolve(null),
     ]);
 
   const lessonsTotal = lessonEntries.length;
@@ -225,27 +353,41 @@ export async function loadClassRoster(
 
   // 3. Attendance: stamps in this course's windows, counted per student.
   const adminRows = adminRes.rows;
+  const adminById = new Map(adminRows.map((row) => [row.id, row]));
   const adminIds = adminRows.map((a) => a.id);
   const closedWindowCount = adminRows.filter(
-    (a) => Date.parse(a.closes_at) < nowMs,
+    (a) =>
+      a.instructor_id === scopedInstructorId && Date.parse(a.closes_at) < nowMs,
   ).length;
 
   const attendanceByUser = new Map<string, number>();
   let attendanceError: string | null = null;
   if (adminIds.length > 0) {
-    const stampsRes = await selectAllRows<{
-      user_id: string;
-      administration_id: string;
-    }>((from, to) =>
+    const stampsRes = await selectAllRowsInBatches<
+      {
+        user_id: string;
+        administration_id: string;
+      },
+      string
+    >(adminIds, (batch, from, to) =>
       admin
         .from('workshop_attendance')
         .select('user_id, administration_id')
-        .in('administration_id', adminIds)
+        .in('administration_id', batch)
+        .order('administration_id', { ascending: true })
+        .order('user_id', { ascending: true })
         .range(from, to),
     );
     attendanceError = stampsRes.error;
     for (const s of stampsRes.rows) {
       if (!userIdSet.has(s.user_id)) continue;
+      const administration = adminById.get(s.administration_id);
+      if (!administration) {
+        continue;
+      }
+      if ((sectionById.get(s.user_id) ?? null) !== administration.section) {
+        continue;
+      }
       attendanceByUser.set(
         s.user_id,
         (attendanceByUser.get(s.user_id) ?? 0) + 1,
@@ -316,6 +458,13 @@ export async function loadClassRoster(
     };
     const attempts = quizByUser.get(id) ?? [];
     const attendanceCount = attendanceByUser.get(id) ?? 0;
+    const studentSection = sectionById.get(id) ?? null;
+    const eligibleClosedWindowCount = adminRows.filter(
+      (administration) =>
+        administration.instructor_id === scopedInstructorId &&
+        Date.parse(administration.closes_at) < nowMs &&
+        studentSection === administration.section,
+    ).length;
     const avgBestScore = computeAvgBestScore(attempts);
 
     const quizLast = quizLastActive.get(id) ?? null;
@@ -333,11 +482,12 @@ export async function loadClassRoster(
         avgBestScore,
         attendanceCount,
       },
-      { closedWindowCount, nowMs },
+      { closedWindowCount: eligibleClosedWindowCount, nowMs },
     );
 
     return {
       userId: id,
+      instructorId: scopedInstructorId,
       name: registrarNameById.get(id) ?? nameById.get(id) ?? null,
       section: sectionById.get(id) ?? null,
       email: emailById?.get(id) ?? null,
@@ -362,11 +512,13 @@ export async function loadClassRoster(
     roster: {
       course,
       semester,
+      instructorId: scopedInstructorId,
+      assignmentActive: assignment.active,
       lessonsTotal,
       closedWindowCount,
       students,
       atRiskCount: students.filter((s) => s.risk.atRisk).length,
-      emailLookupFailed: withEmail && emailById === null,
+      emailLookupFailed: withEmail && userIds.length > 0 && emailById === null,
       dataIncomplete,
     },
   };

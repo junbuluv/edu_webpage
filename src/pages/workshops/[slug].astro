@@ -2,7 +2,16 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getEntry } from 'astro:content';
 import StampInButton from '@components/workshop/StampInButton';
-import { isAdmin } from '@lib/roles';
+import { isStaff } from '@lib/roles';
+import { getAdminClient } from '@lib/supabase/admin';
+import {
+  canUseStudentWorkshopAttendance,
+  canRevealWorkshopQuestions,
+  formatNewYorkDateTime,
+  formatWeekOf,
+  publicWorkshopQuestions,
+  workshopWindowStatus,
+} from '@lib/workshop-policy';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
@@ -16,54 +25,100 @@ if (!workshop) {
   return new Response(null, { status: 404 });
 }
 
-// Enrollment gate: students enrolled in the course OR admins see the
-// schedule. Admin "view-as" sees the page but won't be able to stamp
-// unless they're also enrolled (the stamp API still requires enrollment
-// or being the course's instructor).
-const viewerIsAdmin = isAdmin(Astro.locals.profile?.role);
-const { data: enrollment } = await supabase
+const role = Astro.locals.profile?.role;
+const viewerIsStaffPreview = isStaff(role);
+const admin = getAdminClient();
+const myAttempts = await admin
+  .from('workshop_attendance')
+  .select('administration_id, stamped_at, verification_method')
+  .eq('user_id', user.id);
+const historicalAdministrationIds = [
+  ...new Set((myAttempts.data ?? []).map((row) => row.administration_id)),
+];
+const historicalAdministrationsResult =
+  historicalAdministrationIds.length > 0
+    ? await admin
+        .from('workshop_administrations')
+        .select(
+          'id, semester, section, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
+        )
+        .eq('workshop_slug', workshop.data.slug)
+        .in('id', historicalAdministrationIds)
+    : { data: [], error: null };
+const { data: enrollments, error: enrollmentError } = await supabase
   .from('enrollments')
-  .select('user_id')
+  .select('user_id, section, semester, enrolled_at')
   .eq('user_id', user.id)
   .eq('course_slug', workshop.data.course)
-  .maybeSingle();
-const enrolled = !!enrollment;
-const canView = enrolled || viewerIsAdmin;
+  .order('enrolled_at', { ascending: false })
+  .limit(1);
+const currentEnrollment = enrollments?.[0] ?? null;
+const enrolled = currentEnrollment !== null;
+const sectionAssignmentMissing =
+  workshop.data.course === 'eco-1002' &&
+  enrolled &&
+  currentEnrollment.section == null;
+const canViewCurrentSchedule = enrolled || viewerIsStaffPreview;
+const canView =
+  canViewCurrentSchedule ||
+  (historicalAdministrationsResult.data ?? []).length > 0;
+const canStamp =
+  enrolled &&
+  canUseStudentWorkshopAttendance(role) &&
+  !sectionAssignmentMissing;
+const historicalOnly =
+  !enrolled &&
+  !viewerIsStaffPreview &&
+  (historicalAdministrationsResult.data ?? []).length > 0;
 
-// Pull this workshop's administrations across all sections, sorted by
-// section then opens_at. Only show those whose closes_at is still in
-// the future (don't leak past windows).
-const nowIso = new Date().toISOString();
-const { data: admins } = canView
+// RLS limits students to their exact instructor, semester, and section.
+const administrationsResult = canViewCurrentSchedule
   ? await supabase
       .from('workshop_administrations')
       .select(
-        'id, section, week_of, opens_at, closes_at, required_lat, required_lng, required_radius_meters, notes',
+        'id, semester, section, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
       )
       .eq('workshop_slug', workshop.data.slug)
-      .gt('closes_at', nowIso)
       .order('opens_at', { ascending: true })
-  : { data: [] };
-
-const myAttempts = canView
-  ? await supabase
-      .from('workshop_attendance')
-      .select('administration_id, stamped_at')
-      .eq('user_id', user.id)
-  : { data: [] };
-const stampedSet = new Set(
-  (myAttempts.data ?? []).map((a) => a.administration_id),
+  : { data: [], error: null };
+const administrationById = new Map(
+  [
+    ...(administrationsResult.data ?? []),
+    ...(historicalAdministrationsResult.data ?? []),
+  ].map((administration) => [administration.id, administration]),
 );
-
-function statusOf(
-  opens: string,
-  closes: string,
-): 'open' | 'upcoming' | 'closed' {
-  const now = Date.now();
-  if (now < Date.parse(opens)) return 'upcoming';
-  if (now > Date.parse(closes)) return 'closed';
-  return 'open';
-}
+const admins = [...administrationById.values()];
+const dataUnavailable = Boolean(
+  enrollmentError ||
+  myAttempts.error ||
+  administrationsResult.error ||
+  historicalAdministrationsResult.error,
+);
+const stampByAdministration = new Map(
+  (myAttempts.data ?? []).map((attempt) => [
+    attempt.administration_id,
+    attempt,
+  ]),
+);
+const publicQuestions = publicWorkshopQuestions(workshop.data.questions);
+const nowMs = Date.now();
+const visibleAdmins = admins.filter((administration) => {
+  if (nowMs <= Date.parse(administration.closes_at)) return true;
+  return stampByAdministration.has(administration.id);
+});
+const nextTransitionAt = visibleAdmins
+  .flatMap((administration) => {
+    const status = workshopWindowStatus(
+      administration.opens_at,
+      administration.closes_at,
+      administration.cancelled_at,
+      nowMs,
+    );
+    if (status === 'upcoming') return [administration.opens_at];
+    if (status === 'open') return [administration.closes_at];
+    return [];
+  })
+  .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
 
 const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
 const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
@@ -80,7 +135,20 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     <p class="mt-3 text-ink-muted">{workshop.data.summary}</p>
 
     {
-      !canView && (
+      dataUnavailable && (
+        <div
+          role="alert"
+          class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900"
+        >
+          Workshop records are temporarily unavailable. Refresh before relying
+          on the schedule or attendance status. Stamping is disabled until the
+          records load successfully.
+        </div>
+      )
+    }
+
+    {
+      !canView && !dataUnavailable && (
         <div class="mt-8 rounded border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
           <p class="font-medium">You're not enrolled in this course.</p>
           <p class="mt-2">
@@ -92,38 +160,70 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     }
 
     {
-      canView && !enrolled && viewerIsAdmin && (
+      canView &&
+        !dataUnavailable &&
+        sectionAssignmentMissing &&
+        canUseStudentWorkshopAttendance(role) && (
+          <div
+            role="alert"
+            class="mt-6 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
+          >
+            <p class="font-medium">Your roster needs a section assignment.</p>
+            <p class="mt-1">
+              Ask your instructor to assign CML, CTL, CWL, or CRL before using
+              weekly ECO workshop attendance. Stamping stays disabled until the
+              roster is repaired.
+            </p>
+          </div>
+        )
+    }
+
+    {
+      canView && !dataUnavailable && viewerIsStaffPreview && (
         <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
-          <strong>Admin view.</strong> You're viewing this page without being
-          enrolled. Stamping is not available without enrollment.
+          <strong>Staff preview.</strong> You can verify the student-facing
+          schedule, but attendance stamping is disabled in staff accounts.
+        </div>
+      )
+    }
+    {
+      canView && !dataUnavailable && historicalOnly && (
+        <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-sm text-sky-900">
+          <strong>Attendance history.</strong> You are no longer on the current
+          course roster, so only sessions with your retained attendance record
+          are shown and stamping is disabled.
         </div>
       )
     }
 
     {
-      canView && (admins ?? []).length === 0 && (
-        <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
-          <p>
-            <strong>No workshop sessions are scheduled right now.</strong>{' '}
-            {courseUsesSections
-              ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
-              : 'Your instructor will open a workshop window each week.'}{' '}
-            Come back during class time.
-          </p>
-        </div>
-      )
+      canView &&
+        !dataUnavailable &&
+        !sectionAssignmentMissing &&
+        visibleAdmins.length === 0 && (
+          <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
+            <p>
+              <strong>No workshop sessions are scheduled right now.</strong>{' '}
+              {courseUsesSections
+                ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
+                : 'Your instructor will open a workshop window each week.'}{' '}
+              Come back during class time.
+            </p>
+          </div>
+        )
     }
 
     {
-      canView && (admins?.length ?? 0) > 0 && (
+      canView && !dataUnavailable && visibleAdmins.length > 0 && (
         <section class="mt-10">
-          <h2 class="text-xl font-semibold">
-            {courseUsesSections
-              ? "This week's sections"
-              : "This week's workshop"}
-          </h2>
+          <h2 class="text-xl font-semibold">Workshop sessions</h2>
           <p class="mt-1 text-sm text-ink-muted">
-            {courseUsesSections ? (
+            {historicalOnly ? (
+              <>
+                Review the retained attendance records for sessions you
+                attended.
+              </>
+            ) : courseUsesSections ? (
               <>
                 Stamp in for <em>your</em> section once you're physically in the
                 room.
@@ -132,25 +232,61 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
               <>Stamp in once you're physically in the room.</>
             )}
           </p>
+          {nextTransitionAt && (
+            <div
+              data-workshop-live-refresh
+              data-refresh-at={nextTransitionAt}
+              class="mt-3 flex flex-wrap items-center gap-2 rounded border border-slate-200 bg-slate-50 p-3 text-xs text-ink-muted"
+            >
+              <button
+                type="button"
+                data-refresh-button
+                class="rounded border border-slate-300 bg-white px-2 py-1 font-medium text-ink hover:border-accent"
+              >
+                Refresh workshop status
+              </button>
+              <span data-refresh-message aria-live="polite">
+                This page will refresh once at the next opening or closing time.
+              </span>
+              <label class="flex items-center gap-1.5">
+                <input type="checkbox" data-auto-refresh checked />
+                Auto-refresh at the next transition
+              </label>
+            </div>
+          )}
           <ul class="mt-4 space-y-3">
-            {(admins ?? []).map((a) => {
-              const status = statusOf(a.opens_at, a.closes_at);
-              const alreadyStamped = stampedSet.has(a.id);
+            {visibleAdmins.map((a) => {
+              const status = workshopWindowStatus(
+                a.opens_at,
+                a.closes_at,
+                a.cancelled_at,
+                nowMs,
+              );
+              const attendance = stampByAdministration.get(a.id);
+              const alreadyStamped = attendance != null;
+              const questionsVisible = canRevealWorkshopQuestions(
+                alreadyStamped,
+                a.questions_revealed_at,
+              );
+              const revealPollUntil = new Date(
+                Date.parse(a.closes_at) + 15 * 60 * 1000,
+              ).toISOString();
               return (
                 <li class="rounded-lg border border-slate-200 p-4">
                   <div class="flex items-start justify-between gap-3">
                     <div>
                       <p class="text-sm font-medium">
+                        {a.semester} ·{' '}
                         {a.section ? <>Section {a.section} · </> : null}
-                        week of {new Date(a.week_of).toLocaleDateString()}
+                        week of {formatWeekOf(a.week_of)}
                       </p>
                       <p class="mt-1 text-xs text-ink-muted">
-                        Open {new Date(a.opens_at).toLocaleString()} — closes{' '}
-                        {new Date(a.closes_at).toLocaleString()}
+                        Open {formatNewYorkDateTime(a.opens_at)} — closes{' '}
+                        {formatNewYorkDateTime(a.closes_at)} ET
                       </p>
-                      {a.notes && (
-                        <p class="mt-1 text-xs text-ink-muted">{a.notes}</p>
-                      )}
+                      <p class="mt-1 text-xs text-ink-muted">
+                        Meeting location: {a.location_label}
+                      </p>
                     </div>
                     <span
                       class={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold uppercase ${
@@ -158,7 +294,9 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
                           ? 'bg-emerald-100 text-emerald-800'
                           : status === 'upcoming'
                             ? 'bg-amber-100 text-amber-800'
-                            : 'bg-slate-200 text-slate-700'
+                            : status === 'cancelled'
+                              ? 'bg-rose-100 text-rose-800'
+                              : 'bg-slate-200 text-slate-700'
                       }`}
                     >
                       {status}
@@ -166,26 +304,94 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
                   </div>
                   <div class="mt-3">
                     {alreadyStamped ? (
-                      <p class="rounded border border-emerald-300 bg-emerald-50 p-2 text-sm text-emerald-900">
-                        ✓ You're already stamped in for this section. Discussion
-                        questions appear once your instructor reveals them in
-                        class.
-                      </p>
-                    ) : status === 'open' ? (
+                      <div class="rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950">
+                        <p>
+                          ✓ Attendance recorded via{' '}
+                          {attendance.verification_method === 'manual'
+                            ? 'manual instructor verification'
+                            : attendance.verification_method === 'geofence'
+                              ? 'the location check'
+                              : attendance.verification_method === 'window'
+                                ? 'the workshop window'
+                                : 'a legacy verification record'}
+                          .
+                        </p>
+                        <p class="mt-1">
+                          Recorded{' '}
+                          {formatNewYorkDateTime(attendance.stamped_at)} ET.
+                        </p>
+                      </div>
+                    ) : status === 'open' && canStamp ? (
                       <StampInButton
                         client:load
                         administrationId={a.id}
                         section={a.section ?? null}
-                        requiredLat={a.required_lat}
-                        requiredLng={a.required_lng}
-                        requiredRadiusMeters={a.required_radius_meters}
+                        geoRequired={a.geofence_required}
                       />
+                    ) : status === 'open' && viewerIsStaffPreview ? (
+                      <p class="text-sm text-ink-muted">
+                        Staff preview only. Use a student account to test the
+                        attendance flow.
+                      </p>
+                    ) : status === 'open' ? (
+                      <p class="text-sm text-ink-muted">
+                        Attendance stamping is only available to student
+                        accounts with a complete roster assignment.
+                      </p>
                     ) : status === 'upcoming' ? (
                       <p class="text-sm text-ink-muted">
                         Stamping opens at the start time above.
                       </p>
+                    ) : status === 'cancelled' ? (
+                      <p class="rounded border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
+                        This workshop session was cancelled.
+                      </p>
                     ) : (
                       <p class="text-sm text-ink-muted">Window closed.</p>
+                    )}
+                    {alreadyStamped &&
+                      !questionsVisible &&
+                      status !== 'cancelled' && (
+                        <div
+                          data-workshop-reveal
+                          data-administration-id={a.id}
+                          data-poll-until={revealPollUntil}
+                          class="mt-3 rounded border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950"
+                        >
+                          <div class="flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              data-reveal-check
+                              class="rounded border border-sky-300 bg-white px-2 py-1 text-xs font-medium hover:bg-sky-100"
+                            >
+                              Check for discussion questions
+                            </button>
+                            <span
+                              data-reveal-message
+                              aria-live="polite"
+                              tabindex="-1"
+                            >
+                              Questions will appear when your instructor reveals
+                              them.
+                            </span>
+                          </div>
+                          <section data-reveal-questions hidden class="mt-3">
+                            <h3 class="font-semibold">Discussion questions</h3>
+                            <ol class="mt-3 list-decimal space-y-3 pl-5" />
+                          </section>
+                        </div>
+                      )}
+                    {questionsVisible && (
+                      <section class="mt-4 rounded border border-sky-200 bg-sky-50 p-4">
+                        <h3 class="font-semibold text-sky-950">
+                          Discussion questions
+                        </h3>
+                        <ol class="mt-3 list-decimal space-y-3 pl-5 text-sm text-sky-950">
+                          {publicQuestions.map((question) => (
+                            <li>{question.prompt}</li>
+                          ))}
+                        </ol>
+                      </section>
                     )}
                   </div>
                 </li>
@@ -197,9 +403,234 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     }
 
     <p class="mt-12 text-xs text-ink-muted">
-      Stamping records your location and links the attendance to your own
-      account. See the <a class="underline" href="/privacy">privacy policy</a>
+      A location-enabled stamp checks one coordinate reading and its reported
+      accuracy, then retains only the verification method and a protected device
+      deduplication token. Coordinates and accuracy are not retained. Manual
+      verification is available from your instructor. See the <a
+        class="underline"
+        href="/privacy">privacy policy</a
+      >{' '}
       for details.
     </p>
   </article>
 </BaseLayout>
+
+<script>
+  const MAX_TIMEOUT_MS = 2_147_000_000;
+  interface WorkshopStatusResponse {
+    ok: boolean;
+    reason?: string;
+    status?: 'upcoming' | 'open' | 'closed' | 'cancelled';
+    questions?: Array<{ id: string; prompt: string }> | null;
+  }
+
+  let cleanupWorkshopLivePage = () => {};
+
+  function initializeWorkshopLivePage() {
+    cleanupWorkshopLivePage();
+    const controller = new AbortController();
+    const timeoutIds: number[] = [];
+    const schedule = (callback: () => void, delay: number) => {
+      const timeoutId = window.setTimeout(callback, delay);
+      timeoutIds.push(timeoutId);
+      return timeoutId;
+    };
+    cleanupWorkshopLivePage = () => {
+      controller.abort();
+      for (const timeoutId of timeoutIds) window.clearTimeout(timeoutId);
+    };
+
+    for (const root of document.querySelectorAll<HTMLElement>(
+      '[data-workshop-live-refresh]',
+    )) {
+      const refresh = () => {
+        if (document.visibilityState === 'visible') window.location.reload();
+      };
+      root
+        .querySelector<HTMLButtonElement>('[data-refresh-button]')
+        ?.addEventListener('click', () => window.location.reload(), {
+          signal: controller.signal,
+        });
+
+      const refreshAt = root.dataset.refreshAt;
+      const autoRefresh = root.querySelector<HTMLInputElement>(
+        '[data-auto-refresh]',
+      );
+      let openingTimeoutId: number | null = null;
+      const scheduleOpeningRefresh = () => {
+        if (openingTimeoutId != null) window.clearTimeout(openingTimeoutId);
+        openingTimeoutId = null;
+        if (!refreshAt || !autoRefresh?.checked) return;
+        const delay = Date.parse(refreshAt) - Date.now() + 500;
+        if (delay <= 0) refresh();
+        else {
+          openingTimeoutId = schedule(
+            scheduleOpeningRefresh,
+            Math.min(delay, MAX_TIMEOUT_MS),
+          );
+        }
+      };
+      autoRefresh?.addEventListener('change', scheduleOpeningRefresh, {
+        signal: controller.signal,
+      });
+      scheduleOpeningRefresh();
+
+      document.addEventListener(
+        'visibilitychange',
+        () => {
+          if (document.visibilityState !== 'visible') return;
+          if (
+            autoRefresh?.checked &&
+            refreshAt &&
+            Date.now() >= Date.parse(refreshAt)
+          ) {
+            refresh();
+          }
+        },
+        { signal: controller.signal },
+      );
+    }
+
+    for (const root of document.querySelectorAll<HTMLElement>(
+      '[data-workshop-reveal]',
+    )) {
+      const button = root.querySelector<HTMLButtonElement>(
+        '[data-reveal-check]',
+      );
+      const message = root.querySelector<HTMLElement>('[data-reveal-message]');
+      const questionRegion = root.querySelector<HTMLElement>(
+        '[data-reveal-questions]',
+      );
+      const questionList =
+        questionRegion?.querySelector<HTMLOListElement>('ol');
+      const administrationId = root.dataset.administrationId;
+      const pollUntil = Date.parse(root.dataset.pollUntil ?? '');
+      let pollingComplete = false;
+      let pollDelayMs = 10_000;
+      let requestInFlight = false;
+      let announceCurrentRequest = false;
+
+      const checkStatus = async (announce: boolean): Promise<boolean> => {
+        if (!administrationId || pollingComplete) return pollingComplete;
+        if (requestInFlight) {
+          if (announce) {
+            announceCurrentRequest = true;
+            if (message) message.textContent = 'Checking…';
+            if (button) button.disabled = true;
+          }
+          return false;
+        }
+        requestInFlight = true;
+        announceCurrentRequest = announce;
+        if (announce && message) message.textContent = 'Checking…';
+        if (announce && button) button.disabled = true;
+        const requestController = new AbortController();
+        const abortForNavigation = () => requestController.abort();
+        controller.signal.addEventListener('abort', abortForNavigation, {
+          once: true,
+        });
+        const requestTimeoutId = schedule(
+          () => requestController.abort(),
+          8_000,
+        );
+        try {
+          const response = await fetch(
+            `/api/workshops/status?administration_id=${encodeURIComponent(administrationId)}`,
+            {
+              headers: { accept: 'application/json' },
+              signal: requestController.signal,
+            },
+          );
+          const result = (await response.json()) as WorkshopStatusResponse;
+          if (!response.ok || !result.ok) {
+            if (announceCurrentRequest && message) {
+              message.textContent =
+                result.reason === 'unauthenticated'
+                  ? 'Your session expired. Sign in again to check questions.'
+                  : 'Questions could not be checked. Retry in a moment.';
+            }
+            return false;
+          }
+          if (result.questions?.length && questionRegion && questionList) {
+            questionList.replaceChildren(
+              ...result.questions.map((question) => {
+                const item = document.createElement('li');
+                item.textContent = question.prompt;
+                return item;
+              }),
+            );
+            questionRegion.hidden = false;
+            if (message) message.textContent = 'Discussion questions revealed.';
+            if (announceCurrentRequest) message?.focus();
+            if (button) button.hidden = true;
+            pollingComplete = true;
+            return true;
+          }
+          if (result.status === 'cancelled') {
+            if (message) message.textContent = 'This workshop was cancelled.';
+            if (announceCurrentRequest) message?.focus();
+            if (button) button.hidden = true;
+            pollingComplete = true;
+            return true;
+          }
+          if (announceCurrentRequest && message) {
+            message.textContent = 'Questions have not been revealed yet.';
+          }
+          return false;
+        } catch (error) {
+          if (announceCurrentRequest && message && !controller.signal.aborted) {
+            message.textContent =
+              error instanceof DOMException && error.name === 'AbortError'
+                ? 'The question check timed out. Retry in a moment.'
+                : 'Questions could not be checked. Check your connection and retry.';
+          }
+          return false;
+        } finally {
+          requestInFlight = false;
+          window.clearTimeout(requestTimeoutId);
+          controller.signal.removeEventListener('abort', abortForNavigation);
+          if (
+            announceCurrentRequest &&
+            button &&
+            !pollingComplete &&
+            !controller.signal.aborted
+          ) {
+            button.disabled = false;
+          }
+          announceCurrentRequest = false;
+        }
+      };
+
+      const schedulePoll = () => {
+        if (
+          pollingComplete ||
+          controller.signal.aborted ||
+          !Number.isFinite(pollUntil) ||
+          Date.now() >= pollUntil
+        ) {
+          return;
+        }
+        schedule(() => {
+          void (async () => {
+            if (document.visibilityState === 'visible') {
+              await checkStatus(false);
+            }
+            pollDelayMs = Math.min(Math.round(pollDelayMs * 1.5), 30_000);
+            schedulePoll();
+          })();
+        }, pollDelayMs);
+      };
+
+      button?.addEventListener('click', () => void checkStatus(true), {
+        signal: controller.signal,
+      });
+      schedulePoll();
+    }
+  }
+
+  document.addEventListener('astro:page-load', initializeWorkshopLivePage);
+  document.addEventListener('astro:before-swap', () =>
+    cleanupWorkshopLivePage(),
+  );
+  initializeWorkshopLivePage();
+</script>

@@ -1,8 +1,12 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin as isAdminRole, isStaff as isStaffRole } from '@lib/roles';
-import { COURSE_SLUGS, isCourseSlug, type CourseSlug } from '@lib/courses';
+import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
+import type { CourseSlug } from '@lib/courses';
+import {
+  listClasses,
+  type InstructorClass,
+} from '@lib/instructor/class-roster';
 import {
   previewImport,
   applyImport,
@@ -11,33 +15,71 @@ import {
 } from '@lib/instructor/roster-import';
 import { logDisclosureSafe } from '@lib/audit';
 
-// Staff-gated by middleware (/instructor prefix), but guard explicitly
-// rather than defaulting an absent profile to 'instructor'.
+// The route is staff-gated by middleware, but roster mutation is restricted
+// to instructors and admins; teaching assistants are read-only.
 const user = Astro.locals.user!;
 const rawRole = Astro.locals.profile?.role;
-if (!isStaffRole(rawRole)) return new Response(null, { status: 403 });
+if (!isInstructor(rawRole)) return new Response(null, { status: 403 });
 const role = rawRole as 'instructor' | 'ta' | 'admin';
 const isAdmin = isAdminRole(role);
 
-let course: CourseSlug | null = null;
+let assignments: InstructorClass[];
+try {
+  assignments = (await listClasses(user.id, isAdmin)).filter(
+    (assignment) => assignment.assignmentActive,
+  );
+} catch {
+  return new Response(
+    'Could not load teaching assignments right now. Please try again.',
+    { status: 503 },
+  );
+}
+
+const assignmentValue = (assignment: InstructorClass) =>
+  JSON.stringify([
+    assignment.instructorId,
+    assignment.course,
+    assignment.semester,
+  ]);
 const qpCourse = Astro.url.searchParams.get('course');
-if (qpCourse && isCourseSlug(qpCourse)) course = qpCourse;
-let semester = Astro.url.searchParams.get('semester') ?? '';
+const qpSemester = Astro.url.searchParams.get('semester');
+const qpInstructor = Astro.url.searchParams.get('instructor');
+const hasRequestedAssignment = Boolean(
+  qpCourse || qpSemester || (isAdmin && qpInstructor),
+);
+let selectedAssignment: InstructorClass | null =
+  assignments.find(
+    (assignment) =>
+      assignment.course === qpCourse &&
+      assignment.semester === qpSemester &&
+      (!isAdmin || assignment.instructorId === qpInstructor),
+  ) ?? (hasRequestedAssignment ? null : (assignments[0] ?? null));
+let course: CourseSlug | null = selectedAssignment?.course ?? null;
+let semester = selectedAssignment?.semester ?? '';
+let targetInstructorId = selectedAssignment?.instructorId ?? user.id;
 
 let csvText = '';
 let preview: ImportPreview | null = null;
-let formError: string | null = null;
+let formError: string | null =
+  hasRequestedAssignment && !selectedAssignment
+    ? 'The requested teaching assignment is not active. Choose an active assignment instead.'
+    : null;
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const action = String(form.get('action') ?? '');
-  const fCourse = String(form.get('course') ?? '');
-  semester = String(form.get('semester') ?? '').trim();
+  const selectedValue = String(form.get('assignment') ?? '');
+  selectedAssignment =
+    assignments.find(
+      (assignment) => assignmentValue(assignment) === selectedValue,
+    ) ?? null;
+  course = selectedAssignment?.course ?? null;
+  semester = selectedAssignment?.semester ?? '';
+  targetInstructorId = selectedAssignment?.instructorId ?? user.id;
   csvText = String(form.get('csv') ?? '');
-  course = isCourseSlug(fCourse) ? fCourse : null;
 
-  if (!course || !semester) {
-    formError = 'Choose a course and enter a semester.';
+  if (!selectedAssignment || !course || !semester) {
+    formError = 'Choose an active teaching assignment.';
   } else if (!csvText.trim()) {
     formError =
       'Paste roster CSV with a header row that includes an "email" column.';
@@ -46,6 +88,7 @@ if (Astro.request.method === 'POST') {
       const result = await applyImport(
         user.id,
         isAdmin,
+        targetInstructorId,
         course,
         semester,
         csvText,
@@ -56,6 +99,7 @@ if (Astro.request.method === 'POST') {
         action: 'import_roster',
         targetResource: `${course}:${semester}`,
         metadata: {
+          instructorId: targetInstructorId,
           enrolled: result.enrolled,
           updated: result.updated,
           skipped: result.skipped,
@@ -65,26 +109,32 @@ if (Astro.request.method === 'POST') {
       });
       return Astro.redirect(
         `/instructor/classes/${course}?semester=${encodeURIComponent(semester)}` +
+          `&instructor=${encodeURIComponent(targetInstructorId)}` +
           `&imported=${result.enrolled}&updated=${result.updated}&skipped=${result.skipped}`,
       );
     } catch (err) {
       formError =
         err instanceof RosterImportError && err.code === 'forbidden'
-          ? 'You can only import into a class you teach (or a brand-new one). This course and semester is managed by another instructor.'
-          : 'Import failed — the auth or database service may be temporarily unavailable. Try again.';
+          ? err.message
+          : err instanceof RosterImportError && err.code === 'invalid'
+            ? err.message
+            : 'Import failed — the auth or database service may be temporarily unavailable. Try again.';
     }
   } else {
     try {
       preview = await previewImport(
         user.id,
         isAdmin,
+        targetInstructorId,
         course,
         semester,
         csvText,
       );
-    } catch {
+    } catch (err) {
       formError =
-        'Could not build the preview — the auth or database service may be temporarily unavailable. Try again.';
+        err instanceof RosterImportError && err.code !== 'failed'
+          ? err.message
+          : 'Could not build the preview — the auth or database service may be temporarily unavailable. Try again.';
     }
   }
 }
@@ -122,56 +172,66 @@ const courseMeta = new Map(
       )
     }
 
-    <form method="POST" class="mt-8 space-y-4">
-      <input type="hidden" name="action" value="preview" />
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <label class="text-sm">
-          <span class="font-medium">Course</span>
-          <select
-            name="course"
-            required
-            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
-          >
-            {
-              COURSE_SLUGS.map((slug) => (
-                <option value={slug} selected={course === slug}>
-                  {courseMeta.get(slug)?.code ?? slug}
-                </option>
-              ))
-            }
-          </select>
-        </label>
-        <label class="text-sm">
-          <span class="font-medium">Semester</span>
-          <input
-            type="text"
-            name="semester"
-            required
-            value={semester}
-            placeholder="e.g. Spring 2026"
-            class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
-          />
-        </label>
-      </div>
-      <label class="block text-sm">
-        <span class="font-medium">Roster CSV</span>
-        <textarea
-          name="csv"
-          rows="10"
-          required
-          placeholder="email,name,section
+    {
+      assignments.length === 0 ? (
+        <p class="mt-8 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          No active teaching assignment is available. An admin must assign an
+          instructor to a course and semester before a roster can be imported.
+        </p>
+      ) : (
+        <form method="POST" class="mt-8 space-y-4">
+          <input type="hidden" name="action" value="preview" />
+          <div>
+            <label class="block text-sm">
+              <span class="font-medium">Teaching assignment</span>
+              <select
+                name="assignment"
+                required
+                class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5"
+              >
+                {assignments.map((assignment) => (
+                  <option
+                    value={assignmentValue(assignment)}
+                    selected={
+                      selectedAssignment != null &&
+                      assignmentValue(selectedAssignment) ===
+                        assignmentValue(assignment)
+                    }
+                  >
+                    {courseMeta.get(assignment.course)?.code ??
+                      assignment.course}
+                    {' · '}
+                    {assignment.semester}
+                    {isAdmin &&
+                      ` · ${assignment.instructorName ?? assignment.instructorId}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <label class="block text-sm">
+            <span class="font-medium">Roster CSV</span>
+            <textarea
+              name="csv"
+              rows="10"
+              maxlength="1000000"
+              required
+              placeholder="email,name,section
 jane@x.edu,Jane Doe,CML"
-          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 font-mono text-xs"
-          >{csvText}</textarea
-        >
-      </label>
-      <button
-        type="submit"
-        class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
-        Preview import
-      </button>
-    </form>
+              class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 font-mono text-xs"
+            >
+              {csvText}
+            </textarea>
+          </label>
+          <button
+            type="submit"
+            class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Preview import
+          </button>
+        </form>
+      )
+    }
 
     {
       preview && course && (
@@ -220,8 +280,13 @@ jane@x.edu,Jane Doe,CML"
           ) : preview.toEnroll.length > 0 || preview.toUpdate.length > 0 ? (
             <form method="POST" class="mt-5">
               <input type="hidden" name="action" value="apply" />
-              <input type="hidden" name="course" value={course} />
-              <input type="hidden" name="semester" value={semester} />
+              <input
+                type="hidden"
+                name="assignment"
+                value={
+                  selectedAssignment ? assignmentValue(selectedAssignment) : ''
+                }
+              />
               <textarea name="csv" class="hidden">
                 {csvText}
               </textarea>

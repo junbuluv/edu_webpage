@@ -19,7 +19,7 @@ if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
 if (!id) return new Response(null, { status: 404 });
 
 const admin = getAdminClient();
-const { data: p } = await admin
+const { data: p, error: paperError } = await admin
   .from('archive_papers')
   .select(
     'id, course_slug, kind, title, semester_term, semester_year, covers, original_filename, published, created_by',
@@ -27,6 +27,9 @@ const { data: p } = await admin
   .eq('id', id)
   .is('deleted_at', null)
   .maybeSingle();
+if (paperError) {
+  return new Response('Could not load this paper right now.', { status: 503 });
+}
 if (!p) return new Response(null, { status: 404 });
 if (!(await instructorOwnsCourse(user.id, p.course_slug, role))) {
   return Astro.redirect('/instructor/archive?error=not_course_instructor');
@@ -79,6 +82,7 @@ const covers = new Set(p.covers);
         <input
           name="title"
           required
+          maxlength="200"
           value={p.title}
           class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
         />

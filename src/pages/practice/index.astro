@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { compareLessons } from '@lib/lesson/sequence';
 
 const [quizzes, courseEntries, lessons] = await Promise.all([
   getCollection('quizzes'),
@@ -8,16 +9,14 @@ const [quizzes, courseEntries, lessons] = await Promise.all([
   getCollection('lessons'),
 ]);
 
-// Map a quiz's lessonSlug to its lesson order so quizzes list in course
-// sequence, not alphabetically. Key by both the raw collection id and the
-// extension-stripped form to be robust to the id format.
-const lessonOrder = new Map<string, number>();
+const lessonByReference = new Map<string, (typeof lessons)[number]>();
 for (const l of lessons) {
-  lessonOrder.set(l.id, l.data.order);
-  lessonOrder.set(l.id.replace(/\.mdx?$/, ''), l.data.order);
+  for (const reference of [l.id, l.id.replace(/\.mdx?$/, ''), l.slug]) {
+    lessonByReference.set(reference, l);
+  }
 }
-const quizOrder = (lessonSlug?: string) =>
-  lessonSlug ? (lessonOrder.get(lessonSlug) ?? 999) : 999;
+const lessonForQuiz = (lessonSlug?: string) =>
+  lessonSlug ? lessonByReference.get(lessonSlug) : undefined;
 
 // Group quizzes by course (practice kind only; exams/assignments live
 // in each course's gated archive).
@@ -29,11 +28,19 @@ for (const q of quizzes) {
   byCourse.set(q.data.course, arr);
 }
 for (const arr of byCourse.values()) {
-  arr.sort(
-    (a, b) =>
-      quizOrder(a.data.lessonSlug) - quizOrder(b.data.lessonSlug) ||
-      a.data.title.localeCompare(b.data.title),
-  );
+  arr.sort((a, b) => {
+    const aLesson = lessonForQuiz(a.data.lessonSlug);
+    const bLesson = lessonForQuiz(b.data.lessonSlug);
+    if (aLesson && bLesson) {
+      return (
+        compareLessons(aLesson, bLesson) ||
+        a.data.title.localeCompare(b.data.title)
+      );
+    }
+    if (aLesson) return -1;
+    if (bLesson) return 1;
+    return a.data.title.localeCompare(b.data.title);
+  });
 }
 
 // One section per course that has quizzes, in the course's display order.

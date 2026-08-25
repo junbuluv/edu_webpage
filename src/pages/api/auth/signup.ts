@@ -1,9 +1,12 @@
 import type { APIRoute } from 'astro';
 import { safeNext } from '@lib/auth/safe-next';
+import { buildAuthCallbackUrl } from '@lib/auth/callback-url';
 import {
   isAllowedEmail,
   allowedDomainsHumanList,
 } from '@lib/auth/email-allowlist';
+import { CURRENT_TERMS_VERSION } from '@lib/auth/terms';
+import { getAdminClient } from '@lib/supabase/admin';
 
 const MIN_PASSWORD_LEN = 12;
 
@@ -14,6 +17,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   const email = String(form.get('email') ?? '').trim();
   const password = String(form.get('password') ?? '');
   const next = safeNext(String(form.get('next') ?? '/'));
+  const acceptedTerms = form.get('accept_terms') === 'yes';
 
   if (!isAllowedEmail(email)) {
     return redirect(
@@ -30,19 +34,60 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
       )}`,
     );
   }
+  if (!acceptedTerms) {
+    return redirect(
+      `/auth/signup?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+        'You must accept the Terms of Service and acknowledge the Privacy Policy.',
+      )}`,
+    );
+  }
 
-  const { error } = await locals.supabase.auth.signUp({
+  const { data, error } = await locals.supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${import.meta.env.PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: buildAuthCallbackUrl(
+        import.meta.env.PUBLIC_SITE_URL || import.meta.env.VERCEL_URL,
+        request.url,
+        next,
+      ),
     },
   });
 
   if (error) {
+    console.error('[auth/signup] signup_failed', {
+      name: error.name,
+      status: error.status,
+      code: error.code,
+    });
     return redirect(
-      `/auth/signup?next=${encodeURIComponent(next)}&error=${encodeURIComponent(error.message)}`,
+      `/auth/signup?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+        'Account creation could not be completed. Please retry.',
+      )}`,
     );
   }
-  return redirect(`/auth/check-email?email=${encodeURIComponent(email)}`);
+  if (data.user) {
+    try {
+      const accepted = await getAdminClient().rpc('accept_terms', {
+        p_user_id: data.user.id,
+        p_policy_version: CURRENT_TERMS_VERSION,
+        p_source: 'signup',
+      });
+      if (accepted.error || accepted.data !== 'accepted') {
+        console.error('[auth/signup] terms_acceptance_save_failed', {
+          userId: data.user.id,
+          code: accepted.error?.code,
+        });
+      }
+    } catch (acceptanceError) {
+      console.error('[auth/signup] terms_acceptance_save_failed', {
+        userId: data.user.id,
+        error:
+          acceptanceError instanceof Error
+            ? acceptanceError.message
+            : String(acceptanceError),
+      });
+    }
+  }
+  return redirect('/auth/check-email');
 };

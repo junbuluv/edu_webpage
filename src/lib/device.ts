@@ -1,34 +1,57 @@
 import type { AstroCookies } from 'astro';
 
-// Browser-identifying cookie used to deduplicate workshop stamps. Issued
-// by middleware on first visit so it's available across the whole site.
+// Browser-identifying cookie used to deduplicate workshop stamps. Middleware
+// issues it only for an authenticated visit to the protected workshop area.
 //
 // Soft barrier: students who clear cookies between sessions or use
 // private browsing can defeat it. Pair with in-room headcount for real
 // proof of attendance.
 
-const COOKIE_NAME = 'device_id';
-const FIVE_YEARS_SECONDS = 60 * 60 * 24 * 365 * 5;
+const COOKIE_NAME = 'workshop_device_id';
+const LEGACY_COOKIE_NAME = 'device_id';
+const SIX_MONTHS_SECONDS = 60 * 60 * 24 * 180;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function ensureDeviceId(cookies: AstroCookies, isProd: boolean): string {
-  const existing = cookies.get(COOKIE_NAME)?.value;
-  if (existing && /^[0-9a-f-]{8,}$/i.test(existing)) {
+  const current = cookies.get(COOKIE_NAME)?.value;
+  const legacy = cookies.get(LEGACY_COOKIE_NAME)?.value;
+  if (legacy) cookies.delete(LEGACY_COOKIE_NAME, { path: '/' });
+  if (current && UUID_PATTERN.test(current)) {
+    return current;
+  }
+  const existing = legacy && UUID_PATTERN.test(legacy) ? legacy : null;
+  if (existing) {
+    setDeviceCookie(cookies, existing, isProd);
     return existing;
   }
   const id = generateUUIDv4();
+  setDeviceCookie(cookies, id, isProd);
+  return id;
+}
+
+function setDeviceCookie(
+  cookies: AstroCookies,
+  id: string,
+  isProd: boolean,
+): void {
   cookies.set(COOKIE_NAME, id, {
     path: '/',
     httpOnly: true,
     sameSite: 'lax',
     secure: isProd,
-    maxAge: FIVE_YEARS_SECONDS,
+    maxAge: SIX_MONTHS_SECONDS,
   });
-  return id;
 }
 
 export function readDeviceId(cookies: AstroCookies): string | null {
   const v = cookies.get(COOKIE_NAME)?.value;
-  return v && /^[0-9a-f-]{8,}$/i.test(v) ? v : null;
+  return v && UUID_PATTERN.test(v) ? v : null;
+}
+
+export function clearWorkshopDeviceId(cookies: AstroCookies): void {
+  cookies.delete(COOKIE_NAME, { path: '/' });
+  cookies.delete(LEGACY_COOKIE_NAME, { path: '/' });
 }
 
 function generateUUIDv4(): string {

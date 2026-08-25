@@ -23,13 +23,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!user) return err('unauthenticated');
   if (!isAdmin(role)) return err('forbidden');
 
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return err('invalid_input');
+  }
   const email = String(form.get('email') ?? '')
     .trim()
     .toLowerCase();
   const requestedRole = String(form.get('role') ?? '').trim();
 
-  if (!email || !requestedRole) return err('invalid_input');
+  if (!email || email.length > 254 || !requestedRole) {
+    return err('invalid_input');
+  }
   // Reject anything outside student/instructor/ta up front (e.g. a forged
   // 'admin' value) before touching the auth user list.
   if (!isAssignableRole(requestedRole)) return err('invalid_role');
@@ -50,28 +57,58 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   // Read the current role; never modify an existing admin (anti-phishing).
   // Keyed on the profiles PK (id), so maybeSingle matches at most one row.
-  const { data: targetProfile } = await admin
+  const { data: targetProfile, error: profileError } = await admin
     .from('profiles')
     .select('role')
     .eq('id', targetId)
     .maybeSingle();
+  if (profileError) return err('lookup_failed');
   if (!targetProfile) return err('no_account');
   const currentRole = targetProfile.role ?? 'student';
 
   const outcome = classifyRoleAssign({
     requestedRole,
     emailFound: true,
-    targetIsAdmin: currentRole === 'admin',
+    currentRole,
   });
+  // A no-op (target already has this role) is benign: skip the redundant
+  // UPDATE and the misleading 'set role X -> X' audit entry it would write.
+  if (outcome === 'no_change') return ok('role_unchanged');
   if (outcome !== 'ok') return err(outcome);
 
-  const { error } = await admin
+  if (currentRole === 'instructor' && requestedRole === 'ta') {
+    const { data: assignments, error: assignmentError } = await admin
+      .from('teaching_assignments')
+      .select('instructor_id')
+      .eq('instructor_id', targetId)
+      .eq('active', true)
+      .limit(1);
+    if (assignmentError) return err('lookup_failed');
+    if ((assignments ?? []).length > 0) return err('role_in_use');
+  }
+
+  const { data: updated, error } = await admin
     .from('profiles')
     .update({ role: requestedRole })
-    .eq('id', targetId);
-  if (error) return err('update_failed');
+    .eq('id', targetId)
+    .eq('role', currentRole as 'student' | 'instructor' | 'ta')
+    .select('id')
+    .maybeSingle();
+  if (error?.code === '23514') {
+    return err(
+      (currentRole === 'instructor' || currentRole === 'ta') &&
+        requestedRole === 'student'
+        ? 'use_offboarding'
+        : 'role_in_use',
+    );
+  }
+  if (error || !updated) return err('update_failed');
 
-  await logDisclosureSafe({
+  // The role change has already committed. Record it — but a privilege change
+  // must not land with no audit trail and no signal. logDisclosureSafe returns
+  // false when the audit write fails (convention #10 fail-open), so surface
+  // that to the admin instead of silently reporting plain success.
+  const audited = await logDisclosureSafe({
     actorId: user.id,
     actorRole: role as 'instructor' | 'ta' | 'admin',
     action: 'promote_role',
@@ -82,5 +119,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
     request,
   });
 
-  return ok('role_set');
+  return audited ? ok('role_set') : err('role_set_unaudited');
 };

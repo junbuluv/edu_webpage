@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { maxLocalOkunGap, okunOutcome } from '@lib/viz/model-math';
 
 // Okun's law:  u - u_n = -k * (Y - Y_n)/Y_n           (k ≈ 0.5 for US)
 // Phillips curve (expectations-augmented):
@@ -33,16 +34,35 @@ const baseline: State = {
   okunK: 0.5,
 };
 
+const minimumGap = -5;
+const gapStep = 0.25;
+const minimumDisplayedUnemployment = 1;
+
 function chain(s: State, gap: number) {
-  const u = s.natUnemp - s.okunK * gap;
-  const pi = s.inflExp - s.beta * (u - s.natUnemp);
-  return { u, pi };
+  const { unemployment, inflation } = okunOutcome(
+    gap,
+    s.natUnemp,
+    s.inflExp,
+    s.beta,
+    s.okunK,
+  );
+  return { u: unemployment, pi: inflation };
+}
+
+function maximumGap(s: State) {
+  const unrounded = maxLocalOkunGap(
+    s.natUnemp,
+    s.okunK,
+    5,
+    minimumDisplayedUnemployment,
+  );
+  return Math.floor(unrounded / gapStep) * gapStep;
 }
 
 function buildSeries(s: State) {
-  // Iterate over output gap (used by Okun panel x-axis).
+  const maxGap = maximumGap(s);
   return Array.from({ length: 41 }, (_, i) => {
-    const gap = -5 + i * 0.25;
+    const gap = minimumGap + (i / 40) * (maxGap - minimumGap);
     const { u, pi } = chain(s, gap);
     return { gap, u, pi };
   });
@@ -50,6 +70,7 @@ function buildSeries(s: State) {
 
 export default function OkunPhillips() {
   const [s, setS] = useState<State>(baseline);
+  const maxGap = maximumGap(s);
   const data = useMemo(() => buildSeries(s), [s]);
   // Phillips panel plots π vs u; sort by u so the line draws monotonically.
   const phillipsData = useMemo(
@@ -64,9 +85,9 @@ export default function OkunPhillips() {
         <Slider
           label="Output gap (Y−Yₙ)/Yₙ"
           v={s.outputGap}
-          min={-5}
-          max={5}
-          step={0.25}
+          min={minimumGap}
+          max={maxGap}
+          step={gapStep}
           fmt={(v) => v.toFixed(2) + '%'}
           onChange={(v) => setS((x) => ({ ...x, outputGap: v }))}
         />
@@ -77,7 +98,15 @@ export default function OkunPhillips() {
           max={7}
           step={0.1}
           fmt={(v) => v.toFixed(1) + '%'}
-          onChange={(v) => setS((x) => ({ ...x, natUnemp: v }))}
+          onChange={(v) =>
+            setS((x) => {
+              const next = { ...x, natUnemp: v };
+              return {
+                ...next,
+                outputGap: Math.min(next.outputGap, maximumGap(next)),
+              };
+            })
+          }
         />
         <Slider
           label="Expected inflation πᵉ"
@@ -104,8 +133,23 @@ export default function OkunPhillips() {
           max={1.0}
           step={0.05}
           fmt={(v) => v.toFixed(2)}
-          onChange={(v) => setS((x) => ({ ...x, okunK: v }))}
+          onChange={(v) =>
+            setS((x) => {
+              const next = { ...x, okunK: v };
+              return {
+                ...next,
+                outputGap: Math.min(next.outputGap, maximumGap(next)),
+              };
+            })
+          }
         />
+        <button
+          type="button"
+          onClick={() => setS({ ...baseline })}
+          className="self-end rounded border border-slate-300 px-2 py-1 text-sm text-ink-muted hover:bg-slate-50"
+        >
+          Reset
+        </button>
         <div className="self-end text-sm text-ink-muted">
           u = <strong>{current.u.toFixed(2)}%</strong>, π ={' '}
           <strong>{current.pi.toFixed(2)}%</strong>
@@ -209,10 +253,15 @@ export default function OkunPhillips() {
       </div>
 
       <p className="md:col-span-2 mt-1 text-xs text-ink-muted">
-        Positive output gap (boom) ⇒ lower unemployment via Okun ⇒ higher
-        inflation via the Phillips curve. Try sliding the output gap from −3% to
-        +3% — that's roughly the swing the US economy made between the 2020
-        trough and the 2022 over-heating.
+        Current parameters: uₙ = {s.natUnemp.toFixed(1)}%, πᵉ ={' '}
+        {s.inflExp.toFixed(1)}%, β = {s.beta.toFixed(2)}, and k ={' '}
+        {s.okunK.toFixed(2)}. Okun's law is a local empirical approximation, not
+        a structural identity. The simulation therefore limits the output gap to{' '}
+        {minimumGap.toFixed(0)}% through {maxGap.toFixed(2)}%, where its linear
+        estimate keeps unemployment at or above{' '}
+        {minimumDisplayedUnemployment.toFixed(0)}%. Within that range, a
+        positive output gap lowers unemployment and raises inflation through the
+        Phillips curve.
       </p>
     </div>
   );

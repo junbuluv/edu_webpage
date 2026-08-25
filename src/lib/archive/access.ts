@@ -1,5 +1,7 @@
-import { isStaff, isAdmin } from '@lib/roles';
+import { isStaff, isAdmin, isInstructor, type UserRole } from '@lib/roles';
 import { getAdminClient } from '@lib/supabase/admin';
+import { ArchiveServiceUnavailableError } from './errors';
+import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
 
 /**
  * True iff the current viewer may see gated, course-scoped archive content
@@ -16,48 +18,60 @@ export async function canViewCourse(
 ): Promise<boolean> {
   const user = locals.user;
   if (!user) return false;
+  if (!hasAcceptedCurrentTerms(locals.profile)) return false;
   if (isStaff(locals.profile?.role)) return true;
   const supabase = locals.supabase;
   if (!supabase) return false;
   // A student can have one enrollments row per semester for the same course,
   // so this may return >1 row. limit(1) + length check — .maybeSingle()
   // errors (PGRST116) on multiple rows, wrongly denying a re-enrolled student.
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('enrollments')
     .select('user_id')
     .eq('user_id', user.id)
     .eq('course_slug', courseSlug)
     .limit(1);
+  if (error) {
+    console.error('[archive] enrollment_access_check_failed', {
+      code: error.code,
+    });
+    throw new ArchiveServiceUnavailableError('access_check');
+  }
   return !!data && data.length > 0;
 }
 
 /**
  * True iff `userId` may manage content for `courseSlug`: an admin (any
- * course), or an instructor listed as instructor_id on some enrollment row
- * for that course. Uses the service-role admin client (enrollments are not
- * readable under a normal client for arbitrary users). Fails closed on
- * missing env / error.
+ * course), or an instructor with an active assignment for at least one term
+ * of that course. Authority is never inferred from student enrollment rows.
+ * Fails closed on missing env / error.
  */
 export async function instructorOwnsCourse(
   userId: string,
   courseSlug: string,
-  role: string | null | undefined,
+  role: UserRole | null | undefined,
 ): Promise<boolean> {
-  if (isAdmin(role as never)) return true;
+  if (isAdmin(role)) return true;
+  if (!isInstructor(role)) return false;
   try {
     const admin = getAdminClient();
-    // An instructor has one enrollments row per enrolled student, so this
-    // query returns MANY rows for a real class. Use limit(1) + array check —
-    // .maybeSingle() errors (PGRST116) on >1 row, which would wrongly deny
-    // ownership for any course with two or more students.
-    const { data } = await admin
-      .from('enrollments')
-      .select('user_id')
+    const { data, error } = await admin
+      .from('teaching_assignments')
+      .select('instructor_id')
       .eq('instructor_id', userId)
       .eq('course_slug', courseSlug)
+      .eq('active', true)
       .limit(1);
+    if (error) {
+      console.error('[archive] ownership_check_failed', { code: error.code });
+      throw new ArchiveServiceUnavailableError('ownership_check');
+    }
     return !!(data && data.length > 0);
-  } catch {
-    return false;
+  } catch (error) {
+    if (error instanceof ArchiveServiceUnavailableError) throw error;
+    console.error('[archive] ownership_check_failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new ArchiveServiceUnavailableError('ownership_check');
   }
 }

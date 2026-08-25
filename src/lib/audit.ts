@@ -11,7 +11,10 @@ export type DisclosureAction =
   | 'manage_enrollment'
   | 'delete_user'
   | 'promote_role'
-  | 'manage_archive';
+  | 'manage_teaching_assignment'
+  | 'offboard_staff'
+  | 'manage_archive'
+  | 'manage_workshop';
 
 export interface DisclosureContext {
   actorId: string;

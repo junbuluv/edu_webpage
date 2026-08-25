@@ -5,6 +5,12 @@ import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import { loadGradableQuiz } from '@lib/quiz/resolve';
 import { toPublicQuestions } from '@lib/quiz/public';
 import { canViewCourse } from '@lib/archive/access';
+import {
+  ArchiveServiceUnavailableError,
+  QuizInvalidError,
+  QuizUnavailableError,
+} from '@lib/archive/errors';
+import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
 
 // SSR so Astro.locals.user is populated by middleware and the header
 // renders the signed-in state. Lookup the quiz by slug on each request.
@@ -13,7 +19,27 @@ const { slug } = Astro.params;
 if (!slug) {
   return new Response(null, { status: 404 });
 }
-const quiz = await loadGradableQuiz(slug);
+let quiz: Awaited<ReturnType<typeof loadGradableQuiz>>;
+try {
+  quiz = await loadGradableQuiz(slug);
+} catch (error) {
+  if (error instanceof QuizInvalidError) {
+    return new Response(
+      'This quiz needs instructor review before it can open.',
+      {
+        status: 422,
+        headers: { 'cache-control': 'no-store' },
+      },
+    );
+  }
+  if (error instanceof QuizUnavailableError) {
+    return new Response('The quiz service is temporarily unavailable.', {
+      status: 503,
+      headers: { 'cache-control': 'no-store' },
+    });
+  }
+  throw error;
+}
 if (!quiz) {
   return new Response(null, { status: 404 });
 }
@@ -27,8 +53,23 @@ if (quiz.kind !== 'practice') {
       `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
     );
   }
-  if (!(await canViewCourse(Astro.locals, quiz.course))) {
-    return Astro.redirect(`/${quiz.course}/archive`);
+  if (!hasAcceptedCurrentTerms(Astro.locals.profile)) {
+    return Astro.redirect(
+      `/account/terms?next=${encodeURIComponent(Astro.url.pathname)}`,
+    );
+  }
+  try {
+    if (!(await canViewCourse(Astro.locals, quiz.course))) {
+      return Astro.redirect(`/${quiz.course}/archive`);
+    }
+  } catch (error) {
+    if (error instanceof ArchiveServiceUnavailableError) {
+      return new Response('Archive access is temporarily unavailable.', {
+        status: 503,
+        headers: { 'cache-control': 'no-store' },
+      });
+    }
+    throw error;
   }
 }
 

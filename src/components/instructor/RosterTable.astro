@@ -8,10 +8,20 @@ interface Props {
   semester: string;
   usesSections: boolean;
   canManage: boolean;
+  instructorId: string;
+  instructorOptions: Array<{ id: string; label: string }>;
 }
 
-const { students, lessonsTotal, course, semester, usesSections, canManage } =
-  Astro.props;
+const {
+  students,
+  lessonsTotal,
+  course,
+  semester,
+  usesSections,
+  canManage,
+  instructorId,
+  instructorOptions,
+} = Astro.props;
 const SECTION_OPTS = ['CML', 'CTL', 'CWL', 'CRL'];
 
 function pct(v: number | null): string {
@@ -34,6 +44,7 @@ function lastSeen(iso: string | null): string {
     >
       <tr>
         <th class="px-3 py-2 font-medium">Student</th>
+        {usesSections && <th class="px-3 py-2 font-medium">Section</th>}
         <th class="px-3 py-2 font-medium">Lessons</th>
         <th class="px-3 py-2 font-medium">Quizzes</th>
         <th class="px-3 py-2 font-medium">Avg</th>
@@ -55,6 +66,15 @@ function lastSeen(iso: string | null): string {
               </div>
               <div class="text-xs text-ink-muted">{s.email ?? '—'}</div>
             </td>
+            {usesSections && (
+              <td class="px-3 py-2">
+                {s.section ? (
+                  s.section
+                ) : (
+                  <span class="font-medium text-amber-800">Not assigned</span>
+                )}
+              </td>
+            )}
             <td class="px-3 py-2 tabular-nums">
               {s.lessonsCompleted}/{lessonsTotal}
             </td>
@@ -66,12 +86,16 @@ function lastSeen(iso: string | null): string {
             </td>
             <td class="px-3 py-2">
               {s.risk.atRisk ? (
-                <span
-                  class="inline-block cursor-help rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold uppercase text-amber-800"
-                  title={s.risk.reasons.join(' · ')}
-                >
-                  ⚠ at-risk
-                </span>
+                <details>
+                  <summary class="cursor-pointer rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold uppercase text-amber-800">
+                    ⚠ at-risk
+                  </summary>
+                  <ul class="mt-1 min-w-48 list-disc space-y-1 pl-4 text-xs text-amber-900">
+                    {s.risk.reasons.map((reason) => (
+                      <li>{reason}</li>
+                    ))}
+                  </ul>
+                </details>
               ) : (
                 <span class="text-ink-muted">—</span>
               )}
@@ -80,7 +104,7 @@ function lastSeen(iso: string | null): string {
               <td class="px-3 py-2">
                 <details>
                   <summary class="cursor-pointer text-xs text-accent">
-                    Edit
+                    Edit {s.name ?? s.email ?? 'student'}
                   </summary>
                   <form
                     method="POST"
@@ -89,16 +113,23 @@ function lastSeen(iso: string | null): string {
                   >
                     <input type="hidden" name="course_slug" value={course} />
                     <input type="hidden" name="semester" value={semester} />
+                    <input
+                      type="hidden"
+                      name="instructor_id"
+                      value={instructorId}
+                    />
                     <input type="hidden" name="user_id" value={s.userId} />
                     <input
                       name="student_name"
                       placeholder="Display name"
+                      aria-label={`Display name for ${s.name ?? s.email ?? 'student'}`}
                       value={s.name ?? ''}
                       class="rounded border border-slate-300 px-1 py-0.5 text-xs"
                     />
                     {usesSections && (
                       <select
                         name="section"
+                        aria-label={`Section for ${s.name ?? s.email ?? 'student'}`}
                         class="rounded border border-slate-300 px-1 py-0.5 text-xs"
                       >
                         <option value="" selected={!s.section}>
@@ -107,6 +138,22 @@ function lastSeen(iso: string | null): string {
                         {SECTION_OPTS.map((o) => (
                           <option value={o} selected={s.section === o}>
                             {o}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {instructorOptions.length > 1 && (
+                      <select
+                        name="new_instructor_id"
+                        aria-label={`Transfer ${s.name ?? s.email ?? 'student'} to instructor`}
+                        class="rounded border border-slate-300 px-1 py-0.5 text-xs"
+                      >
+                        {instructorOptions.map((option) => (
+                          <option
+                            value={option.id}
+                            selected={option.id === instructorId}
+                          >
+                            {option.label}
                           </option>
                         ))}
                       </select>
@@ -126,6 +173,11 @@ function lastSeen(iso: string | null): string {
                   >
                     <input type="hidden" name="course_slug" value={course} />
                     <input type="hidden" name="semester" value={semester} />
+                    <input
+                      type="hidden"
+                      name="instructor_id"
+                      value={instructorId}
+                    />
                     <input type="hidden" name="user_id" value={s.userId} />
                     <button
                       type="submit"

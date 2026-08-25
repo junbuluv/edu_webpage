@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useId, useState } from 'react';
 
 export interface CourseOption {
   slug: string;
@@ -10,138 +10,99 @@ export interface CourseOption {
 interface Props {
   courses: CourseOption[];
   activeSlug: string | null;
+  staffViewer?: boolean;
+  wide?: boolean;
 }
 
-export default function CourseSwitcher({ courses, activeSlug }: Props) {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState<string | null>(null);
+export default function CourseSwitcher({
+  courses,
+  activeSlug,
+  staffViewer = false,
+  wide = false,
+}: Props) {
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onClickOutside(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function onKeydown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    document.addEventListener('keydown', onKeydown);
-    return () => {
-      document.removeEventListener('mousedown', onClickOutside);
-      document.removeEventListener('keydown', onKeydown);
-    };
-  }, [open]);
+  const [termsRequired, setTermsRequired] = useState(false);
+  const errorId = useId();
 
   if (courses.length === 0) return null;
 
-  const active = courses.find((c) => c.slug === activeSlug) ?? null;
-  const buttonLabel = active ? active.code : 'Pick a course';
-
   async function pick(slug: string) {
-    if (slug === activeSlug) {
-      setOpen(false);
-      return;
-    }
-    setSubmitting(slug);
+    if (!slug || slug === activeSlug) return;
+    setSubmitting(true);
     setError(null);
+    setTermsRequired(false);
     try {
-      const resp = await fetch('/api/profile/active-course', {
+      const response = await fetch('/api/profile/active-course', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ course_slug: slug }),
       });
-      const data = (await resp.json()) as {
+      const data = (await response.json()) as {
         ok: boolean;
         redirectTo?: string;
         reason?: string;
-        detail?: string;
       };
-      if (!data.ok || !data.redirectTo) {
-        // Prefer the detail field (real server error text); fall back to
-        // the high-level reason.
-        const msg = data.detail
-          ? `${data.reason ?? 'Failed'}: ${data.detail}`
-          : (data.reason ?? 'Could not switch course.');
-        setError(msg);
-        setSubmitting(null);
+      if (!response.ok || !data.ok || !data.redirectTo) {
+        const needsTerms =
+          response.status === 428 &&
+          data.reason === 'terms_acceptance_required';
+        setTermsRequired(needsTerms);
+        setError(
+          needsTerms
+            ? 'Accept the current terms before switching courses.'
+            : data.reason === 'unauthenticated'
+              ? 'Your session expired. Sign in again to switch courses.'
+              : data.reason === 'invalid_course_slug'
+                ? 'That course is no longer available.'
+                : 'Could not switch course. Please retry.',
+        );
+        setSubmitting(false);
         return;
       }
-      window.location.href = data.redirectTo;
-    } catch (e) {
-      setError(`Network error: ${(e as Error).message}`);
-      setSubmitting(null);
+      window.location.assign(data.redirectTo);
+    } catch {
+      setError('Could not switch course. Check your connection and retry.');
+      setSubmitting(false);
     }
   }
 
   return (
-    <div ref={rootRef} className="relative inline-block text-left">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-accent"
-      >
-        <span>{buttonLabel}</span>
-        <svg
-          aria-hidden="true"
-          className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`}
-          viewBox="0 0 12 12"
-          fill="currentColor"
+    <div className="relative">
+      <label>
+        <span className="sr-only">Active course</span>
+        <select
+          value={activeSlug ?? ''}
+          disabled={submitting}
+          onChange={(event) => void pick(event.target.value)}
+          aria-describedby={error ? errorId : undefined}
+          className={`${wide ? 'w-full' : 'max-w-36'} rounded border border-slate-300 bg-white px-2 py-1.5 text-sm font-medium disabled:opacity-60`}
         >
-          <path
-            d="M3 4.5l3 3 3-3"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            fill="none"
-          />
-        </svg>
-      </button>
-
-      {open && (
-        <div
-          role="listbox"
-          className="absolute right-0 z-20 mt-1 w-64 rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+          {!activeSlug && <option value="">Pick a course</option>}
+          {courses.map((course) => (
+            <option key={course.slug} value={course.slug}>
+              {course.code}
+              {course.enrolled ? '' : staffViewer ? ' (staff)' : ' (browse)'}
+            </option>
+          ))}
+        </select>
+      </label>
+      {error && (
+        <p
+          id={errorId}
+          role="alert"
+          className={`${wide ? 'mt-1' : 'absolute right-0 z-20 mt-1 w-64'} rounded border border-rose-200 bg-white p-2 text-xs text-rose-700 shadow`}
         >
-          {courses.map((c) => {
-            const isActive = c.slug === activeSlug;
-            const isLoading = submitting === c.slug;
-            return (
-              <button
-                key={c.slug}
-                role="option"
-                aria-selected={isActive}
-                disabled={isLoading || submitting !== null}
-                onClick={() => pick(c.slug)}
-                className={`flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 disabled:opacity-50 ${
-                  isActive ? 'bg-slate-50' : ''
-                }`}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{c.code}</span>
-                    {isActive && (
-                      <span className="text-xs text-ink-muted">(current)</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-ink-muted">{c.title}</div>
-                </div>
-                {isLoading && (
-                  <span className="text-xs text-ink-muted">...</span>
-                )}
-              </button>
-            );
-          })}
-          {error && (
-            <div className="border-t border-slate-200 px-3 py-2 text-xs text-rose-700">
-              {error}
-            </div>
+          {error}
+          {termsRequired && (
+            <>
+              {' '}
+              <a className="font-medium underline" href="/account/terms">
+                Review terms
+              </a>
+            </>
           )}
-        </div>
+        </p>
       )}
     </div>
   );
