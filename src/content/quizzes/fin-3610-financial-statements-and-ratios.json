@@ -58,7 +58,7 @@
       "choices": [
         "Banks and retailers have identical profit margins",
         "The bank has high leverage (high equity multiplier) compensating for lower margins; the retailer has higher margins with low leverage",
-        "Coincidence \u2014 the ratios are unrelated",
+        "Coincidence; the ratios are unrelated",
         "Banks have negligible assets"
       ],
       "correctIndex": 1,
@@ -70,7 +70,7 @@
     "title": "Inside Macy's $151 million accounting error",
     "url": "https://accountancyage.com/2024/12/12/inside-macys-151-million-accounting-error/",
     "source": "Accountancy Age",
-    "why": "Concrete 2024 case of hidden delivery-expense accruals at Macy's that distorted reported earnings \u2014 direct lesson on earnings quality and internal control over financial statements.",
+    "why": "Concrete 2024 case of hidden delivery-expense accruals at Macy's that distorted reported earnings, a direct lesson on earnings quality and internal control over financial statements.",
     "date": "2024-12"
   }
 }

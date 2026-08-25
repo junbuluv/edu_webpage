@@ -36,11 +36,11 @@
     {
       "type": "numeric",
       "id": "q3",
-      "prompt": "A one-year risk-free bond paying $100 trades at $95.24 (yielding ~5%). A one-year credit-default-swap that pays $100 in case of default trades at $4 today (you receive the $4 premium upfront). What is the no-arbitrage price for a one-year corporate bond that pays $100 if the firm survives and $0 if it defaults? Answer in dollars to two decimals.",
-      "answer": 91.24,
+      "prompt": "A one-year risk-free bond paying $100 trades at $96.15 (yielding ~4%). A one-year credit-default-swap that pays $100 in case of default trades at $5 today. What is the no-arbitrage price for a one-year corporate bond that pays $100 if the firm survives and $0 if it defaults? Answer in dollars to two decimals.",
+      "answer": 91.15,
       "tolerance": 0.05,
       "unit": "$",
-      "explanation": "Replicate the risky bond as: long the risk-free bond (cost $95.24) + short the CDS (receive $4). Net cost = $95.24 \u2212 $4 = $91.24. If the risky bond trades for anything else, arbitrage exists.",
+      "explanation": "Replicate the risky bond as: long the risk-free bond (cost $96.15) + sell the CDS (receive the $5 premium today). Net cost = $96.15 \u2212 $5 = $91.15. If the risky bond trades for anything else, arbitrage exists.",
       "points": 2
     },
     {
@@ -57,7 +57,7 @@
     "title": "Hedge funds at the heart of Treasury market turmoil as basis trades unwind",
     "url": "https://www.hedgeweek.com/hedge-funds-at-the-heart-of-treasury-market-turmoil-as-basis-trades-unwind/",
     "source": "Hedgeweek",
-    "why": "April 2025 Treasury cash-futures basis blowout \u2014 a textbook real-world breakdown of the law of one price when leveraged arbitrageurs are forced to unwind.",
+    "why": "April 2025 Treasury cash-futures basis blowout: a textbook real-world breakdown of the law of one price when leveraged arbitrageurs are forced to unwind.",
     "date": "2025-04"
   }
 }
