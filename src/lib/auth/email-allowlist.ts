@@ -1,9 +1,10 @@
 // Accepted email domains for signup. Add new domains here as the
 // institution adds them. Lowercased; comparison is case-insensitive.
 //
-// Today: Baruch College students and faculty/staff, plus Gmail.
-// Common additions to consider later if the program grows:
-//   - login.cuny.edu (CUNY-wide SSO domain)
+// Today: Baruch College students and faculty/staff, the CUNY-wide SSO
+// domain (login.cuny.edu — what CUNYfirst/Brightspace rosters list, so
+// roster-import matching works without an email-collection step), plus
+// Gmail. Common additions to consider later if the program grows:
 //   - other CUNY school domains (hunter.cuny.edu, etc.)
 //
 // Why gmail.com is here: CUNY/Baruch mail is hosted on Microsoft 365
@@ -19,6 +20,7 @@
 export const ALLOWED_EMAIL_DOMAINS = [
   'baruchmail.cuny.edu',
   'baruch.cuny.edu',
+  'login.cuny.edu',
   'gmail.com',
 ] as const;
 
