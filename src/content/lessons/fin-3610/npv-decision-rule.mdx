@@ -71,9 +71,10 @@ When it breaks:
   once, e.g. mining projects with closure costs at the end). Multiple
   IRRs exist; the rule is ambiguous.
 - **Mutually exclusive projects of different scale.** Project A:
-  invest \$1, get \$2 back. IRR = 100%. Project B: invest \$1M, get
-  \$1.2M back. IRR = 20%. NPV at 10% cost of capital: A = \$0.82, B =
-  \$90,000. IRR ranks A higher; NPV (correctly) ranks B higher.
+  invest \$1 today, get \$2 back in one year. IRR = 100%. Project B:
+  invest \$1M today, get \$1.2M back in one year. IRR = 20%. NPV at a
+  10% cost of capital: A = \$0.82, B ≈ \$90,900. IRR ranks A higher;
+  NPV (correctly) ranks B higher.
 - **Mutually exclusive projects of different timing.** IRR favors
   short, early-payoff projects; NPV correctly accounts for the size
   of long-term value creation.
@@ -130,19 +131,18 @@ NPV(A) = -500 + 150 × PV-annuity(10%, 5)
 ≈ -500 + 568.65
 = **+\$68.65k**.
 
-**Project B**: $C_0 = -\$500\,k$, then $\$250\,k$ in year
+**Project B**: $C_0 = -\$500\,k$, then $\$325\,k$ in year
 1 and 2, $\$0$ thereafter (a shorter contract).
 
-NPV(B) = -500 + 250 / 1.10 + 250 / 1.21
-= -500 + 227.27 + 206.61
-= **-\$66.12k**.
+NPV(B) = -500 + 325 / 1.10 + 325 / 1.21
+= -500 + 295.45 + 268.60
+= **+\$64.05k**.
 
-Take A. B merely recoups its initial outlay after exactly two years:
-its IRR is 0%, and it **destroys** value at a 10% cost of capital
-because the contract ends just as the investment has been recouped.
-NPV and IRR both select A here. An undiscounted payback rule would
-prefer B because it recovers cash in two years rather than about
-3.33 years, but it cannot tell that B earns no return on capital.
+Take A. Both projects create value, but the competing rules pick B:
+payback favors B (about 1.5 years vs. 3.3), and so does IRR (B's is
+about 19.4%, A's about 15.2%, since B returns cash sooner). NPV alone
+sees that A's longer contract creates **more** total value. With
+mutually exclusive projects, rank by NPV, not by IRR or payback.
 
 ## Calibrating your intuition
 
