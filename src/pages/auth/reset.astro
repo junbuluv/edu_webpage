@@ -1,5 +1,16 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import { isRecoverySession } from '@lib/auth/session-amr';
+
+// Recovery-link arrivals only; a normally signed-in visitor is sent to the
+// change-password page, which asks for the current password first.
+if (
+  Astro.locals.supabase &&
+  Astro.locals.user &&
+  !(await isRecoverySession(Astro.locals.supabase))
+) {
+  return Astro.redirect('/account/password');
+}
 
 const error = Astro.url.searchParams.get('error');
 ---

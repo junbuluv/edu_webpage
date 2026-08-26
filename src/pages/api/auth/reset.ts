@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { isRecoverySession } from '@lib/auth/session-amr';
 
 const MIN_PASSWORD_LEN = 12;
 
@@ -8,6 +9,11 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
     return redirect(
       '/auth/signin?error=Reset+link+expired%2C+request+a+new+one',
     );
+  }
+  // Only recovery-link sessions may set a password without providing the
+  // current one; normally signed-in users go through /account/password.
+  if (!(await isRecoverySession(locals.supabase))) {
+    return redirect('/account/password');
   }
 
   const form = await request.formData();
