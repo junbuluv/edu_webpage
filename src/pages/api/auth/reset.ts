@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { isRecoverySession } from '@lib/auth/session-amr';
 
-const MIN_PASSWORD_LEN = 12;
+const MIN_PASSWORD_LEN = 8;
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (!locals.supabase) return redirect('/auth/setup-required');

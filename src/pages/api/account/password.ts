@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-const MIN_PASSWORD_LEN = 12;
+const MIN_PASSWORD_LEN = 8;
 
 // Signed-in password change with re-authentication: verifying the current
 // password via signInWithPassword before updateUser means a walk-up on an
