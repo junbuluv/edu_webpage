@@ -95,7 +95,15 @@ jobs:
           createdb --maintenance-db=postgres workshop_upgrade
           export PGDATABASE=workshop_upgrade
           psql -v ON_ERROR_STOP=1 -f supabase/tests/auth_stub.sql
-          git show 6e5ef3073b0813b6136360fb69296d198e69ee72:supabase/schema.sql > /tmp/pre_workshop_integrity.sql
+          # The "before" schema is vendored as a fixture rather than fetched
+          # with 'git show <sha>'. The old pin was a commit on the
+          # workshop-integrity branch; rebasing that branch before merge
+          # orphaned it, and CI's checkout cannot resolve unreachable
+          # commits, so this step died with exit 128. No commit reachable
+          # from main carries that intermediate state (it has
+          # lesson_progress.course_slug but not teaching_assignments), so
+          # repointing at main history is not possible either.
+          cp supabase/tests/fixtures/pre_workshop_integrity_schema.sql /tmp/pre_workshop_integrity.sql
           psql -v ON_ERROR_STOP=1 -f /tmp/pre_workshop_integrity.sql
           psql -v ON_ERROR_STOP=1 <<'SQL'
           insert into auth.users (
