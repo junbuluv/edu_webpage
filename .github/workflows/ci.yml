@@ -95,7 +95,15 @@ jobs:
           createdb --maintenance-db=postgres workshop_upgrade
           export PGDATABASE=workshop_upgrade
           psql -v ON_ERROR_STOP=1 -f supabase/tests/auth_stub.sql
-          git show 6e5ef3073b0813b6136360fb69296d198e69ee72:supabase/schema.sql > /tmp/pre_workshop_integrity.sql
+          # Must be a commit REACHABLE FROM main. The previous pin was a
+          # commit on the workshop-integrity branch; rebasing that branch
+          # before merge orphaned the SHA, so the checkout (fetch-depth 0,
+          # which still only walks reachable refs) could no longer resolve it
+          # and this step failed with exit 128. This is main immediately
+          # before the workshop-integrity merge (#109) -- i.e. the last
+          # pre-upgrade schema -- and main is force-push protected, so it
+          # stays reachable.
+          git show 19a7267d03013114b5bc0ac6565cba8154b5d612:supabase/schema.sql > /tmp/pre_workshop_integrity.sql
           psql -v ON_ERROR_STOP=1 -f /tmp/pre_workshop_integrity.sql
           psql -v ON_ERROR_STOP=1 <<'SQL'
           insert into auth.users (
