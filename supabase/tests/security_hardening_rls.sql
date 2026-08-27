@@ -1272,13 +1272,23 @@ begin
   end if;
   delete from public.archive_videos where id = item_id;
 
+  -- schedule_version 1 on purpose. This fixture needs two things at once: a
+  -- window that is open *right now* (the stamp RPC refuses anything else) and
+  -- a real ECO section (the wrong-section assertion below depends on it).
+  -- Under schedule_version 2 the section/day constraint requires opens_at to
+  -- fall on the section's own weekday, so those two demands could only both
+  -- hold on a Tuesday -- which made this whole block pass on Tuesdays and
+  -- fail every other day of the week. Version 1 is exempt from the
+  -- section/day and week_of derivation checks, and no RPC branches on
+  -- schedule_version, so every assertion here still exercises the same code.
+  -- Do not "modernize" this to version 2 without making the clock injectable.
   insert into public.workshop_administrations (
-    workshop_slug, course_slug, semester, section, week_of, instructor_id,
-    opens_at, closes_at
+    workshop_slug, course_slug, semester, section, week_of, schedule_version,
+    instructor_id, opens_at, closes_at
   ) values (
     'eco-1002-rpc-fixture', 'eco-1002', 'fall-2026', 'CTL',
     date_trunc('week', now() at time zone 'America/New_York')::date,
-    '00000000-0000-0000-0000-000000000201',
+    1, '00000000-0000-0000-0000-000000000201',
     now() - interval '1 hour', now() + interval '1 hour'
   ) returning id into administration_id;
   begin
