@@ -40,6 +40,23 @@ try {
 // Management metrics follow workshop RLS: instructors and admins only.
 const viewerCanManage = isInstructor(Astro.locals.profile?.role);
 const range = parseRange(Astro.url.searchParams.get('range'));
+
+// A staff-access request made at signup, still awaiting an admin decision.
+// Read under RLS (role_requests lets a user see only their own row); a
+// failure just hides the banner rather than breaking the dashboard.
+let pendingStaffRole: 'instructor' | 'ta' | null = null;
+try {
+  const { data: roleRequest } = await supabase
+    .from('role_requests')
+    .select('requested_role, status')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (roleRequest?.status === 'pending') {
+    pendingStaffRole = roleRequest.requested_role;
+  }
+} catch (error) {
+  console.error('[dashboard] role_request_read_failed', error);
+}
 let staffMetrics: Awaited<ReturnType<typeof loadStaffMetrics>> | null = null;
 let staffMetricsUnavailable = false;
 if (viewerCanManage && activeSlug && data) {
@@ -56,6 +73,24 @@ if (viewerCanManage && activeSlug && data) {
   <div class="mx-auto max-w-4xl px-4 py-10">
     <h1 class="text-3xl font-semibold tracking-tight">Your dashboard</h1>
     <p class="mt-2 text-ink-muted">Signed in as {user.email}</p>
+
+    {
+      pendingStaffRole && (
+        <div
+          role="status"
+          class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          <p>
+            <strong>Staff access pending.</strong> You asked for{' '}
+            {pendingStaffRole === 'instructor'
+              ? 'lecturer'
+              : 'teaching assistant'}{' '}
+            access. An administrator has been notified and will review it. Until
+            then your account works as a student account.
+          </p>
+        </div>
+      )
+    }
 
     {
       dashboardUnavailable && (
