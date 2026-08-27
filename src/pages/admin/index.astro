@@ -22,6 +22,39 @@ const { data: events, error: auditError } = await admin
   .order('ts', { ascending: false })
   .limit(50);
 
+// Staff-access requests made at signup. Pending ones need a decision before
+// the requester gets any staff capability (until then they are students).
+const { data: pendingRequests, error: requestError } = await admin
+  .from('role_requests')
+  .select('user_id, requested_role, requested_at')
+  .eq('status', 'pending')
+  .order('requested_at', { ascending: true })
+  .limit(50);
+
+const REQUEST_OK: Record<string, string> = {
+  approved: 'Staff access approved. The role is active immediately.',
+  denied: 'Request denied. The account keeps student-level access.',
+};
+const REQUEST_ERR: Record<string, string> = {
+  forbidden: 'Only admins can decide staff-access requests.',
+  invalid_input: 'That request could not be read. Reload and try again.',
+  invalid_decision: 'Unrecognized decision.',
+  not_found: 'That request no longer exists.',
+  already_decided:
+    'That request was already decided (possibly in another tab).',
+  cannot_modify_admin: 'Admin accounts cannot be modified here.',
+  lookup_failed: 'Could not load the request. Try again.',
+  update_failed: 'The decision could not be saved. Try again.',
+};
+const requestOkParam = Astro.url.searchParams.get('request_ok');
+const requestErrParam = Astro.url.searchParams.get('request_error');
+const requestOkText = requestOkParam
+  ? (REQUEST_OK[requestOkParam] ?? null)
+  : null;
+const requestErrText = requestErrParam
+  ? (REQUEST_ERR[requestErrParam] ?? 'That request could not be completed.')
+  : null;
+
 const assignmentResult = await selectAllRows<{
   instructor_id: string;
   course_slug: string;
@@ -213,6 +246,93 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
     <p class="mt-3 text-ink-muted">
       Signed in as {profile.display_name ?? user.email}. Role: {profile.role}.
     </p>
+
+    <section class="mt-10 rounded-lg border border-slate-200 p-5">
+      <h2 class="text-lg font-semibold">
+        Staff access requests
+        {
+          (pendingRequests ?? []).length > 0 && (
+            <span class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900">
+              {(pendingRequests ?? []).length} pending
+            </span>
+          )
+        }
+      </h2>
+      <p class="mt-1 text-sm text-ink-muted">
+        People who chose lecturer or teaching assistant at signup. They hold
+        student-level access until approved here. Deny anyone you do not
+        recognize: approving grants access to student records.
+      </p>
+
+      {
+        requestOkText && (
+          <p class="mt-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+            {requestOkText}
+          </p>
+        )
+      }
+      {
+        requestErrText && (
+          <p class="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            {requestErrText}
+          </p>
+        )
+      }
+      {
+        requestError && (
+          <p class="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            Pending requests could not be loaded.
+          </p>
+        )
+      }
+
+      {
+        (pendingRequests ?? []).length === 0 ? (
+          <p class="mt-4 text-sm text-ink-muted">No pending requests.</p>
+        ) : (
+          <ul class="mt-4 divide-y divide-slate-200 rounded border border-slate-200">
+            {(pendingRequests ?? []).map((req) => (
+              <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                <div>
+                  <p class="text-sm font-medium">
+                    {emailById.get(req.user_id) ?? req.user_id}
+                  </p>
+                  <p class="text-xs text-ink-muted">
+                    Requested{' '}
+                    {req.requested_role === 'instructor'
+                      ? 'Lecturer'
+                      : 'Teaching assistant'}{' '}
+                    · {nyDateTime.format(new Date(req.requested_at))} ET
+                  </p>
+                </div>
+                <div class="flex gap-2">
+                  <form method="POST" action="/api/admin/role-request">
+                    <input type="hidden" name="user_id" value={req.user_id} />
+                    <input type="hidden" name="decision" value="approve" />
+                    <button
+                      type="submit"
+                      class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      Approve
+                    </button>
+                  </form>
+                  <form method="POST" action="/api/admin/role-request">
+                    <input type="hidden" name="user_id" value={req.user_id} />
+                    <input type="hidden" name="decision" value="deny" />
+                    <button
+                      type="submit"
+                      class="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-ink hover:bg-slate-50"
+                    >
+                      Deny
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
 
     <section class="mt-10 rounded-lg border border-slate-200 p-5">
       <h2 class="text-lg font-semibold">User roles</h2>

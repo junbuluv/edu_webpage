@@ -55,8 +55,20 @@ alter table public.profiles add column if not exists tos_accepted_at timestamptz
 alter table public.profiles add column if not exists tos_version text;
 alter table public.profiles add column if not exists active_course_slug text;
 
+-- Student ID (CUNY EMPLID), HMAC'd like every other sensitive identifier
+-- (convention #9): never stored in the clear, but still comparable, so a
+-- registrar export can be matched against it. Deliberately excluded from the
+-- authenticated column grant below: only service-role code reads it.
+alter table public.profiles add column if not exists student_id_hmac text;
+
 create unique index if not exists profiles_email_hmac_uq
   on public.profiles (email_hmac);
+
+-- One account per student ID. Partial so the many staff/legacy rows with a
+-- NULL value don't collide with each other.
+create unique index if not exists profiles_student_id_hmac_uq
+  on public.profiles (student_id_hmac)
+  where student_id_hmac is not null;
 
 alter table public.profiles enable row level security;
 
@@ -333,6 +345,53 @@ create policy "teaching_assignments_authenticated_read"
       where p.id = (select auth.uid()) and p.role = 'admin'
     )
   );
+
+-- =========================================================================
+-- role_requests --- a signup asking for staff access, pending admin review.
+--
+-- Choosing "lecturer" or "TA" on the signup form must never write
+-- profiles.role: that would let anyone self-promote and read other students'
+-- records. Signup records a request here; the role changes only when an admin
+-- approves it through /admin. 'admin' is excluded by CHECK, so a forged form
+-- value cannot request it. One row per user: re-requesting overwrites.
+-- =========================================================================
+create table if not exists public.role_requests (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  requested_role user_role not null,
+  status text not null default 'pending',
+  requested_at timestamptz not null default now(),
+  decided_by uuid references public.profiles(id) on delete set null,
+  decided_at timestamptz,
+  note text,
+  constraint role_requests_role_chk
+    check (requested_role in ('instructor', 'ta')),
+  constraint role_requests_status_chk
+    check (status in ('pending', 'approved', 'denied')),
+  constraint role_requests_note_chk
+    check (note is null or char_length(note) between 1 and 300)
+);
+
+create index if not exists role_requests_pending_idx
+  on public.role_requests (status, requested_at desc);
+
+alter table public.role_requests enable row level security;
+
+drop policy if exists "role_requests_self_or_admin_read" on public.role_requests;
+create policy "role_requests_self_or_admin_read"
+  on public.role_requests for select
+  to authenticated
+  using (
+    (select auth.uid()) = user_id
+    or exists (
+      select 1 from public.profiles p
+      where p.id = (select auth.uid()) and p.role = 'admin'
+    )
+  );
+
+-- Requests are created by the signup handler and settled by the admin
+-- handler, both service-role. No client may write them.
+revoke insert, update, delete on table public.role_requests
+  from anon, authenticated;
 
 -- =========================================================================
 -- lesson_progress --- one row per (user, lesson)

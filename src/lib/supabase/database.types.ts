@@ -22,6 +22,7 @@ export type Database = {
           tos_accepted_at: string | null;
           tos_version: string | null;
           active_course_slug: string | null;
+          student_id_hmac: string | null;
           created_at: string;
         };
         Insert: {
@@ -32,6 +33,7 @@ export type Database = {
           tos_accepted_at?: string | null;
           tos_version?: string | null;
           active_course_slug?: string | null;
+          student_id_hmac?: string | null;
         };
         Update: {
           id?: string;
@@ -41,6 +43,37 @@ export type Database = {
           tos_accepted_at?: string | null;
           tos_version?: string | null;
           active_course_slug?: string | null;
+          student_id_hmac?: string | null;
+        };
+        Relationships: [];
+      };
+      role_requests: {
+        Row: {
+          user_id: string;
+          requested_role: 'instructor' | 'ta';
+          status: 'pending' | 'approved' | 'denied';
+          requested_at: string;
+          decided_by: string | null;
+          decided_at: string | null;
+          note: string | null;
+        };
+        Insert: {
+          user_id: string;
+          requested_role: 'instructor' | 'ta';
+          status?: 'pending' | 'approved' | 'denied';
+          requested_at?: string;
+          decided_by?: string | null;
+          decided_at?: string | null;
+          note?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          requested_role?: 'instructor' | 'ta';
+          status?: 'pending' | 'approved' | 'denied';
+          requested_at?: string;
+          decided_by?: string | null;
+          decided_at?: string | null;
+          note?: string | null;
         };
         Relationships: [];
       };

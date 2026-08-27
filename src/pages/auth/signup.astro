@@ -4,9 +4,29 @@ import {
   ALLOWED_EMAIL_DOMAINS,
   allowedDomainsHumanList,
 } from '@lib/auth/email-allowlist';
+import { isSignupRole } from '@lib/auth/signup-role';
 
 const next = Astro.url.searchParams.get('next') ?? '/';
 const error = Astro.url.searchParams.get('error');
+
+// Preserve the chosen role across a validation bounce so the student doesn't
+// have to re-pick it just to fix a mistyped ID.
+const roleParam = Astro.url.searchParams.get('role') ?? 'student';
+const selectedRole = isSignupRole(roleParam) ? roleParam : 'student';
+
+const ROLE_CHOICES: Array<{ value: string; label: string; hint: string }> = [
+  { value: 'student', label: 'Student', hint: 'Enrolled in a course' },
+  {
+    value: 'instructor',
+    label: 'Lecturer',
+    hint: 'Teaching a course (needs approval)',
+  },
+  {
+    value: 'ta',
+    label: 'Teaching assistant',
+    hint: 'Supporting a course (needs approval)',
+  },
+];
 
 // HTML5 pattern: any local-part, then @, then exactly one of our allowed
 // domains. Browser-side check only; server-side is the source of truth.
@@ -42,6 +62,60 @@ Astro.response.headers.set('Cache-Control', 'no-store');
 
     <form method="POST" action="/api/auth/signup" class="space-y-4">
       <input type="hidden" name="next" value={next} />
+
+      <fieldset>
+        <legend class="text-sm font-medium">I am a</legend>
+        <div class="mt-2 space-y-2">
+          {
+            ROLE_CHOICES.map((choice) => (
+              <label class="flex items-start gap-2 rounded border border-slate-300 px-3 py-2">
+                <input
+                  type="radio"
+                  name="role"
+                  value={choice.value}
+                  checked={selectedRole === choice.value}
+                  required
+                  class="mt-1 js-role"
+                />
+                <span>
+                  <span class="text-sm font-medium">{choice.label}</span>
+                  <span class="block text-xs text-ink-muted">
+                    {choice.hint}
+                  </span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div id="student-id-field">
+        <label class="block">
+          <span class="text-sm font-medium">Student ID (EMPLID)</span>
+          <input
+            name="student_id"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="15113468"
+            class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+          />
+          <span class="mt-1 block text-xs text-ink-muted">
+            The 8-digit ID from CUNYfirst. Your instructor uses it to match you
+            to the class roster.
+          </span>
+        </label>
+      </div>
+
+      <p
+        id="staff-note"
+        hidden
+        class="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+      >
+        Lecturer and teaching-assistant accounts are reviewed by an
+        administrator. You can sign in right away, but staff features stay
+        locked until your request is approved.
+      </p>
+
       <label class="block">
         <span class="text-sm font-medium">Email</span>
         <input
@@ -102,3 +176,28 @@ Astro.response.headers.set('Cache-Control', 'no-store');
     </p>
   </div>
 </BaseLayout>
+
+<script>
+  // Progressive enhancement only: without JS the student-ID field stays
+  // visible and simply isn't required, and the server re-validates either
+  // way (it ignores a student ID sent with a staff role).
+  const field = document.getElementById('student-id-field');
+  const note = document.getElementById('staff-note');
+  const input = document.querySelector<HTMLInputElement>(
+    'input[name="student_id"]',
+  );
+  const radios = document.querySelectorAll<HTMLInputElement>('input.js-role');
+
+  function sync() {
+    const selected = document.querySelector<HTMLInputElement>(
+      'input.js-role:checked',
+    )?.value;
+    const isStudent = selected === 'student';
+    if (field) field.hidden = !isStudent;
+    if (note) note.hidden = isStudent;
+    if (input) input.required = isStudent;
+  }
+
+  radios.forEach((radio) => radio.addEventListener('change', sync));
+  sync();
+</script>
