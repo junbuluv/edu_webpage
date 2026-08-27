@@ -6,7 +6,7 @@ import {
   allowedDomainsHumanList,
 } from '@lib/auth/email-allowlist';
 import { CURRENT_TERMS_VERSION } from '@lib/auth/terms';
-import { getAdminClient } from '@lib/supabase/admin';
+import { getAdminClient, listAllAuthUsers } from '@lib/supabase/admin';
 import {
   classifySignup,
   isStaffSignupRole,
@@ -124,85 +124,98 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
       )}`,
     );
   }
-  if (data.user) {
-    try {
-      const accepted = await getAdminClient().rpc('accept_terms', {
-        p_user_id: data.user.id,
+  // data.user is NOT reliable here: this project's GoTrue returns a bare user
+  // object for confirmation-required signups, which the installed supabase-js
+  // maps to null (no error). Relying on it silently skipped every
+  // post-signup write, including terms acceptance. Resolve the account
+  // through the service role instead, which is version-independent.
+  //
+  // Freshness guard: signing up with an already-registered email must never
+  // write to that account (it would let anyone attach their student ID or a
+  // staff request to someone else's profile). A profile created seconds ago
+  // is one this request just created; anything older is pre-existing.
+  const NEW_ACCOUNT_WINDOW_MS = 60_000;
+  try {
+    const admin = getAdminClient();
+    const account = (await listAllAuthUsers(admin)).find(
+      (candidate) => candidate.email?.toLowerCase() === email.toLowerCase(),
+    );
+    const { data: profile } = account
+      ? await admin
+          .from('profiles')
+          .select('id, created_at, student_id_hmac')
+          .eq('id', account.id)
+          .maybeSingle()
+      : { data: null };
+
+    const isFreshAccount =
+      profile != null &&
+      Date.now() - Date.parse(profile.created_at) < NEW_ACCOUNT_WINDOW_MS;
+
+    if (isFreshAccount) {
+      const userId = profile.id;
+
+      const accepted = await admin.rpc('accept_terms', {
+        p_user_id: userId,
         p_policy_version: CURRENT_TERMS_VERSION,
         p_source: 'signup',
       });
       if (accepted.error || accepted.data !== 'accepted') {
         console.error('[auth/signup] terms_acceptance_save_failed', {
-          userId: data.user.id,
+          userId,
           code: accepted.error?.code,
         });
       }
-    } catch (acceptanceError) {
-      console.error('[auth/signup] terms_acceptance_save_failed', {
-        userId: data.user.id,
-        error:
-          acceptanceError instanceof Error
-            ? acceptanceError.message
-            : String(acceptanceError),
-      });
-    }
 
-    // Supabase returns an obfuscated user with an empty identities array when
-    // the email is already registered (anti-enumeration). Writing rows for
-    // that placeholder id would target a stranger's account, so skip it.
-    const isNewAccount = (data.user.identities ?? []).length > 0;
-    if (isNewAccount) {
-      try {
-        const admin = getAdminClient();
-        if (studentIdHmac) {
-          const { error: idError } = await admin
-            .from('profiles')
-            .update({ student_id_hmac: studentIdHmac })
-            .eq('id', data.user.id);
-          if (idError) {
-            console.error('[auth/signup] student_id_save_failed', {
-              userId: data.user.id,
-              code: idError.code,
-            });
-          }
+      // Never overwrite an ID that is already set.
+      if (studentIdHmac && profile.student_id_hmac == null) {
+        const { error: idError } = await admin
+          .from('profiles')
+          .update({ student_id_hmac: studentIdHmac })
+          .eq('id', userId);
+        if (idError) {
+          console.error('[auth/signup] student_id_save_failed', {
+            userId,
+            code: idError.code,
+          });
         }
-        if (isStaffRequest) {
-          const { error: requestError } = await admin
-            .from('role_requests')
-            .upsert(
-              {
-                user_id: data.user.id,
-                requested_role: requestedRole as 'instructor' | 'ta',
-                status: 'pending',
-                requested_at: new Date().toISOString(),
-                decided_by: null,
-                decided_at: null,
-              },
-              { onConflict: 'user_id' },
-            );
-          if (requestError) {
-            console.error('[auth/signup] role_request_save_failed', {
-              userId: data.user.id,
-              code: requestError.code,
-            });
-          } else {
-            // Fail-open: a mail outage must not break account creation.
-            await notifyAdminsOfRoleRequest({
-              email,
-              requestedRole: requestedRole as 'instructor' | 'ta',
-            });
-          }
+      }
+
+      if (isStaffRequest) {
+        const { error: requestError } = await admin
+          .from('role_requests')
+          .upsert(
+            {
+              user_id: userId,
+              requested_role: requestedRole as 'instructor' | 'ta',
+              status: 'pending',
+              requested_at: new Date().toISOString(),
+              decided_by: null,
+              decided_at: null,
+            },
+            { onConflict: 'user_id' },
+          );
+        if (requestError) {
+          console.error('[auth/signup] role_request_save_failed', {
+            userId,
+            code: requestError.code,
+          });
+        } else {
+          // Fail-open: a mail outage must not break account creation.
+          await notifyAdminsOfRoleRequest({
+            email,
+            requestedRole: requestedRole as 'instructor' | 'ta',
+          });
         }
-      } catch (postSignupError) {
-        console.error('[auth/signup] post_signup_write_failed', {
-          userId: data.user.id,
-          error:
-            postSignupError instanceof Error
-              ? postSignupError.message
-              : String(postSignupError),
-        });
       }
     }
+  } catch (postSignupError) {
+    console.error('[auth/signup] post_signup_write_failed', {
+      error:
+        postSignupError instanceof Error
+          ? postSignupError.message
+          : String(postSignupError),
+    });
   }
   return redirect('/auth/check-email');
 };
