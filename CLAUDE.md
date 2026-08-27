@@ -94,6 +94,41 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Lesson figures: `public/figures/<course>/<lesson-slug>/<name>.png`
   for committed images; `BarFigure` data lives inline in MDX
 - Per-chart presets + URL state: `src/lib/{islm,adas,bonds}/{presets,url-state}.ts`
+- Weekly attendance (PR #113): pure alias-free `src/lib/attendance-weekly.ts`
+  builds a week-by-week matrix (`attended` / `missed` / `pending` /
+  `ineligible`) from the distinct `week_of` Mondays of non-cancelled
+  `workshop_administrations`. There is no semester calendar; weeks exist only
+  as those Mondays. Instructor side: per-week ✓/✗ columns in
+  `RosterTable.astro` plus `week_<monday>` CSV columns. Student side: a
+  "Workshop attendance" card on `/dashboard` (weekly chips + a stamp-in link
+  when a window for their section is open now), loaded in `dashboard.ts` via
+  the student's own RLS reads
+- Signup roles + student ID (PR #120): the signup form asks student /
+  lecturer / TA and collects an 8-digit EMPLID from students. Choosing a
+  staff role writes a **request** to `role_requests`, never a role — see
+  convention #19. Pure logic: `src/lib/auth/signup-role.ts` (role +
+  student-ID validation) and `src/lib/admin/role-decision.ts` (approve/deny
+  classifier), both unit-tested. Admin queue on `/admin` with handler
+  `src/pages/api/admin/role-request.ts`; pending users see a banner on
+  `/dashboard`. Student IDs are stored only as `profiles.student_id_hmac`
+  (convention #9), excluded from the `authenticated` column grant, and
+  uniquely indexed
+- Account password change (PR #115): `/account/password` (linked from the
+  dashboard Account section) requires the current password, verified by
+  re-authenticating before `updateUser`. `/auth/reset` is reserved for
+  recovery-link sessions, detected via the JWT `amr` claim in
+  `src/lib/auth/session-amr.ts` (fails open when the claim is unreadable so
+  a genuine recovery user is never stranded)
+- Cross-device email confirmation (PR #118): `src/pages/auth/confirm.ts`
+  validates `?token_hash=&type=` with `verifyOtp`, entirely server-side, so
+  confirmation and reset links work from any device. `/auth/callback` (PKCE
+  `?code=`) remains for legacy links but only completes in the browser that
+  started the flow — see the Supabase gotchas section for the email
+  templates this requires
+- Operational email: `src/lib/email/notify.ts` posts to the Resend REST API
+  (`RESEND_API_KEY`) and is fail-open — used to alert admins of a staff
+  access request. Auth email (confirmation, reset) does **not** go through
+  this; Supabase sends it via its own SMTP settings
 
 ## Repository workflow
 
@@ -117,8 +152,24 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   stock Postgres 15 service container with a minimal `auth` stub (roles,
   `auth.users`, and `auth.uid()`). Catches idempotency regressions
   (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
-  Currently **advisory**, not blocking — flip to required in the ruleset
-  when ready by adding `schema-roundtrip` to `required_status_checks`.
+  It also exercises the upgrade path and the RLS suite
+  (`supabase/tests/security_hardening_rls.sql`). Currently **advisory**, not
+  blocking — flip to required in the ruleset when ready by adding
+  `schema-roundtrip` to `required_status_checks`. Two traps this job has
+  already sprung (both fixed 2026-08-26, PR #121):
+  - **Don't pin a commit SHA that lives on a feature branch.** The
+    upgrade test used to `git show <sha>:supabase/schema.sql`; rebasing
+    that branch before merge orphaned the commit and CI died with exit
+    128, while clones predating the rebase still resolved it. The
+    pre-upgrade schema is now vendored at
+    `supabase/tests/fixtures/pre_workshop_integrity_schema.sql` — a
+    historical snapshot, so never "update" it to match the current schema.
+  - **Don't write date-dependent fixtures.** A workshop fixture paired
+    section `CTL` with `opens_at = now()`, but the section/day CHECK
+    requires an ECO window to open on its section's weekday, so the suite
+    passed only on Tuesdays. Use fixed weekday-correct dates (the other
+    fixtures use `2026-07-13`, a Monday, with `CML`) or
+    `schedule_version = 1`, which is exempt from that check.
 - **`copyright-gate`** — runs `node scripts/check-copyright.mjs` over
   lesson MDX + quiz JSON (flags missing `credit`, external/hotlinked
   images, `materials/` references). Also **advisory**; the deeper,
@@ -249,6 +300,22 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     `src/lib/archive/access.ts` are the corrected pattern. (A `.maybeSingle()`
     keyed on the full enrollments PK — `user_id`+`course_slug`+`semester` —
     is safe, since that matches at most one row.)
+19. **A role chosen at signup is a request, never an assignment.**
+    `profiles.role` is written only by an admin (the `/admin` queue or
+    `assign-role`) or by SQL. Signup inserts into `role_requests`, whose
+    CHECK limits `requested_role` to `instructor|ta` so a forged form value
+    cannot request `admin`; the account keeps student-level access until
+    approved. Don't add any path that sets `profiles.role` from user input.
+20. **Never trust `data.user` from `supabase.auth.signUp()`.** On this
+    project it resolves to `null` with **no error**: GoTrue returns a bare
+    user object for confirmation-required signups and the installed
+    supabase-js maps that shape to null. Code guarded on `if (data.user)`
+    is dead code — this silently skipped terms acceptance at signup for
+    months (the `/account/terms` gate masked it) and then dropped student
+    IDs and role requests too (#122). Resolve the account through the
+    service role by email instead, and guard writes on
+    `profiles.created_at` being seconds old, so signing up with an
+    already-registered email can never write to that account.
 
 ## Hosted Supabase gotchas
 
@@ -264,17 +331,33 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   (`42501: permission denied`). The trigger gracefully falls back to NULL
   `email_hmac`. Long-term fix is Supabase Vault or a per-call parameter;
   for now, email dedup-by-hash is a no-op on hosted projects.
-- **Free-tier email is rate-limited and frequently blocked** by university
-  spam filters (cuny.edu runs Microsoft 365 / EOP, which drops Supabase's
-  built-in confirmation email server-side with no bounce). For dev, manually
-  confirm via SQL:
+- **Auth email is custom SMTP via Resend, and it works to Baruch
+  addresses** (shipped 2026-08-26). Supabase Auth → SMTP Settings points at
+  `smtp.resend.com:465`, sender `noreply@baruchfinance.com`, domain verified
+  in Resend with SPF/DKIM in Cloudflare DNS. This replaced Supabase's
+  built-in sender, which cuny.edu (Microsoft 365 / EOP) dropped server-side
+  with no bounce. `gmail.com` stays in the signup allowlist as a fallback.
+  For dev you can still confirm by hand:
   `update auth.users set email_confirmed_at = now() where email = '...';`
-  For prod, configure custom SMTP (Resend / Postmark / SES) — full runbook in
-  `CONTRIBUTING.md`. **Interim (PR #74):** `gmail.com` is an accepted signup
-  domain (`src/lib/auth/email-allowlist.ts`) so students can fall back to
-  Gmail when Baruch confirmation is dropped. Verified: built-in email _does_
-  reach Gmail, so the failure is recipient-side Microsoft filtering. Custom
-  SMTP + domain registration is deferred to **Aug 2026** (before fall term).
+- **The auth email templates must link to `/auth/confirm`, not the default
+  PKCE URL.** Supabase Auth → Email Templates:
+  - Confirm signup:
+    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`
+  - Reset password:
+    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset`
+
+  The default `{{ .ConfirmationURL }}` runs the PKCE `?code=` flow, whose
+  verifier lives in the browser that started signup, so opening the link on
+  a phone or in a mail client fails with "PKCE code verifier not found in
+  storage" even though the email was already verified. `/auth/confirm` uses
+  `verifyOtp` server-side and works from any device. Templates live only in
+  the dashboard — they are not in this repo, so re-check them after any
+  project restore.
+
+- **Outlook/Gmail link scanners consume one-time links.** A pre-fetched
+  confirmation link is spent before the student clicks it; the account is
+  confirmed anyway, so `/auth/confirm` answers with "already used — try
+  signing in" rather than a dead end. Expect students to report this.
 - **Adding values to `user_role`** uses `alter type user_role add value if
 not exists '<value>';`. Postgres enforces two related restrictions
   around enum value additions, and Supabase SQL Editor (which wraps the
@@ -374,9 +457,16 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   update public.profiles set role = '<student|instructor|ta|admin>'
    where id = (select id from auth.users where email = '<them>');
   ```
-  No in-app promotion path by design — admins designated via SQL by the
-  project owner. **Pending promotion** (account not yet created):
+  **Granting `admin` stays SQL-only by design.** `student|instructor|ta`
+  can also be set from `/admin` (by email, or by approving a signup
+  request). **Pending promotion** (account not yet created):
   `konstantin.kucheryavyy@baruch.cuny.edu` → `admin` after first signup.
+- **Approve a staff-access request**: someone who picked lecturer or TA at
+  signup appears in "Staff access requests" at the top of `/admin`
+  (you also get an email). Approve sets the role immediately; deny leaves
+  them a student. Both are audit-logged as `promote_role` with
+  `metadata.via = 'signup_request'`, and neither can touch an admin
+  account or re-decide a settled request.
 - **Bootstrap a fresh Supabase project for dev/test**: run the full
   `supabase/schema.sql` once, sign up via `/auth/signup`, then in SQL Editor:
   `update auth.users set email_confirmed_at = now() where email = '<you>';`
@@ -398,9 +488,10 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    (aggregation, at-risk rules, CSV parsing, quiz grading). `node --test`
    strips TS types but does NOT resolve `@lib/*` path aliases, so anything
    it tests must be alias-free — that's why pure logic is split into
-   `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts`, separate
-   from the `@lib`-importing service-role modules. Keep that split when
-   adding testable logic.
+   `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
+   `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts`,
+   separate from the `@lib`-importing service-role modules. Keep that split
+   when adding testable logic. 133 tests as of 2026-08-26.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
