@@ -886,14 +886,16 @@ and insert after the `accent` block:
 
 In `src/layouts/LessonLayout.astro`, change
 
+<!-- prettier-ignore -->
 ```astro
-<h1 class="text-3xl font-semibold tracking-tight mt-2">{data.title}</h1>
+      <h1 class="text-3xl font-semibold tracking-tight mt-2">{data.title}</h1>
 ```
 
 to
 
+<!-- prettier-ignore -->
 ```astro
-<h1 class="text-3xl font-extrabold tracking-tight mt-2">{data.title}</h1>
+      <h1 class="text-3xl font-extrabold tracking-tight mt-2">{data.title}</h1>
 ```
 
 In `src/components/lesson/LessonSidebar.tsx`, change the unit heading's class
@@ -1103,8 +1105,9 @@ Expected today: `paddingLeft` `"1px"`, `borderBottom` `"0px"`, `accentColor` `"a
 
 In `src/styles/global.css`, inside the `:root` block, directly after `color-scheme: light;`, add:
 
+<!-- prettier-ignore -->
 ```css
-accent-color: rgb(var(--accent)); /* sliders, checkboxes, radios */
+  accent-color: rgb(var(--accent)); /* sliders, checkboxes, radios */
 ```
 
 - [ ] **Step 3: Style Markdown tables**
@@ -1361,17 +1364,19 @@ Expected: FAIL, listing about 100 offenders such as `viz/ISLMChart.tsx: #2563eb`
 
 In `src/styles/global.css`, inside `:root`, directly after the `--neutral-400` line, add:
 
+<!-- prettier-ignore -->
 ```css
-/* Chart colors: hex, because charts use them in SVG attributes. */
---chart-1: #2563eb;
---chart-2: #dc2626;
---chart-3: #059669;
---chart-4: #f97316;
---chart-1-soft: #dbeafe;
---chart-3-soft: #10b981;
---chart-grid: #e2e8f0;
---chart-ref: #94a3b8;
---chart-ink: #0f172a;
+
+  /* Chart colors: hex, because charts use them in SVG attributes. */
+  --chart-1: #2563eb;
+  --chart-2: #dc2626;
+  --chart-3: #059669;
+  --chart-4: #f97316;
+  --chart-1-soft: #dbeafe;
+  --chart-3-soft: #10b981;
+  --chart-grid: #e2e8f0;
+  --chart-ref: #94a3b8;
+  --chart-ink: #0f172a;
 ```
 
 - [ ] **Step 6: Replace the literals**
@@ -1625,10 +1630,13 @@ On `/lessons/eco-1002/is-lm-intro` at width 1280, run with `browser_evaluate`:
 
 Expected today: `handleText` and `legendText` equal the series color `rgb(37, 99, 235)`, not ink `rgb(56, 56, 56)`.
 
-- [ ] **Step 2: Fix DragHandle in all three files**
+- [ ] **Step 2: Fix the drag handles**
 
-The three `DragHandle` functions are identical. In each of `src/components/viz/ISLMChart.tsx`, `src/components/viz/ADASChart.tsx`, and `src/components/viz/BondPriceYield.tsx`, replace
+Each of the three chart files has its own `DragHandle`, and they differ slightly. All three pass the series color as text `color`; the fix keeps it only as `borderColor` and adds `text-ink`.
 
+In `src/components/viz/ISLMChart.tsx` (the only one that wraps the label in a `<span>`), replace
+
+<!-- prettier-ignore -->
 ```tsx
       style={{ top, color }}
       className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold shadow hover:shadow-md"
@@ -1640,6 +1648,7 @@ The three `DragHandle` functions are identical. In each of `src/components/viz/I
 
 with
 
+<!-- prettier-ignore -->
 ```tsx
       style={{ top, borderColor: color }}
       className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold text-ink shadow hover:shadow-md"
@@ -1648,6 +1657,24 @@ with
     >
       {label} ↔
 ```
+
+In `src/components/viz/ADASChart.tsx` and `src/components/viz/BondPriceYield.tsx`, replace
+
+<!-- prettier-ignore -->
+```tsx
+      style={{ top, color, borderColor: color }}
+      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold shadow hover:shadow-md"
+```
+
+with
+
+<!-- prettier-ignore -->
+```tsx
+      style={{ top, borderColor: color }}
+      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold text-ink shadow hover:shadow-md"
+```
+
+Check: `grep -n "style={{ top" src/components/viz/ISLMChart.tsx src/components/viz/ADASChart.tsx src/components/viz/BondPriceYield.tsx` shows `style={{ top, borderColor: color }}` in all three.
 
 - [ ] **Step 3: Fix the DuPont label**
 
@@ -1748,16 +1775,17 @@ Expected: FAIL. `--chart-4` is 2.80:1 (today's orange), `--chart-ref` is 2.56:1,
 
 In `src/styles/global.css`, replace the nine chart token lines with:
 
+<!-- prettier-ignore -->
 ```css
---chart-1: #2869af; /* Midtown Blue, PMS 7455C */
---chart-2: #e65f24; /* Tangerine, PMS 165C */
---chart-3: #009e73; /* Okabe-Ito bluish green */
---chart-4: #cc79a7; /* Okabe-Ito reddish purple */
---chart-1-soft: #dce8f5; /* Midtown tint (Solow area) */
---chart-3-soft: #56ba96; /* light step of chart-3 (waterfall D&A) */
---chart-grid: #e6e4df; /* = slate-200 */
---chart-ref: #8c8a84; /* zero and reference lines */
---chart-ink: #383838; /* = ink: dots, total lines, chart text */
+  --chart-1: #2869af; /* Midtown Blue, PMS 7455C */
+  --chart-2: #e65f24; /* Tangerine, PMS 165C */
+  --chart-3: #009e73; /* Okabe-Ito bluish green */
+  --chart-4: #cc79a7; /* Okabe-Ito reddish purple */
+  --chart-1-soft: #dce8f5; /* Midtown tint (Solow area) */
+  --chart-3-soft: #56ba96; /* light step of chart-3 (waterfall D&A) */
+  --chart-grid: #e6e4df; /* = slate-200 */
+  --chart-ref: #8c8a84; /* zero and reference lines */
+  --chart-ink: #383838; /* = ink: dots, total lines, chart text */
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**

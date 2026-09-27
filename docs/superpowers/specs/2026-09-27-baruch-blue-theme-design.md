@@ -156,7 +156,7 @@ Chart tokens are stored as hex, not RGB channels, because they are used in SVG a
 
 **Text never wears a series color.** Tangerine (3.48:1) and reddish purple (3.06:1) are fine as marks but fail as small text.
 
-- `DragHandle` (identical copies in `ADASChart.tsx`, `BondPriceYield.tsx`, `ISLMChart.tsx`): the wrapper's `style={{ top, color }}` becomes `style={{ top, borderColor: color }}` plus `text-ink`, so the border carries identity and the label is ink. Drop the inner span's unused `borderColor`.
+- `DragHandle` (a separate copy in each of `ISLMChart.tsx`, `ADASChart.tsx`, and `BondPriceYield.tsx`, differing slightly): each passes the series color as text `color`. Keep it only as `borderColor` and add `text-ink`, so the border carries identity and the label is ink. ISLM's copy also wraps the label in a `<span>` with an unused `borderColor`; render the label directly.
 - `DuPontExplorer.tsx`: the reference-line label's `fill: '#dc2626'` becomes `fill: 'var(--chart-ink)'`.
 - Recharts colors legend text and default-tooltip items with the series color, set as an inline style. Override once in `global.css` (hence `!important`): `.recharts-legend-item-text, .recharts-tooltip-item { color: rgb(var(--ink)) !important; }`. Legend swatches keep identity.
 
