@@ -139,7 +139,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   JetBrains Mono (Fontsource). Design: `docs/superpowers/specs/2026-09-27-baruch-blue-theme-design.md`
   Charts use `var(--chart-1)`…`var(--chart-4)` (Midtown Blue, Tangerine,
   Okabe-Ito green and purple), `--chart-1-soft`, `--chart-3-soft`,
-  `--chart-grid`, `--chart-ref`, and `--chart-ink`; chart text is always ink.
+  `--chart-grid`, `--chart-ref`, and `--chart-ink`. Chart text is ink, never
+  a series color: `global.css` sets Recharts legend, tooltip, and label text
+  to ink (axis ticks keep Recharts' `#666`, 5.74:1).
   BarFigure `color` takes `'chart-1'`…`'chart-4'` (or hex).
   `src/lib/theme/no-hardcoded-colors.test.ts` rejects hex literals in
   `src/components`.
