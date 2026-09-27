@@ -189,7 +189,7 @@ export default function StampInButton({
         type="button"
         disabled={phase === 'locating' || phase === 'submitting'}
         onClick={stamp}
-        className="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-strong disabled:opacity-50"
       >
         {phase === 'locating'
           ? 'Checking location…'

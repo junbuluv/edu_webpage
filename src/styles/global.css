@@ -6,6 +6,21 @@
 
 :root {
   color-scheme: light;
+
+  /* Theme tokens. Colors used through Tailwind are RGB channels so opacity
+     modifiers keep working: rgb(var(--accent) / 0.4). */
+  --ink: 15 23 42; /* #0F172A */
+  --ink-muted: 71 85 105; /* #475569 */
+  --accent: 37 99 235; /* #2563EB */
+  --accent-strong: 29 78 216; /* #1D4ED8 */
+  --accent-soft: 219 234 254; /* #DBEAFE */
+
+  /* Light end of the slate scale; tailwind.config.mjs maps slate-50..400 here. */
+  --neutral-50: 248 250 252; /* #F8FAFC */
+  --neutral-100: 241 245 249; /* #F1F5F9 */
+  --neutral-200: 226 232 240; /* #E2E8F0 */
+  --neutral-300: 203 213 225; /* #CBD5E1 */
+  --neutral-400: 148 163 184; /* #94A3B8 */
 }
 
 html {

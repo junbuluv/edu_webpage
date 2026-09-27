@@ -373,7 +373,7 @@ export default function PaperUploadForm({
               ? () => void finalizeUpload(pendingFinalize)
               : undefined
         }
-        className="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60"
+        className="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-strong disabled:cursor-wait disabled:opacity-60"
       >
         {pending
           ? 'Uploading…'
