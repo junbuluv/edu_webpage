@@ -442,8 +442,8 @@ function DragHandle({
       onPan={onDrag}
       type="button"
       aria-label={`Drag to shift ${label} curve horizontally`}
-      style={{ top, color, borderColor: color }}
-      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold shadow hover:shadow-md"
+      style={{ top, borderColor: color }}
+      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold text-ink shadow hover:shadow-md"
     >
       {label} ↔
     </motion.button>

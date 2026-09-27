@@ -140,7 +140,7 @@ export default function DuPontExplorer() {
                 value: `your firm ${mine.toFixed(1)}%`,
                 position: 'right',
                 fontSize: 11,
-                fill: 'var(--chart-2)',
+                fill: 'var(--chart-ink)',
               }}
             />
             <Bar dataKey="roe" name="ROE" fill="var(--chart-1)">

@@ -469,12 +469,12 @@ function DragHandle({
       onPan={onDrag}
       type="button"
       aria-label={`Drag to shift ${label} curve horizontally`}
-      style={{ top, color }}
-      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold shadow hover:shadow-md"
-      // The border color matches the curve. Tailwind doesn't know the
-      // dynamic color, so we set it inline via the wrapper style.
+      style={{ top, borderColor: color }}
+      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold text-ink shadow hover:shadow-md"
+      // The border carries the curve's color; the label stays ink because
+      // some series colors fall below 4.5:1 as text.
     >
-      <span style={{ borderColor: color }}>{label} ↔</span>
+      {label} ↔
     </motion.button>
   );
 }

@@ -110,3 +110,11 @@ body {
 .katex-display {
   @apply my-6 overflow-x-auto;
 }
+
+/* Recharts colors legend text and default-tooltip items with the series
+   color through inline styles; keep that text in ink, since some series
+   colors are below 4.5:1 as text. Legend swatches keep the series color. */
+.recharts-legend-item-text,
+.recharts-tooltip-item {
+  color: rgb(var(--ink)) !important;
+}
