@@ -445,7 +445,7 @@ export default function ArchiveQuizBuilder({
       )}
       <button
         type="submit"
-        className="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+        className="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-strong"
       >
         {initial?.id ? 'Save quiz' : 'Save hidden quiz'}
       </button>

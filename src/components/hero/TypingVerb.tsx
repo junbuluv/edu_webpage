@@ -84,11 +84,11 @@ export default function TypingVerb({
   }, [reducedMotion]);
 
   return (
-    <span className="inline-block text-accent" aria-live="polite">
+    <span className="inline-block text-brand-sky" aria-live="polite">
       {text}
       <span
         aria-hidden="true"
-        className="ml-0.5 inline-block w-[2px] -translate-y-[2px] animate-pulse bg-accent align-middle"
+        className="ml-0.5 inline-block w-[2px] -translate-y-[2px] animate-pulse bg-brand-sky align-middle"
         style={{ height: '0.9em' }}
       />
     </span>

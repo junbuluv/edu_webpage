@@ -174,7 +174,7 @@ export default function ScenarioPlayer<S extends StageState>({
           <button
             type="button"
             onClick={() => setIsPlaying((p) => !p)}
-            className="rounded bg-accent px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded bg-accent px-3 py-1 text-sm font-medium text-white hover:bg-accent-strong"
           >
             {isPlaying ? 'Pause' : 'Play'}
           </button>

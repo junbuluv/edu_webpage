@@ -1,3 +1,6 @@
+@import '@fontsource-variable/figtree';
+@import '@fontsource-variable/figtree/wght-italic.css';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'katex/dist/katex.min.css';
 
 @tailwind base;
@@ -6,6 +9,38 @@
 
 :root {
   color-scheme: light;
+  accent-color: rgb(var(--accent)); /* sliders, checkboxes, radios */
+
+  /* Theme tokens (Baruch Blue). Colors used through Tailwind are RGB channels
+     so opacity modifiers keep working: rgb(var(--accent) / 0.4). */
+  --ink: 56 56 56; /* #383838 Charcoal */
+  --ink-muted: 86 101 122; /* #56657A, Baruch Slate darkened for AA */
+  --heading: 5 51 107; /* #05336B Baruch Blue */
+  --accent: 0 51 161; /* #0033A1 CUNY Blue */
+  --accent-strong: 5 51 107; /* #05336B Baruch Blue */
+  --accent-soft: 232 240 252; /* #E8F0FC */
+  --brand: 5 51 107; /* #05336B Baruch Blue: header, home hero */
+  --brand-sky: 163 201 255; /* #A3C9FF Sky */
+  --brand-sky-soft: 201 220 247; /* #C9DCF7 header navigation */
+  --brand-mist: 211 226 246; /* #D3E2F6 hero subtitle */
+
+  /* Light end of the slate scale, remapped to Baruch neutrals at the same
+     lightness; tailwind.config.mjs maps slate-50..400 here. */
+  --neutral-50: 247 244 235; /* #F7F4EB Pearl */
+  --neutral-100: 239 236 229; /* #EFECE5 */
+  --neutral-200: 230 228 223; /* #E6E4DF */
+  --neutral-300: 216 215 214; /* #D8D7D6 Dove */
+  --neutral-400: 161 158 152; /* #A19E98 */
+}
+
+@layer base {
+  /* Utilities outrank the base layer, so any heading with its own text-*
+     class keeps it. */
+  h1,
+  h2,
+  h3 {
+    color: rgb(var(--heading));
+  }
 }
 
 html {
@@ -18,20 +53,20 @@ body {
 }
 
 .prose {
-  @apply max-w-prose;
+  @apply max-w-prose text-[1.0625rem];
 }
 
 .prose h1 {
-  @apply text-3xl font-semibold tracking-tight mt-0 mb-6;
+  @apply text-3xl font-bold tracking-tight mt-0 mb-6;
 }
 .prose h2 {
-  @apply text-2xl font-semibold tracking-tight mt-10 mb-4;
+  @apply text-2xl font-bold tracking-tight mt-10 mb-4;
 }
 .prose h3 {
   @apply text-xl font-semibold mt-8 mb-3;
 }
 .prose p {
-  @apply leading-7 my-4 text-ink/90;
+  @apply leading-[1.7] my-4 text-ink/90;
 }
 .prose ul {
   @apply list-disc pl-6 my-4;
@@ -46,7 +81,19 @@ body {
   @apply rounded-lg bg-slate-900 text-slate-100 p-4 overflow-x-auto;
 }
 .prose blockquote {
-  @apply border-l-4 border-accent/40 pl-4 italic text-ink-muted;
+  @apply border-l-4 border-brand-sky pl-4 italic text-ink-muted;
+}
+
+/* Markdown tables (13 lessons). display:block lets a wide table scroll
+   inside the text column on phones instead of widening the page. */
+.prose table {
+  @apply my-6 block max-w-full overflow-x-auto border-collapse text-[0.9375rem];
+}
+.prose th {
+  @apply border-b border-slate-300 bg-slate-50 px-3.5 py-2 text-left font-semibold text-heading;
+}
+.prose td {
+  @apply border-b border-slate-200 px-3.5 py-2 align-top;
 }
 
 .katex-display {

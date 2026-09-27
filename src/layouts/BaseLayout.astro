@@ -35,6 +35,12 @@ const switcherProps = switcherCourses.map((c) => ({
 const activeCourseSlug = profile?.active_course_slug ?? null;
 const viewerIsStaff = isStaff(profile?.role);
 const viewerIsAdmin = isAdmin(profile?.role);
+
+// Header controls sit on Baruch Blue, where the browser's default focus
+// ring disappears, so they get a Sky outline.
+const onBlueFocus =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sky';
+const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
 ---
 
 <!doctype html>
@@ -48,11 +54,14 @@ const viewerIsAdmin = isAdmin(profile?.role);
     <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col">
-    <header class="border-b border-slate-200 bg-white">
+    <header class="border-b border-brand-sky/25 bg-brand">
       <div
         class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3"
       >
-        <a href="/" class="font-semibold text-lg tracking-tight">
+        <a
+          href="/"
+          class={`font-semibold text-lg tracking-tight text-white ${onBlueFocus}`}
+        >
           <span class="sm:hidden">Baruch Studio</span>
           <span class="hidden sm:inline">Baruch Econ &amp; Finance Studio</span>
         </a>
@@ -60,9 +69,9 @@ const viewerIsAdmin = isAdmin(profile?.role);
           class="hidden items-center gap-3 text-sm xl:flex"
           aria-label="Primary navigation"
         >
-          <a href="/eco-1002" class="text-ink-muted hover:text-ink">ECO 1002</a>
-          <a href="/fin-3610" class="text-ink-muted hover:text-ink">FIN 3610</a>
-          <a href="/practice" class="text-ink-muted hover:text-ink">Practice</a>
+          <a href="/eco-1002" class={navLink}>ECO 1002</a>
+          <a href="/fin-3610" class={navLink}>FIN 3610</a>
+          <a href="/practice" class={navLink}>Practice</a>
           {
             user ? (
               <>
@@ -74,28 +83,28 @@ const viewerIsAdmin = isAdmin(profile?.role);
                     staffViewer={viewerIsStaff}
                   />
                 )}
-                <a href="/dashboard" class="text-ink-muted hover:text-ink">
+                <a href="/dashboard" class={navLink}>
                   Dashboard
                 </a>
                 {viewerIsStaff && (
-                  <a href="/instructor" class="text-ink-muted hover:text-ink">
+                  <a href="/instructor" class={navLink}>
                     Manage
                   </a>
                 )}
                 {viewerIsAdmin && (
-                  <a href="/admin" class="text-ink-muted hover:text-ink">
+                  <a href="/admin" class={navLink}>
                     Admin
                   </a>
                 )}
                 <form method="POST" action="/api/auth/signout" class="inline">
-                  <button class="text-ink-muted hover:text-ink" type="submit">
+                  <button class={navLink} type="submit">
                     Sign out
                   </button>
                 </form>
               </>
             ) : (
               <a
-                class="rounded bg-accent px-3 py-1.5 text-white text-sm"
+                class={`rounded bg-brand-sky px-3 py-1.5 text-sm font-medium text-brand hover:bg-white ${onBlueFocus}`}
                 href="/auth/signin"
               >
                 Sign in
@@ -106,7 +115,7 @@ const viewerIsAdmin = isAdmin(profile?.role);
 
         <details class="group xl:hidden">
           <summary
-            class="cursor-pointer list-none rounded border border-slate-300 px-3 py-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden"
+            class={`cursor-pointer list-none rounded border border-brand-sky/40 px-3 py-1.5 text-sm font-medium text-white [&::-webkit-details-marker]:hidden ${onBlueFocus}`}
           >
             Menu
           </summary>

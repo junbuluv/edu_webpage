@@ -30,11 +30,9 @@ const stats = courses.map((c) => ({
 ---
 
 <BaseLayout title="Baruch Econ & Finance Studio">
-  <section
-    class="border-b border-slate-200 bg-gradient-to-b from-white to-slate-50"
-  >
+  <section class="bg-brand">
     <div class="mx-auto max-w-4xl px-4 py-20 text-center">
-      <h1 class="text-4xl font-semibold tracking-tight md:text-5xl">
+      <h1 class="text-4xl font-extrabold tracking-tight text-white md:text-5xl">
         Economics &amp; Finance you can{' '}
         <TypingVerb
           client:load
@@ -47,7 +45,7 @@ const stats = courses.map((c) => ({
           ]}
         />.
       </h1>
-      <p class="mx-auto mt-5 max-w-2xl text-lg text-ink-muted">
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-brand-mist">
         Interactive lessons, calibrated visualizations, and short quizzes
         designed for undergraduate econ and finance courses. Drag a slider,
         watch the curves move, then test yourself.
@@ -57,7 +55,7 @@ const stats = courses.map((c) => ({
       >
         <a
           href="/eco-1002"
-          class="rounded-lg bg-accent px-5 py-3 text-left text-white shadow-sm transition hover:bg-blue-700 sm:min-w-[18rem]"
+          class="rounded-lg bg-white px-5 py-3 text-left text-brand shadow-sm transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sky sm:min-w-[18rem]"
         >
           <span class="block text-xs uppercase tracking-wide opacity-80">
             Start with ECO 1002:
@@ -68,9 +66,11 @@ const stats = courses.map((c) => ({
         </a>
         <a
           href="/fin-3610"
-          class="rounded-lg border border-slate-300 px-5 py-3 text-left shadow-sm transition hover:border-accent hover:text-accent sm:min-w-[18rem]"
+          class="rounded-lg border border-brand-sky px-5 py-3 text-left text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-sky sm:min-w-[18rem]"
         >
-          <span class="block text-xs uppercase tracking-wide text-ink-muted">
+          <span
+            class="block text-xs uppercase tracking-wide text-brand-sky-soft"
+          >
             Start with FIN 3610:
           </span>
           <span class="mt-0.5 block text-lg font-semibold leading-snug">

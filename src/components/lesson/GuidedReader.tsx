@@ -185,7 +185,7 @@ export default function GuidedReader({ lessonSlug, steps }: Props) {
         {idx < total - 1 ? (
           <button
             onClick={() => setIdx((i) => Math.min(total - 1, i + 1))}
-            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-strong"
           >
             Next →
           </button>
