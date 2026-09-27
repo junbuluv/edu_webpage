@@ -74,7 +74,7 @@ export default function LessonSidebar({
       </a>
       {units.map((u) => (
         <section key={u.unit} className="mb-4">
-          <h3 className="px-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          <h3 className="px-3 text-xs font-semibold uppercase tracking-wide text-accent">
             {u.unit}
           </h3>
           <ul className="mt-1">

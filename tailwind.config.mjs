@@ -12,10 +12,17 @@ export default {
           DEFAULT: token('ink'),
           muted: token('ink-muted'),
         },
+        heading: token('heading'),
         accent: {
           DEFAULT: token('accent'),
           strong: token('accent-strong'),
           soft: token('accent-soft'),
+        },
+        brand: {
+          DEFAULT: token('brand'),
+          sky: token('brand-sky'),
+          'sky-soft': token('brand-sky-soft'),
+          mist: token('brand-mist'),
         },
         // Only the light end of slate is themed. extend deep-merges, so
         // slate-500..950 keep Tailwind's defaults. A semantic rename

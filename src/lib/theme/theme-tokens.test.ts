@@ -1,12 +1,13 @@
 // Run: node --test src/lib/theme/theme-tokens.test.ts
 //
 // Guards the theme tokens in src/styles/global.css: every token the site
-// relies on exists, and every text/background pairing passes WCAG AA.
+// relies on exists, every text/background pairing passes WCAG AA, and the
+// chrome keeps Baruch's official colors.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { contrastRatio, parseRootTokens } from './contrast.ts';
+import { contrastRatio, parseRootTokens, toRgb } from './contrast.ts';
 
 const css = readFileSync(
   new URL('../../styles/global.css', import.meta.url),
@@ -23,16 +24,34 @@ function color(nameOrHex: string): string {
   return value;
 }
 
+/** '5 51 107' or '#05336b' -> '#05336B' */
+function hex(name: string): string {
+  return (
+    '#' +
+    toRgb(color(name))
+      .map((c) => c.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase()
+  );
+}
+
 // [pairing, foreground, background, minimum ratio]
 const TEXT_PAIRS: Array<[string, string, string, number]> = [
   ['body text on white', 'ink', WHITE, 4.5],
   ['muted text on white', 'ink-muted', WHITE, 4.5],
+  ['headings on white', 'heading', WHITE, 4.5],
   ['links on white', 'accent', WHITE, 4.5],
   ['button label on accent', WHITE, 'accent', 4.5],
   ['button label on accent hover', WHITE, 'accent-strong', 4.5],
+  ['body text on slate-50 panels', 'ink', 'neutral-50', 4.5],
   ['muted text on slate-50', 'ink-muted', 'neutral-50', 4.5],
   ['muted text on slate-100', 'ink-muted', 'neutral-100', 4.5],
   ['muted text on slate-200', 'ink-muted', 'neutral-200', 4.5],
+  ['header text on brand', WHITE, 'brand', 4.5],
+  ['header nav on brand', 'brand-sky-soft', 'brand', 4.5],
+  ['hero subtitle on brand', 'brand-mist', 'brand', 4.5],
+  ['sign-in label on sky', 'brand', 'brand-sky', 4.5],
+  ['hero verb and focus outline on brand', 'brand-sky', 'brand', 3],
 ];
 
 for (const [label, fg, bg, min] of TEXT_PAIRS) {
@@ -44,3 +63,12 @@ for (const [label, fg, bg, min] of TEXT_PAIRS) {
     );
   });
 }
+
+test('chrome uses Baruch official colors', () => {
+  assert.equal(hex('brand'), '#05336B'); // Baruch Blue, PMS 288C
+  assert.equal(hex('heading'), '#05336B');
+  assert.equal(hex('accent'), '#0033A1'); // CUNY Blue, PMS 286C
+  assert.equal(hex('brand-sky'), '#A3C9FF'); // Sky, PMS 658C
+  assert.equal(hex('neutral-50'), '#F7F4EB'); // Pearl, PMS 9060C
+  assert.equal(hex('neutral-300'), '#D8D7D6'); // Dove, Cool Gray 1C
+});
