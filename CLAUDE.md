@@ -129,6 +129,14 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   (`RESEND_API_KEY`) and is fail-open — used to alert admins of a staff
   access request. Auth email (confirmation, reset) does **not** go through
   this; Supabase sends it via its own SMTP settings
+- Theme tokens (Baruch Blue): colors are CSS custom properties in
+  `src/styles/global.css` `:root`, stored as RGB channels. `tailwind.config.mjs`
+  maps `ink`, `ink-muted`, `heading`, `accent` (`-strong`, `-soft`), `brand`
+  (`-sky`, `-sky-soft`, `-mist`) and `slate-50`…`slate-400` onto them, so
+  `slate-50`…`400` render Baruch's warm Pearl/Dove neutrals by design.
+  `src/lib/theme/theme-tokens.test.ts` fails if a token edit breaks WCAG AA or
+  drifts from Baruch's official colors. Fonts are self-hosted Figtree and
+  JetBrains Mono (Fontsource). Design: `docs/superpowers/specs/2026-09-27-baruch-blue-theme-design.md`
 
 ## Repository workflow
 
@@ -316,6 +324,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     service role by email instead, and guard writes on
     `profiles.created_at` being seconds old, so signing up with an
     already-registered email can never write to that account.
+21. **Colors come from theme tokens.** Use `text-ink`, `text-heading`,
+    `bg-accent`, `hover:bg-accent-strong`, `bg-brand` and friends; never raw
+    `blue-*` classes for brand color. Status colors (emerald, amber, rose,
+    red, sky) stay Tailwind classes. h1–h3 are Baruch Blue through one base
+    rule; give a heading an explicit `text-*` class when it sits on a tinted
+    status panel.
+22. **Never put `\$` inside `$…$` lesson math.** remark-math does not honor
+    backslash escapes inside math, so the `$` ends the span early and the
+    rest of the sentence renders as garbled, unbreakable math. Write
+    currency as text (`\$5`) or, inside math, as `\text{\textdollar}5`.
 
 ## Hosted Supabase gotchas
 
@@ -489,7 +507,8 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    strips TS types but does NOT resolve `@lib/*` path aliases, so anything
    it tests must be alias-free — that's why pure logic is split into
    `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
-   `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts`,
+   `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
+   `theme/contrast.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
    when adding testable logic. 133 tests as of 2026-08-26.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
