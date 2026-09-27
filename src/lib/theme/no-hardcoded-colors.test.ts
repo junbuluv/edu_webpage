@@ -27,10 +27,9 @@ function offenders(pattern: RegExp): string[] {
   );
 }
 
-// The pre-theme chart palette; each color now has a --chart-* token.
-const OLD_PALETTE =
-  /#(?:2563eb|dc2626|059669|f97316|dbeafe|10b981|e2e8f0|94a3b8|0f172a)\b/gi;
+// Quoted hex color literals: '#abc', "#aabbcc", `#aabbcc`.
+const HEX_LITERAL = /['"`]#(?:[0-9a-f]{3}|[0-9a-f]{6})['"`]/gi;
 
-test('chart components use --chart-* tokens, not the old palette hexes', () => {
-  assert.deepEqual(offenders(OLD_PALETTE), []);
+test('components contain no hardcoded hex colors', () => {
+  assert.deepEqual(offenders(HEX_LITERAL), []);
 });

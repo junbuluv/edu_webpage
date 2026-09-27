@@ -215,7 +215,7 @@ export default function AnnuityExplorer() {
               type="monotone"
               dataKey="pv"
               name="PV"
-              stroke="#4572a7"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               dot={false}
             />

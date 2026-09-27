@@ -143,7 +143,7 @@ export default function DuPontExplorer() {
                 fill: 'var(--chart-2)',
               }}
             />
-            <Bar dataKey="roe" name="ROE" fill="#4572a7">
+            <Bar dataKey="roe" name="ROE" fill="var(--chart-1)">
               <LabelList
                 dataKey="roe"
                 position="top"

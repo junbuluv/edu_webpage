@@ -129,7 +129,7 @@ export default function CreditSpreadExplorer() {
               type="monotone"
               dataKey="bps"
               name="break-even spread"
-              stroke="#aa4643"
+              stroke="var(--chart-2)"
               strokeWidth={2}
               dot={false}
             />
