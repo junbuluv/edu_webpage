@@ -8,6 +8,7 @@
 
 :root {
   color-scheme: light;
+  accent-color: rgb(var(--accent)); /* sliders, checkboxes, radios */
 
   /* Theme tokens (Baruch Blue). Colors used through Tailwind are RGB channels
      so opacity modifiers keep working: rgb(var(--accent) / 0.4). */
@@ -80,6 +81,18 @@ body {
 }
 .prose blockquote {
   @apply border-l-4 border-brand-sky pl-4 italic text-ink-muted;
+}
+
+/* Markdown tables (13 lessons). display:block lets a wide table scroll
+   inside the text column on phones instead of widening the page. */
+.prose table {
+  @apply my-6 block max-w-full overflow-x-auto border-collapse text-[0.9375rem];
+}
+.prose th {
+  @apply border-b border-slate-300 bg-slate-50 px-3.5 py-2 text-left font-semibold text-heading;
+}
+.prose td {
+  @apply border-b border-slate-200 px-3.5 py-2 align-top;
 }
 
 .katex-display {
