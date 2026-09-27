@@ -118,3 +118,11 @@ body {
 .recharts-tooltip-item {
   color: rgb(var(--ink)) !important;
 }
+
+/* Recharts draws axis titles, reference labels and LabelList values in its
+   default #808080 (3.95:1 on white); ink keeps that small text at AA. A
+   stylesheet fill outranks the SVG fill attribute, so no !important. */
+.recharts-surface .recharts-label,
+.recharts-surface .recharts-label-list text {
+  fill: rgb(var(--ink));
+}
