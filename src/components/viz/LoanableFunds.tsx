@@ -156,7 +156,7 @@ export default function LoanableFunds() {
             data={data}
             margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="I"
               type="number"
@@ -187,7 +187,7 @@ export default function LoanableFunds() {
               data={data}
               dataKey="r"
               name="Demand (Investment)"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               dot={false}
             />
             <Line
@@ -195,7 +195,7 @@ export default function LoanableFunds() {
               data={data.map((d) => ({ ...d, I: d.S }))}
               dataKey="r"
               name="Supply (Saving - Deficit)"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
             />
             {s.deficit !== 0 && (
@@ -204,7 +204,7 @@ export default function LoanableFunds() {
                 data={data.map((d) => ({ ...d, I: d.Sprivate }))}
                 dataKey="r"
                 name="Private saving alone"
-                stroke="#94a3b8"
+                stroke="var(--chart-ref)"
                 strokeDasharray="4 4"
                 dot={false}
               />
@@ -213,7 +213,7 @@ export default function LoanableFunds() {
               x={eq.iStar}
               y={eq.rStar}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>

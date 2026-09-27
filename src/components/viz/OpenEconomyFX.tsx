@@ -127,7 +127,7 @@ export default function OpenEconomyFX() {
       <div className="mt-4 h-72">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="eps"
               type="number"
@@ -157,14 +157,14 @@ export default function OpenEconomyFX() {
               type="monotone"
               dataKey="NX"
               name="NX(ε)"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
             />
             <ReferenceDot
               x={epsStar}
               y={flows.capOutflow}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>

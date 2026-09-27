@@ -105,7 +105,7 @@ export default function CAPMSecurityMarketLine() {
             data={line}
             margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="beta"
               type="number"
@@ -131,14 +131,14 @@ export default function CAPMSecurityMarketLine() {
             <Tooltip formatter={(v: number) => (v * 100).toFixed(2) + '%'} />
             <ReferenceLine
               y={s.rf}
-              stroke="#94a3b8"
+              stroke="var(--chart-ref)"
               strokeDasharray="3 3"
               label={{ value: 'Rf', position: 'right', fontSize: 10 }}
             />
             <Line
               data={line}
               dataKey="exp"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
               name="SML"
               type="monotone"
@@ -146,7 +146,7 @@ export default function CAPMSecurityMarketLine() {
             <Scatter
               data={points}
               dataKey="observed"
-              fill="#dc2626"
+              fill="var(--chart-2)"
               name="Observed assets"
             />
           </ComposedChart>

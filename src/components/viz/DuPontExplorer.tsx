@@ -115,7 +115,7 @@ export default function DuPontExplorer() {
             margin={{ top: 16, right: 16, bottom: 8, left: 8 }}
           >
             <CartesianGrid
-              stroke="#e2e8f0"
+              stroke="var(--chart-grid)"
               strokeDasharray="3 3"
               vertical={false}
             />
@@ -134,13 +134,13 @@ export default function DuPontExplorer() {
             <Tooltip formatter={(v: number) => `${v}%`} />
             <ReferenceLine
               y={mine}
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               strokeDasharray="5 4"
               label={{
                 value: `your firm ${mine.toFixed(1)}%`,
                 position: 'right',
                 fontSize: 11,
-                fill: '#dc2626',
+                fill: 'var(--chart-2)',
               }}
             />
             <Bar dataKey="roe" name="ROE" fill="#4572a7">

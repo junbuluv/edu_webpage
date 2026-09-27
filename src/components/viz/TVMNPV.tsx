@@ -153,7 +153,7 @@ export default function TVMNPV() {
         <div className="h-64">
           <ResponsiveContainer>
             <BarChart data={cashflows}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="t"
                 label={{
@@ -166,8 +166,8 @@ export default function TVMNPV() {
               <YAxis />
               <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
               <Legend verticalAlign="top" height={24} />
-              <Bar dataKey="cf" name="Cash flow" fill="#2563eb" />
-              <Bar dataKey="pv" name="Discounted" fill="#059669" />
+              <Bar dataKey="cf" name="Cash flow" fill="var(--chart-1)" />
+              <Bar dataKey="pv" name="Discounted" fill="var(--chart-3)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -180,7 +180,7 @@ export default function TVMNPV() {
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={sensitivity}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="r"
                 tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
@@ -196,11 +196,11 @@ export default function TVMNPV() {
                 formatter={(v: number) => `$${v.toFixed(0)}`}
                 labelFormatter={(l: number) => `r = ${(l * 100).toFixed(1)}%`}
               />
-              <ReferenceLine y={0} stroke="#94a3b8" />
+              <ReferenceLine y={0} stroke="var(--chart-ref)" />
               {irrVal !== null && irrVal > 0 && irrVal < 0.5 && (
                 <ReferenceLine
                   x={irrVal}
-                  stroke="#dc2626"
+                  stroke="var(--chart-2)"
                   strokeDasharray="3 3"
                   label={{ value: 'IRR', position: 'top', fontSize: 10 }}
                 />
@@ -209,7 +209,7 @@ export default function TVMNPV() {
                 type="monotone"
                 dataKey="npv"
                 name="NPV(r)"
-                stroke="#2563eb"
+                stroke="var(--chart-1)"
                 dot={false}
               />
             </LineChart>

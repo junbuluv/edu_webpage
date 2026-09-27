@@ -104,7 +104,7 @@ export default function MoneyMultiplier() {
       <div className="mt-4 h-64">
         <ResponsiveContainer>
           <BarChart data={chartData}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip formatter={(v: number) => `$${v.toFixed(0)}B`} />
@@ -113,19 +113,19 @@ export default function MoneyMultiplier() {
               dataKey="currency"
               name="Currency in circulation"
               stackId="a"
-              fill="#2563eb"
+              fill="var(--chart-1)"
             />
             <Bar
               dataKey="reserves"
               name="Bank reserves"
               stackId="a"
-              fill="#dc2626"
+              fill="var(--chart-2)"
             />
             <Bar
               dataKey="deposits"
               name="Checkable deposits"
               stackId="a"
-              fill="#059669"
+              fill="var(--chart-3)"
             />
           </BarChart>
         </ResponsiveContainer>

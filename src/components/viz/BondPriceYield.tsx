@@ -268,7 +268,7 @@ export default function BondPriceYield() {
       <div className="relative mt-4 h-72">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="y"
               tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
@@ -296,7 +296,7 @@ export default function BondPriceYield() {
               type="monotone"
               dataKey="p"
               name="Price(y)"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
               isAnimationActive={false}
             />
@@ -304,12 +304,17 @@ export default function BondPriceYield() {
               x={yieldRate}
               y={currentP}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>
         </ResponsiveContainer>
-        <DragHandle label="YTM" color="#0f172a" top="45%" onDrag={onDragYTM} />
+        <DragHandle
+          label="YTM"
+          color="var(--chart-ink)"
+          top="45%"
+          onDrag={onDragYTM}
+        />
       </div>
 
       {/* Pin & compare + share */}

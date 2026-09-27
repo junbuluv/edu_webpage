@@ -31,6 +31,17 @@
   --neutral-200: 230 228 223; /* #E6E4DF */
   --neutral-300: 216 215 214; /* #D8D7D6 Dove */
   --neutral-400: 161 158 152; /* #A19E98 */
+
+  /* Chart colors: hex, because charts use them in SVG attributes. */
+  --chart-1: #2563eb;
+  --chart-2: #dc2626;
+  --chart-3: #059669;
+  --chart-4: #f97316;
+  --chart-1-soft: #dbeafe;
+  --chart-3-soft: #10b981;
+  --chart-grid: #e2e8f0;
+  --chart-ref: #94a3b8;
+  --chart-ink: #0f172a;
 }
 
 @layer base {

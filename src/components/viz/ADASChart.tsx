@@ -230,7 +230,7 @@ export default function ADASChart() {
       <div className="relative mt-4 h-80">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="Y"
               tickFormatter={(v) => v.toFixed(0)}
@@ -255,7 +255,7 @@ export default function ADASChart() {
               type="monotone"
               dataKey="AD"
               name="AD"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
               isAnimationActive={false}
             />
@@ -263,7 +263,7 @@ export default function ADASChart() {
               type="monotone"
               dataKey="SRAS"
               name="SRAS"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               dot={false}
               isAnimationActive={false}
             />
@@ -271,16 +271,16 @@ export default function ADASChart() {
               x={eq.Y}
               y={eq.P}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>
         </ResponsiveContainer>
 
-        <DragHandle label="AD" color="#2563eb" top="25%" onDrag={onDragAD} />
+        <DragHandle label="AD" color="var(--chart-1)" top="25%" onDrag={onDragAD} />
         <DragHandle
           label="SRAS"
-          color="#dc2626"
+          color="var(--chart-2)"
           top="60%"
           onDrag={onDragSRAS}
         />

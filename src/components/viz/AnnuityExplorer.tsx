@@ -184,7 +184,7 @@ export default function AnnuityExplorer() {
             data={data}
             margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="r"
               type="number"
@@ -224,7 +224,7 @@ export default function AnnuityExplorer() {
                 x={+(s.r * 100).toFixed(2)}
                 y={Math.round(current)}
                 r={5}
-                fill="#dc2626"
+                fill="var(--chart-2)"
                 stroke="none"
               />
             )}

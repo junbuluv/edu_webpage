@@ -172,7 +172,7 @@ export default function EfficientFrontier() {
       <div className="h-80">
         <ResponsiveContainer>
           <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               type="number"
               dataKey="x"
@@ -207,15 +207,15 @@ export default function EfficientFrontier() {
             <Scatter
               name="Opportunity set (all weights)"
               data={frontier}
-              line={{ stroke: '#2563eb' }}
-              fill="#2563eb"
+              line={{ stroke: 'var(--chart-1)' }}
+              fill="var(--chart-1)"
               shape={() => <></>}
             />
             <Scatter
               name="Capital market line"
               data={cml}
-              line={{ stroke: '#059669', strokeDasharray: '5 4' }}
-              fill="#059669"
+              line={{ stroke: 'var(--chart-3)', strokeDasharray: '5 4' }}
+              fill="var(--chart-3)"
               shape={() => <></>}
             />
             <Scatter
@@ -224,7 +224,7 @@ export default function EfficientFrontier() {
                 { x: +(s.sd1 * 100).toFixed(2), y: +(s.er1 * 100).toFixed(2) },
                 { x: +(s.sd2 * 100).toFixed(2), y: +(s.er2 * 100).toFixed(2) },
               ]}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
             />
             <Scatter
               name="Tangent portfolio"
@@ -234,7 +234,7 @@ export default function EfficientFrontier() {
                   y: +(tangent.er * 100).toFixed(2),
                 },
               ]}
-              fill="#dc2626"
+              fill="var(--chart-2)"
             />
           </ScatterChart>
         </ResponsiveContainer>

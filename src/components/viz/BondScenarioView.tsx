@@ -64,7 +64,7 @@ export default function BondScenarioView({ state }: Props) {
       <div className="mt-2 h-64">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="y"
               tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
@@ -92,7 +92,7 @@ export default function BondScenarioView({ state }: Props) {
               type="monotone"
               dataKey="p"
               name="Price(y)"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
               isAnimationActive={false}
             />
@@ -100,7 +100,7 @@ export default function BondScenarioView({ state }: Props) {
               x={state.yieldRate}
               y={currentP}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>
