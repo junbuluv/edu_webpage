@@ -232,7 +232,7 @@ export default function AnnuityExplorer() {
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-xs text-ink-muted">
-        The red dot is your chosen r. Drag r left and watch PV climb steeply:
+        The orange dot is your chosen r. Drag r left and watch PV climb steeply:
         halving the rate roughly doubles the value of a perpetual stream. For
         {s.type === 'growing-perp'
           ? ' For a growing perpetuity, the curve diverges as r approaches g; the r − g gap dominates a Gordon-model valuation.'

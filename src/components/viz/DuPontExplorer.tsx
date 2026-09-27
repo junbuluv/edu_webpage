@@ -159,7 +159,7 @@ export default function DuPontExplorer() {
         same ROE by a different route. Thin margin and fast turnover for the
         retailer, fat margin and slow turnover for the luxury brand, a thin
         revenue base carried by heavy leverage for the bank. Click each to load
-        its mix into the sliders and watch the red "your firm" line drop onto
+        its mix into the sliders and watch the orange "your firm" line drop onto
         the bars. Push the equity multiplier alone and the line rises with no
         improvement in the underlying business: that is leverage flattering ROE.
         Archetype figures are illustrative, not reported.

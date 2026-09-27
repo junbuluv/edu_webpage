@@ -143,8 +143,8 @@ export default function MMPropositionII() {
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-xs text-ink-muted">
-        Raise leverage and the red cost of equity climbs in a straight line, yet
-        the green WACC never moves: it stays pinned at r_U. The firm trades
+        Raise leverage and the orange cost of equity climbs in a straight line,
+        yet the green WACC never moves: it stays pinned at r_U. The firm trades
         cheap debt for costlier equity in exactly offsetting amounts, so its
         total value is untouched. That flat green line is Modigliani-Miller.
       </p>
