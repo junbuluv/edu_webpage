@@ -1,8 +1,9 @@
 # Session log — 2026-09-27 (Baruch Blue theme: design, spec, plan, PRs 1–2)
 
 Continues [2026-08-26](2026-08-26-auth-roles-and-audit.md). PR 1 (#124) is
-merged (dd9cc7b) and live on baruchfinance.com. PR 2 (charts,
-`feat/baruch-blue-charts`) is open and waits for the owner's merge.
+merged (dd9cc7b) and live on baruchfinance.com. PR 2 (#125, charts,
+`feat/baruch-blue-charts`) is open with CI green and waits for the owner's
+merge. Wrapped up 2026-09-29.
 
 ## Decided
 
@@ -28,7 +29,7 @@ merged (dd9cc7b) and live on baruchfinance.com. PR 2 (charts,
   styles and `accent-color`; CLAUDE.md conventions 21–22. Reviewer verdict
   "ready to merge"; two findings fixed (real italic faces; workshop panel
   heading color).
-- **PR 2** (open) `feat/baruch-blue-charts`, Tasks 8–12: chart colors moved
+- **#125** (open, CI green) `feat/baruch-blue-charts`, Tasks 8–12: chart colors moved
   to `--chart-*` tokens (pixel-identical across all 19 chart lessons); a
   guard test rejects hex literals in `src/components`; BarFigure takes theme
   slots through a tested resolver (11 FIN 3610 lessons switched from
@@ -66,10 +67,14 @@ merged (dd9cc7b) and live on baruchfinance.com. PR 2 (charts,
    chart shots in a tall viewport rather than full-page (a resize re-runs
    Recharts animations), park the mouse at (0,0), and allow ~4/255 for SVG
    anti-aliasing.
+8. **The Vercel CLI appends `.vercel` to `.gitignore`** when it links the
+   project unless that exact line exists; the old `.vercel/` entry did not
+   count, so the appended line sat uncommitted for days. It is committed in
+   #125, so the tree stays clean after `vercel link` or `vercel deploy`.
 
 ## Open
 
-- Owner: review PR 2's preview on the chart lessons (IS-LM, AD-AS,
+- Owner: review #125's preview (behind Vercel login) on the chart lessons (IS-LM, AD-AS,
   capital budgeting waterfall, MM Proposition II, valuing stocks), then
   merge (squash) and confirm the production deploy.
 - Owner: the signed-in pages from PR 1 were not eyeballed before its merge;
