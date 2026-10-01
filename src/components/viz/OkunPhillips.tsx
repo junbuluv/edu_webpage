@@ -161,7 +161,7 @@ export default function OkunPhillips() {
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={data}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="gap"
                 tickFormatter={(v) => v.toFixed(0) + '%'}
@@ -187,14 +187,14 @@ export default function OkunPhillips() {
                 type="monotone"
                 dataKey="u"
                 name="u(gap)"
-                stroke="#2563eb"
+                stroke="var(--chart-1)"
                 dot={false}
               />
               <ReferenceDot
                 x={s.outputGap}
                 y={current.u}
                 r={5}
-                fill="#0f172a"
+                fill="var(--chart-ink)"
                 stroke="white"
               />
             </LineChart>
@@ -209,7 +209,7 @@ export default function OkunPhillips() {
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={phillipsData}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="u"
                 type="number"
@@ -237,14 +237,14 @@ export default function OkunPhillips() {
                 type="monotone"
                 dataKey="pi"
                 name="π(u)"
-                stroke="#dc2626"
+                stroke="var(--chart-2)"
                 dot={false}
               />
               <ReferenceDot
                 x={current.u}
                 y={current.pi}
                 r={5}
-                fill="#0f172a"
+                fill="var(--chart-ink)"
                 stroke="white"
               />
             </LineChart>

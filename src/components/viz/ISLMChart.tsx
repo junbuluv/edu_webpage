@@ -226,7 +226,7 @@ export default function ISLMChart() {
             data={data}
             margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="Y"
               type="number"
@@ -259,7 +259,7 @@ export default function ISLMChart() {
               type="linear"
               dataKey="rIS"
               name="IS (goods market)"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -268,7 +268,7 @@ export default function ISLMChart() {
               type="linear"
               dataKey="rLM"
               name="LM (money market)"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -277,7 +277,7 @@ export default function ISLMChart() {
               x={eq.Yeq}
               y={eq.req}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
               strokeWidth={2}
               label={{
@@ -294,8 +294,18 @@ export default function ISLMChart() {
             Positioned to roughly hug each curve label area on the right
             edge of the chart so they don't collide with the equilibrium
             dot in the middle. */}
-        <DragHandle label="IS" color="#2563eb" top="20%" onDrag={onDragIS} />
-        <DragHandle label="LM" color="#dc2626" top="65%" onDrag={onDragLM} />
+        <DragHandle
+          label="IS"
+          color="var(--chart-1)"
+          top="20%"
+          onDrag={onDragIS}
+        />
+        <DragHandle
+          label="LM"
+          color="var(--chart-2)"
+          top="65%"
+          onDrag={onDragLM}
+        />
       </div>
 
       {/* Pin & compare + share */}
@@ -459,12 +469,12 @@ function DragHandle({
       onPan={onDrag}
       type="button"
       aria-label={`Drag to shift ${label} curve horizontally`}
-      style={{ top, color }}
-      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold shadow hover:shadow-md"
-      // The border color matches the curve. Tailwind doesn't know the
-      // dynamic color, so we set it inline via the wrapper style.
+      style={{ top, borderColor: color }}
+      className="absolute right-2 z-10 -translate-y-1/2 cursor-ew-resize rounded-full border-2 bg-white px-2 py-0.5 text-xs font-bold text-ink shadow hover:shadow-md"
+      // The border carries the curve's color; the label stays ink because
+      // some series colors fall below 4.5:1 as text.
     >
-      <span style={{ borderColor: color }}>{label} ↔</span>
+      {label} ↔
     </motion.button>
   );
 }

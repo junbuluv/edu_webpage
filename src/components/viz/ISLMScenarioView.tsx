@@ -69,7 +69,7 @@ export default function ISLMScenarioView({ state }: Props) {
             data={data}
             margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="Y"
               type="number"
@@ -102,7 +102,7 @@ export default function ISLMScenarioView({ state }: Props) {
               type="linear"
               dataKey="rIS"
               name="IS"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -111,7 +111,7 @@ export default function ISLMScenarioView({ state }: Props) {
               type="linear"
               dataKey="rLM"
               name="LM"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -120,7 +120,7 @@ export default function ISLMScenarioView({ state }: Props) {
               x={eq.Yeq}
               y={eq.req}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
               strokeWidth={2}
             />

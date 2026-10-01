@@ -98,7 +98,7 @@ export default function CreditSpreadExplorer() {
             data={data}
             margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="p"
               type="number"
@@ -129,7 +129,7 @@ export default function CreditSpreadExplorer() {
               type="monotone"
               dataKey="bps"
               name="break-even spread"
-              stroke="#aa4643"
+              stroke="var(--chart-2)"
               strokeWidth={2}
               dot={false}
             />
@@ -137,7 +137,7 @@ export default function CreditSpreadExplorer() {
               x={+(s.p * 100).toFixed(2)}
               y={bps}
               r={5}
-              fill="#dc2626"
+              fill="var(--chart-2)"
               stroke="none"
             />
           </LineChart>

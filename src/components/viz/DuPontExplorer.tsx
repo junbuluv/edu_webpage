@@ -115,7 +115,7 @@ export default function DuPontExplorer() {
             margin={{ top: 16, right: 16, bottom: 8, left: 8 }}
           >
             <CartesianGrid
-              stroke="#e2e8f0"
+              stroke="var(--chart-grid)"
               strokeDasharray="3 3"
               vertical={false}
             />
@@ -134,16 +134,16 @@ export default function DuPontExplorer() {
             <Tooltip formatter={(v: number) => `${v}%`} />
             <ReferenceLine
               y={mine}
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               strokeDasharray="5 4"
               label={{
                 value: `your firm ${mine.toFixed(1)}%`,
                 position: 'right',
                 fontSize: 11,
-                fill: '#dc2626',
+                fill: 'var(--chart-ink)',
               }}
             />
-            <Bar dataKey="roe" name="ROE" fill="#4572a7">
+            <Bar dataKey="roe" name="ROE" fill="var(--chart-1)">
               <LabelList
                 dataKey="roe"
                 position="top"
@@ -159,7 +159,7 @@ export default function DuPontExplorer() {
         same ROE by a different route. Thin margin and fast turnover for the
         retailer, fat margin and slow turnover for the luxury brand, a thin
         revenue base carried by heavy leverage for the bank. Click each to load
-        its mix into the sliders and watch the red "your firm" line drop onto
+        its mix into the sliders and watch the orange "your firm" line drop onto
         the bars. Push the equity multiplier alone and the line rises with no
         improvement in the underlying business: that is leverage flattering ROE.
         Archetype figures are illustrative, not reported.

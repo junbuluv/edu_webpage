@@ -91,7 +91,7 @@ export default function MMPropositionII() {
       <div className="mt-4 h-72">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="de"
               label={{
@@ -120,14 +120,14 @@ export default function MMPropositionII() {
               type="monotone"
               dataKey="rE"
               name="Cost of equity r_E"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="wacc"
               name="WACC (= r_U, flat)"
-              stroke="#059669"
+              stroke="var(--chart-3)"
               strokeWidth={2.5}
               dot={false}
             />
@@ -135,7 +135,7 @@ export default function MMPropositionII() {
               type="monotone"
               dataKey="rD"
               name="Cost of debt r_D"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               strokeDasharray="5 4"
               dot={false}
             />
@@ -143,8 +143,8 @@ export default function MMPropositionII() {
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-xs text-ink-muted">
-        Raise leverage and the red cost of equity climbs in a straight line, yet
-        the green WACC never moves: it stays pinned at r_U. The firm trades
+        Raise leverage and the orange cost of equity climbs in a straight line,
+        yet the green WACC never moves: it stays pinned at r_U. The firm trades
         cheap debt for costlier equity in exactly offsetting amounts, so its
         total value is untouched. That flat green line is Modigliani-Miller.
       </p>

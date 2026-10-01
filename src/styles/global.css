@@ -31,6 +31,17 @@
   --neutral-200: 230 228 223; /* #E6E4DF */
   --neutral-300: 216 215 214; /* #D8D7D6 Dove */
   --neutral-400: 161 158 152; /* #A19E98 */
+
+  /* Chart colors: hex, because charts use them in SVG attributes. */
+  --chart-1: #2869af; /* Midtown Blue, PMS 7455C */
+  --chart-2: #e65f24; /* Tangerine, PMS 165C */
+  --chart-3: #009e73; /* Okabe-Ito bluish green */
+  --chart-4: #cc79a7; /* Okabe-Ito reddish purple */
+  --chart-1-soft: #dce8f5; /* Midtown tint (Solow area) */
+  --chart-3-soft: #56ba96; /* light step of chart-3 (waterfall D&A) */
+  --chart-grid: #e6e4df; /* = slate-200 */
+  --chart-ref: #8c8a84; /* zero and reference lines */
+  --chart-ink: #383838; /* = ink: dots, total lines, chart text */
 }
 
 @layer base {
@@ -98,4 +109,20 @@ body {
 
 .katex-display {
   @apply my-6 overflow-x-auto;
+}
+
+/* Recharts colors legend text and default-tooltip items with the series
+   color through inline styles; keep that text in ink, since some series
+   colors are below 4.5:1 as text. Legend swatches keep the series color. */
+.recharts-legend-item-text,
+.recharts-tooltip-item {
+  color: rgb(var(--ink)) !important;
+}
+
+/* Recharts draws axis titles, reference labels and LabelList values in its
+   default #808080 (3.95:1 on white); ink keeps that small text at AA. A
+   stylesheet fill outranks the SVG fill attribute, so no !important. */
+.recharts-surface .recharts-label,
+.recharts-surface .recharts-label-list text {
+  fill: rgb(var(--ink));
 }

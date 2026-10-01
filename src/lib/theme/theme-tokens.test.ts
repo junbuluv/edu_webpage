@@ -72,3 +72,30 @@ test('chrome uses Baruch official colors', () => {
   assert.equal(hex('neutral-50'), '#F7F4EB'); // Pearl, PMS 9060C
   assert.equal(hex('neutral-300'), '#D8D7D6'); // Dove, Cool Gray 1C
 });
+
+// Chart marks need 3:1 against the white chart surface; the light step of
+// the ordinal teal pair needs 2:1; chart text (ink) needs 4.5:1.
+const MARK_PAIRS: Array<[string, number]> = [
+  ['chart-1', 3],
+  ['chart-2', 3],
+  ['chart-3', 3],
+  ['chart-4', 3],
+  ['chart-ref', 3],
+  ['chart-3-soft', 2],
+  ['chart-ink', 4.5],
+];
+
+for (const [name, min] of MARK_PAIRS) {
+  test(`--${name} on white is at least ${min}:1`, () => {
+    const ratio = contrastRatio(color(name), WHITE);
+    assert.ok(
+      ratio >= min,
+      `--${name}: ${ratio.toFixed(2)}:1 is below ${min}:1`,
+    );
+  });
+}
+
+test('the first two chart slots use Baruch colors', () => {
+  assert.equal(hex('chart-1'), '#2869AF'); // Midtown Blue, PMS 7455C
+  assert.equal(hex('chart-2'), '#E65F24'); // Tangerine, PMS 165C
+});

@@ -184,7 +184,7 @@ export default function AnnuityExplorer() {
             data={data}
             margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="r"
               type="number"
@@ -215,7 +215,7 @@ export default function AnnuityExplorer() {
               type="monotone"
               dataKey="pv"
               name="PV"
-              stroke="#4572a7"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               dot={false}
             />
@@ -224,7 +224,7 @@ export default function AnnuityExplorer() {
                 x={+(s.r * 100).toFixed(2)}
                 y={Math.round(current)}
                 r={5}
-                fill="#dc2626"
+                fill="var(--chart-2)"
                 stroke="none"
               />
             )}
@@ -232,7 +232,7 @@ export default function AnnuityExplorer() {
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-xs text-ink-muted">
-        The red dot is your chosen r. Drag r left and watch PV climb steeply:
+        The orange dot is your chosen r. Drag r left and watch PV climb steeply:
         halving the rate roughly doubles the value of a perpetual stream. For
         {s.type === 'growing-perp'
           ? ' For a growing perpetuity, the curve diverges as r approaches g; the r − g gap dominates a Gordon-model valuation.'

@@ -292,7 +292,7 @@ export default function CashflowWaterfall() {
         <div className="h-64">
           <ResponsiveContainer>
             <ComposedChart data={rows} stackOffset="sign">
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="t"
                 label={{
@@ -305,27 +305,42 @@ export default function CashflowWaterfall() {
               <YAxis />
               <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
               <Legend verticalAlign="top" height={24} />
-              <ReferenceLine y={0} stroke="#94a3b8" />
-              <Bar dataKey="nopat" name="NOPAT" stackId="a" fill="#059669" />
-              <Bar dataKey="da" name="+ D&A" stackId="a" fill="#10b981" />
+              <ReferenceLine y={0} stroke="var(--chart-ref)" />
+              <Bar
+                dataKey="nopat"
+                name="NOPAT"
+                stackId="a"
+                fill="var(--chart-3)"
+              />
+              <Bar
+                dataKey="da"
+                name="+ D&A"
+                stackId="a"
+                fill="var(--chart-3-soft)"
+              />
               <Bar
                 dataKey="terminalValue"
                 name="Terminal value"
                 stackId="a"
-                fill="#2563eb"
+                fill="var(--chart-1)"
               />
-              <Bar dataKey="dWCNeg" name="− ΔWC" stackId="a" fill="#f97316" />
+              <Bar
+                dataKey="dWCNeg"
+                name="− ΔWC"
+                stackId="a"
+                fill="var(--chart-4)"
+              />
               <Bar
                 dataKey="capexNeg"
                 name="− CapEx"
                 stackId="a"
-                fill="#dc2626"
+                fill="var(--chart-2)"
               />
               <Line
                 type="monotone"
                 dataKey="fcf"
                 name="Total cash flow incl. terminal value"
-                stroke="#0f172a"
+                stroke="var(--chart-ink)"
                 strokeWidth={2}
                 dot
               />
@@ -339,7 +354,7 @@ export default function CashflowWaterfall() {
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={rows}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="t"
                 label={{
@@ -356,7 +371,7 @@ export default function CashflowWaterfall() {
                 type="monotone"
                 dataKey="cumNPV"
                 name="cumulative NPV"
-                stroke="#2563eb"
+                stroke="var(--chart-1)"
                 dot
               />
             </LineChart>

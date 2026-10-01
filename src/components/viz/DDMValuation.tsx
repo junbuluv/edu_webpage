@@ -139,7 +139,7 @@ export default function DDMValuation() {
         <div className="h-72">
           <ResponsiveContainer>
             <LineChart data={curve}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="b"
                 tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
@@ -159,7 +159,7 @@ export default function DDMValuation() {
               />
               <ReferenceLine
                 y={base}
-                stroke="#94a3b8"
+                stroke="var(--chart-ref)"
                 strokeDasharray="4 4"
                 label={{
                   value: 'no-growth benchmark',
@@ -171,7 +171,7 @@ export default function DDMValuation() {
                 type="monotone"
                 dataKey="price"
                 name="P₀(b)"
-                stroke="#2563eb"
+                stroke="var(--chart-1)"
                 dot={false}
                 connectNulls
               />
@@ -180,7 +180,7 @@ export default function DDMValuation() {
                   x={s.retention}
                   y={P}
                   r={4}
-                  fill="#dc2626"
+                  fill="var(--chart-2)"
                   stroke="none"
                 />
               )}

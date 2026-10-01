@@ -51,7 +51,7 @@ export default function ADASScenarioView({ state }: Props) {
       <div className="mt-2 h-72">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="Y"
               tickFormatter={(v) => v.toFixed(0)}
@@ -76,7 +76,7 @@ export default function ADASScenarioView({ state }: Props) {
               type="monotone"
               dataKey="AD"
               name="AD"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               dot={false}
               isAnimationActive={false}
             />
@@ -84,7 +84,7 @@ export default function ADASScenarioView({ state }: Props) {
               type="monotone"
               dataKey="SRAS"
               name="SRAS"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               dot={false}
               isAnimationActive={false}
             />
@@ -92,7 +92,7 @@ export default function ADASScenarioView({ state }: Props) {
               x={eq.Y}
               y={eq.P}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>

@@ -136,7 +136,7 @@ export default function WACCVisualizer() {
       <div className="mt-4 h-72">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis
               dataKey="dv"
               tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
@@ -165,21 +165,21 @@ export default function WACCVisualizer() {
               type="monotone"
               dataKey="re"
               name="cost of equity rE"
-              stroke="#dc2626"
+              stroke="var(--chart-2)"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="rd"
               name="after-tax rD"
-              stroke="#059669"
+              stroke="var(--chart-3)"
               dot={false}
             />
             <Line
               type="monotone"
               dataKey="wacc"
               name="WACC"
-              stroke="#2563eb"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               dot={false}
             />
@@ -187,7 +187,7 @@ export default function WACCVisualizer() {
               x={optimal.dv}
               y={optimal.wacc}
               r={5}
-              fill="#0f172a"
+              fill="var(--chart-ink)"
               stroke="white"
             />
           </LineChart>

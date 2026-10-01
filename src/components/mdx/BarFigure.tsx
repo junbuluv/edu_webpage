@@ -8,10 +8,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { resolveSeriesColor } from '@lib/chart/series-color';
 
 interface Series {
   key: string;
   name: string;
+  /** A theme slot ('chart-1' to 'chart-4') or a hex color. Defaults to the series' slot. */
   color?: string;
 }
 
@@ -27,8 +29,6 @@ interface Props {
   /** Height in pixels for the chart area. Default 360. */
   height?: number;
 }
-
-const DEFAULT_COLORS = ['#4572a7', '#aa4643', '#89a54e', '#80699b'];
 
 export default function BarFigure({
   data,
@@ -52,7 +52,7 @@ export default function BarFigure({
             data={data}
             margin={{ top: 16, right: 24, left: 8, bottom: 8 }}
           >
-            <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
             <XAxis dataKey={xKey} fontSize={11} />
             <YAxis
               fontSize={11}
@@ -74,7 +74,7 @@ export default function BarFigure({
                 key={s.key}
                 dataKey={s.key}
                 name={s.name}
-                fill={s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]}
+                fill={resolveSeriesColor(s.color, i)}
               />
             ))}
           </BarChart>

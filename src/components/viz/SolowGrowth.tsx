@@ -117,7 +117,7 @@ export default function SolowGrowth() {
         <div className="h-64">
           <ResponsiveContainer>
             <AreaChart data={curves}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="k"
                 tickFormatter={(v) => v.toFixed(1)}
@@ -135,21 +135,21 @@ export default function SolowGrowth() {
                 type="monotone"
                 dataKey="sy"
                 name="s·f(k)"
-                stroke="#2563eb"
-                fill="#dbeafe"
+                stroke="var(--chart-1)"
+                fill="var(--chart-1-soft)"
               />
               <Line
                 type="monotone"
                 dataKey="breakeven"
                 name="(n+δ)·k"
-                stroke="#dc2626"
+                stroke="var(--chart-2)"
                 dot={false}
               />
               <ReferenceDot
                 x={kss}
                 y={(state.n + state.d) * kss}
                 r={5}
-                fill="#0f172a"
+                fill="var(--chart-ink)"
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -161,7 +161,7 @@ export default function SolowGrowth() {
         <div className="h-64">
           <ResponsiveContainer>
             <LineChart data={path}>
-              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
               <XAxis
                 dataKey="t"
                 label={{
@@ -178,14 +178,14 @@ export default function SolowGrowth() {
                 type="monotone"
                 dataKey="k"
                 name="k(t)"
-                stroke="#2563eb"
+                stroke="var(--chart-1)"
                 dot={false}
               />
               <Line
                 type="monotone"
                 dataKey="y"
                 name="y(t)"
-                stroke="#059669"
+                stroke="var(--chart-3)"
                 dot={false}
               />
             </LineChart>

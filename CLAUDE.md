@@ -137,6 +137,14 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/lib/theme/theme-tokens.test.ts` fails if a token edit breaks WCAG AA or
   drifts from Baruch's official colors. Fonts are self-hosted Figtree and
   JetBrains Mono (Fontsource). Design: `docs/superpowers/specs/2026-09-27-baruch-blue-theme-design.md`
+  Charts use `var(--chart-1)`…`var(--chart-4)` (Midtown Blue, Tangerine,
+  Okabe-Ito green and purple), `--chart-1-soft`, `--chart-3-soft`,
+  `--chart-grid`, `--chart-ref`, and `--chart-ink`. Chart text is ink, never
+  a series color: `global.css` sets Recharts legend, tooltip, and label text
+  to ink (axis ticks keep Recharts' `#666`, 5.74:1).
+  BarFigure `color` takes `'chart-1'`…`'chart-4'` (or hex).
+  `src/lib/theme/no-hardcoded-colors.test.ts` rejects hex literals in
+  `src/components`.
 
 ## Repository workflow
 
@@ -508,9 +516,9 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    it tests must be alias-free — that's why pure logic is split into
    `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
-   `theme/contrast.ts`,
+   `theme/contrast.ts` / `chart/series-color.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 133 tests as of 2026-08-26.
+   when adding testable logic. 168 tests as of 2026-09-27.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
