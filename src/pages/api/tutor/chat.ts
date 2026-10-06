@@ -25,11 +25,7 @@ import {
 import { buildTutorInstructions } from '@lib/tutor/prompt';
 import { toTutorUIStream } from '@lib/tutor/stream';
 import { parseTutorRequest } from '@lib/tutor/request';
-import {
-  consumeTutorQuota,
-  recordTutorUsage,
-  refundTutorQuota,
-} from '@lib/tutor/usage';
+import { consumeTutorQuota, recordTutorUsage } from '@lib/tutor/usage';
 
 function json(payload: unknown, status: number): Response {
   return new Response(JSON.stringify(payload), {
@@ -115,13 +111,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   // AI SDK 7: result.toUIMessageStreamResponse is deprecated in favor of
   // createUIMessageStreamResponse. toTutorUIStream sends the messages-left
-  // count, hides reasoning, and refunds the slot if the model fails before
-  // sending any text (see src/lib/tutor/stream.ts).
+  // count and hides reasoning (see src/lib/tutor/stream.ts). The reserved
+  // slot is never refunded, even if the model fails: refunds let a client
+  // turn deliberate failures into unlimited provider calls.
   return createUIMessageStreamResponse({
     headers: { 'cache-control': 'private, no-store' },
-    stream: toTutorUIStream(result.stream, {
-      remaining: quota.remaining,
-      onNoOutputFailure: () => refundTutorQuota(quota.messageId),
-    }),
+    stream: toTutorUIStream(result.stream, { remaining: quota.remaining }),
   });
 };

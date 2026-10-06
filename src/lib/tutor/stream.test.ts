@@ -54,71 +54,60 @@ function failing(error: unknown) {
 }
 
 async function run(model: MockLanguageModelV4, remaining = 39) {
-  let refunds = 0;
   const result = streamText({
     model,
     prompt: 'hi',
     maxRetries: 0,
     onError: () => {},
   });
-  const chunks = (await convertReadableStreamToArray(
-    toTutorUIStream(result.stream, {
-      remaining,
-      onNoOutputFailure: () => {
-        refunds++;
-      },
-    }),
+  return (await convertReadableStreamToArray(
+    toTutorUIStream(result.stream, { remaining }),
   )) as Chunk[];
-  return { chunks, refunds };
 }
 
-test('sends the server messages-left count when the reply finishes', async () => {
-  const { chunks, refunds } = await run(streaming([...text('Hi'), finish]));
-  assert.deepEqual(chunks.find((c) => c.type === 'finish')?.messageMetadata, {
-    remaining: 39,
-  });
-  assert.equal(
-    chunks.find((c) => c.type === 'start')?.messageMetadata,
-    undefined,
-  );
-  assert.equal(refunds, 0);
+const metadataOf = (chunks: Chunk[], type: string) =>
+  chunks.find((c) => c.type === type)?.messageMetadata;
+
+test('puts the server messages-left count on the reply as it starts and finishes', async () => {
+  const chunks = await run(streaming([...text('Hi'), finish]));
+  assert.deepEqual(metadataOf(chunks, 'start'), { remaining: 39 });
+  assert.deepEqual(metadataOf(chunks, 'finish'), { remaining: 39 });
 });
 
-test('refunds the slot when the provider fails before any text', async () => {
-  const { chunks, refunds } = await run(failing(new Error('upstream down')));
-  assert.equal(refunds, 1);
+test('a failure before any text still shows the count (the attempt counted)', async () => {
+  const chunks = await run(failing(new Error('upstream down')));
+  assert.deepEqual(metadataOf(chunks, 'start'), { remaining: 39 });
   assert.equal(
     chunks.find((c) => c.type === 'error')?.errorText,
     'unavailable',
   );
-  assert.ok(chunks.every((c) => c.messageMetadata === undefined));
 });
 
-test('keeps the slot when the stream fails after text', async () => {
-  const { chunks, refunds } = await run(
+test('a failure after text keeps the partial reply and the count', async () => {
+  const chunks = await run(
     streaming([
       { type: 'text-start', id: 't' },
       { type: 'text-delta', id: 't', delta: 'Partial' },
       { type: 'error', error: new Error('cut off') },
     ]),
   );
-  assert.equal(refunds, 0);
+  assert.ok(chunks.some((c) => c.type === 'text-delta'));
   assert.ok(chunks.some((c) => c.type === 'error'));
+  assert.deepEqual(metadataOf(chunks, 'start'), { remaining: 39 });
 });
 
 test('budget rejections reach the browser as budget_exhausted', async () => {
-  const { chunks, refunds } = await run(
+  const chunks = await run(
     failing(Object.assign(new Error('Gateway error'), { statusCode: 402 })),
   );
   assert.equal(
     chunks.find((c) => c.type === 'error')?.errorText,
     'budget_exhausted',
   );
-  assert.equal(refunds, 1);
 });
 
 test('never sends reasoning to the browser', async () => {
-  const { chunks } = await run(
+  const chunks = await run(
     streaming([
       { type: 'reasoning-start', id: 'r' },
       { type: 'reasoning-delta', id: 'r', delta: 'The answer is 4.' },

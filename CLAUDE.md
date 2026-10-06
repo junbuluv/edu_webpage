@@ -153,9 +153,10 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
   `src/lib/tutor/` (request parsing, lesson-to-text, coach prompt, math
   delimiters, error codes, eval scoring; unit-tested). Daily cap of 40 per
-  rolling 24 hours via the service-role RPC `consume_tutor_quota` (a slot is
-  refunded only when the model fails before sending any text); usage rows in
-  `tutor_messages` hold no message text. Model chosen with
+  rolling 24 hours via the service-role RPC `consume_tutor_quota` (every
+  attempt counts, failed ones included; never add refunds, which let a client
+  turn deliberate failures into free calls); usage rows in `tutor_messages`
+  hold no message text. Model chosen with
   `scripts/tutor-eval.ts`; reports in `quality_reports/tutor-eval/`
 
 ## Repository workflow

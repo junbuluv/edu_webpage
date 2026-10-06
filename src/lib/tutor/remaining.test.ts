@@ -22,7 +22,7 @@ test('falls back to the page count before any reply finishes', () => {
   );
 });
 
-test('skips a failed reply that carries no count', () => {
+test('skips a reply that carries no count (e.g. aborted before it started)', () => {
   const messages = [
     { role: 'assistant', metadata: { remaining: 20 } },
     { role: 'user' },

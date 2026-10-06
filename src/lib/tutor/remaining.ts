@@ -1,8 +1,9 @@
 // Messages left today, as the tutor panel shows it. Pure and alias-free; runs
-// in the browser. The server puts its exact count on each finished reply
-// (message metadata, see stream.ts). A reply that failed before any text
-// carries no count because its quota slot was refunded, so the last finished
-// reply's count, or the page's initial count, stays correct.
+// in the browser. The server puts its exact count on every reply as it starts
+// and finishes (message metadata, see stream.ts), including attempts that
+// fail, because every attempt counts. A request refused before streaming
+// (429, 503) creates no reply, so the last reply's count, or the page's
+// initial count, stays correct.
 
 export interface MessageWithMetadata {
   role: string;
