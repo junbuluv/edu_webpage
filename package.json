@@ -20,6 +20,7 @@
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_REF --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
+    "@ai-sdk/react": "^4.0.131",
     "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^4.0.3",
     "@astrojs/react": "^4.1.2",
@@ -39,6 +40,7 @@
     "plotly.js-finance-dist-min": "^2.35.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
     "react-plotly.js": "^2.6.0",
     "recharts": "^2.15.0",
     "rehype-katex": "^7.0.1",
