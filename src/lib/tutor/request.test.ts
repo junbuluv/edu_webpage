@@ -3,7 +3,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseTutorRequest } from './request.ts';
-import { TUTOR_HISTORY_LIMIT, TUTOR_MAX_MESSAGE_CHARS } from './limits.ts';
+import {
+  TUTOR_HISTORY_LIMIT,
+  TUTOR_MAX_HISTORY_CHARS,
+  TUTOR_MAX_MESSAGE_CHARS,
+} from './limits.ts';
 
 const SLUG = 'eco-1002/is-lm-intro';
 const user = (id: string, text: string) => ({
@@ -127,4 +131,45 @@ test('a conversation with nothing usable is rejected', () => {
     ],
   });
   assert.deepEqual(r, { ok: false, reason: 'empty_conversation' });
+});
+
+test('caps each older message as a whole, not per part', () => {
+  const manyParts = {
+    id: '2',
+    role: 'assistant',
+    parts: Array.from({ length: 50 }, () => ({
+      type: 'text',
+      text: 'z'.repeat(TUTOR_MAX_HISTORY_CHARS),
+    })),
+  };
+  const r = parseTutorRequest({
+    lessonSlug: SLUG,
+    messages: [user('1', 'q'), manyParts, user('3', 'next')],
+  });
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    const kept = r.value.messages[1].parts.reduce(
+      (n, p) => n + p.text.length,
+      0,
+    );
+    assert.ok(
+      kept <= TUTOR_MAX_HISTORY_CHARS,
+      `older message kept ${kept} chars`,
+    );
+  }
+});
+
+test('counts every part of the newest message against its limit', () => {
+  const split = {
+    id: '1',
+    role: 'user',
+    parts: Array.from({ length: 3 }, () => ({
+      type: 'text',
+      text: 'x'.repeat(TUTOR_MAX_MESSAGE_CHARS),
+    })),
+  };
+  assert.deepEqual(parseTutorRequest({ lessonSlug: SLUG, messages: [split] }), {
+    ok: false,
+    reason: 'message_too_long',
+  });
 });

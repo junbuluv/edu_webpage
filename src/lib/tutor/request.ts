@@ -60,17 +60,16 @@ export function parseTutorRequest(raw: unknown): TutorParseResult {
     const role =
       m.role === 'user' ? 'user' : m.role === 'assistant' ? 'assistant' : null;
     if (!role) continue;
-    const parts: TutorTextPart[] = [];
-    for (const p of m.parts) {
-      if (
-        p.type === 'text' &&
-        typeof p.text === 'string' &&
-        p.text.trim() !== ''
-      ) {
-        parts.push({ type: 'text', text: p.text });
-      }
-    }
-    if (parts.length > 0) cleaned.push({ id: m.id, role, parts });
+    // Merge text parts into one so every length cap below applies to the
+    // whole message; capping each part separately let one message carry 50
+    // parts of the maximum length.
+    const text = m.parts
+      .flatMap((p) =>
+        p.type === 'text' && typeof p.text === 'string' ? [p.text] : [],
+      )
+      .join('\n');
+    if (text.trim() === '') continue;
+    cleaned.push({ id: m.id, role, parts: [{ type: 'text', text }] });
   }
 
   const recent = cleaned.slice(-TUTOR_HISTORY_LIMIT);
@@ -78,21 +77,23 @@ export function parseTutorRequest(raw: unknown): TutorParseResult {
   if (!last) return { ok: false, reason: 'empty_conversation' };
   if (last.role !== 'user')
     return { ok: false, reason: 'last_message_not_user' };
-  const lastLength = last.parts.reduce((n, p) => n + p.text.length, 0);
-  if (lastLength > TUTOR_MAX_MESSAGE_CHARS) {
+  if (last.parts[0].text.length > TUTOR_MAX_MESSAGE_CHARS) {
     return { ok: false, reason: 'message_too_long' };
   }
 
-  const messages = recent.map((m, i) =>
-    i === recent.length - 1
-      ? m
-      : {
-          ...m,
-          parts: m.parts.map((p) => ({
-            type: 'text' as const,
-            text: p.text.slice(0, TUTOR_MAX_HISTORY_CHARS),
-          })),
-        },
+  const messages = recent.map(
+    (m, i): TutorMessage =>
+      i === recent.length - 1
+        ? m
+        : {
+            ...m,
+            parts: [
+              {
+                type: 'text',
+                text: m.parts[0].text.slice(0, TUTOR_MAX_HISTORY_CHARS),
+              },
+            ],
+          },
   );
   return { ok: true, value: { lessonSlug: parsed.data.lessonSlug, messages } };
 }
