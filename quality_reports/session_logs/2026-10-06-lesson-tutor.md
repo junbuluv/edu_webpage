@@ -1,8 +1,8 @@
 # Session log — 2026-10-05/06 (ECO 1002 lesson tutor: research, spec, plan, implementation)
 
 Continues [2026-09-27](2026-09-27-baruch-blue-theme.md). Branch
-`feat/lesson-tutor` (off `main` babc9a5) holds the whole feature, committed
-but **not pushed**. Task 10 (model eval) waits for the owner's AI Gateway key.
+`feat/lesson-tutor` (off `main` babc9a5) holds the whole feature; PR #126 is
+open with CI green.
 
 ## Decided
 
@@ -71,16 +71,29 @@ but **not pushed**. Task 10 (model eval) waits for the owner's AI Gateway key.
   concept answers ran about 200 words). The owner chose it; it is now the
   default. `gpt-6-luna` (about 3x cheaper per token) waits for paid credits.
 
+## Rollout (2026-10-06)
+
+- Production schema applied by the owner; checked read-only (both functions,
+  the empty table, client grants, the purge cron job).
+- Rollout steps 4 to 6 run by the agent through the Vercel CLI, because the
+  Vercel MCP grant came back with no team access:
+  - `AI_GATEWAY_API_KEY` is a sensitive var on Production and Preview. CLI 54
+    in agent mode loops on `git_branch_required` for Preview, so Production
+    was added first and its targets patched to include Preview.
+  - Fluid compute is on (300 s default function timeout).
+  - The PR preview was rebuilt with the key (`edu-webpage-di97wol9e-…`,
+    Ready, clean build log). Previews sit behind Vercel Authentication, so the
+    signed-in check is the owner's.
+- Found, not part of this PR: the project has no `CRON_SECRET`, so the daily
+  `/api/cron/archive-upload-cleanup` run is rejected with 401.
+
 ## Open items for the owner
 
-1. Done: AI Gateway key created, eval run, `gpt-5-mini` chosen. Rotate the
-   key before production (it was pasted in chat) and buy credits before
-   students arrive (free tier: 5 requests a minute).
-2. Push, open the PR titled `db: …`, add `AI_GATEWAY_API_KEY` to all three
-   Vercel scopes, paste `supabase/schema.sql` in production, and confirm
-   Fluid compute is on for `edu-webpage` (Task 11 steps 4–9).
-3. Deferred minors from the review: GuidedReader check explanations enter
-   the context; counter fails open on a read error; "Thinking…" disappears
-   during the reasoning gap; aborted streams leave null token columns; RLS
-   suite lacks a column-grant assertion; eval reports would land in a public
-   tracked folder; panel accessibility nits.
+1. Sign in on the rebuilt preview as admin: an ECO 1002 reply streams and the
+   counter drops by one; a FIN 3610 lesson shows no panel. Then merge #126,
+   check the production deploy (CLAUDE.md gotcha), sync local `main`, and
+   tell the ECO 1002 instructors.
+2. Rotate the gateway key (it was pasted in chat) and buy credits before
+   students arrive (free tier: 5 requests a minute across the team).
+3. Deferred minors: the counter fails open on a read error; aborted streams
+   leave null token columns.
