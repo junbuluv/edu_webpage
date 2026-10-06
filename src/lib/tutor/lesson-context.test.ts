@@ -97,3 +97,33 @@ test('caps very long lessons', () => {
   assert.equal(out.length, TUTOR_MAX_CONTEXT_CHARS + marker.length);
   assert.ok(out.endsWith(marker));
 });
+
+test('drops self-check answer explanations from component props', () => {
+  const body = [
+    '<GuidedReader',
+    '  steps={[',
+    '    {',
+    "      heading: 'IS curve',",
+    '      bodyHtml: `<p>The IS curve slopes downward because investment falls as r rises.</p>`,',
+    '      check: {',
+    "        prompt: 'A tax cut shifts which curve, and in which direction?',",
+    "        choices: ['IS shifts right', 'LM shifts left'],",
+    '        correctIndex: 0,',
+    '        explanation:',
+    "          'A tax cut raises spending at every r, shifting IS rightward.',",
+    '      },',
+    '    },',
+    '  ]}',
+    '/>',
+  ].join('\n');
+  const out = lessonToContext(body, meta);
+  assert.ok(
+    out.includes('A tax cut shifts which curve, and in which direction?'),
+  );
+  assert.ok(
+    out.includes(
+      'The IS curve slopes downward because investment falls as r rises.',
+    ),
+  );
+  assert.ok(!out.includes('A tax cut raises spending at every r'));
+});

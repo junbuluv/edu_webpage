@@ -16,6 +16,17 @@ export interface LessonMeta {
 
 export const TUTOR_MAX_CONTEXT_CHARS = 30_000;
 
+// Prop keys whose strings answer a lesson's self-checks (GuidedReader's
+// `check.explanation`). The tutor must not read answers off the page it
+// is coaching on, so these never enter the context.
+const ANSWER_KEYS = new Set([
+  'explanation',
+  'answer',
+  'solution',
+  'feedback',
+  'correct',
+]);
+
 interface ScannedTag {
   name: string;
   end: number;
@@ -52,11 +63,12 @@ function scanTag(src: string, start: number): ScannedTag | null {
       const close = findStringEnd(src, i);
       if (close < 0) return null;
       const value = src.slice(i + 1, close);
-      strings.push(value);
+      const before = src.slice(Math.max(start, i - 64), i);
+      // Object keys like `explanation: '...'` hold self-check answers.
+      const key = /([A-Za-z_$][\w$]*)\s*:\s*$/.exec(before)?.[1];
+      if (!key || !ANSWER_KEYS.has(key)) strings.push(value);
       if (depth === 0) {
-        const attr = /([A-Za-z_][\w:-]*)\s*=\s*$/.exec(
-          src.slice(Math.max(start, i - 64), i),
-        );
+        const attr = /([A-Za-z_][\w:-]*)\s*=\s*$/.exec(before);
         if (attr) attrs[attr[1]] = value;
       }
       i = close + 1;
