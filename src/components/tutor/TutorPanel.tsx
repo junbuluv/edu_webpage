@@ -37,6 +37,8 @@ export default function TutorPanel({
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   const transport = useMemo(
     () =>
@@ -61,10 +63,18 @@ export default function TutorPanel({
       : remainingFromMessages(messages, initialRemaining);
   const busy = status === 'submitted' || status === 'streaming';
   const thinking = awaitingFirstWords(status, messages);
+  const lastReply = messages.at(-1);
+  const announcement = thinking
+    ? 'The tutor is thinking.'
+    : status === 'ready' && lastReply?.role === 'assistant'
+      ? 'The tutor replied.'
+      : '';
   const canSend = !busy && remaining > 0 && input.trim() !== '';
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
+    else if (wasOpen.current) launcherRef.current?.focus();
+    wasOpen.current = open;
   }, [open]);
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
@@ -88,9 +98,9 @@ export default function TutorPanel({
     return (
       <button
         type="button"
+        ref={launcherRef}
         onClick={() => setOpen(true)}
-        aria-expanded={false}
-        aria-controls="tutor-panel"
+        aria-haspopup="dialog"
         className="fixed bottom-5 right-5 z-40 rounded-full bg-accent px-5 py-3 font-medium text-white shadow-lg hover:bg-accent-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         Ask the tutor
@@ -119,10 +129,10 @@ export default function TutorPanel({
         </button>
       </header>
 
-      <div
-        className="flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm text-ink"
-        aria-live="polite"
-      >
+      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm text-ink">
+        <p className="sr-only" aria-live="polite">
+          {announcement}
+        </p>
         {messages.length === 0 && (
           <div className="space-y-2 text-ink-muted">
             <p>
