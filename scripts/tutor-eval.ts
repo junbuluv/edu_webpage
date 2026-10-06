@@ -17,6 +17,7 @@ import {
   accuracyPasses,
   FIN_NUMERIC_SAMPLE,
   formatEvalQuestion,
+  isRateLimitError,
   parseEvalAnswer,
   type EvalQuestion,
 } from '../src/lib/tutor/eval.ts';
@@ -160,23 +161,60 @@ async function ask(
   prompt: string,
   tally: Tally,
 ): Promise<string> {
-  try {
-    const { text, usage } = await generateText({
-      model: gateway(modelId),
-      instructions,
-      prompt,
-      maxOutputTokens: TUTOR_MAX_OUTPUT_TOKENS,
-      providerOptions: providerOptionsFor(modelId, effort),
-    });
-    tally.input += usage.inputTokens ?? 0;
-    tally.output += usage.outputTokens ?? 0;
-    return text;
-  } catch (error) {
-    console.error(
-      `  request failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    return '';
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const { text, usage } = await generateText({
+        model: gateway(modelId),
+        instructions,
+        prompt,
+        maxOutputTokens: TUTOR_MAX_OUTPUT_TOKENS,
+        providerOptions: providerOptionsFor(modelId, effort),
+      });
+      tally.input += usage.inputTokens ?? 0;
+      tally.output += usage.outputTokens ?? 0;
+      return text;
+    } catch (error) {
+      // A rate limit says nothing about the model: wait a minute and retry.
+      if (isRateLimitError(error) && attempt < 6) {
+        console.error(`  rate limited; waiting 61 s (attempt ${attempt})`);
+        await new Promise((resolve) => setTimeout(resolve, 61_000));
+        continue;
+      }
+      console.error(
+        `  request failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return '';
+    }
   }
+}
+
+interface Miss {
+  where: string;
+  expected: string;
+  got: string;
+  reply: string;
+}
+
+const LETTERS = 'ABCDEFGHIJ';
+function describeExpected(q: EvalQuestion): string {
+  if (q.type === 'multiple_choice') return LETTERS[q.correctIndex] ?? '?';
+  if (q.type === 'multi_select') {
+    return q.correctIndices.map((i) => LETTERS[i] ?? '?').join(', ');
+  }
+  return `${q.answer} ± ${q.tolerance}${q.unit ? ` ${q.unit}` : ''}`;
+}
+function describeGot(q: EvalQuestion, answer: unknown): string {
+  if (answer === undefined) return 'no parseable answer';
+  if (q.type === 'multiple_choice' && typeof answer === 'number') {
+    return LETTERS[answer] ?? String(answer);
+  }
+  if (q.type === 'multi_select' && Array.isArray(answer)) {
+    return answer.map((i) => LETTERS[i] ?? '?').join(', ');
+  }
+  return String(answer);
+}
+function cell(text: string): string {
+  return text.replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim().slice(-140);
 }
 
 async function main(): Promise<void> {
@@ -217,6 +255,8 @@ async function main(): Promise<void> {
 
     let ecoScore = 0;
     let ecoMax = 0;
+    const misses: Miss[] = [];
+    const replies = new Map<string, string>();
     for (const quiz of eco) {
       const instructions = accuracyInstructions(
         ecoCourse.code,
@@ -234,10 +274,20 @@ async function main(): Promise<void> {
         );
         const answer = parseEvalAnswer(q, reply);
         if (answer !== undefined) answers[q.id] = answer;
+        replies.set(`${quiz.slug}:${q.id}`, reply);
       }
       const graded = gradeQuiz(quiz.questions, answers);
       ecoScore += graded.score;
       ecoMax += graded.maxScore;
+      for (const q of quiz.questions) {
+        if (graded.perQuestion[q.id]?.correct) continue;
+        misses.push({
+          where: `${quiz.slug} ${q.id}`,
+          expected: describeExpected(q),
+          got: describeGot(q, answers[q.id]),
+          reply: replies.get(`${quiz.slug}:${q.id}`) ?? '',
+        });
+      }
     }
 
     let finCorrect = 0;
@@ -255,8 +305,19 @@ async function main(): Promise<void> {
         tally,
       );
       const answer = parseEvalAnswer(q, reply);
-      if (answer !== undefined && gradeQuiz([q], { [q.id]: answer }).score > 0)
+      if (
+        answer !== undefined &&
+        gradeQuiz([q], { [q.id]: answer }).score > 0
+      ) {
         finCorrect++;
+      } else {
+        misses.push({
+          where: `${quiz.slug} ${q.id}`,
+          expected: describeExpected(q),
+          got: describeGot(q, answer),
+          reply,
+        });
+      }
     }
 
     const coachCases = [
@@ -267,6 +328,14 @@ async function main(): Promise<void> {
       })),
     ];
     transcripts.push(`## ${modelId} (${effort})\n`);
+    transcripts.push(
+      `### Accuracy misses (${misses.length})\n\n| Question | Expected | Got | End of reply |\n|---|---|---|---|\n${misses
+        .map(
+          (m) =>
+            `| ${m.where} | ${m.expected} | ${cell(m.got)} | ${cell(m.reply)} |`,
+        )
+        .join('\n')}\n`,
+    );
     for (const [i, c] of coachCases.entries()) {
       const instructions = buildTutorInstructions({
         courseCode: ecoCourse.code,

@@ -65,3 +65,18 @@ export function accuracyPasses(
     finCorrect >= FIN_NUMERIC_PASS
   );
 }
+
+/**
+ * Gateway rate limits (the free tier allows 5 requests a minute) say nothing
+ * about the model, so the eval waits and retries instead of scoring a miss.
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const { name, statusCode, message } = error as {
+    name?: unknown;
+    statusCode?: unknown;
+    message?: unknown;
+  };
+  if (statusCode === 429 || name === 'GatewayRateLimitError') return true;
+  return typeof message === 'string' && /rate ?limit/i.test(message);
+}

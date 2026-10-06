@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {
   accuracyPasses,
   formatEvalQuestion,
+  isRateLimitError,
   parseEvalAnswer,
   type EvalQuestion,
 } from './eval.ts';
@@ -63,4 +64,25 @@ test('pass bar: 90% of ECO points and 8 of 10 FIN numeric', () => {
   assert.equal(accuracyPasses(43, 48, 10), false);
   assert.equal(accuracyPasses(48, 48, 7), false);
   assert.equal(accuracyPasses(0, 0, 10), false);
+});
+
+test('recognizes gateway rate limits so the eval can wait instead of scoring a miss', () => {
+  const gateway = Object.assign(
+    new Error('Rate limit exceeded for openai/gpt-5-mini'),
+    {
+      name: 'GatewayRateLimitError',
+    },
+  );
+  assert.equal(isRateLimitError(gateway), true);
+  assert.equal(isRateLimitError({ statusCode: 429 }), true);
+  assert.equal(
+    isRateLimitError(
+      new Error(
+        'Failed after 3 attempts. Last error: GatewayRateLimitError: Rate limit exceeded',
+      ),
+    ),
+    true,
+  );
+  assert.equal(isRateLimitError(new Error('socket hang up')), false);
+  assert.equal(isRateLimitError(undefined), false);
 });
