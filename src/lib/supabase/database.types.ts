@@ -228,6 +228,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      tutor_messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_slug: string;
+          lesson_slug: string;
+          model: string | null;
+          input_tokens: number | null;
+          output_tokens: number | null;
+          reasoning_tokens: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_slug: string;
+          lesson_slug: string;
+          model?: string | null;
+          input_tokens?: number | null;
+          output_tokens?: number | null;
+          reasoning_tokens?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_slug?: string;
+          lesson_slug?: string;
+          model?: string | null;
+          input_tokens?: number | null;
+          output_tokens?: number | null;
+          reasoning_tokens?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       archive_videos: {
         Row: {
           id: string;
@@ -649,6 +685,19 @@ export type Database = {
           storage_path: string;
           action: string;
         }>;
+      };
+      consume_tutor_quota: {
+        Args: {
+          p_user_id: string;
+          p_course_slug: string;
+          p_lesson_slug: string;
+          p_daily_limit: number;
+        };
+        Returns: {
+          status: string;
+          message_id: string | null;
+          remaining: number;
+        }[];
       };
       log_disclosure: {
         Args: {

@@ -479,7 +479,8 @@ begin
     'public.archive_videos',
     'public.archive_paper_upload_intents',
     'public.archive_papers',
-    'public.archive_quizzes'
+    'public.archive_quizzes',
+    'public.tutor_messages'
   ] loop
     if has_any_column_privilege('anon', relation_name, 'SELECT') then
       raise exception 'anonymous SELECT remained granted on %', relation_name;
@@ -2006,5 +2007,79 @@ begin
     raise exception 'private attendance policy helper is not hardened SECURITY DEFINER';
   end if;
 end $$;
+
+
+-- Lesson tutor (2026-10-05): rolling 24-hour cap, self-only reads, no client
+-- writes and no client access to the quota RPC.
+reset role;
+do $$
+declare
+  r record;
+begin
+  insert into public.tutor_messages (user_id, course_slug, lesson_slug)
+  select '00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/is-lm-intro'
+    from generate_series(1, 39);
+
+  select * into r from public.consume_tutor_quota(
+    '00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/is-lm-intro', 40
+  );
+  if r.status <> 'ok' or r.message_id is null or r.remaining <> 0 then
+    raise exception 'tutor quota: 40th message returned %/%/%',
+      r.status, r.message_id, r.remaining;
+  end if;
+
+  select * into r from public.consume_tutor_quota(
+    '00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/is-lm-intro', 40
+  );
+  if r.status <> 'rate_limited' then
+    raise exception 'tutor quota: 41st message returned %', r.status;
+  end if;
+
+  update public.tutor_messages
+     set created_at = now() - interval '25 hours'
+   where user_id = '00000000-0000-0000-0000-000000000101';
+  select * into r from public.consume_tutor_quota(
+    '00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/is-lm-intro', 40
+  );
+  if r.status <> 'ok' or r.remaining <> 39 then
+    raise exception 'tutor quota counted messages older than 24 hours (%/%)',
+      r.status, r.remaining;
+  end if;
+
+  insert into public.tutor_messages (user_id, course_slug, lesson_slug)
+  values ('00000000-0000-0000-0000-000000000102', 'eco-1002', 'eco-1002/is-lm-intro');
+end $$;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+do $$
+begin
+  if not exists (
+    select 1 from public.tutor_messages
+     where user_id = '00000000-0000-0000-0000-000000000101'
+  ) then
+    raise exception 'student could not read their own tutor usage';
+  end if;
+  if exists (
+    select 1 from public.tutor_messages
+     where user_id <> '00000000-0000-0000-0000-000000000101'
+  ) then
+    raise exception 'student read another student''s tutor usage';
+  end if;
+  begin
+    insert into public.tutor_messages (user_id, course_slug, lesson_slug)
+    values ('00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/forged');
+    raise exception 'student inserted a tutor usage row directly';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.consume_tutor_quota(
+      '00000000-0000-0000-0000-000000000101', 'eco-1002', 'eco-1002/forged', 40
+    );
+    raise exception 'student executed consume_tutor_quota';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
 
 rollback;
