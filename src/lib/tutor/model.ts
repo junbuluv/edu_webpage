@@ -5,7 +5,11 @@
 import { createGateway } from 'ai';
 import { parseTutorEffort, providerOptionsFor } from './provider-options';
 
-export const DEFAULT_TUTOR_MODEL = 'openai/gpt-6-luna';
+// Chosen by scripts/tutor-eval.ts on 2026-10-06 at reasoning effort low:
+// ECO 100%, FIN numeric 10/10, coaching 10/10. openai/gpt-6-luna is about 3x
+// cheaper per token but needs paid AI Gateway credits; re-test it before
+// spring if cost matters.
+export const DEFAULT_TUTOR_MODEL = 'openai/gpt-5-mini';
 
 export function tutorConfigured(): boolean {
   return Boolean(import.meta.env.AI_GATEWAY_API_KEY);

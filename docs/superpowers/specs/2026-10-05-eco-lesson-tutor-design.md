@@ -19,7 +19,7 @@ a few dollars per semester.
 | Pilot course | ECO 1002 |
 | Who turns it on | The site owner, once per course (`tutor: true` in course JSON) |
 | Who can use it | Enrolled students and staff (`canViewCourse`) |
-| Model | Cheapest configuration passing the eval; default `openai/gpt-6-luna` at reasoning effort `low`, via Vercel AI Gateway |
+| Model | Cheapest configuration passing the eval; `openai/gpt-5-mini` at reasoning effort `low`, chosen 2026-10-06 (ECO 100%, FIN numeric 10/10, coaching 10/10; `gpt-6-luna` untested until paid credits), via Vercel AI Gateway |
 | Eval pass bar | >= 90% of ECO quiz points, >= 8/10 FIN numeric, >= 8/10 coach transcripts |
 | Limits | 40 messages per student per rolling 24 hours; $25/month gateway key budget |
 | Stored data | Usage rows only (who, lesson, when, tokens); no message text |
