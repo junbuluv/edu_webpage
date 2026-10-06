@@ -5,5 +5,6 @@
   "description": "IS-LM, AD-AS, monetary and fiscal policy. Output, inflation, and the business cycle.",
   "accentColor": "#0033A1",
   "order": 1,
-  "defaultSemester": "spring-2027"
+  "defaultSemester": "spring-2027",
+  "tutor": true
 }

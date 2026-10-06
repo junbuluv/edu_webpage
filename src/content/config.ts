@@ -148,6 +148,8 @@ const courses = defineCollection({
       ),
     order: z.number().int().nonnegative(),
     defaultSemester: z.string(),
+    // Lesson tutor panel (2026-10-05 design). Off unless set per course.
+    tutor: z.boolean().default(false),
   }),
 });
 
