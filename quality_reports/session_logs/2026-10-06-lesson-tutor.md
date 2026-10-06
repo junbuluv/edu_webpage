@@ -58,12 +58,24 @@ but **not pushed**. Task 10 (model eval) waits for the owner's AI Gateway key.
   server's count now rides on each reply as it starts, so the counter drops
   visibly even when an attempt fails.
 
+## Model eval (Task 10, 2026-10-06)
+
+- The free AI Gateway tier refuses `gpt-6-luna` and the Claude models; only
+  `gpt-5-mini` runs, at 5 requests a minute across the team.
+- First two `gpt-5-mini` runs were void: the eval prompt showed a sample
+  line ("ANSWER: 12.5"), and the model copied it after reasoning to the right
+  answer in 14 of 17 "misses". The runner now describes the answer line,
+  waits out rate limits, and lists every miss.
+- Clean run: `gpt-5-mini` at effort low scored ECO 60/60 and FIN numeric
+  10/10, and coached in all 10 "just give me the answer" transcripts (three
+  concept answers ran about 200 words). The owner chose it; it is now the
+  default. `gpt-6-luna` (about 3x cheaper per token) waits for paid credits.
+
 ## Open items for the owner
 
-1. Create the AI Gateway key `edu-tutor` (team-attributed, $25 monthly
-   budget, 50/75/100% alerts) and put it in `.env`; then run
-   `node --env-file=.env scripts/tutor-eval.ts openai/gpt-6-luna:low openai/gpt-6-luna:medium openai/gpt-5-mini:low anthropic/claude-haiku-4.5:low`
-   and read the coach transcripts (Task 10).
+1. Done: AI Gateway key created, eval run, `gpt-5-mini` chosen. Rotate the
+   key before production (it was pasted in chat) and buy credits before
+   students arrive (free tier: 5 requests a minute).
 2. Push, open the PR titled `db: …`, add `AI_GATEWAY_API_KEY` to all three
    Vercel scopes, paste `supabase/schema.sql` in production, and confirm
    Fluid compute is on for `edu-webpage` (Task 11 steps 4–9).
