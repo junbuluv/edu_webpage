@@ -542,9 +542,9 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` /
-   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream}.ts`,
+   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 218 tests as of 2026-10-06.
+   when adding testable logic. 222 tests as of 2026-10-06.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
