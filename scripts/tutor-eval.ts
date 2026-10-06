@@ -6,7 +6,8 @@
 // WHERE: terminal, repo root. Needs AI_GATEWAY_API_KEY (from .env):
 //   node --env-file=.env scripts/tutor-eval.ts openai/gpt-6-luna:low openai/gpt-6-luna:medium
 // Each argument is <gateway model id>[:<effort>]. Writes
-// quality_reports/tutor-eval/<date>-tutor-eval.md and prints a summary.
+// quality_reports/tutor-eval/<date>-tutor-eval.md (gitignored: transcripts can
+// contain quiz answers, and the repo is public) and prints a summary.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';

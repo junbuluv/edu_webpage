@@ -42,3 +42,7 @@ supabase/.temp/
 # Claude Code runtime artifacts (machine-local; tracked .claude/ content stays)
 .claude/scheduled_tasks.lock
 .vercel
+
+# Tutor model eval reports (scripts/tutor-eval.ts). Coach transcripts can
+# contain quiz answers and this repo is public, so reports stay local.
+quality_reports/tutor-eval/

@@ -157,7 +157,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   attempt counts, failed ones included; never add refunds, which let a client
   turn deliberate failures into free calls); usage rows in `tutor_messages`
   hold no message text. Model chosen with
-  `scripts/tutor-eval.ts`; reports in `quality_reports/tutor-eval/`
+  `scripts/tutor-eval.ts`; its reports go to the gitignored
+  `quality_reports/tutor-eval/` (transcripts can contain quiz answers; never
+  commit them)
 
 ## Repository workflow
 

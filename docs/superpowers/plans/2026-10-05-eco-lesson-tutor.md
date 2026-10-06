@@ -2614,7 +2614,7 @@ Expected: `npm test` passes, including `no-hardcoded-colors.test.ts`; typecheck 
 ### Task 10: Pick the model (needs the owner's gateway key)
 
 **Files:**
-- Create: `quality_reports/tutor-eval/<date>-tutor-eval.md` (written by the script)
+- Create: `quality_reports/tutor-eval/<date>-tutor-eval.md` (written by the script; gitignored since 2026-10-06, never committed)
 - Possibly modify: `src/lib/tutor/model.ts` (`DEFAULT_TUTOR_MODEL`), `src/lib/tutor/provider-options.ts` (`parseTutorEffort` default) + `provider-options.test.ts`
 
 - [ ] **Step 1: Create the key** (WHERE: Vercel dashboard > AI Gateway > API Keys)
@@ -2645,8 +2645,8 @@ Expected: PASS, 0 errors.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add quality_reports/tutor-eval/ src/lib/tutor/model.ts src/lib/tutor/provider-options.ts src/lib/tutor/provider-options.test.ts
-git commit -m "docs(tutor): model eval report and chosen tutor model" -m "Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
+git add src/lib/tutor/model.ts src/lib/tutor/provider-options.ts src/lib/tutor/provider-options.test.ts
+git commit -m "chore(tutor): use the model the eval chose (report stays local)" -m "Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 ```
 
 ---
