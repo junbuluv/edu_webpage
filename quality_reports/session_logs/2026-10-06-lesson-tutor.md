@@ -49,10 +49,14 @@ but **not pushed**. Task 10 (model eval) waits for the owner's AI Gateway key.
   `usage.outputTokenDetails.reasoningTokens`, and
   `createUIMessageStreamResponse` (`toUIMessageStreamResponse` deprecated).
 - Final review ("with fixes"): a model call that failed before any text kept
-  its quota slot and the counter never moved, so an outage could use up a
-  student's day. Now the slot is refunded only on no-output provider
-  failures, the server's exact count rides on each finished reply, and
-  reasoning is never streamed to the browser (`09b4ec0`).
+  its quota slot while the counter never moved, so an outage could quietly
+  use up a student's day. The fix (`09b4ec0`) refunded such slots, sent the
+  server's exact count with each reply, and stopped streaming reasoning to
+  the browser. A follow-up background security review showed the refund
+  reopened the cap (a client could force failures, for example by aborting,
+  and retry for free), so the refund is gone: every attempt counts, and the
+  server's count now rides on each reply as it starts, so the counter drops
+  visibly even when an attempt fails.
 
 ## Open items for the owner
 
