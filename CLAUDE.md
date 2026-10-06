@@ -440,9 +440,13 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   secret, the
   prod runtime gets `undefined` and middleware redirects every authenticated
   request to `/auth/setup-required`.
-  `AI_GATEWAY_API_KEY` (optional; turns on the lesson tutor) also needs all
-  three scopes. Server env vars are inlined at build time, so redeploy after
-  changing it.
+  `AI_GATEWAY_API_KEY` (optional; turns on the lesson tutor) is a sensitive
+  var on Production and Preview only, since Vercel doesn't allow sensitive
+  vars in Development (local dev reads `.env`). Server env vars are inlined
+  at build time, so redeploy after changing it. Vercel CLI 54 in agent mode
+  loops on `git_branch_required` when adding a Preview var for all
+  branches: add Production first, then add Preview to that entry's targets
+  (dashboard edit, or a REST `PATCH` of its `target`).
 - **Production auto-deploy from `main` is not reliable.** Several merges to
   `main` have failed to trigger production deploys (only preview-on-PR fires
   reliably). After merging an important change, verify a Vercel check-run
