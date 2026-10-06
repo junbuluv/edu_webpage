@@ -9,7 +9,6 @@ import {
   convertToModelMessages,
   createUIMessageStreamResponse,
   streamText,
-  toUIMessageStream,
   type UIMessage,
 } from 'ai';
 import { canViewCourse } from '@lib/archive/access';
@@ -24,8 +23,13 @@ import {
   tutorProviderOptions,
 } from '@lib/tutor/model';
 import { buildTutorInstructions } from '@lib/tutor/prompt';
+import { toTutorUIStream } from '@lib/tutor/stream';
 import { parseTutorRequest } from '@lib/tutor/request';
-import { consumeTutorQuota, recordTutorUsage } from '@lib/tutor/usage';
+import {
+  consumeTutorQuota,
+  recordTutorUsage,
+  refundTutorQuota,
+} from '@lib/tutor/usage';
 
 function json(payload: unknown, status: number): Response {
   return new Response(JSON.stringify(payload), {
@@ -110,13 +114,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   // AI SDK 7: result.toUIMessageStreamResponse is deprecated in favor of
-  // createUIMessageStreamResponse + toUIMessageStream. onError's return value
-  // is the only error text the browser sees.
+  // createUIMessageStreamResponse. toTutorUIStream sends the messages-left
+  // count, hides reasoning, and refunds the slot if the model fails before
+  // sending any text (see src/lib/tutor/stream.ts).
   return createUIMessageStreamResponse({
     headers: { 'cache-control': 'private, no-store' },
-    stream: toUIMessageStream({
-      stream: result.stream,
-      onError: (error) => classifyStreamError(error),
+    stream: toTutorUIStream(result.stream, {
+      remaining: quota.remaining,
+      onNoOutputFailure: () => refundTutorQuota(quota.messageId),
     }),
   });
 };

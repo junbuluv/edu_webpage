@@ -78,6 +78,26 @@ export async function recordTutorUsage(
   }
 }
 
+/**
+ * Give back a reserved slot when the model failed before sending any text
+ * (the student got no reply). Never called on client aborts or midway
+ * failures, so retrying cannot get around the daily cap.
+ */
+export async function refundTutorQuota(messageId: string): Promise<void> {
+  try {
+    const { error } = await getAdminClient()
+      .from('tutor_messages')
+      .delete()
+      .eq('id', messageId);
+    if (error)
+      console.error('[tutor] quota_refund_failed', { code: error.code });
+  } catch (error) {
+    console.error('[tutor] quota_refund_failed', {
+      error: errorMessage(error),
+    });
+  }
+}
+
 /** Messages left in the rolling 24-hour window. Display only; the RPC enforces. */
 export async function tutorMessagesRemaining(
   supabase: NonNullable<SupabaseServerClient>,

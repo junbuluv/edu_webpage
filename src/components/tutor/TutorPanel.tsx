@@ -17,6 +17,7 @@ import {
   TUTOR_HISTORY_LIMIT,
   TUTOR_MAX_MESSAGE_CHARS,
 } from '@lib/tutor/limits';
+import { remainingFromMessages } from '@lib/tutor/remaining';
 
 interface Props {
   lessonSlug: string;
@@ -51,10 +52,12 @@ export default function TutorPanel({
   });
 
   const errorCode = error ? parseTutorError(error.message) : null;
-  const answered = messages.filter((m) => m.role === 'assistant').length;
-  // Display only: the server's daily cap is the authority.
+  // The server puts its exact count on each finished reply; the daily cap in
+  // the database stays the authority.
   const remaining =
-    errorCode === 'rate_limited' ? 0 : Math.max(0, initialRemaining - answered);
+    errorCode === 'rate_limited'
+      ? 0
+      : remainingFromMessages(messages, initialRemaining);
   const busy = status === 'submitted' || status === 'streaming';
   const canSend = !busy && remaining > 0 && input.trim() !== '';
 
