@@ -18,6 +18,7 @@ import {
   TUTOR_MAX_MESSAGE_CHARS,
 } from '@lib/tutor/limits';
 import { remainingFromMessages } from '@lib/tutor/remaining';
+import { awaitingFirstWords } from '@lib/tutor/thinking';
 
 interface Props {
   lessonSlug: string;
@@ -59,6 +60,7 @@ export default function TutorPanel({
       ? 0
       : remainingFromMessages(messages, initialRemaining);
   const busy = status === 'submitted' || status === 'streaming';
+  const thinking = awaitingFirstWords(status, messages);
   const canSend = !busy && remaining > 0 && input.trim() !== '';
 
   useEffect(() => {
@@ -137,6 +139,9 @@ export default function TutorPanel({
           const text = m.parts
             .map((p) => (p.type === 'text' ? p.text : ''))
             .join('');
+          // A reply with no words yet (still reasoning, or failed) shows the
+          // "Thinking…" line or the error below instead of an empty bubble.
+          if (m.role === 'assistant' && text.trim() === '') return null;
           return m.role === 'user' ? (
             <div
               key={m.id}
@@ -150,7 +155,7 @@ export default function TutorPanel({
             </div>
           );
         })}
-        {status === 'submitted' && <p className="text-ink-muted">Thinking…</p>}
+        {thinking && <p className="text-ink-muted">Thinking…</p>}
         {errorCode && (
           <div
             role="alert"
