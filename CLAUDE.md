@@ -184,7 +184,11 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   `auth.users`, and `auth.uid()`). Catches idempotency regressions
   (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
   It also exercises the upgrade path and the RLS suite
-  (`supabase/tests/security_hardening_rls.sql`). Currently **advisory**, not
+  (`supabase/tests/security_hardening_rls.sql`). That suite also runs on the
+  upgrade-path database (July fixture plus migrations), so it may only touch
+  objects that exist there; tables added since get their own suite run only
+  on the fresh schema (`supabase/tests/lesson_tutor_rls.sql`, step "Exercise
+  lesson tutor RLS"). Currently **advisory**, not
   blocking — flip to required in the ruleset when ready by adding
   `schema-roundtrip` to `required_status_checks`. Two traps this job has
   already sprung (both fixed 2026-08-26, PR #121):
