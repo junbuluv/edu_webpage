@@ -163,7 +163,7 @@ async function ask(
 ): Promise<string> {
   for (let attempt = 1; ; attempt++) {
     try {
-      const { text, usage } = await generateText({
+      const { text, usage, finishReason } = await generateText({
         model: gateway(modelId),
         instructions,
         prompt,
@@ -172,7 +172,11 @@ async function ask(
       });
       tally.input += usage.inputTokens ?? 0;
       tally.output += usage.outputTokens ?? 0;
-      return text;
+      // An empty reply usually means reasoning used up maxOutputTokens
+      // (finish reason "length"), which the production tutor shares.
+      return text.trim() === ''
+        ? `(empty reply; finish reason: ${finishReason}; output tokens: ${usage.outputTokens ?? '?'})`
+        : text;
     } catch (error) {
       // A rate limit says nothing about the model: wait a minute and retry.
       if (isRateLimitError(error) && attempt < 6) {

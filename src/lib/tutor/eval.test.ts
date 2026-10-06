@@ -38,12 +38,20 @@ const num: EvalQuestion = {
   points: 1,
 };
 
-test('formats lettered choices and the final-line format', () => {
+test('formats lettered choices and asks for a final ANSWER line', () => {
   const text = formatEvalQuestion(mc);
   assert.ok(text.includes('A. Up\nB. Down\nC. Flat'));
-  assert.ok(text.includes('ANSWER: B'));
-  assert.ok(formatEvalQuestion(ms).includes('ANSWER: A, C'));
-  assert.ok(formatEvalQuestion(num).includes('ANSWER: 12.5'));
+  for (const q of [mc, ms, num]) {
+    assert.match(formatEvalQuestion(q), /last line.*ANSWER:/i);
+  }
+});
+
+test('never shows a sample answer the model could copy', () => {
+  // gpt-5-mini copied "ANSWER: 12.5" / "ANSWER: B" from the old examples
+  // even after reasoning to a different answer.
+  for (const q of [mc, ms, num]) {
+    assert.doesNotMatch(formatEvalQuestion(q), /ANSWER:\s*[A-J0-9$-]/);
+  }
 });
 
 test('parses the last ANSWER line', () => {

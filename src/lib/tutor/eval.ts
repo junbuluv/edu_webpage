@@ -16,23 +16,26 @@ export type EvalQuestion = GradableQuestion & {
 
 const LETTERS = 'ABCDEFGHIJ';
 
+// Describes the ANSWER line instead of showing a sample one: with a sample
+// ("ANSWER: 12.5"), gpt-5-mini copied it verbatim after reasoning to a
+// different answer, which made the first two eval runs meaningless.
 export function formatEvalQuestion(q: EvalQuestion): string {
   const lines = [`Question: ${q.prompt}`];
   if (q.type === 'numeric') {
     lines.push(
       `Answer with a number${q.unit ? ` in ${q.unit}` : ''}.`,
-      'End with a final line exactly like: ANSWER: 12.5',
+      'On the last line, write ANSWER: followed by your number only, with no units.',
     );
   } else {
     (q.choices ?? []).forEach((c, i) => lines.push(`${LETTERS[i]}. ${c}`));
     lines.push(
       q.type === 'multi_select'
-        ? 'Select every correct choice. End with a final line exactly like: ANSWER: A, C'
-        : 'Select one choice. End with a final line exactly like: ANSWER: B',
+        ? 'Select every correct choice. On the last line, write ANSWER: followed by the letters of all correct choices, separated by commas.'
+        : 'Select one choice. On the last line, write ANSWER: followed by the letter of your choice.',
     );
   }
   lines.push(
-    'Keep any reasoning to three sentences or fewer before the final line.',
+    'Keep any reasoning to three sentences or fewer before that line.',
   );
   return lines.join('\n');
 }
