@@ -145,6 +145,17 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   BarFigure `color` takes `'chart-1'`…`'chart-4'` (or hex).
   `src/lib/theme/no-hardcoded-colors.test.ts` rejects hex literals in
   `src/components`.
+- Lesson tutor (2026-10-05): coach-mode chat on lesson pages for enrolled
+  students + staff of courses with `tutor: true` in
+  `src/content/courses/<slug>.json` (ECO 1002 only for now). Island
+  `src/components/tutor/TutorPanel.tsx` (mounted in `LessonLayout.astro`);
+  endpoint `src/pages/api/tutor/chat.ts` (AI SDK 7 via Vercel AI Gateway,
+  key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
+  `src/lib/tutor/` (request parsing, lesson-to-text, coach prompt, math
+  delimiters, error codes, eval scoring; unit-tested). Daily cap of 40 per
+  rolling 24 hours via the service-role RPC `consume_tutor_quota`; usage
+  rows in `tutor_messages` hold no message text. Model chosen with
+  `scripts/tutor-eval.ts`; reports in `quality_reports/tutor-eval/`
 
 ## Repository workflow
 
@@ -342,6 +353,13 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     backslash escapes inside math, so the `$` ends the span early and the
     rest of the sentence renders as garbled, unbreakable math. Write
     currency as text (`\$5`) or, inside math, as `\text{\textdollar}5`.
+23. **The tutor sees lesson MDX, never answer keys.** Its context is the
+    coach rules plus the current lesson's body (`lessonToContext`). Never add
+    quiz JSON, workshop JSON (`notes` hold answers), or archive content to
+    the tutor prompt, and never send names, emails, or student IDs to the
+    model or log message text. Coach mode is prompt-level only; the
+    answer-key boundary stays `toPublicQuestions()` plus server-side grading
+    (#17).
 
 ## Hosted Supabase gotchas
 
@@ -412,6 +430,9 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   secret, the
   prod runtime gets `undefined` and middleware redirects every authenticated
   request to `/auth/setup-required`.
+  `AI_GATEWAY_API_KEY` (optional; turns on the lesson tutor) also needs all
+  three scopes. Server env vars are inlined at build time, so redeploy after
+  changing it.
 - **Production auto-deploy from `main` is not reliable.** Several merges to
   `main` have failed to trigger production deploys (only preview-on-PR fires
   reliably). After merging an important change, verify a Vercel check-run
@@ -516,9 +537,10 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    it tests must be alias-free — that's why pure logic is split into
    `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
-   `theme/contrast.ts` / `chart/series-color.ts`,
+   `theme/contrast.ts` / `chart/series-color.ts` /
+   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 168 tests as of 2026-09-27.
+   when adding testable logic. 209 tests as of 2026-10-06.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
