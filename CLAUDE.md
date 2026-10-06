@@ -153,8 +153,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
   `src/lib/tutor/` (request parsing, lesson-to-text, coach prompt, math
   delimiters, error codes, eval scoring; unit-tested). Daily cap of 40 per
-  rolling 24 hours via the service-role RPC `consume_tutor_quota`; usage
-  rows in `tutor_messages` hold no message text. Model chosen with
+  rolling 24 hours via the service-role RPC `consume_tutor_quota` (a slot is
+  refunded only when the model fails before sending any text); usage rows in
+  `tutor_messages` hold no message text. Model chosen with
   `scripts/tutor-eval.ts`; reports in `quality_reports/tutor-eval/`
 
 ## Repository workflow
@@ -538,9 +539,9 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` /
-   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval}.ts`,
+   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 209 tests as of 2026-10-06.
+   when adding testable logic. 218 tests as of 2026-10-06.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
