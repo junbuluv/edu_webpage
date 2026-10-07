@@ -3,6 +3,9 @@
 **Date:** 2026-10-05
 **Status:** Approved in brainstorming; implementation plan at
 `docs/superpowers/plans/2026-10-05-eco-lesson-tutor.md`
+**Update 2026-10-06:** also on for FIN 3610 (`tutor: true`), sharing the
+40-message daily cap; `BarFigure` data now enters the lesson context as small
+tables.
 
 ## Goal
 
@@ -12,17 +15,17 @@ a few dollars per semester.
 
 ## Decisions (from interview)
 
-| Question | Decision |
-|---|---|
-| Where it lives | In the site, on lesson pages (not an external tool) |
-| How much it gives away | Coach: explains concepts; on numeric problems asks for an attempt, hints step by step, gives the final number only after an attempt; never states answers to graded-looking items |
-| Pilot course | ECO 1002 |
-| Who turns it on | The site owner, once per course (`tutor: true` in course JSON) |
-| Who can use it | Enrolled students and staff (`canViewCourse`) |
-| Model | Cheapest configuration passing the eval; `openai/gpt-5-mini` at reasoning effort `low`, chosen 2026-10-06 (ECO 100%, FIN numeric 10/10, coaching 10/10; `gpt-6-luna` untested until paid credits), via Vercel AI Gateway |
-| Eval pass bar | >= 90% of ECO quiz points, >= 8/10 FIN numeric, >= 8/10 coach transcripts |
-| Limits | 40 messages per student per rolling 24 hours; $25/month gateway key budget |
-| Stored data | Usage rows only (who, lesson, when, tokens); no message text |
+| Question               | Decision                                                                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Where it lives         | In the site, on lesson pages (not an external tool)                                                                                                                                                                      |
+| How much it gives away | Coach: explains concepts; on numeric problems asks for an attempt, hints step by step, gives the final number only after an attempt; never states answers to graded-looking items                                        |
+| Pilot course           | ECO 1002                                                                                                                                                                                                                 |
+| Who turns it on        | The site owner, once per course (`tutor: true` in course JSON)                                                                                                                                                           |
+| Who can use it         | Enrolled students and staff (`canViewCourse`)                                                                                                                                                                            |
+| Model                  | Cheapest configuration passing the eval; `openai/gpt-5-mini` at reasoning effort `low`, chosen 2026-10-06 (ECO 100%, FIN numeric 10/10, coaching 10/10; `gpt-6-luna` untested until paid credits), via Vercel AI Gateway |
+| Eval pass bar          | >= 90% of ECO quiz points, >= 8/10 FIN numeric, >= 8/10 coach transcripts                                                                                                                                                |
+| Limits                 | 40 messages per student per rolling 24 hours; $25/month gateway key budget                                                                                                                                               |
+| Stored data            | Usage rows only (who, lesson, when, tokens); no message text                                                                                                                                                             |
 
 ## Timing
 

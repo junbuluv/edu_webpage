@@ -147,19 +147,22 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/components`.
 - Lesson tutor (2026-10-05): coach-mode chat on lesson pages for enrolled
   students + staff of courses with `tutor: true` in
-  `src/content/courses/<slug>.json` (ECO 1002 only for now). Island
+  `src/content/courses/<slug>.json` (ECO 1002 and FIN 3610, one shared daily
+  cap). Island
   `src/components/tutor/TutorPanel.tsx` (mounted in `LessonLayout.astro`);
   endpoint `src/pages/api/tutor/chat.ts` (AI SDK 7 via Vercel AI Gateway,
   key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
-  `src/lib/tutor/` (request parsing, lesson-to-text, coach prompt, math
-  delimiters, error codes, eval scoring; unit-tested). Daily cap of 40 per
+  `src/lib/tutor/` (request parsing, lesson-to-text, which turns `BarFigure`
+  data into small tables, coach prompt, math delimiters, error codes, eval
+  scoring; unit-tested). Daily cap of 40 per
   rolling 24 hours via the service-role RPC `consume_tutor_quota` (every
   attempt counts, failed ones included; never add refunds, which let a client
   turn deliberate failures into free calls); usage rows in `tutor_messages`
   hold no message text. Model chosen with
   `scripts/tutor-eval.ts` (default `openai/gpt-5-mini` at effort `low`, chosen
   2026-10-06; the AI Gateway free tier allows only 5 requests a minute across
-  the team, so buy credits before students use it); its reports go to the gitignored
+  the team, so buy credits before students use it; `--course <slug>
+--coaching-only` screens one course's coaching); its reports go to the gitignored
   `quality_reports/tutor-eval/` (transcripts can contain quiz answers; never
   commit them)
 
