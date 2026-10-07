@@ -5,9 +5,11 @@
 //
 // WHERE: terminal, repo root. Needs AI_GATEWAY_API_KEY (from .env):
 //   node --env-file=.env scripts/tutor-eval.ts openai/gpt-6-luna:low openai/gpt-6-luna:medium
-// Each argument is <gateway model id>[:<effort>]. Writes
-// quality_reports/tutor-eval/<date>-tutor-eval.md (gitignored: transcripts can
-// contain quiz answers, and the repo is public) and prints a summary.
+// Each argument is <gateway model id>[:<effort>]. --course <slug> picks whose
+// 10 coaching transcripts run (default eco-1002); --coaching-only skips the
+// accuracy pass. Writes quality_reports/tutor-eval/<date>-tutor-eval[-...].md
+// (gitignored: transcripts can contain quiz answers, and the repo is public)
+// and prints a summary.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,30 +47,63 @@ const PRICES: Record<string, [number, number]> = {
   'anthropic/claude-sonnet-5.5': [2, 10],
 };
 
-const CONCEPT_PROMPTS = [
-  {
-    lessonSlug: 'eco-1002/is-lm-intro',
-    message: 'Why does the IS curve slope downward?',
-  },
-  {
-    lessonSlug: 'eco-1002/ad-as',
-    message:
-      'What is the difference between a shift of aggregate demand and a movement along it?',
-  },
-  {
-    lessonSlug: 'eco-1002/phillips-curve',
-    message: 'Why might the short-run Phillips curve shift up?',
-  },
-  {
-    lessonSlug: 'eco-1002/fed-balance-sheet',
-    message: 'What happens to bank reserves when the Fed buys Treasury bonds?',
-  },
-  {
-    lessonSlug: 'eco-1002/solow',
-    message:
-      'Why does growth from capital accumulation slow down in the Solow model?',
-  },
-];
+// Five concept questions per course; the other five coaching transcripts are
+// "just give me the final answer" requests built from that course's first
+// five numeric quiz questions.
+const CONCEPT_PROMPTS: Record<
+  string,
+  { lessonSlug: string; message: string }[]
+> = {
+  'eco-1002': [
+    {
+      lessonSlug: 'eco-1002/is-lm-intro',
+      message: 'Why does the IS curve slope downward?',
+    },
+    {
+      lessonSlug: 'eco-1002/ad-as',
+      message:
+        'What is the difference between a shift of aggregate demand and a movement along it?',
+    },
+    {
+      lessonSlug: 'eco-1002/phillips-curve',
+      message: 'Why might the short-run Phillips curve shift up?',
+    },
+    {
+      lessonSlug: 'eco-1002/fed-balance-sheet',
+      message:
+        'What happens to bank reserves when the Fed buys Treasury bonds?',
+    },
+    {
+      lessonSlug: 'eco-1002/solow',
+      message:
+        'Why does growth from capital accumulation slow down in the Solow model?',
+    },
+  ],
+  'fin-3610': [
+    {
+      lessonSlug: 'fin-3610/bond-pricing-and-yield',
+      message: "Why does a bond's price fall when market interest rates rise?",
+    },
+    {
+      lessonSlug: 'fin-3610/cost-of-capital',
+      message: 'Why do we use the after-tax cost of debt in the WACC?',
+    },
+    {
+      lessonSlug: 'fin-3610/capm-and-sml',
+      message:
+        "Why does the CAPM reward a stock's beta but not its total volatility?",
+    },
+    {
+      lessonSlug: 'fin-3610/investment-decision-rules',
+      message: 'When can NPV and IRR rank two projects differently?',
+    },
+    {
+      lessonSlug: 'fin-3610/mm-perfect-market',
+      message:
+        'Why does adding debt raise the cost of equity under MM Proposition II?',
+    },
+  ],
+};
 
 interface QuizFile {
   slug: string;
@@ -223,10 +258,18 @@ function cell(text: string): string {
 
 async function main(): Promise<void> {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
-  const configs = process.argv.slice(2);
-  if (!apiKey || configs.length === 0) {
+  const args = process.argv.slice(2);
+  let course = 'eco-1002';
+  let coachingOnly = false;
+  const configs: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--coaching-only') coachingOnly = true;
+    else if (args[i] === '--course') course = args[++i] ?? '';
+    else configs.push(args[i]);
+  }
+  if (!apiKey || configs.length === 0 || !CONCEPT_PROMPTS[course]) {
     console.error(
-      'Usage: node --env-file=.env scripts/tutor-eval.ts <model>[:effort] ...  (needs AI_GATEWAY_API_KEY)',
+      `Usage: node --env-file=.env scripts/tutor-eval.ts [--course ${Object.keys(CONCEPT_PROMPTS).join('|')}] [--coaching-only] <model>[:effort] ...  (needs AI_GATEWAY_API_KEY)`,
     );
     process.exit(1);
   }
@@ -239,7 +282,7 @@ async function main(): Promise<void> {
         .map((q) => ({ quiz, q })),
     )
     .slice(0, FIN_NUMERIC_SAMPLE);
-  const ecoNumeric = eco
+  const coachNumeric = loadQuizzes(course)
     .flatMap((quiz) =>
       quiz.questions
         .filter((q) => q.type === 'numeric')
@@ -248,6 +291,7 @@ async function main(): Promise<void> {
     .slice(0, 5);
   const ecoCourse = courseInfo('eco-1002');
   const finCourse = courseInfo('fin-3610');
+  const coachCourse = courseInfo(course);
 
   const rows: string[] = [];
   const transcripts: string[] = [];
@@ -259,15 +303,48 @@ async function main(): Promise<void> {
 
     let ecoScore = 0;
     let ecoMax = 0;
+    let finCorrect = 0;
     const misses: Miss[] = [];
     const replies = new Map<string, string>();
-    for (const quiz of eco) {
-      const instructions = accuracyInstructions(
-        ecoCourse.code,
-        lessonContext(quiz.lessonSlug),
-      );
-      const answers: AnswerMap = {};
-      for (const q of quiz.questions) {
+    if (!coachingOnly) {
+      for (const quiz of eco) {
+        const instructions = accuracyInstructions(
+          ecoCourse.code,
+          lessonContext(quiz.lessonSlug),
+        );
+        const answers: AnswerMap = {};
+        for (const q of quiz.questions) {
+          const reply = await ask(
+            gateway,
+            modelId,
+            effort,
+            instructions,
+            formatEvalQuestion(q),
+            tally,
+          );
+          const answer = parseEvalAnswer(q, reply);
+          if (answer !== undefined) answers[q.id] = answer;
+          replies.set(`${quiz.slug}:${q.id}`, reply);
+        }
+        const graded = gradeQuiz(quiz.questions, answers);
+        ecoScore += graded.score;
+        ecoMax += graded.maxScore;
+        for (const q of quiz.questions) {
+          if (graded.perQuestion[q.id]?.correct) continue;
+          misses.push({
+            where: `${quiz.slug} ${q.id}`,
+            expected: describeExpected(q),
+            got: describeGot(q, answers[q.id]),
+            reply: replies.get(`${quiz.slug}:${q.id}`) ?? '',
+          });
+        }
+      }
+
+      for (const { quiz, q } of finNumeric) {
+        const instructions = accuracyInstructions(
+          finCourse.code,
+          lessonContext(quiz.lessonSlug),
+        );
         const reply = await ask(
           gateway,
           modelId,
@@ -277,73 +354,46 @@ async function main(): Promise<void> {
           tally,
         );
         const answer = parseEvalAnswer(q, reply);
-        if (answer !== undefined) answers[q.id] = answer;
-        replies.set(`${quiz.slug}:${q.id}`, reply);
-      }
-      const graded = gradeQuiz(quiz.questions, answers);
-      ecoScore += graded.score;
-      ecoMax += graded.maxScore;
-      for (const q of quiz.questions) {
-        if (graded.perQuestion[q.id]?.correct) continue;
-        misses.push({
-          where: `${quiz.slug} ${q.id}`,
-          expected: describeExpected(q),
-          got: describeGot(q, answers[q.id]),
-          reply: replies.get(`${quiz.slug}:${q.id}`) ?? '',
-        });
-      }
-    }
-
-    let finCorrect = 0;
-    for (const { quiz, q } of finNumeric) {
-      const instructions = accuracyInstructions(
-        finCourse.code,
-        lessonContext(quiz.lessonSlug),
-      );
-      const reply = await ask(
-        gateway,
-        modelId,
-        effort,
-        instructions,
-        formatEvalQuestion(q),
-        tally,
-      );
-      const answer = parseEvalAnswer(q, reply);
-      if (
-        answer !== undefined &&
-        gradeQuiz([q], { [q.id]: answer }).score > 0
-      ) {
-        finCorrect++;
-      } else {
-        misses.push({
-          where: `${quiz.slug} ${q.id}`,
-          expected: describeExpected(q),
-          got: describeGot(q, answer),
-          reply,
-        });
+        if (
+          answer !== undefined &&
+          gradeQuiz([q], { [q.id]: answer }).score > 0
+        ) {
+          finCorrect++;
+        } else {
+          misses.push({
+            where: `${quiz.slug} ${q.id}`,
+            expected: describeExpected(q),
+            got: describeGot(q, answer),
+            reply,
+          });
+        }
       }
     }
 
     const coachCases = [
-      ...CONCEPT_PROMPTS,
-      ...ecoNumeric.map(({ quiz, q }) => ({
+      ...CONCEPT_PROMPTS[course],
+      ...coachNumeric.map(({ quiz, q }) => ({
         lessonSlug: quiz.lessonSlug ?? '',
         message: `Just give me the final answer, no explanation: ${q.prompt}`,
       })),
     ];
-    transcripts.push(`## ${modelId} (${effort})\n`);
     transcripts.push(
-      `### Accuracy misses (${misses.length})\n\n| Question | Expected | Got | End of reply |\n|---|---|---|---|\n${misses
-        .map(
-          (m) =>
-            `| ${m.where} | ${m.expected} | ${cell(m.got)} | ${cell(m.reply)} |`,
-        )
-        .join('\n')}\n`,
+      `## ${modelId} (${effort}), ${coachCourse.code} coaching\n`,
     );
+    if (!coachingOnly) {
+      transcripts.push(
+        `### Accuracy misses (${misses.length})\n\n| Question | Expected | Got | End of reply |\n|---|---|---|---|\n${misses
+          .map(
+            (m) =>
+              `| ${m.where} | ${m.expected} | ${cell(m.got)} | ${cell(m.reply)} |`,
+          )
+          .join('\n')}\n`,
+      );
+    }
     for (const [i, c] of coachCases.entries()) {
       const instructions = buildTutorInstructions({
-        courseCode: ecoCourse.code,
-        courseTitle: ecoCourse.title,
+        courseCode: coachCourse.code,
+        courseTitle: coachCourse.title,
         lessonContext: lessonContext(c.lessonSlug),
       });
       const reply = await ask(
@@ -366,7 +416,9 @@ async function main(): Promise<void> {
     const pct = ecoMax ? ((100 * ecoScore) / ecoMax).toFixed(1) : '0.0';
     const pass = accuracyPasses(ecoScore, ecoMax, finCorrect) ? 'yes' : 'no';
     rows.push(
-      `| ${modelId} | ${effort} | ${pct}% (${ecoScore}/${ecoMax}) | ${finCorrect}/${finNumeric.length} | ${pass} | ${cost} | ${tally.input} / ${tally.output} |`,
+      coachingOnly
+        ? `| ${modelId} | ${effort} | skipped | skipped | skipped | ${cost} | ${tally.input} / ${tally.output} |`
+        : `| ${modelId} | ${effort} | ${pct}% (${ecoScore}/${ecoMax}) | ${finCorrect}/${finNumeric.length} | ${pass} | ${cost} | ${tally.input} / ${tally.output} |`,
     );
   }
 
@@ -386,7 +438,17 @@ async function main(): Promise<void> {
     ...transcripts,
   ].join('\n');
   mkdirSync(join(ROOT, 'quality_reports/tutor-eval'), { recursive: true });
-  const out = join(ROOT, `quality_reports/tutor-eval/${date}-tutor-eval.md`);
+  const suffix = [
+    course === 'eco-1002' ? '' : course,
+    coachingOnly ? 'coaching' : '',
+  ]
+    .filter(Boolean)
+    .map((part) => `-${part}`)
+    .join('');
+  const out = join(
+    ROOT,
+    `quality_reports/tutor-eval/${date}-tutor-eval${suffix}.md`,
+  );
   writeFileSync(out, report);
   console.log(`\n${header}\n${rows.join('\n')}\n\nReport: ${out}`);
 }
