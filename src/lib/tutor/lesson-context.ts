@@ -1,9 +1,10 @@
 // Turns a lesson's raw MDX body (CollectionEntry<'lessons'>.body) into plain
 // text for the tutor's instructions. Pure and alias-free. Imports are dropped;
-// <Figure> becomes its caption; other components become
-// "[Interactive: Name]" plus any prose found in their string props
-// (GuidedReader keeps its steps); children of components with closing tags
-// stay in place. Prose and $…$ math are kept verbatim. Components are only
+// <Figure> becomes its caption; <BarFigure> becomes a small table of its
+// literal data; other components become "[Interactive: Name]" plus any prose
+// found in their string props (GuidedReader keeps its steps); children of
+// components with closing tags stay in place. Prose and $…$ math are kept
+// verbatim. Components are only
 // recognized at the start of a line, so math like $r<R$ is never mistaken
 // for a tag.
 
@@ -33,6 +34,8 @@ interface ScannedTag {
   selfClosing: boolean;
   strings: string[];
   attrs: Record<string, string>;
+  // Raw source of {expression} props, e.g. BarFigure's data={[…]}.
+  exprs: Record<string, string>;
 }
 
 function findStringEnd(src: string, open: number): number {
@@ -55,6 +58,9 @@ function scanTag(src: string, start: number): ScannedTag | null {
   const name = nameMatch[1];
   const strings: string[] = [];
   const attrs: Record<string, string> = {};
+  const exprs: Record<string, string> = {};
+  let exprAttr: string | null = null;
+  let exprStart = 0;
   let depth = 0;
   let i = start + nameMatch[0].length;
   while (i < src.length) {
@@ -74,12 +80,23 @@ function scanTag(src: string, start: number): ScannedTag | null {
       i = close + 1;
       continue;
     }
-    if (ch === '{') depth++;
-    else if (ch === '}') depth--;
-    else if (depth === 0 && ch === '/' && src[i + 1] === '>') {
-      return { name, end: i + 2, selfClosing: true, strings, attrs };
+    if (ch === '{') {
+      if (depth === 0) {
+        const before = src.slice(Math.max(start, i - 64), i);
+        exprAttr = /([A-Za-z_][\w:-]*)\s*=\s*$/.exec(before)?.[1] ?? null;
+        exprStart = i + 1;
+      }
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0 && exprAttr) {
+        exprs[exprAttr] = src.slice(exprStart, i);
+        exprAttr = null;
+      }
+    } else if (depth === 0 && ch === '/' && src[i + 1] === '>') {
+      return { name, end: i + 2, selfClosing: true, strings, attrs, exprs };
     } else if (depth === 0 && ch === '>') {
-      return { name, end: i + 1, selfClosing: false, strings, attrs };
+      return { name, end: i + 1, selfClosing: false, strings, attrs, exprs };
     }
     i++;
   }
@@ -93,10 +110,82 @@ function stripHtml(s: string): string {
     .trim();
 }
 
+const MAX_CHART_ROWS = 60;
+
+// The {…} objects directly inside an array literal such as data={[{…}, {…}]}.
+function objectLiterals(raw: string): string[] {
+  const objects: string[] = [];
+  let depth = 0;
+  let begin = -1;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      const close = findStringEnd(raw, i);
+      if (close < 0) return objects;
+      i = close;
+    } else if (ch === '{' || ch === '[') {
+      if (ch === '{' && depth === 1) begin = i;
+      depth++;
+    } else if (ch === '}' || ch === ']') {
+      depth--;
+      if (ch === '}' && depth === 1 && begin >= 0) {
+        objects.push(raw.slice(begin + 1, i));
+        begin = -1;
+      }
+    }
+  }
+  return objects;
+}
+
+// `key: 'text'` / `key: "text"` / `key: 12.5` pairs; other values are skipped.
+const LITERAL_FIELD =
+  /([A-Za-z_$][\w$]*)\s*:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?))/g;
+
+function literalFields(source: string): Record<string, string> {
+  const fields: Record<string, string> = {};
+  for (const m of source.matchAll(LITERAL_FIELD)) {
+    fields[m[1]] = m[2] ?? m[3] ?? m[4] ?? '';
+  }
+  return fields;
+}
+
+// BarFigure's numbers live in the MDX (data, xKey, series), so the tutor gets
+// them as rows instead of only the caption. Null when the data isn't a
+// literal array, so the caller falls back to the generic summary.
+function describeChart(tag: ScannedTag): string | null {
+  const { xKey, yAxisLabel, caption, credit } = tag.attrs;
+  const { data, series: seriesSource } = tag.exprs;
+  if (!xKey || !data || !seriesSource) return null;
+  const series = objectLiterals(seriesSource)
+    .map(literalFields)
+    .filter((s) => s.key);
+  const rows = objectLiterals(data).map(literalFields);
+  if (series.length === 0 || rows.length === 0) return null;
+  const lines = [
+    `[Chart${yAxisLabel ? ` (${yAxisLabel})` : ''}]`,
+    [xKey, ...series.map((s) => s.name || s.key)].join(' | '),
+    ...rows
+      .slice(0, MAX_CHART_ROWS)
+      .map((row) =>
+        [row[xKey] ?? '', ...series.map((s) => row[s.key] ?? '')].join(' | '),
+      ),
+  ];
+  if (rows.length > MAX_CHART_ROWS) {
+    lines.push(`(${rows.length - MAX_CHART_ROWS} more rows)`);
+  }
+  if (caption) lines.push(caption);
+  if (credit) lines.push(`Source: ${credit}`);
+  return lines.join('\n');
+}
+
 function describeComponent(tag: ScannedTag): string {
   if (tag.name === 'Figure') {
     const text = tag.attrs.caption ?? tag.attrs.alt;
     return text ? `[Figure: ${text}]` : '[Figure]';
+  }
+  if (tag.name === 'BarFigure') {
+    const chart = describeChart(tag);
+    if (chart) return chart;
   }
   // Prose-like props only: long enough and containing a space (skips slugs,
   // paths, and ids such as lessonSlug="eco-1002/is-lm-guided").

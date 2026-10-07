@@ -127,3 +127,47 @@ test('drops self-check answer explanations from component props', () => {
   );
   assert.ok(!out.includes('A tax cut raises spending at every r'));
 });
+
+test('renders BarFigure data as a compact table the tutor can read', () => {
+  const body = [
+    '<BarFigure',
+    '  client:load',
+    '  data={[',
+    "    { fy: 'FY14', ocf: 59.7, capex: 9.6 },",
+    "    { fy: 'FY15', ocf: 81.3, capex: 11.2 },",
+    '  ]}',
+    '  xKey="fy"',
+    '  series={[',
+    "    { key: 'ocf', name: 'Operating cash flow ($B)', color: 'chart-1' },",
+    "    { key: 'capex', name: 'CapEx ($B)', color: 'chart-2' },",
+    '  ]}',
+    '  yAxisLabel="USD billions"',
+    '  caption="Apple operating cash flow and capital expenditures."',
+    '  credit="Apple 10-K filings via SEC EDGAR"',
+    '/>',
+    '',
+    'After.',
+  ].join('\n');
+  const out = lessonToContext(body, meta);
+  assert.ok(
+    out.includes(
+      '[Chart (USD billions)]\nfy | Operating cash flow ($B) | CapEx ($B)\nFY14 | 59.7 | 9.6\nFY15 | 81.3 | 11.2',
+    ),
+  );
+  assert.ok(
+    out.includes('Apple operating cash flow and capital expenditures.'),
+  );
+  assert.ok(out.includes('Source: Apple 10-K filings via SEC EDGAR'));
+  assert.ok(!out.includes('chart-1'));
+  assert.ok(!out.includes('client:load'));
+  assert.ok(out.includes('After.'));
+});
+
+test('a chart whose data is not a literal keeps the caption-only summary', () => {
+  const out = lessonToContext(
+    '<BarFigure data={rows} xKey="fy" series={cols} caption="Free cash flow by fiscal year." />\n',
+    meta,
+  );
+  assert.ok(out.includes('[Interactive: BarFigure]'));
+  assert.ok(out.includes('Free cash flow by fiscal year.'));
+});
