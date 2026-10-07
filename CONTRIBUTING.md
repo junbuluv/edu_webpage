@@ -634,20 +634,27 @@ canonical place for Astro build-time settings.
 1. Vercel dashboard → **Add New → Project** → import `junbuluv/edu_webpage`.
 2. Framework preset auto-detects as **Astro**. Accept defaults.
 3. Project Settings → **Environment Variables** → add the following six. Give
-   every variable except `PUBLIC_SITE_URL` all three scopes (Production,
-   Preview, Development). Scope `PUBLIC_SITE_URL` to Production; previews use
-   Vercel's deployment URL automatically. If Production isn't checked on a
-   Supabase var, the prod runtime gets `undefined` and every authenticated
-   request redirects to `/auth/setup-required`:
+   the three Supabase vars and `PII_HMAC_SECRET` Production and Preview
+   scopes; leave Development off, since local dev reads `.env`. Scope
+   `PUBLIC_SITE_URL` and `CRON_SECRET` to Production: previews use Vercel's
+   deployment URL automatically, and Vercel runs cron jobs only on
+   production. If Production isn't checked on a Supabase var, the prod
+   runtime gets `undefined` and every authenticated request redirects to
+   `/auth/setup-required`:
 
-   | Variable                    | Value                                   | Notes                                        |
-   | --------------------------- | --------------------------------------- | -------------------------------------------- |
-   | `PUBLIC_SUPABASE_URL`       | Supabase project URL                    | From Supabase → Settings → API               |
-   | `PUBLIC_SUPABASE_ANON_KEY`  | anon public JWT (`eyJ...`)              | Same panel                                   |
-   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`)             | Mark as Sensitive                            |
-   | `PUBLIC_SITE_URL`           | `https://<your-deploy>.vercel.app`      | Production scope; update for custom domains  |
-   | `PII_HMAC_SECRET`           | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive                            |
-   | `CRON_SECRET`               | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive; secures the daily cleanup |
+   | Variable                    | Value                                   | Notes                                                         |
+   | --------------------------- | --------------------------------------- | ------------------------------------------------------------- |
+   | `PUBLIC_SUPABASE_URL`       | Supabase project URL                    | From Supabase → Settings → API                                |
+   | `PUBLIC_SUPABASE_ANON_KEY`  | anon public JWT (`eyJ...`)              | Same panel                                                    |
+   | `SUPABASE_SERVICE_ROLE_KEY` | service_role JWT (`eyJ...`)             | Mark as Sensitive                                             |
+   | `PUBLIC_SITE_URL`           | `https://<your-deploy>.vercel.app`      | Production scope; update for custom domains                   |
+   | `PII_HMAC_SECRET`           | 64-char hex from `openssl rand -hex 32` | Mark as Sensitive                                             |
+   | `CRON_SECRET`               | 64-char hex from `openssl rand -hex 32` | Production only; Mark as Sensitive; secures the daily cleanup |
+
+   Optional: `RESEND_API_KEY` (Production; admin alert email, fail-open) and
+   `AI_GATEWAY_API_KEY` (Production and Preview, Sensitive; turns on the
+   lesson tutor). Server env vars are inlined at build time, so redeploy
+   after changing any of them.
 
 4. Update Supabase Authentication → **URL Configuration**:
    - **Site URL**: same as `PUBLIC_SITE_URL`
@@ -687,12 +694,15 @@ canonical place for Astro build-time settings.
 
 Pushes to `main` should auto-deploy via the GitHub integration, but in
 practice this has been unreliable — several merges have failed to fire
-a production deploy. Verify with:
+a production deploy. Vercel reports each deploy to GitHub as a commit
+status named `Vercel`, not a check-run, so a check-run query comes back
+empty even after a good deploy. Verify with:
 
 ```bash
-# Did Vercel actually deploy the latest main commit?
-gh api repos/junbuluv/edu_webpage/commits/$(git rev-parse main)/check-runs \
-  --jq '.check_runs[] | select(.name | startswith("Vercel"))'
+# Did Vercel actually deploy the latest main commit? Expect "success".
+git fetch -q origin
+gh api repos/junbuluv/edu_webpage/commits/$(git rev-parse origin/main)/status \
+  --jq '.statuses[] | select(.context == "Vercel") | .state'
 ```
 
 If empty: Vercel didn't pick up the push. Force a redeploy via Vercel UI:
