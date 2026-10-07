@@ -12,7 +12,7 @@ insert into auth.users (
   ('00000000-0000-0000-0000-000000000107', 'rls-student-demoted-owner@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000201', 'rls-instructor-eco@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000202', 'rls-instructor-fin@example.test', now(), 'authenticated', 'authenticated', now(), now()),
-  ('00000000-0000-0000-0000-000000000203', 'rls-ta@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000203', 'rls-unassigned-instructor@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000204', 'rls-admin@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000205', 'rls-inactive-owner@example.test', now(), 'authenticated', 'authenticated', '1970-01-01', '1970-01-01'),
   ('00000000-0000-0000-0000-000000000206', 'rls-inactive-admin@example.test', now(), 'authenticated', 'authenticated', '1970-01-01', '1970-01-01'),
@@ -32,7 +32,7 @@ insert into public.profiles (id, role) values
   ('00000000-0000-0000-0000-000000000107', 'student'),
   ('00000000-0000-0000-0000-000000000201', 'instructor'),
   ('00000000-0000-0000-0000-000000000202', 'instructor'),
-  ('00000000-0000-0000-0000-000000000203', 'ta'),
+  ('00000000-0000-0000-0000-000000000203', 'instructor'),
   ('00000000-0000-0000-0000-000000000204', 'admin'),
   ('00000000-0000-0000-0000-000000000205', 'instructor'),
   ('00000000-0000-0000-0000-000000000206', 'admin'),
@@ -1023,32 +1023,32 @@ declare
 begin
   select count(*) into visible_rows from public.teaching_assignments;
   if visible_rows <> 0 then
-    raise exception 'TA teaching-assignment read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor teaching-assignment read expected 0 rows, got %', visible_rows;
   end if;
 
   select count(*) into visible_rows from public.enrollments;
   if visible_rows <> 0 then
-    raise exception 'TA enrollment read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor enrollment read expected 0 rows, got %', visible_rows;
   end if;
 
   select count(*) into visible_rows from public.offering_lesson_progress;
   if visible_rows <> 0 then
-    raise exception 'TA offering progress read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor offering progress read expected 0 rows, got %', visible_rows;
   end if;
 
   select count(*) into visible_rows from public.quiz_attempts;
   if visible_rows <> 0 then
-    raise exception 'TA quiz read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor quiz read expected 0 rows, got %', visible_rows;
   end if;
 
   select count(*) into visible_rows from public.workshop_attendance;
   if visible_rows <> 0 then
-    raise exception 'TA attendance read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor attendance read expected 0 rows, got %', visible_rows;
   end if;
 
   select count(*) into visible_rows from public.workshop_administrations;
   if visible_rows <> 0 then
-    raise exception 'TA workshop read expected 0 rows, got %', visible_rows;
+    raise exception 'unassigned instructor workshop read expected 0 rows, got %', visible_rows;
   end if;
 end $$;
 
@@ -1627,7 +1627,7 @@ begin
   ) values (
     '00000000-0000-0000-0000-000000000415',
     '00000000-0000-0000-0000-000000000203',
-    'eco-1002', 'exam', 'TA lifecycle fixture', 'fall', 2026, '{}',
+    'eco-1002', 'exam', 'Unassigned instructor lifecycle fixture', 'fall', 2026, '{}',
     '00000000-0000-0000-0000-000000000203/eco-1002/415/file.pdf',
     'file.pdf', 'application/pdf', 128, false, 'pending',
     now() + interval '1 hour'
@@ -1636,7 +1636,7 @@ begin
     update public.profiles
        set role = 'student'
      where id = '00000000-0000-0000-0000-000000000203';
-    raise exception 'TA with owned rows was directly demoted';
+    raise exception 'unassigned instructor with owned rows was directly demoted';
   exception when check_violation then null;
   end;
   delete from public.archive_paper_upload_intents
