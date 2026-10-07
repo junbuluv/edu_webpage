@@ -86,13 +86,27 @@ open with CI green.
     signed-in check is the owner's.
 - The owner ran that signed-in check on the rebuilt preview and reported it
   working, which closes step 6.
-- Found, not part of this PR: the project has no `CRON_SECRET`, so the daily
-  `/api/cron/archive-upload-cleanup` run is rejected with 401.
+- #126 merged as `cee5e1b` (squash). Vercel built production on its own;
+  baruchfinance.com served that build, and the signed-out checks passed (the
+  ECO lesson loads with no tutor button; `/api/tutor/chat` answers 401).
+- Follow-up fixes in a docs PR after the merge:
+  - The project had no `CRON_SECRET`, so every daily
+    `/api/cron/archive-upload-cleanup` run had been rejected with 401.
+    Read-only queries first showed the first run would delete nothing
+    (production had no archive papers or upload intents yet). The secret is
+    now a sensitive Production var with a copy in the owner's local `.env`;
+    production was rebuilt, and the endpoint answered 401 without the secret
+    and 200 with it, with nothing to clean.
+  - CLAUDE.md, CONTRIBUTING.md and README.md said the secrets need all three
+    scopes, but none uses Development, and `CRON_SECRET` belongs on
+    Production only. The documented deploy check queried check-runs, but
+    Vercel reports a commit status, so it false-alarmed even after the #126
+    deploy succeeded. All three docs are corrected.
 
 ## Open items for the owner
 
-1. Merge #126, check the production deploy (CLAUDE.md gotcha) and smoke-test
-   it signed out, sync local `main`, and tell the ECO 1002 instructors.
+1. Run one signed-in check on production (an ECO 1002 reply streams), then
+   tell the ECO 1002 instructors.
 2. Rotate the gateway key (it was pasted in chat) and buy credits before
    students arrive (free tier: 5 requests a minute across the team).
 3. Deferred minors: the counter fails open on a read error; aborted streams
