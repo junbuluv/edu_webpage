@@ -1,13 +1,13 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin, isInstructor } from '@lib/roles';
+import { isAdmin, isStaff } from '@lib/roles';
 import { isCourseSlug, type CourseSlug } from '@lib/courses';
 
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
 const role = Astro.locals.profile?.role ?? 'student';
-if (!isInstructor(role)) return new Response(null, { status: 403 });
+if (!isStaff(role)) return new Response(null, { status: 403 });
 
 // Admins see all courses; instructors see courses with active assignments.
 const allCoursesCollection = await getCollection('courses');

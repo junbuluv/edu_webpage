@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isAdmin, isInstructor } from '@lib/roles';
+import { isAdmin, isStaff } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import {
   canManageClass,
@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       headers: { Location: '/auth/signin?next=/instructor/classes' },
     });
   }
-  if (!isInstructor(role)) {
+  if (!isStaff(role)) {
     return new Response(null, { status: 303, headers: { Location: '/' } });
   }
   const form = await request.formData();

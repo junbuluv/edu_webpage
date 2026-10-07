@@ -9,7 +9,7 @@ import { canViewCourse } from '@lib/archive/access';
 import { fetchArchiveVideosForLesson } from '@lib/archive/db';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
 import { normalizeLessonSlug } from '@lib/archive/build';
-import { isContentManager } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import TutorPanel from '@components/tutor/TutorPanel';
 import { getTutorCourse } from '@lib/tutor/access';
 import { TUTOR_DAILY_LIMIT } from '@lib/tutor/limits';
@@ -205,7 +205,7 @@ if (Astro.locals.user && Astro.locals.supabase) {
                 ))}
               </ul>
             )}
-            {isContentManager(role) && (
+            {isStaff(role) && (
               <p class="mt-3 text-sm">
                 <a
                   href={`/instructor/archive?course=${data.course}&lesson=${lessonSlug}`}

@@ -13,7 +13,7 @@ import {
   validatePaperUploadMetadata,
 } from '@lib/archive/paper-upload';
 import { logDisclosureSafe } from '@lib/audit';
-import { isContentManager } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import { getAdminClient } from '@lib/supabase/admin';
 
 const MAX_JSON_BYTES = 32 * 1024;
@@ -204,7 +204,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const role = locals.profile?.role ?? 'student';
 
   if (!user) return json({ ok: false, reason: 'unauthenticated' }, 401);
-  if (!isContentManager(role)) {
+  if (!isStaff(role)) {
     return json({ ok: false, reason: 'forbidden' }, 403);
   }
 

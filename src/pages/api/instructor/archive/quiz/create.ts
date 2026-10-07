@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isContentManager } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
@@ -36,7 +36,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const role = locals.profile?.role ?? 'student';
 
   if (!user) return err('unauthenticated');
-  if (!isContentManager(role)) return err('forbidden');
+  if (!isStaff(role)) return err('forbidden');
 
   let form: FormData;
   try {

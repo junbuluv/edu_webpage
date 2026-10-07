@@ -2,7 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isContentManager, isAdmin } from '@lib/roles';
+import { isStaff, isAdmin } from '@lib/roles';
 import { instructorOwnsCourse } from '@lib/archive/access';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import ArchiveQuizBuilder, {
@@ -18,7 +18,7 @@ if (!user) {
     `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
   );
 }
-if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+if (!isStaff(role)) return Astro.redirect('/instructor/archive');
 if (!id) return new Response(null, { status: 404 });
 
 const admin = getAdminClient();

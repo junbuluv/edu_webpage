@@ -12,7 +12,7 @@ import {
   type CourseDashboardData,
 } from '@lib/dashboard';
 import { loadStaffMetrics, parseRange } from '@lib/staff-dashboard';
-import { isInstructor } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import type { CourseSlug } from '@lib/courses';
 
 const user = Astro.locals.user!;
@@ -38,7 +38,7 @@ try {
 }
 
 // Management metrics follow workshop RLS: instructors and admins only.
-const viewerCanManage = isInstructor(Astro.locals.profile?.role);
+const viewerCanManage = isStaff(Astro.locals.profile?.role);
 const range = parseRange(Astro.url.searchParams.get('range'));
 
 // A staff-access request made at signup, still awaiting an admin decision.
