@@ -431,29 +431,38 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
 
 - **Env vars must be set manually in Vercel UI.** The Supabase-Vercel
   Integration is a separate install from the Supabase-GitHub Integration
-  and most setups have only the latter. Five vars need **all three environment
-  scopes** (Production, Preview, Development): `PUBLIC_SUPABASE_URL`,
-  `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PII_HMAC_SECRET`,
-  and `CRON_SECRET`. Set `PUBLIC_SITE_URL` to the canonical URL in Production;
-  Preview may leave it unset because auth callbacks fall back to Vercel's
-  deployment URL. If Production scope is unchecked on any required runtime
-  secret, the
-  prod runtime gets `undefined` and middleware redirects every authenticated
-  request to `/auth/setup-required`.
-  `AI_GATEWAY_API_KEY` (optional; turns on the lesson tutor) is a sensitive
-  var on Production and Preview only, since Vercel doesn't allow sensitive
-  vars in Development (local dev reads `.env`). Server env vars are inlined
-  at build time, so redeploy after changing it. Vercel CLI 54 in agent mode
-  loops on `git_branch_required` when adding a Preview var for all
-  branches: add Production first, then add Preview to that entry's targets
-  (dashboard edit, or a REST `PATCH` of its `target`).
+  and most setups have only the latter. Four runtime secrets need
+  **Production and Preview**: `PUBLIC_SUPABASE_URL`,
+  `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
+  `PII_HMAC_SECRET`. No var uses Development: local dev reads `.env`, and
+  nothing here runs `vercel dev` or `vercel env pull`. If Production scope is
+  unchecked on any of the four, the prod runtime gets `undefined` and
+  middleware redirects every authenticated request to
+  `/auth/setup-required`. Set `PUBLIC_SITE_URL` to the canonical URL in
+  Production; Preview may leave it unset because auth callbacks fall back to
+  Vercel's deployment URL. Production only: `CRON_SECRET` (sensitive, 16+
+  characters; Vercel sends it as a bearer token to the daily
+  `/api/cron/archive-upload-cleanup`, which rejects every run without it)
+  and `RESEND_API_KEY` (admin alert email, fail-open). `AI_GATEWAY_API_KEY`
+  (optional; turns on the lesson tutor) is a sensitive var on Production and
+  Preview only, since Vercel doesn't allow sensitive vars in Development.
+  Server env vars are inlined at build time, so redeploy after changing any
+  of them. Vercel CLI 54 in agent mode loops on `git_branch_required` when
+  adding a Preview var for all branches: add Production first, then add
+  Preview to that entry's targets (dashboard edit, or a REST `PATCH` of its
+  `target`).
 - **Production auto-deploy from `main` is not reliable.** Several merges to
   `main` have failed to trigger production deploys (only preview-on-PR fires
-  reliably). After merging an important change, verify a Vercel check-run
-  appears for that SHA via
-  `gh api repos/junbuluv/edu_webpage/commits/<sha>/check-runs --jq '.check_runs[] | select(.name | startswith("Vercel"))'`;
-  if empty, force-redeploy via Vercel UI: Deployments → `⋯` on latest →
-  Redeploy → uncheck "Use existing Build Cache".
+  reliably). After merging an important change, confirm Vercel deployed that
+  SHA. Vercel reports to GitHub as a commit status named `Vercel` (plus a
+  GitHub Deployment), not a check-run, so a check-run query comes back empty
+  even after a good deploy. Check
+  `gh api repos/junbuluv/edu_webpage/commits/<sha>/status --jq '.statuses[] | select(.context == "Vercel") | .state'`
+  (expect `success`) or
+  `vercel ls edu-webpage --scope junbuluvs-projects -m githubCommitSha=<sha>`.
+  If neither shows a production deploy, force-redeploy via Vercel UI:
+  Deployments → `⋯` on latest → Redeploy → uncheck "Use existing Build
+  Cache", or deploy from the CLI (next bullet).
 - **Deploying via CLI works and is the reliable path.** The repo is linked
   (gitignored `.vercel/`) to the canonical project **`edu-webpage`** (prod
   alias `edu-webpage-fawn.vercel.app`); `vercel deploy --prod --yes` ships the

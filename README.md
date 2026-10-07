@@ -97,12 +97,14 @@ Production and Preview:
 
 | Var                         | Scope                                                                             |
 | --------------------------- | --------------------------------------------------------------------------------- |
-| `PUBLIC_SUPABASE_URL`       | Production + Preview + Development                                                |
-| `PUBLIC_SUPABASE_ANON_KEY`  | Production + Preview + Development                                                |
-| `SUPABASE_SERVICE_ROLE_KEY` | Production + Preview + Development; sensitive                                     |
+| `PUBLIC_SUPABASE_URL`       | Production + Preview                                                              |
+| `PUBLIC_SUPABASE_ANON_KEY`  | Production + Preview                                                              |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production + Preview; sensitive                                                   |
 | `PUBLIC_SITE_URL`           | Production = your prod URL; Preview may be empty (uses the Vercel/request origin) |
-| `PII_HMAC_SECRET`           | Production + Preview + Development; sensitive                                     |
-| `CRON_SECRET`               | Random 16+ character value; sensitive                                             |
+| `PII_HMAC_SECRET`           | Production + Preview; sensitive                                                   |
+| `CRON_SECRET`               | Production only; random 16+ character value; sensitive                            |
+| `RESEND_API_KEY`            | Optional: Production; admin alert email (fail-open)                               |
+| `AI_GATEWAY_API_KEY`        | Optional: Production + Preview; sensitive; turns on the lesson tutor              |
 
 Every PR then gets its own preview URL. `vercel.json` also registers the daily
 cleanup for expired direct-upload intents; Vercel sends `CRON_SECRET` to that
