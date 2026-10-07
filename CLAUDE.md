@@ -566,7 +566,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `theme/contrast.ts` / `chart/series-color.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 224 tests as of 2026-10-06.
+   when adding testable logic. 228 tests as of 2026-10-06.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

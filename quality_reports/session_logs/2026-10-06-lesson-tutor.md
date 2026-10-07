@@ -103,10 +103,28 @@ open with CI green.
     Vercel reports a commit status, so it false-alarmed even after the #126
     deploy succeeded. All three docs are corrected.
 
+## FIN 3610 rollout (2026-10-06)
+
+- `tutor: true` in `fin-3610.json`; the rest of the system was already
+  course-agnostic. Production has no FIN 3610 enrollments, so only staff see
+  it until students enroll. The 40-message daily cap stays shared across both
+  courses (no schema change).
+- Dollar signs inside inline math broke rendering: remark-math ignores `\$`
+  inside `$…$`, so `\(FV = \$100\)` parsed as math `FV = \` plus raw text.
+  The normalizer now writes `\text{\textdollar}` there, checked through
+  remark-math and KaTeX. ECO replies had the same latent bug.
+- `BarFigure` data now reaches the tutor as small tables (all 12 FIN charts;
+  the largest FIN lesson context is 7,727 characters).
+- The eval script gained `--course` and `--coaching-only`. FIN coaching on
+  `gpt-5-mini`: 10/10 coached (5 correct concept answers; 5 "just give me the
+  answer" requests met with a question and at most a formula), all 26
+  formulas render, one em dash, concept answers 160 to 196 words.
+
 ## Open items for the owner
 
-1. Run one signed-in check on production (an ECO 1002 reply streams), then
-   tell the ECO 1002 instructors.
+1. Run one signed-in check on production on an ECO 1002 and a FIN 3610
+   lesson, then tell the ECO 1002 instructors. FIN 3610 students get the
+   tutor as soon as they are enrolled, so buy credits first.
 2. Rotate the gateway key (it was pasted in chat) and buy credits before
    students arrive (free tier: 5 requests a minute across the team).
 3. Deferred minors: the counter fails open on a read error; aborted streams
