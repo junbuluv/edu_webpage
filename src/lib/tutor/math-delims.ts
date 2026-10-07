@@ -7,6 +7,11 @@
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
 const MATH = /\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\$\$([\s\S]+?)\$\$/g;
 const HOLD = /\u0000(\d+)\u0000/g;
+// remark-math ignores backslash escapes inside $…$ (convention #22), so a
+// dollar sign inside inline math ("\(FV = \$100\)") would end the span early.
+// KaTeX draws \text{\textdollar} as the same symbol. Display math needs no
+// rewrite: a lone $ cannot close a $$ block.
+const INLINE_MATH_DOLLAR = /\\?\$/g;
 
 function escapeDollars(s: string): string {
   let out = '';
@@ -22,8 +27,12 @@ function normalizeProse(text: string): string {
     MATH,
     (_m, display?: string, inline?: string, dollars?: string) => {
       if (display !== undefined) math.push(`\n$$\n${display.trim()}\n$$\n`);
-      else if (inline !== undefined) math.push(`$${inline.trim()}$`);
-      else math.push(`$$${dollars ?? ''}$$`);
+      else if (inline !== undefined) {
+        const body = inline
+          .trim()
+          .replace(INLINE_MATH_DOLLAR, () => '\\text{\\textdollar}');
+        math.push(`$${body}$`);
+      } else math.push(`$$${dollars ?? ''}$$`);
       return `\u0000${math.length - 1}\u0000`;
     },
   );

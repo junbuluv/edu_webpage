@@ -5,5 +5,6 @@
   "description": "Capital budgeting, capital structure, valuation, and risk-return tradeoffs.",
   "accentColor": "#510C76",
   "order": 2,
-  "defaultSemester": "fall-2026"
+  "defaultSemester": "fall-2026",
+  "tutor": true
 }
