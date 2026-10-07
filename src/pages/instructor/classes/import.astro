@@ -16,11 +16,11 @@ import {
 import { logDisclosureSafe } from '@lib/audit';
 
 // The route is staff-gated by middleware, but roster mutation is restricted
-// to instructors and admins; teaching assistants are read-only.
+// to instructors and admins.
 const user = Astro.locals.user!;
 const rawRole = Astro.locals.profile?.role;
 if (!isInstructor(rawRole)) return new Response(null, { status: 403 });
-const role = rawRole as 'instructor' | 'ta' | 'admin';
+const role = rawRole as 'instructor' | 'admin';
 const isAdmin = isAdminRole(role);
 
 let assignments: InstructorClass[];

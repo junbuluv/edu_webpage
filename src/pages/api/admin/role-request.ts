@@ -87,7 +87,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   await logDisclosureSafe({
     actorId: user.id,
-    actorRole: actorRole as 'instructor' | 'ta' | 'admin',
+    actorRole: actorRole as 'instructor' | 'admin',
     action: 'promote_role',
     targetUserId: targetId,
     metadata: {

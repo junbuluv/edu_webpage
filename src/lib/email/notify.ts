@@ -1,6 +1,6 @@
 // Outbound operational email (not auth email — Supabase sends that through
 // its own SMTP config). Used to tell admins that someone is waiting on a
-// staff-access decision, so a TA isn't blocked until an admin happens to
+// staff-access decision, so a new lecturer isn't blocked until an admin happens to
 // check /admin.
 //
 // Every function here is fail-open: it logs and returns false rather than
@@ -71,12 +71,11 @@ async function adminEmails(): Promise<string[]> {
 
 export async function notifyAdminsOfRoleRequest(args: {
   email: string;
-  requestedRole: 'instructor' | 'ta';
+  requestedRole: 'instructor';
 }): Promise<boolean> {
   try {
     const to = await adminEmails();
-    const roleLabel =
-      args.requestedRole === 'instructor' ? 'Lecturer' : 'Teaching assistant';
+    const roleLabel = 'Lecturer';
     return await sendEmail({
       to,
       subject: `Staff access requested: ${roleLabel}`,

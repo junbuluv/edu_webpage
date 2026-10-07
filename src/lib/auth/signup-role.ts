@@ -1,22 +1,17 @@
 // Pure, alias-free validation for the role + student-ID fields on the signup
 // form, so it can run under `node --test` (which doesn't resolve @lib/*).
 //
-// Picking a role at signup does NOT grant it. 'instructor' and 'ta' are
-// recorded as a request in role_requests and stay inert until an admin
-// approves; only 'student' is applied immediately (it is also the DB default).
+// Picking a role at signup does NOT grant it. 'instructor' is recorded as a
+// request in role_requests and stays inert until an admin approves; only 'student' is applied immediately (it is also the DB default).
 // 'admin' is deliberately absent here and rejected by a CHECK constraint on
 // role_requests, so a forged form value cannot escalate.
 
-export type SignupRole = 'student' | 'instructor' | 'ta';
+export type SignupRole = 'student' | 'instructor';
 
-export const SIGNUP_ROLES: readonly SignupRole[] = [
-  'student',
-  'instructor',
-  'ta',
-];
+export const SIGNUP_ROLES: readonly SignupRole[] = ['student', 'instructor'];
 
 /** Roles that require an admin decision before they take effect. */
-export const STAFF_SIGNUP_ROLES: readonly SignupRole[] = ['instructor', 'ta'];
+export const STAFF_SIGNUP_ROLES: readonly SignupRole[] = ['instructor'];
 
 export function isSignupRole(value: string): value is SignupRole {
   return (SIGNUP_ROLES as readonly string[]).includes(value);

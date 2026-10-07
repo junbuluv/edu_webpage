@@ -18,7 +18,7 @@ export type Database = {
           id: string;
           email_hmac: string | null;
           display_name: string | null;
-          role: 'student' | 'instructor' | 'ta' | 'admin';
+          role: 'student' | 'instructor' | 'admin';
           tos_accepted_at: string | null;
           tos_version: string | null;
           active_course_slug: string | null;
@@ -29,7 +29,7 @@ export type Database = {
           id: string;
           email_hmac?: string | null;
           display_name?: string | null;
-          role?: 'student' | 'instructor' | 'ta' | 'admin';
+          role?: 'student' | 'instructor' | 'admin';
           tos_accepted_at?: string | null;
           tos_version?: string | null;
           active_course_slug?: string | null;
@@ -39,7 +39,7 @@ export type Database = {
           id?: string;
           email_hmac?: string | null;
           display_name?: string | null;
-          role?: 'student' | 'instructor' | 'ta' | 'admin';
+          role?: 'student' | 'instructor' | 'admin';
           tos_accepted_at?: string | null;
           tos_version?: string | null;
           active_course_slug?: string | null;
@@ -50,7 +50,7 @@ export type Database = {
       role_requests: {
         Row: {
           user_id: string;
-          requested_role: 'instructor' | 'ta';
+          requested_role: 'instructor';
           status: 'pending' | 'approved' | 'denied';
           requested_at: string;
           decided_by: string | null;
@@ -59,7 +59,7 @@ export type Database = {
         };
         Insert: {
           user_id: string;
-          requested_role: 'instructor' | 'ta';
+          requested_role: 'instructor';
           status?: 'pending' | 'approved' | 'denied';
           requested_at?: string;
           decided_by?: string | null;
@@ -68,7 +68,7 @@ export type Database = {
         };
         Update: {
           user_id?: string;
-          requested_role?: 'instructor' | 'ta';
+          requested_role?: 'instructor';
           status?: 'pending' | 'approved' | 'denied';
           requested_at?: string;
           decided_by?: string | null;
@@ -620,7 +620,7 @@ export type Database = {
         Row: {
           id: string;
           actor_id: string | null;
-          actor_role: 'student' | 'instructor' | 'ta' | 'admin' | null;
+          actor_role: 'student' | 'instructor' | 'admin' | null;
           action: string;
           target_user_id: string | null;
           target_resource: string | null;
@@ -632,7 +632,7 @@ export type Database = {
         Insert: {
           id?: string;
           actor_id?: string | null;
-          actor_role?: 'student' | 'instructor' | 'ta' | 'admin' | null;
+          actor_role?: 'student' | 'instructor' | 'admin' | null;
           action: string;
           target_user_id?: string | null;
           target_resource?: string | null;
@@ -643,7 +643,7 @@ export type Database = {
         Update: {
           id?: string;
           actor_id?: string | null;
-          actor_role?: 'student' | 'instructor' | 'ta' | 'admin' | null;
+          actor_role?: 'student' | 'instructor' | 'admin' | null;
           action?: string;
           target_user_id?: string | null;
           target_resource?: string | null;
@@ -822,7 +822,7 @@ export type Database = {
       };
     };
     Enums: {
-      user_role: 'student' | 'instructor' | 'ta' | 'admin';
+      user_role: 'student' | 'instructor' | 'admin';
       progress_status: 'started' | 'completed';
       workshop_section: 'CML' | 'CTL' | 'CWL' | 'CRL';
     };

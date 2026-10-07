@@ -8,12 +8,11 @@
  * account cannot mint new admins or lock out existing ones (see CONTRIBUTING
  * "Bootstrapping the first admin").
  */
-export type AssignableRole = 'student' | 'instructor' | 'ta';
+export type AssignableRole = 'student' | 'instructor';
 
 export const ASSIGNABLE_ROLES: readonly AssignableRole[] = [
   'student',
   'instructor',
-  'ta',
 ];
 
 export function isAssignableRole(role: string): role is AssignableRole {

@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
         ? 'Enter your 8-digit student ID (EMPLID).'
         : signupOutcome === 'student_id_invalid'
           ? 'That student ID does not look right. It should be 8 digits, as shown in CUNYfirst.'
-          : 'Choose whether you are a student, lecturer, or teaching assistant.';
+          : 'Choose whether you are a student or a lecturer.';
     return redirect(
       `/auth/signup?next=${encodeURIComponent(next)}&role=${encodeURIComponent(
         requestedRole,
@@ -187,7 +187,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
           .upsert(
             {
               user_id: userId,
-              requested_role: requestedRole as 'instructor' | 'ta',
+              requested_role: requestedRole as 'instructor',
               status: 'pending',
               requested_at: new Date().toISOString(),
               decided_by: null,
@@ -204,7 +204,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
           // Fail-open: a mail outage must not break account creation.
           await notifyAdminsOfRoleRequest({
             email,
-            requestedRole: requestedRole as 'instructor' | 'ta',
+            requestedRole: requestedRole as 'instructor',
           });
         }
       }

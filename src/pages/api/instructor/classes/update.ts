@@ -123,7 +123,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   await logDisclosureSafe({
     actorId: user.id,
-    actorRole: role as 'instructor' | 'ta' | 'admin',
+    actorRole: role as 'instructor' | 'admin',
     action: 'manage_enrollment',
     targetUserId: userId,
     targetResource: `update student in ${course} (${semester})`,

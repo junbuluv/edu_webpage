@@ -202,7 +202,7 @@ const OFFBOARD_ERR: Record<string, string> = {
   cannot_offboard_self: 'You cannot offboard your own admin account.',
   cannot_offboard_admin:
     'Admin accounts cannot be removed with this workflow; use the SQL-only admin process.',
-  target_not_staff: 'The account being removed must be an instructor or TA.',
+  target_not_staff: 'The account being removed must be an instructor.',
   successor_not_instructor:
     'The successor account must currently have the instructor role.',
   cleanup_failed:
@@ -259,9 +259,9 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
         }
       </h2>
       <p class="mt-1 text-sm text-ink-muted">
-        People who chose lecturer or teaching assistant at signup. They hold
-        student-level access until approved here. Deny anyone you do not
-        recognize: approving grants access to student records.
+        People who chose lecturer at signup. They hold student-level access
+        until approved here. Deny anyone you do not recognize: approving grants
+        access to student records.
       </p>
 
       {
@@ -298,11 +298,8 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
                     {emailById.get(req.user_id) ?? req.user_id}
                   </p>
                   <p class="text-xs text-ink-muted">
-                    Requested{' '}
-                    {req.requested_role === 'instructor'
-                      ? 'Lecturer'
-                      : 'Teaching assistant'}{' '}
-                    · {nyDateTime.format(new Date(req.requested_at))} ET
+                    Requested Lecturer ·{' '}
+                    {nyDateTime.format(new Date(req.requested_at))} ET
                   </p>
                 </div>
                 <div class="flex gap-2">
@@ -360,7 +357,7 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
       <form
         method="POST"
         action="/api/admin/assign-role"
-        data-confirm="Change this account's role? Choosing student or TA can revoke staff capabilities."
+        data-confirm="Change this account's role? Choosing student revokes staff capabilities."
         class="mt-4 flex flex-wrap items-end gap-3 text-sm"
       >
         <label class="block flex-1">
@@ -382,7 +379,6 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
           >
             <option value="student">student</option>
             <option value="instructor">instructor</option>
-            <option value="ta">ta</option>
           </select>
         </label>
         <button
@@ -627,7 +623,7 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
     </section>
 
     <section class="mt-10 rounded-lg border border-red-200 p-5">
-      <h2 class="text-lg font-semibold">Offboard an instructor or TA</h2>
+      <h2 class="text-lg font-semibold">Offboard an instructor</h2>
       <p class="mt-1 text-sm text-ink-muted">
         Transfer the staff member's teaching, workshop, enrollment, progress,
         quiz, and archive ownership to an active instructor, then permanently

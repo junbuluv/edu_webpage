@@ -19,7 +19,6 @@ import {
 
 test('workshop self and manual attendance are student-only', () => {
   assert.equal(canUseStudentWorkshopAttendance('student'), true);
-  assert.equal(canUseStudentWorkshopAttendance('ta'), false);
   assert.equal(canUseStudentWorkshopAttendance('instructor'), false);
   assert.equal(canUseStudentWorkshopAttendance('admin'), false);
   assert.equal(canUseStudentWorkshopAttendance(null), false);

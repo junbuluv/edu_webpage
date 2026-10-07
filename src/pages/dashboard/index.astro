@@ -44,7 +44,7 @@ const range = parseRange(Astro.url.searchParams.get('range'));
 // A staff-access request made at signup, still awaiting an admin decision.
 // Read under RLS (role_requests lets a user see only their own row); a
 // failure just hides the banner rather than breaking the dashboard.
-let pendingStaffRole: 'instructor' | 'ta' | null = null;
+let pendingStaffRole: 'instructor' | null = null;
 try {
   const { data: roleRequest } = await supabase
     .from('role_requests')
@@ -81,10 +81,7 @@ if (viewerCanManage && activeSlug && data) {
           class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
         >
           <p>
-            <strong>Staff access pending.</strong> You asked for{' '}
-            {pendingStaffRole === 'instructor'
-              ? 'lecturer'
-              : 'teaching assistant'}{' '}
+            <strong>Staff access pending.</strong> You asked for lecturer
             access. An administrator has been notified and will review it. Until
             then your account works as a student account.
           </p>

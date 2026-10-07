@@ -15,14 +15,19 @@ test('admin is never a selectable signup role', () => {
     classifySignup({ role: 'admin', studentId: '' }),
     'invalid_role',
   );
-  for (const role of ['student', 'instructor', 'ta']) {
+  for (const role of ['student', 'instructor']) {
     assert.equal(isSignupRole(role), true);
   }
 });
 
-test('staff roles are the ones needing approval', () => {
+test('the retired TA role is no longer a signup choice', () => {
+  assert.equal(isSignupRole('ta'), false);
+  assert.equal(isStaffSignupRole('ta'), false);
+  assert.equal(classifySignup({ role: 'ta', studentId: '' }), 'invalid_role');
+});
+
+test('instructor is the only role needing approval', () => {
   assert.equal(isStaffSignupRole('instructor'), true);
-  assert.equal(isStaffSignupRole('ta'), true);
   assert.equal(isStaffSignupRole('student'), false);
 });
 
@@ -59,7 +64,10 @@ test('students must supply a valid student ID', () => {
 
 test('a student ID left in the form is ignored for staff signups', () => {
   // The field is hidden by script, not removed, so it can still be submitted.
-  assert.equal(classifySignup({ role: 'ta', studentId: 'garbage' }), 'ok');
+  assert.equal(
+    classifySignup({ role: 'instructor', studentId: 'garbage' }),
+    'ok',
+  );
   assert.equal(classifySignup({ role: 'instructor', studentId: '' }), 'ok');
 });
 

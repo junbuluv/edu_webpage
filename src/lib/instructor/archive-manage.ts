@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import { getAdminClient, selectAllRows } from '@lib/supabase/admin';
-import { isAdmin, isInstructor, type UserRole } from '@lib/roles';
+import { isAdmin, type UserRole } from '@lib/roles';
 
 export interface ManageVideo {
   id: string;
@@ -40,8 +40,8 @@ export interface ManageQuiz {
 
 /**
  * Courses visible in the staff archive plus non-deleted video/paper/quiz rows.
- * Admins and read-only TAs see the full catalog; instructors see courses with
- * an active assignment. Includes hidden rows for authorized managers.
+ * Admins see the full catalog; instructors see courses with an active
+ * assignment. Includes hidden rows for authorized managers.
  */
 export async function loadInstructorArchive(
   userId: string,
@@ -55,7 +55,7 @@ export async function loadInstructorArchive(
   const admin = getAdminClient();
 
   let courses: string[];
-  if (isAdmin(role) || !isInstructor(role)) {
+  if (isAdmin(role)) {
     const all = await getCollection('courses');
     courses = all.map((c) => c.data.slug);
   } else {

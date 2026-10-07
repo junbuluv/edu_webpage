@@ -6,11 +6,11 @@ import {
   ASSIGNABLE_ROLES,
 } from './role-assign.ts';
 
-test('isAssignableRole accepts the three assignable roles, rejects admin/garbage', () => {
-  assert.deepEqual([...ASSIGNABLE_ROLES], ['student', 'instructor', 'ta']);
+test('isAssignableRole accepts student and instructor, rejects admin, the retired ta, and garbage', () => {
+  assert.deepEqual([...ASSIGNABLE_ROLES], ['student', 'instructor']);
   assert.ok(isAssignableRole('student'));
   assert.ok(isAssignableRole('instructor'));
-  assert.ok(isAssignableRole('ta'));
+  assert.ok(!isAssignableRole('ta'));
   assert.ok(!isAssignableRole('admin'));
   assert.ok(!isAssignableRole(''));
   assert.ok(!isAssignableRole('superuser'));
@@ -50,7 +50,7 @@ test("requesting 'admin' is rejected as invalid_role before anything else", () =
 test('unknown email → no_account (when requested role is valid)', () => {
   assert.equal(
     classifyRoleAssign({
-      requestedRole: 'ta',
+      requestedRole: 'instructor',
       emailFound: false,
       currentRole: 'student',
     }),
@@ -93,7 +93,7 @@ test('admin guard outranks the no_change check', () => {
   // assignable requested value: the admin guard fires first.
   assert.equal(
     classifyRoleAssign({
-      requestedRole: 'ta',
+      requestedRole: 'instructor',
       emailFound: true,
       currentRole: 'admin',
     }),

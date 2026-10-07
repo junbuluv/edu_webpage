@@ -21,11 +21,6 @@ const ROLE_CHOICES: Array<{ value: string; label: string; hint: string }> = [
     label: 'Lecturer',
     hint: 'Teaching a course (needs approval)',
   },
-  {
-    value: 'ta',
-    label: 'Teaching assistant',
-    hint: 'Supporting a course (needs approval)',
-  },
 ];
 
 // HTML5 pattern: any local-part, then @, then exactly one of our allowed
@@ -111,9 +106,9 @@ Astro.response.headers.set('Cache-Control', 'no-store');
         hidden
         class="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
       >
-        Lecturer and teaching-assistant accounts are reviewed by an
-        administrator. You can sign in right away, but staff features stay
-        locked until your request is approved.
+        Lecturer accounts are reviewed by an administrator. You can sign in
+        right away, but staff features stay locked until your request is
+        approved.
       </p>
 
       <label class="block">
