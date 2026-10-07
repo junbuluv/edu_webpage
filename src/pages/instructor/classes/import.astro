@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
+import { isAdmin as isAdminRole, isStaff } from '@lib/roles';
 import type { CourseSlug } from '@lib/courses';
 import {
   listClasses,
@@ -16,11 +16,11 @@ import {
 import { logDisclosureSafe } from '@lib/audit';
 
 // The route is staff-gated by middleware, but roster mutation is restricted
-// to instructors and admins; teaching assistants are read-only.
+// to instructors and admins.
 const user = Astro.locals.user!;
 const rawRole = Astro.locals.profile?.role;
-if (!isInstructor(rawRole)) return new Response(null, { status: 403 });
-const role = rawRole as 'instructor' | 'ta' | 'admin';
+if (!isStaff(rawRole)) return new Response(null, { status: 403 });
+const role = rawRole as 'instructor' | 'admin';
 const isAdmin = isAdminRole(role);
 
 let assignments: InstructorClass[];

@@ -1,4 +1,4 @@
-import { isStaff, isAdmin, isInstructor, type UserRole } from '@lib/roles';
+import { isStaff, isAdmin, type UserRole } from '@lib/roles';
 import { getAdminClient } from '@lib/supabase/admin';
 import { ArchiveServiceUnavailableError } from './errors';
 import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
@@ -52,7 +52,7 @@ export async function instructorOwnsCourse(
   role: UserRole | null | undefined,
 ): Promise<boolean> {
   if (isAdmin(role)) return true;
-  if (!isInstructor(role)) return false;
+  if (!isStaff(role)) return false;
   try {
     const admin = getAdminClient();
     const { data, error } = await admin

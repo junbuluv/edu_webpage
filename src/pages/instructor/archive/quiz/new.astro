@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { isContentManager } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import ArchiveQuizBuilder from '@components/archive/ArchiveQuizBuilder';
 import { loadInstructorArchive } from '@lib/instructor/archive-manage';
@@ -14,7 +14,7 @@ if (!user) {
     `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
   );
 }
-if (!isContentManager(role)) return Astro.redirect('/instructor/archive');
+if (!isStaff(role)) return Astro.redirect('/instructor/archive');
 
 let courses: string[];
 try {

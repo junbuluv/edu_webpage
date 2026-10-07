@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getEntry } from 'astro:content';
-import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
+import { isAdmin as isAdminRole, isStaff } from '@lib/roles';
 import { getAdminClient, selectAllRows } from '@lib/supabase/admin';
 import { logDisclosureSafe } from '@lib/audit';
 import {
@@ -15,7 +15,7 @@ import {
 const user = Astro.locals.user!;
 const supabase = Astro.locals.supabase!;
 const role = Astro.locals.profile?.role ?? 'student';
-if (!isInstructor(role)) return new Response(null, { status: 403 });
+if (!isStaff(role)) return new Response(null, { status: 403 });
 const viewerIsAdmin = isAdminRole(role);
 const admin = getAdminClient();
 

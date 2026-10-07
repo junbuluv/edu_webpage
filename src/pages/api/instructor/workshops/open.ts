@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getEntry } from 'astro:content';
 import { getAdminClient } from '@lib/supabase/admin';
-import { isAdmin, isInstructor } from '@lib/roles';
+import { isAdmin, isStaff } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import {
   isUuid,
@@ -39,7 +39,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const role = locals.profile?.role ?? 'student';
 
   if (!user) return errorRedirect('', 'unauthenticated');
-  if (!isInstructor(role)) return errorRedirect('', 'forbidden');
+  if (!isStaff(role)) return errorRedirect('', 'forbidden');
 
   let form: FormData;
   try {

@@ -10,7 +10,7 @@ declare global {
       supabase: SupabaseServerClient;
       user: User | null;
       profile: {
-        role: 'student' | 'instructor' | 'ta' | 'admin';
+        role: 'student' | 'instructor' | 'admin';
         display_name: string | null;
         active_course_slug: string | null;
         tos_accepted_at: string | null;

@@ -10,12 +10,96 @@ do $$ begin
   create type user_role as enum ('student', 'instructor', 'admin');
 exception when duplicate_object then null; end $$;
 
--- Add 'ta' to user_role if it isn't already present. ALTER TYPE ADD
--- VALUE cannot run inside an explicit transaction block, but
--- Supabase's SQL Editor runs statements outside one by default. If
--- you ever see "ALTER TYPE ... ADD cannot run inside a transaction
--- block", run this single statement on its own.
-alter type user_role add value if not exists 'ta';
+-- Retire the 'ta' role (2026-10-07): user_role is student, instructor, admin.
+-- Postgres cannot drop an enum value, so a database that still has 'ta'
+-- (production was built while this script added it) gets the type rebuilt.
+-- Policies and column triggers that pin the type or its columns are dropped
+-- here and recorded in a temp table; this script recreates them further down,
+-- and the check at the very end fails the run if any did not come back.
+-- Leftover TA accounts become students and TA staff requests are deleted.
+-- Audit rows by a TA stop the run instead: audit history is never rewritten.
+-- Production had none of either on 2026-10-07. Fresh databases never get
+-- 'ta', so this block does nothing there.
+do $$
+declare
+  r record;
+begin
+  if not exists (
+    select 1
+      from pg_catalog.pg_enum e
+      join pg_catalog.pg_type t on t.oid = e.enumtypid
+      join pg_catalog.pg_namespace n on n.oid = t.typnamespace
+     where n.nspname = 'public' and t.typname = 'user_role'
+       and e.enumlabel = 'ta'
+  ) then
+    return;
+  end if;
+
+  if exists (select 1 from public.audit_log where actor_role::text = 'ta') then
+    raise exception 'audit_log has rows with actor_role ta; decide how to keep them before removing the role';
+  end if;
+
+  create temp table if not exists _ta_dropped (
+    kind text not null,
+    name text not null,
+    tbl regclass not null
+  );
+
+  -- Policies that read a user_role column or compare against a user_role
+  -- literal (most staff checks look at profiles.role).
+  for r in
+    select distinct pol.polname as name, pol.polrelid::regclass as tbl
+      from pg_catalog.pg_policy pol
+      join pg_catalog.pg_depend d
+        on d.classid = 'pg_catalog.pg_policy'::regclass and d.objid = pol.oid
+      left join pg_catalog.pg_attribute a
+        on d.refclassid = 'pg_catalog.pg_class'::regclass
+       and a.attrelid = d.refobjid and a.attnum = d.refobjsubid
+     where (d.refclassid = 'pg_catalog.pg_type'::regclass
+            and d.refobjid = 'public.user_role'::regtype)
+        or a.atttypid = 'public.user_role'::regtype
+  loop
+    execute format('drop policy %I on %s', r.name, r.tbl);
+    insert into _ta_dropped values ('policy', r.name, r.tbl);
+  end loop;
+
+  -- Column triggers such as "before update of role on profiles".
+  for r in
+    select distinct tg.tgname as name, tg.tgrelid::regclass as tbl
+      from pg_catalog.pg_trigger tg
+      join pg_catalog.pg_depend d
+        on d.classid = 'pg_catalog.pg_trigger'::regclass and d.objid = tg.oid
+      join pg_catalog.pg_attribute a
+        on d.refclassid = 'pg_catalog.pg_class'::regclass
+       and a.attrelid = d.refobjid and a.attnum = d.refobjsubid
+     where a.atttypid = 'public.user_role'::regtype
+       and not tg.tgisinternal
+  loop
+    execute format('drop trigger %I on %s', r.name, r.tbl);
+    insert into _ta_dropped values ('trigger', r.name, r.tbl);
+  end loop;
+
+  alter table public.role_requests drop constraint if exists role_requests_role_chk;
+  alter table public.profiles alter column role drop default;
+
+  update public.profiles set role = 'student' where role::text = 'ta';
+  delete from public.role_requests where requested_role::text = 'ta';
+
+  create type public.user_role_v2 as enum ('student', 'instructor', 'admin');
+  alter table public.profiles
+    alter column role type public.user_role_v2
+    using role::text::public.user_role_v2;
+  alter table public.role_requests
+    alter column requested_role type public.user_role_v2
+    using requested_role::text::public.user_role_v2;
+  alter table public.audit_log
+    alter column actor_role type public.user_role_v2
+    using actor_role::text::public.user_role_v2;
+  drop type public.user_role;
+  alter type public.user_role_v2 rename to user_role;
+  -- Every signup takes this default; losing it would break account creation.
+  alter table public.profiles alter column role set default 'student';
+end $$;
 
 do $$ begin
   create type progress_status as enum ('started', 'completed');
@@ -349,7 +433,7 @@ create policy "teaching_assignments_authenticated_read"
 -- =========================================================================
 -- role_requests --- a signup asking for staff access, pending admin review.
 --
--- Choosing "lecturer" or "TA" on the signup form must never write
+-- Choosing "lecturer" on the signup form must never write
 -- profiles.role: that would let anyone self-promote and read other students'
 -- records. Signup records a request here; the role changes only when an admin
 -- approves it through /admin. 'admin' is excluded by CHECK, so a forged form
@@ -364,12 +448,18 @@ create table if not exists public.role_requests (
   decided_at timestamptz,
   note text,
   constraint role_requests_role_chk
-    check (requested_role in ('instructor', 'ta')),
+    check (requested_role = 'instructor'),
   constraint role_requests_status_chk
     check (status in ('pending', 'approved', 'denied')),
   constraint role_requests_note_chk
     check (note is null or char_length(note) between 1 and 300)
 );
+
+-- Existing databases keep the table above, so refresh its role check here
+-- (staff requests are instructor-only since TA was retired, 2026-10-07).
+alter table public.role_requests drop constraint if exists role_requests_role_chk;
+alter table public.role_requests add constraint role_requests_role_chk
+  check (requested_role = 'instructor');
 
 create index if not exists role_requests_pending_idx
   on public.role_requests (status, requested_at desc);
@@ -2230,7 +2320,7 @@ begin
       pg_catalog.hashtextextended('instructor:' || new.id::text, 0)
     );
   end if;
-  if old.role in ('instructor', 'ta') and new.role = 'student' then
+  if old.role = 'instructor' and new.role = 'student' then
     v_offboard_transfer :=
       current_setting('app.offboard_scope_transfer', true) = 'on'
       and nullif(
@@ -3827,9 +3917,7 @@ begin
     end if;
     return 'invalid_roles';
   end if;
-  if v_target_role is null or v_target_role not in (
-    'instructor'::public.user_role, 'ta'::public.user_role
-  ) then
+  if v_target_role is distinct from 'instructor'::public.user_role then
     return 'invalid_roles';
   end if;
 
@@ -4158,3 +4246,30 @@ grant select (
 ) on public.workshop_attendance to authenticated;
 grant select (id, user_id, course_slug, lesson_slug, created_at)
   on public.tutor_messages to authenticated;
+
+-- =========================================================================
+-- TA removal safety net (see the user_role block at the top): everything the
+-- rebuild dropped must exist again by now, or the whole run fails (in the
+-- Supabase SQL Editor that rolls the paste back).
+-- =========================================================================
+do $$
+declare
+  v_missing text;
+begin
+  if pg_catalog.to_regclass('pg_temp._ta_dropped') is null then
+    return;
+  end if;
+  select string_agg(format('%s %s on %s', d.kind, d.name, d.tbl), ', ')
+    into v_missing
+    from _ta_dropped d
+   where (d.kind = 'policy' and not exists (
+            select 1 from pg_catalog.pg_policy p
+             where p.polname = d.name and p.polrelid = d.tbl))
+      or (d.kind = 'trigger' and not exists (
+            select 1 from pg_catalog.pg_trigger t
+             where t.tgname = d.name and t.tgrelid = d.tbl));
+  drop table _ta_dropped;
+  if v_missing is not null then
+    raise exception 'the TA removal dropped objects this script did not recreate: %', v_missing;
+  end if;
+end $$;

@@ -122,9 +122,9 @@ open with CI green.
 
 ## Open items for the owner
 
-1. Run one signed-in check on production on an ECO 1002 and a FIN 3610
-   lesson, then tell the ECO 1002 instructors. FIN 3610 students get the
-   tutor as soon as they are enrolled, so buy credits first.
+1. Done: the owner checked the tutor signed in on production (FIN 3610,
+   2026-10-06). Still to do: tell the ECO 1002 instructors. FIN 3610
+   students get the tutor as soon as they are enrolled, so buy credits first.
 2. Rotate the gateway key (it was pasted in chat) and buy credits before
    students arrive (free tier: 5 requests a minute across the team).
 3. Deferred minors: the counter fails open on a read error; aborted streams

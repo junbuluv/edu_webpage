@@ -1,5 +1,5 @@
 import { type CourseSlug } from '@lib/courses';
-import { isAdmin, isInstructor, type UserRole } from '@lib/roles';
+import { isAdmin, isStaff, type UserRole } from '@lib/roles';
 import { getAdminClient } from '@lib/supabase/admin';
 
 export async function hasActiveTeachingAssignment(
@@ -29,7 +29,7 @@ export async function canManageClass(
   role: UserRole | null | undefined,
 ): Promise<boolean> {
   if (isAdmin(role)) return true;
-  if (!isInstructor(role)) return false;
+  if (!isStaff(role)) return false;
 
   return hasActiveTeachingAssignment(userId, course, semester);
 }

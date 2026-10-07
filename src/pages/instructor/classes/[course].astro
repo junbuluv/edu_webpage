@@ -2,7 +2,7 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getEntry } from 'astro:content';
 import RosterTable from '@components/instructor/RosterTable.astro';
-import { isAdmin as isAdminRole, isInstructor } from '@lib/roles';
+import { isAdmin as isAdminRole, isStaff } from '@lib/roles';
 import { isCourseSlug } from '@lib/courses';
 import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 import { logDisclosureSafe } from '@lib/audit';
@@ -11,7 +11,7 @@ import { weeklyCellCsv } from '@lib/attendance-weekly';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
-if (!isInstructor(role)) return new Response(null, { status: 403 });
+if (!isStaff(role)) return new Response(null, { status: 403 });
 const isAdmin = isAdminRole(role);
 
 const courseParam = Astro.params.course;
@@ -154,7 +154,7 @@ if (wantsCsv) {
   }
   await logDisclosureSafe({
     actorId: user.id,
-    actorRole: role as 'instructor' | 'ta' | 'admin',
+    actorRole: role as 'instructor' | 'admin',
     action: 'export_student_data',
     targetResource: `${course}:${semester}`,
     metadata: { rows: roster.students.length, format: 'csv' },
@@ -180,7 +180,7 @@ if (wantsCsv) {
 // branch above logs its own export_student_data and returns before here).
 await logDisclosureSafe({
   actorId: user.id,
-  actorRole: role as 'instructor' | 'ta' | 'admin',
+  actorRole: role as 'instructor' | 'admin',
   action: 'read_class_roster',
   targetResource: `${course}:${semester}`,
   metadata: {

@@ -7,7 +7,7 @@ import {
   PAPER_UPLOAD_BUCKET,
   validatePaperUploadMetadata,
 } from '@lib/archive/paper-upload';
-import { isContentManager } from '@lib/roles';
+import { isStaff } from '@lib/roles';
 import { getAdminClient } from '@lib/supabase/admin';
 import { cleanExpiredPaperUploadIntents } from '@lib/archive/upload-intent-cleanup';
 
@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const role = locals.profile?.role ?? 'student';
 
   if (!user) return json({ ok: false, reason: 'unauthenticated' }, 401);
-  if (!isContentManager(role)) {
+  if (!isStaff(role)) {
     return json({ ok: false, reason: 'forbidden' }, 403);
   }
 

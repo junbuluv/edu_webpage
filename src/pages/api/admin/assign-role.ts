@@ -76,28 +76,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (outcome === 'no_change') return ok('role_unchanged');
   if (outcome !== 'ok') return err(outcome);
 
-  if (currentRole === 'instructor' && requestedRole === 'ta') {
-    const { data: assignments, error: assignmentError } = await admin
-      .from('teaching_assignments')
-      .select('instructor_id')
-      .eq('instructor_id', targetId)
-      .eq('active', true)
-      .limit(1);
-    if (assignmentError) return err('lookup_failed');
-    if ((assignments ?? []).length > 0) return err('role_in_use');
-  }
-
   const { data: updated, error } = await admin
     .from('profiles')
     .update({ role: requestedRole })
     .eq('id', targetId)
-    .eq('role', currentRole as 'student' | 'instructor' | 'ta')
+    .eq('role', currentRole as 'student' | 'instructor')
     .select('id')
     .maybeSingle();
   if (error?.code === '23514') {
     return err(
-      (currentRole === 'instructor' || currentRole === 'ta') &&
-        requestedRole === 'student'
+      currentRole === 'instructor' && requestedRole === 'student'
         ? 'use_offboarding'
         : 'role_in_use',
     );
@@ -110,7 +98,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // that to the admin instead of silently reporting plain success.
   const audited = await logDisclosureSafe({
     actorId: user.id,
-    actorRole: role as 'instructor' | 'ta' | 'admin',
+    actorRole: role as 'instructor' | 'admin',
     action: 'promote_role',
     targetUserId: targetId,
     // No email here — target_resource is human-readable, not for PII.
