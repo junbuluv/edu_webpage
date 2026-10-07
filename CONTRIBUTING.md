@@ -390,7 +390,7 @@ created. The canonical roster of _current_ admins lives in the
 Admin-role promotion stays SQL-only, but day-to-day role, teaching assignment,
 class, and content management has in-app surfaces:
 
-- **Teaching authority** — `/admin` sets student/instructor/TA roles and creates
+- **Teaching authority** — `/admin` sets student/instructor roles and creates
   an explicit course + semester assignment. Student enrollment rows never
   confer instructor authority. Deactivate an assignment to remove write access;
   unused inactive assignments can be removed.
@@ -821,7 +821,7 @@ update auth.users
 
 This works for ~5 users; doesn't scale to a class. Use only as a bridge
 before Resend is wired up, or for occasional out-of-band confirmations
-(e.g., a TA's address that legitimately fails delivery).
+(e.g., a staff address that legitimately fails delivery).
 
 ### Rotation
 

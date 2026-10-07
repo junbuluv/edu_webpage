@@ -56,7 +56,8 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   students from the roster page (`/instructor/classes/<course>`). Gated
   POST handlers `src/pages/api/instructor/classes/{enroll,drop,update}.ts`
   (gate order: `!user` → `!isStaff` → `isCourseSlug`+required fields →
-  `instructorOwnsCourse`); pure unit-tested classifier
+  `canManageClass`, i.e. admin or an active teaching assignment for that
+  course and semester); pure unit-tested classifier
   `src/lib/instructor/enroll-classify.ts`. Add matches by email; drop/update
   take a hidden `user_id`. Existing rows keep their `instructor_id` (only new
   inserts set it). Sections `{CML,CTL,CWL,CRL}` validated, eco-1002 only.
@@ -78,11 +79,17 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
   `src/components/course/CourseSwitcher.tsx` (global header dropdown)
-- Role helpers: `src/lib/roles.ts` — `isStaff`, `isAdmin`,
-  `isContentManager`, `roleLabel`. Use these instead of inline equality
-  checks. `isContentManager` (instructor|admin, **TA read-only**) gates
-  content mutation and is deliberately narrower than `isStaff` (which
-  includes `ta`)
+- Roles: `student`, `instructor`, `admin` (the TA role was retired on
+  2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
+  `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
+  can view every course (`canViewCourse`), but managing one (rosters,
+  workshops, archive edits) also needs an admin-granted row in
+  `teaching_assignments` for that course and semester: `canManageClass` /
+  `hasActiveTeachingAssignment` in `src/lib/instructor/class-access.ts`,
+  `instructorOwnsCourse` in `src/lib/archive/access.ts`. Admins bypass
+  assignments; an instructor with none is effectively read-only (the old
+  TA). `/admin` grants assignments and offboards departing staff, moving
+  their rows to a successor before the role change (a trigger enforces it)
 - Device cookie: `src/lib/device.ts` — middleware issues a short-lived
   `workshop_device_id` UUID cookie; workshop attendance stores only its HMAC
   for uniqueness, never the raw cookie or submitted coordinates
@@ -103,9 +110,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   "Workshop attendance" card on `/dashboard` (weekly chips + a stamp-in link
   when a window for their section is open now), loaded in `dashboard.ts` via
   the student's own RLS reads
-- Signup roles + student ID (PR #120): the signup form asks student /
-  lecturer / TA and collects an 8-digit EMPLID from students. Choosing a
-  staff role writes a **request** to `role_requests`, never a role — see
+- Signup roles + student ID (PR #120): the signup form asks student or
+  lecturer and collects an 8-digit EMPLID from students. Choosing lecturer
+  writes a **request** to `role_requests`, never a role — see
   convention #19. Pure logic: `src/lib/auth/signup-role.ts` (role +
   student-ID validation) and `src/lib/admin/role-decision.ts` (approve/deny
   classifier), both unit-tested. Admin queue on `/admin` with handler
@@ -193,7 +200,9 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   upgrade-path database (July fixture plus migrations), so it may only touch
   objects that exist there; tables added since get their own suite run only
   on the fresh schema (`supabase/tests/lesson_tutor_rls.sql`, step "Exercise
-  lesson tutor RLS"). Currently **advisory**, not
+  lesson tutor RLS"). Step "Rehearse removing the TA role" puts production's
+  pre-2026-10-07 state (`'ta'` plus TA rows) back on the fresh database,
+  re-runs `schema.sql`, and re-runs both suites. Currently **advisory**, not
   blocking — flip to required in the ruleset when ready by adding
   `schema-roundtrip` to `required_status_checks`. Two traps this job has
   already sprung (both fixed 2026-08-26, PR #121):
@@ -268,7 +277,7 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     of throwing) on mutation paths where an audit-write failure shouldn't
     break the user action. Valid actions are the `DisclosureAction` union
     in `audit.ts` (e.g. `manage_archive`, `manage_enrollment`); add new
-    ones there. Keep `actorRole` as the real role so TA actions stay `'ta'`.
+    ones there. Keep `actorRole` as the real role.
 11. **`createSupabaseServerClient(cookies, headers, request)` needs all three
     args.** `getAll()` reads the _incoming_ Cookie header from `request` (not
     `cookies.headers()`, which is outgoing Set-Cookie). In `setAll`, local
@@ -276,11 +285,11 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     sticks on http://localhost in dev — don't invert that merge order.
 12. **Use `isStaff(role)` / `isAdmin(role)` from `@lib/roles`** for any
     staff/admin gate — never inline `role === 'instructor' || role === 'admin'`.
-    The `user_role` enum now has four values: `student`, `instructor`,
-    `ta`, `admin`. New TA-equivalent permissions land for free when checks
-    go through `isStaff`. For content _mutation_ gates (archive
-    videos/papers/quizzes) use `isContentManager` instead — it excludes
-    `ta` (TAs are read-only on content).
+    The `user_role` enum has three values: `student`, `instructor`,
+    `admin` (TA was retired on 2026-10-07; the block at the top of
+    `schema.sql` rebuilt the type). Role is only half of a management check:
+    managing a course also needs a teaching assignment (`canManageClass`,
+    `instructorOwnsCourse`).
 13. **`<ClientRouter />` is mounted in `BaseLayout`.** Cross-page nav
     uses Astro View Transitions. If a React island appears unresponsive
     after navigation, suspect stale DOM references in test/debug code
@@ -343,7 +352,7 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 19. **A role chosen at signup is a request, never an assignment.**
     `profiles.role` is written only by an admin (the `/admin` queue or
     `assign-role`) or by SQL. Signup inserts into `role_requests`, whose
-    CHECK limits `requested_role` to `instructor|ta` so a forged form value
+    CHECK limits `requested_role` to `instructor` so a forged form value
     cannot request `admin`; the account keeps student-level access until
     approved. Don't add any path that sets `profiles.role` from user input.
 20. **Never trust `data.user` from `supabase.auth.signUp()`.** On this
@@ -429,6 +438,12 @@ must be committed before they can be used` — the `ALTER TYPE`
     new value before the implicit commit. Same fix: run the `ALTER
 TYPE` standalone first; on the re-paste it becomes a no-op (since
     the value now exists) and the rest runs cleanly.
+- **Removing a value from an enum** has no `DROP VALUE`: rebuild the type.
+  The guarded block at the top of `schema.sql` (TA removal, 2026-10-07) is
+  the pattern: record and drop the policies and column triggers that depend
+  on the type, remap or reject leftover rows, swap the columns to a new type,
+  drop and rename, restore defaults, and let the rest of the script recreate
+  what was dropped, with a check at the end of the script.
 
 ## Vercel deployment gotchas
 
@@ -521,20 +536,20 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   the `workshops` collection schema in `config.ts` (5–7 questions, course
   must be one of `eco-1002` / `fin-3610`). Visible at `/workshops/<slug>`
   and the per-course index `/{course}/workshops` to enrolled students
-  (admin view-as also works).
+  (staff see a preview).
 - **Open a workshop window**: as a staff user, visit
   `/instructor/workshops/<slug>` and use the section/time/geofence form.
   Also supports SQL inserts; see `CONTRIBUTING.md`.
 - **Promote a user**: in Supabase SQL Editor,
   ```sql
-  update public.profiles set role = '<student|instructor|ta|admin>'
+  update public.profiles set role = '<student|instructor|admin>'
    where id = (select id from auth.users where email = '<them>');
   ```
-  **Granting `admin` stays SQL-only by design.** `student|instructor|ta`
+  **Granting `admin` stays SQL-only by design.** `student|instructor`
   can also be set from `/admin` (by email, or by approving a signup
   request). **Pending promotion** (account not yet created):
   `konstantin.kucheryavyy@baruch.cuny.edu` → `admin` after first signup.
-- **Approve a staff-access request**: someone who picked lecturer or TA at
+- **Approve a staff-access request**: someone who picked lecturer at
   signup appears in "Staff access requests" at the top of `/admin`
   (you also get an email). Approve sets the role immediately; deny leaves
   them a student. Both are audit-logged as `promote_role` with
@@ -566,7 +581,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `theme/contrast.ts` / `chart/series-color.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 228 tests as of 2026-10-06.
+   when adding testable logic. 229 tests as of 2026-10-07.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
