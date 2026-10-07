@@ -27,6 +27,9 @@ interface ImportMetaEnv {
   readonly PUBLIC_SITE_URL: string;
   readonly CRON_SECRET?: string;
   readonly PII_HMAC_SECRET: string;
+  readonly AI_GATEWAY_API_KEY?: string;
+  readonly TUTOR_MODEL?: string;
+  readonly TUTOR_REASONING_EFFORT?: string;
 }
 
 interface ImportMeta {

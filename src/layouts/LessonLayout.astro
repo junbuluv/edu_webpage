@@ -10,6 +10,10 @@ import { fetchArchiveVideosForLesson } from '@lib/archive/db';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
 import { normalizeLessonSlug } from '@lib/archive/build';
 import { isContentManager } from '@lib/roles';
+import TutorPanel from '@components/tutor/TutorPanel';
+import { getTutorCourse } from '@lib/tutor/access';
+import { TUTOR_DAILY_LIMIT } from '@lib/tutor/limits';
+import { tutorMessagesRemaining } from '@lib/tutor/usage';
 
 interface Props {
   lesson: CollectionEntry<'lessons'>;
@@ -76,6 +80,27 @@ try {
     console.error('[lesson] video_load_failed', error);
   }
   videosUnavailable = true;
+}
+
+// Lesson tutor (2026-10-05): canSeeVideos is canViewCourse's enrolled-or-staff
+// answer for this course (false on error), so the tutor reuses it instead of
+// querying enrollments twice. The remaining count is display-only. Any
+// failure hides the panel; it must never take the lesson page down.
+let showTutor = false;
+let tutorRemaining = TUTOR_DAILY_LIMIT;
+if (canSeeVideos && Astro.locals.user && Astro.locals.supabase) {
+  try {
+    showTutor = Boolean(await getTutorCourse(data.course));
+    if (showTutor) {
+      tutorRemaining = await tutorMessagesRemaining(
+        Astro.locals.supabase,
+        Astro.locals.user.id,
+      );
+    }
+  } catch (error) {
+    console.error('[lesson] tutor_setup_failed', error);
+    showTutor = false;
+  }
 }
 
 let initialProgressStatus: 'started' | 'completed' | null = null;
@@ -258,5 +283,16 @@ if (Astro.locals.user && Astro.locals.supabase) {
         }
       </nav>
     </article>
+    {
+      showTutor && (
+        <TutorPanel
+          client:idle
+          lessonSlug={lesson.slug}
+          lessonTitle={data.title}
+          dailyLimit={TUTOR_DAILY_LIMIT}
+          initialRemaining={tutorRemaining}
+        />
+      )
+    }
   </div>
 </BaseLayout>

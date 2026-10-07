@@ -90,6 +90,12 @@ jobs:
       - name: Exercise synthetic RLS identities
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
 
+      # Features added after the July upgrade fixture get their own suite,
+      # run only against the fresh schema above (the upgrade-path database
+      # below predates their tables).
+      - name: Exercise lesson tutor RLS
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/lesson_tutor_rls.sql
+
       - name: Exercise pre-audit upgrade and migration idempotence
         run: |
           createdb --maintenance-db=postgres workshop_upgrade

@@ -3970,6 +3970,122 @@ grant execute on function public.offboard_staff(uuid, uuid, uuid)
   to service_role;
 
 -- =========================================================================
+-- tutor_messages --- one row per lesson-tutor reply (2026-10-05 design).
+--
+-- Holds no message text: only who, which lesson, when, and token counts, for
+-- the per-student daily cap and cost tracking. Written only by the service
+-- role: consume_tutor_quota reserves the row before the model call and the
+-- API fills in token counts after the stream ends. Students may read their
+-- own rows (the lesson page shows messages left today).
+-- =========================================================================
+create table if not exists public.tutor_messages (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  course_slug text not null check (course_slug in ('eco-1002', 'fin-3610')),
+  lesson_slug text not null check (length(lesson_slug) <= 200),
+  model text check (length(model) <= 200),
+  input_tokens integer check (input_tokens >= 0),
+  output_tokens integer check (output_tokens >= 0),
+  reasoning_tokens integer check (reasoning_tokens >= 0),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists tutor_messages_user_created_idx
+  on public.tutor_messages (user_id, created_at desc);
+
+alter table public.tutor_messages enable row level security;
+
+drop policy if exists "tutor_messages_self_read" on public.tutor_messages;
+create policy "tutor_messages_self_read" on public.tutor_messages
+  for select to authenticated
+  using ((select auth.uid()) = user_id);
+
+-- Reserve one tutor message for p_user_id, or refuse once p_daily_limit
+-- messages fall inside the rolling 24-hour window. The advisory lock
+-- serializes concurrent requests from the same student (two tabs), so the
+-- count and the insert cannot race past the cap.
+create or replace function public.consume_tutor_quota(
+  p_user_id uuid,
+  p_course_slug text,
+  p_lesson_slug text,
+  p_daily_limit integer
+)
+returns table (status text, message_id uuid, remaining integer)
+language plpgsql
+set search_path = ''
+as $$
+declare
+  v_used integer;
+  v_id uuid;
+begin
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('tutor-quota:' || p_user_id::text, 0)
+  );
+
+  select count(*) into v_used
+    from public.tutor_messages t
+   where t.user_id = p_user_id
+     and t.created_at >= pg_catalog.clock_timestamp() - interval '24 hours';
+
+  if v_used >= p_daily_limit then
+    return query select 'rate_limited'::text, null::uuid, 0;
+    return;
+  end if;
+
+  insert into public.tutor_messages (user_id, course_slug, lesson_slug)
+  values (p_user_id, p_course_slug, p_lesson_slug)
+  returning id into v_id;
+
+  return query select 'ok'::text, v_id, p_daily_limit - v_used - 1;
+end;
+$$;
+revoke all on function public.consume_tutor_quota(uuid, text, text, integer)
+  from public, anon, authenticated;
+grant execute on function public.consume_tutor_quota(uuid, text, text, integer)
+  to service_role;
+
+create or replace function public.purge_old_tutor_messages(p_days integer default 365)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count integer;
+  v_cutoff timestamptz := now() - (p_days || ' days')::interval;
+begin
+  with deleted as (
+    delete from public.tutor_messages
+     where created_at < v_cutoff
+    returning id
+  )
+  select count(*) into v_count from deleted;
+
+  insert into public.audit_log (
+    actor_id, actor_role, action, target_resource, metadata
+  ) values (
+    null, null, 'system_retention_purge_tutor_messages', 'public.tutor_messages',
+    jsonb_build_object('cutoff_days', p_days, 'count', v_count)
+  );
+
+  return v_count;
+end;
+$$;
+revoke all on function public.purge_old_tutor_messages(integer) from public;
+revoke execute on function public.purge_old_tutor_messages(integer)
+  from anon, authenticated;
+
+do $$ begin
+  perform cron.schedule(
+    'retention_purge_old_tutor_messages',
+    '30 4 * * 0',
+    $cron$select public.purge_old_tutor_messages();$cron$
+  );
+exception when others then
+  raise notice 'pg_cron not available yet; skipping schedule for purge_old_tutor_messages. Enable the extension and re-run this script.';
+end $$;
+
+-- =========================================================================
 -- Client privileges
 --
 -- RLS governs rows but does not protect TRUNCATE, REFERENCES, or TRIGGER.
@@ -3990,7 +4106,8 @@ revoke all privileges on table
   public.archive_videos,
   public.archive_paper_upload_intents,
   public.archive_papers,
-  public.archive_quizzes
+  public.archive_quizzes,
+  public.tutor_messages
 from anon, authenticated, service_role;
 
 grant select, insert, update, delete on table
@@ -4007,7 +4124,8 @@ grant select, insert, update, delete on table
   public.archive_videos,
   public.archive_paper_upload_intents,
   public.archive_papers,
-  public.archive_quizzes
+  public.archive_quizzes,
+  public.tutor_messages
 to service_role;
 revoke update on table public.workshop_attendance from service_role;
 revoke update, delete on table public.terms_acceptances from service_role;
@@ -4038,3 +4156,5 @@ grant select (
 grant select (
   id, administration_id, user_id, stamped_at, verification_method
 ) on public.workshop_attendance to authenticated;
+grant select (id, user_id, course_slug, lesson_slug, created_at)
+  on public.tutor_messages to authenticated;
