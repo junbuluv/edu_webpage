@@ -38,3 +38,20 @@ test('leaves code untouched', () => {
 test('unclosed delimiters fall back to plain text', () => {
   assert.equal(n('A stray \\( and $2'), 'A stray \\( and \\$2');
 });
+
+test('dollar amounts inside inline math cannot end the span early', () => {
+  // remark-math ignores backslash escapes inside $…$ (convention #22), so
+  // "\$100" inside \( \) used to close the math at its "$".
+  assert.equal(
+    n('Use \\(FV = \\$100 \\times 1.05^{10}\\) to compare.'),
+    'Use $FV = \\text{\\textdollar}100 \\times 1.05^{10}$ to compare.',
+  );
+  assert.equal(
+    n('\\(PV = $1000/(1.05)^2\\)'),
+    '$PV = \\text{\\textdollar}1000/(1.05)^2$',
+  );
+});
+
+test('display math keeps its dollar signs: a lone $ cannot close $$', () => {
+  assert.equal(n('\\[ PV = \\$1000 \\]'), '\n$$\nPV = \\$1000\n$$\n');
+});
