@@ -84,15 +84,15 @@ open with CI green.
   - The PR preview was rebuilt with the key (`edu-webpage-di97wol9e-…`,
     Ready, clean build log). Previews sit behind Vercel Authentication, so the
     signed-in check is the owner's.
+- The owner ran that signed-in check on the rebuilt preview and reported it
+  working, which closes step 6.
 - Found, not part of this PR: the project has no `CRON_SECRET`, so the daily
   `/api/cron/archive-upload-cleanup` run is rejected with 401.
 
 ## Open items for the owner
 
-1. Sign in on the rebuilt preview as admin: an ECO 1002 reply streams and the
-   counter drops by one; a FIN 3610 lesson shows no panel. Then merge #126,
-   check the production deploy (CLAUDE.md gotcha), sync local `main`, and
-   tell the ECO 1002 instructors.
+1. Merge #126, check the production deploy (CLAUDE.md gotcha) and smoke-test
+   it signed out, sync local `main`, and tell the ECO 1002 instructors.
 2. Rotate the gateway key (it was pasted in chat) and buy credits before
    students arrive (free tier: 5 requests a minute across the team).
 3. Deferred minors: the counter fails open on a read error; aborted streams
