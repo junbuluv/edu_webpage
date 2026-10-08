@@ -8,6 +8,10 @@ import { listClasses, loadClassRoster } from '@lib/instructor/class-roster';
 import { logDisclosureSafe } from '@lib/audit';
 import { isUuid } from '@lib/workshop-policy';
 import { weeklyCellCsv } from '@lib/attendance-weekly';
+import {
+  rosterExportHeader,
+  rosterExportRow,
+} from '@lib/instructor/roster-export';
 
 const user = Astro.locals.user!;
 const role = Astro.locals.profile?.role ?? 'student';
@@ -112,46 +116,10 @@ if (wantsCsv) {
       },
     );
   }
-  const esc = (v: string | number | null) => {
-    let s = v == null ? '' : String(v);
-    // Neutralize spreadsheet formula injection: a cell starting with one of
-    // these is treated as a formula by Excel/Sheets. Prefix an apostrophe.
-    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  const header = [
-    'name',
-    'email',
-    'section',
-    'lessons_completed',
-    'lessons_total',
-    'quizzes_taken',
-    'avg_best_score',
-    'attendance',
-    ...roster.weeks.map((w) => `week_${w}`),
-    'last_active',
-    'at_risk',
-    'risk_reasons',
+  const lines = [
+    rosterExportHeader(roster.weeks).join(','),
+    ...roster.students.map((s) => rosterExportRow(s, weeklyCellCsv)),
   ];
-  const lines = [header.join(',')];
-  for (const s of roster.students) {
-    lines.push(
-      [
-        esc(s.name),
-        esc(s.email),
-        esc(s.section),
-        s.lessonsCompleted,
-        s.lessonsTotal,
-        s.quizzesTaken,
-        s.avgBestScore == null ? '' : Math.round(s.avgBestScore * 100) / 100,
-        s.attendanceCount,
-        ...s.weeklyCells.map(weeklyCellCsv),
-        esc(s.lastActiveAt),
-        s.risk.atRisk ? 'yes' : 'no',
-        esc(s.risk.reasons.join('; ')),
-      ].join(','),
-    );
-  }
   await logDisclosureSafe({
     actorId: user.id,
     actorRole: role as 'instructor' | 'admin',

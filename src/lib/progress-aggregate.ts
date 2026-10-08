@@ -11,6 +11,8 @@ export type QuizAttemptRow = {
   quiz_slug: string;
   score: number;
   max_score: number;
+  /** ISO timestamp; orders attempts when picking a quiz's first try. */
+  submitted_at?: string | null;
 };
 
 /** Number of distinct quizzes a student has attempted at least once. */
@@ -38,15 +40,49 @@ export function bestScoreByQuiz(
 }
 
 /**
+ * Fraction-correct of each quiz's FIRST attempt (earliest submitted_at),
+ * keyed by quiz_slug. Practice quizzes show the answers after every attempt,
+ * so the first try is the honest measure of what a student knew; later tries
+ * mostly measure retrying. Rows without a timestamp only count when no dated
+ * row exists, in array order. Attempts with a non-positive max_score are
+ * ignored.
+ */
+export function firstScoreByQuiz(
+  attempts: QuizAttemptRow[],
+): Map<string, number> {
+  const first = new Map<string, { pct: number; at: number }>();
+  for (const a of attempts) {
+    if (a.max_score <= 0) continue;
+    const parsed = a.submitted_at ? Date.parse(a.submitted_at) : NaN;
+    const at = Number.isFinite(parsed) ? parsed : Infinity;
+    const prev = first.get(a.quiz_slug);
+    if (prev === undefined || at < prev.at) {
+      first.set(a.quiz_slug, { pct: a.score / a.max_score, at });
+    }
+  }
+  return new Map(Array.from(first, ([slug, v]) => [slug, v.pct]));
+}
+
+function averageOf(scores: Map<string, number>): number | null {
+  if (scores.size === 0) return null;
+  const sum = Array.from(scores.values()).reduce((s, v) => s + v, 0);
+  return sum / scores.size;
+}
+
+/**
  * Average of each quiz's best fraction-correct, across quizzes the student
  * has a scorable attempt for. Returns null when there is nothing to score
  * (no attempts, or every attempt had max_score <= 0).
  */
 export function computeAvgBestScore(attempts: QuizAttemptRow[]): number | null {
-  const best = bestScoreByQuiz(attempts);
-  if (best.size === 0) return null;
-  const sum = Array.from(best.values()).reduce((s, v) => s + v, 0);
-  return sum / best.size;
+  return averageOf(bestScoreByQuiz(attempts));
+}
+
+/** Average of each quiz's first-try fraction-correct; null when nothing scorable. */
+export function computeAvgFirstScore(
+  attempts: QuizAttemptRow[],
+): number | null {
+  return averageOf(firstScoreByQuiz(attempts));
 }
 
 // ---------- at-risk evaluation ----------
@@ -56,8 +92,12 @@ export const RISK_THRESHOLDS = {
   inactiveDays: 14,
   /** Below this fraction of course lessons completed counts as "behind". */
   minLessonCompletionRatio: 0.5,
-  /** Below this average best quiz score counts as "low scores". */
-  minAvgBestScore: 0.6,
+  /**
+   * Below this average FIRST-TRY quiz score counts as "low scores". Not the
+   * best score: answers are shown after each attempt, so a student can retry
+   * any quiz to 100% without having learned it.
+   */
+  minAvgFirstScore: 0.6,
 } as const;
 
 export type RiskThresholds = typeof RISK_THRESHOLDS;
@@ -71,8 +111,8 @@ export interface StudentSignals {
   lastActiveAt: string | null;
   /** Total quiz_attempts rows for this student in this course. */
   quizAttemptCount: number;
-  /** Average best quiz score (0..1), or null if nothing scorable. */
-  avgBestScore: number | null;
+  /** Average first-try quiz score (0..1), or null if nothing scorable. */
+  avgFirstScore: number | null;
   /** Workshop stamps for this student in this course. */
   attendanceCount: number;
 }
@@ -96,7 +136,7 @@ const DAY_MS = 86_400_000;
  * human-readable causes for display. Rules (see RISK_THRESHOLDS):
  *   1. No activity at all (no lessons started, no quizzes attempted).
  *   2. Inactive > inactiveDays AND lessons completed < minLessonCompletionRatio.
- *   3. Average best quiz score < minAvgBestScore (only if they have a score).
+ *   3. Average first-try quiz score < minAvgFirstScore (only if they have one).
  *   4. Zero workshop attendance while >=1 window has already closed.
  */
 export function evaluateRisk(
@@ -129,8 +169,10 @@ export function evaluateRisk(
     reasons.push(`${inactiveLabel}, ${Math.round(ratio * 100)}% lessons done`);
   }
 
-  if (s.avgBestScore != null && s.avgBestScore < t.minAvgBestScore) {
-    reasons.push(`Low quiz avg (${Math.round(s.avgBestScore * 100)}%)`);
+  if (s.avgFirstScore != null && s.avgFirstScore < t.minAvgFirstScore) {
+    reasons.push(
+      `Low first-try quiz avg (${Math.round(s.avgFirstScore * 100)}%)`,
+    );
   }
 
   if (ctx.closedWindowCount > 0 && s.attendanceCount === 0) {

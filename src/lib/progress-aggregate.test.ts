@@ -7,6 +7,8 @@ import {
   countDistinctQuizzes,
   bestScoreByQuiz,
   computeAvgBestScore,
+  firstScoreByQuiz,
+  computeAvgFirstScore,
   evaluateRisk,
   type StudentSignals,
 } from './progress-aggregate.ts';
@@ -22,7 +24,7 @@ const healthy: StudentSignals = {
   lessonStartedCount: 9,
   lastActiveAt: daysAgo(2),
   quizAttemptCount: 6,
-  avgBestScore: 0.9,
+  avgFirstScore: 0.9,
   attendanceCount: 4,
 };
 
@@ -79,7 +81,7 @@ test('rule 1: no activity at all is flagged', () => {
       quizAttemptCount: 0,
       attendanceCount: 0,
       lastActiveAt: null,
-      avgBestScore: null,
+      avgFirstScore: null,
     },
     { closedWindowCount: 0, nowMs: NOW },
   );
@@ -137,7 +139,7 @@ test('rule 2 never renders "Infinity" when engaged but lastActiveAt is null', ()
       lessonStartedCount: 0,
       lastActiveAt: null,
       quizAttemptCount: 3,
-      avgBestScore: 0.9,
+      avgFirstScore: 0.9,
     },
     { closedWindowCount: 0, nowMs: NOW },
   );
@@ -148,20 +150,111 @@ test('rule 2 never renders "Infinity" when engaged but lastActiveAt is null', ()
   assert.ok(r.reasons.some((x) => x.startsWith('No recent activity')));
 });
 
-test('rule 3: low quiz avg flagged below 60%, boundary 60% is not', () => {
+test('rule 3: low first-try quiz avg flagged below 60%, boundary 60% is not', () => {
   assert.ok(
     evaluateRisk(
-      { ...healthy, avgBestScore: 0.59 },
+      { ...healthy, avgFirstScore: 0.59 },
       { closedWindowCount: 0, nowMs: NOW },
-    ).reasons.some((x) => x.startsWith('Low quiz avg')),
+    ).reasons.some((x) => x.startsWith('Low first-try quiz avg')),
   );
   assert.equal(
     evaluateRisk(
-      { ...healthy, avgBestScore: 0.6 },
+      { ...healthy, avgFirstScore: 0.6 },
       { closedWindowCount: 0, nowMs: NOW },
-    ).reasons.some((x) => x.startsWith('Low quiz avg')),
+    ).reasons.some((x) => x.startsWith('Low first-try quiz avg')),
     false,
   );
+});
+
+test('firstScoreByQuiz keeps the earliest attempt per quiz, whatever the row order', () => {
+  const first = firstScoreByQuiz([
+    {
+      quiz_slug: 'a',
+      score: 5,
+      max_score: 5,
+      submitted_at: '2026-05-02T10:00:00Z',
+    },
+    {
+      quiz_slug: 'a',
+      score: 2,
+      max_score: 5,
+      submitted_at: '2026-05-01T10:00:00Z',
+    },
+    {
+      quiz_slug: 'b',
+      score: 1,
+      max_score: 0,
+      submitted_at: '2026-05-01T09:00:00Z',
+    },
+    {
+      quiz_slug: 'b',
+      score: 3,
+      max_score: 4,
+      submitted_at: '2026-05-03T09:00:00Z',
+    },
+  ]);
+  assert.equal(first.get('a'), 0.4);
+  assert.equal(first.get('b'), 0.75); // the max_score=0 row cannot form a ratio
+  // Without timestamps, the first row for a quiz counts as its first attempt.
+  const undated = firstScoreByQuiz([
+    { quiz_slug: 'c', score: 1, max_score: 4 },
+    { quiz_slug: 'c', score: 4, max_score: 4 },
+  ]);
+  assert.equal(undated.get('c'), 0.25);
+});
+
+test('computeAvgFirstScore averages per-quiz first tries, null when nothing scorable', () => {
+  assert.equal(computeAvgFirstScore([]), null);
+  assert.equal(
+    computeAvgFirstScore([{ quiz_slug: 'a', score: 1, max_score: 0 }]),
+    null,
+  );
+  assert.equal(
+    computeAvgFirstScore([
+      {
+        quiz_slug: 'a',
+        score: 1,
+        max_score: 2,
+        submitted_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        quiz_slug: 'a',
+        score: 2,
+        max_score: 2,
+        submitted_at: '2026-05-02T00:00:00Z',
+      },
+      {
+        quiz_slug: 'b',
+        score: 3,
+        max_score: 4,
+        submitted_at: '2026-05-01T00:00:00Z',
+      },
+    ]),
+    0.625,
+  );
+});
+
+test('retrying to 100% does not hide a struggling student', () => {
+  const attempts = [
+    {
+      quiz_slug: 'a',
+      score: 2,
+      max_score: 5,
+      submitted_at: '2026-05-01T10:00:00Z',
+    },
+    {
+      quiz_slug: 'a',
+      score: 5,
+      max_score: 5,
+      submitted_at: '2026-05-01T10:05:00Z',
+    },
+  ];
+  assert.equal(computeAvgBestScore(attempts), 1);
+  const r = evaluateRisk(
+    { ...healthy, avgFirstScore: computeAvgFirstScore(attempts) },
+    { closedWindowCount: 0, nowMs: NOW },
+  );
+  assert.ok(r.reasons.includes('Low first-try quiz avg (40%)'));
 });
 
 test('rule 4: no attendance flagged only once a window has closed', () => {

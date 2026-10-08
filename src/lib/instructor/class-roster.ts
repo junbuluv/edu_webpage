@@ -21,6 +21,7 @@ import {
 import { type CourseSlug, isCourseSlug } from '@lib/courses';
 import {
   computeAvgBestScore,
+  computeAvgFirstScore,
   countDistinctQuizzes,
   evaluateRisk,
   type RiskResult,
@@ -48,6 +49,10 @@ export interface RosterStudent {
   lessonsTotal: number;
   lastActiveAt: string | null;
   quizzesTaken: number;
+  /** Every quiz attempt, retries included. */
+  quizAttempts: number;
+  /** Average first-try score: what the at-risk rule uses (retries show answers). */
+  avgFirstScore: number | null;
   avgBestScore: number | null;
   attendanceCount: number;
   /** Per-week attendance cell aligned with ClassRoster.weeks. */
@@ -487,6 +492,7 @@ export async function loadClassRoster(
         studentSection === administration.section,
     ).length;
     const avgBestScore = computeAvgBestScore(attempts);
+    const avgFirstScore = computeAvgFirstScore(attempts);
 
     const quizLast = quizLastActive.get(id) ?? null;
     let lastActiveAt = lessons.lastActive;
@@ -500,7 +506,7 @@ export async function loadClassRoster(
         lessonStartedCount: lessons.started,
         lastActiveAt,
         quizAttemptCount: attempts.length,
-        avgBestScore,
+        avgFirstScore,
         attendanceCount,
       },
       { closedWindowCount: eligibleClosedWindowCount, nowMs },
@@ -516,6 +522,8 @@ export async function loadClassRoster(
       lessonsTotal,
       lastActiveAt,
       quizzesTaken: countDistinctQuizzes(attempts),
+      quizAttempts: attempts.length,
+      avgFirstScore,
       avgBestScore,
       attendanceCount,
       weeklyCells:
