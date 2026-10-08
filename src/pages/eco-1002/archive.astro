@@ -33,6 +33,7 @@ try {
   archiveUnavailable = true;
   Astro.response.status = 503;
 }
+if (!canView && !archiveUnavailable) Astro.response.status = 403;
 const { items, facets } = archive;
 ---
 
