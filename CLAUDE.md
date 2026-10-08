@@ -551,7 +551,12 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   `quizSlug:` in the lesson frontmatter to link them.
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
   self-contained, accept props for any tunable parameters, default to a
-  calibrated baseline, include a "Reset" affordance for sliders.
+  calibrated baseline, include a "Reset" affordance for sliders. Wrap the
+  chart's sized container in `ChartFrame` (`src/components/viz/ChartFrame.tsx`)
+  with a `description` of what is plotted and a `summary` of the current
+  values in words (reuse the on-screen readout); screen readers hear the
+  summary when a slider moves. `chart-alternatives.test.ts` fails on a bare
+  chart, and `control-labels.test.ts` on an unlabeled slider (convention 24).
 - **New lesson figure**: pick a source — for empirical charts default to
   FRED (`fredgraph.png?id=SERIES`, US public-domain), download under
   `public/figures/<course>/<slug>/`, embed via the `Figure` MDX component
