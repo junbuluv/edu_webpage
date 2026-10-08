@@ -403,6 +403,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     model or log message text. Coach mode is prompt-level only; the
     answer-key boundary stays `toPublicQuestions()` plus server-side grading
     (#17).
+24. **Every form control gets an accessible name, and page-load code never
+    calls `scrollIntoView`.** Point `aria-labelledby` at the visible label
+    (with `useId()`), wrap the control in a `<label>`, or pair `htmlFor`/`id`,
+    so a screen reader names the parameter a slider changes;
+    `src/lib/a11y/control-labels.test.ts` parses every component's JSX and
+    fails otherwise. `scrollIntoView` also moves Chromium's sequential-focus
+    starting point, so on load it makes the first Tab skip the skip link
+    (scroll the container's `scrollTop` instead; `focus-start.test.ts`).
+    `BaseLayout` owns the skip link (`#main`) and the footer link to
+    `/accessibility`; keep that page's claims true when features change.
 
 ## Hosted Supabase gotchas
 
