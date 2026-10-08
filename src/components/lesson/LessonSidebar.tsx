@@ -41,6 +41,7 @@ export default function LessonSidebar({
   );
   const [open, setOpen] = useState(false);
   const currentRef = useRef<HTMLAnchorElement>(null);
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
 
   // Merge anonymous/local progress after hydration so SSR markup and the
   // first client render agree (localStorage is unavailable during SSR).
@@ -60,8 +61,19 @@ export default function LessonSidebar({
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  // Bring the current lesson into view by scrolling the sidebar's own box.
+  // Calling scrollIntoView on the link would also move Chromium's
+  // sequential-focus starting point, so the first Tab would skip the skip
+  // link and the header.
   useEffect(() => {
-    currentRef.current?.scrollIntoView({ block: 'nearest' });
+    const link = currentRef.current;
+    const box = scrollBoxRef.current;
+    if (!link || !box) return;
+    const l = link.getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    if (l.top < b.top || l.bottom > b.bottom) {
+      box.scrollTop += l.top - b.top - (box.clientHeight - l.height) / 2;
+    }
   }, []);
 
   const tree = (
@@ -119,7 +131,10 @@ export default function LessonSidebar({
     <>
       {/* Desktop: fixed column rendered by the layout's grid */}
       <div className="hidden lg:block">
-        <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pb-6 pr-2">
+        <div
+          ref={scrollBoxRef}
+          className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pb-6 pr-2"
+        >
           {tree}
         </div>
       </div>

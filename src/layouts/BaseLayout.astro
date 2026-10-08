@@ -54,6 +54,11 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
     <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-heading focus:shadow"
+      >Skip to main content</a
+    >
     <header class="border-b border-brand-sky/25 bg-brand">
       <div
         class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3"
@@ -192,7 +197,7 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
       </div>
     </header>
 
-    <main class="flex-1" transition:animate="fade">
+    <main id="main" tabindex="-1" class="flex-1" transition:animate="fade">
       <slot />
     </main>
 
@@ -204,6 +209,7 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
         <nav class="flex gap-4">
           <a href="/privacy" class="hover:text-ink">Privacy</a>
           <a href="/terms" class="hover:text-ink">Terms</a>
+          <a href="/accessibility" class="hover:text-ink">Accessibility</a>
           <a
             href="https://github.com/junbuluv/edu_webpage"
             class="hover:text-ink">GitHub</a

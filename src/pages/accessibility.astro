@@ -1,0 +1,75 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+
+const lastUpdated = '2026-10-07';
+---
+
+<BaseLayout title="Accessibility">
+  <article class="mx-auto max-w-3xl px-4 py-12 prose">
+    <h1>Accessibility</h1>
+    <p class="text-sm text-ink-muted">Last updated: {lastUpdated}</p>
+
+    <p>
+      Baruch Econ & Finance Studio is used in Baruch College courses, and every
+      student should be able to use it. We aim to meet the Web Content
+      Accessibility Guidelines (WCAG) 2.1 at level AA.
+    </p>
+
+    <h2>What we do</h2>
+    <ul>
+      <li>
+        Every page starts with a "Skip to main content" link and has one main
+        heading and a main landmark.
+      </li>
+      <li>
+        Equations are rendered with KaTeX, which includes MathML that screen
+        readers can read aloud.
+      </li>
+      <li>
+        Every slider, number box, and menu in the interactive models has a
+        label, so a screen reader names the parameter it changes. Every
+        adjustable value can be set with a keyboard; dragging a curve is an
+        optional shortcut.
+      </li>
+      <li>
+        Text and interface colors are checked against WCAG AA contrast ratios in
+        our automated tests.
+      </li>
+      <li>Images have text alternatives.</li>
+      <li>Pages reflow on phone screens without sideways scrolling.</li>
+    </ul>
+
+    <h2>Known limitations</h2>
+    <ul>
+      <li>
+        The interactive charts are drawn as graphics. We are adding a text
+        description to each chart and a spoken readout of its current values.
+        Until that is done, the lesson text and the numbers shown beside each
+        chart carry the same information.
+      </li>
+      <li>
+        Lecture videos in the course archive are hosted on YouTube or Vimeo, so
+        captions depend on each video.
+      </li>
+      <li>
+        PDFs in the course archive come from past terms and may not be tagged
+        for screen readers. Ask us and we will provide an accessible version.
+      </li>
+    </ul>
+
+    <h2>Report a barrier or ask for another format</h2>
+    <p>
+      If something on this site is hard or impossible to use with your setup,
+      email
+      <a href="mailto:hyunjun.yoo@baruch.cuny.edu"
+        >hyunjun.yoo@baruch.cuny.edu</a
+      >
+      with the page address and what happened. We will reply and work with you on
+      a fix or an accessible alternative.
+    </p>
+    <p>
+      For course accommodations, Baruch students can also work with the
+      college's disability services office.
+    </p>
+  </article>
+</BaseLayout>
