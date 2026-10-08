@@ -24,6 +24,7 @@ export type CourseDashboardData = {
   course: CollectionEntry<'courses'>;
   instructors: Array<CollectionEntry<'instructors'>>;
   enrolledSemester: string | null;
+  enrolledSection: string | null;
   stats: {
     lessonsCompleted: number;
     lessonsTotal: number;
@@ -186,7 +187,7 @@ export async function getDashboardData(
       .order('submitted_at', { ascending: false }),
     supabase
       .from('enrollments')
-      .select('semester')
+      .select('semester, section')
       .eq('user_id', userId)
       .eq('course_slug', courseSlug)
       .order('enrolled_at', { ascending: false })
@@ -299,6 +300,7 @@ export async function getDashboardData(
     course,
     instructors,
     enrolledSemester: enrollmentRows.data?.[0]?.semester ?? null,
+    enrolledSection: enrollmentRows.data?.[0]?.section ?? null,
     stats: {
       lessonsCompleted,
       lessonsTotal: lessons.length,

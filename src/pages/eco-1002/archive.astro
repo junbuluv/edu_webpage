@@ -11,7 +11,7 @@ const user = Astro.locals.user;
 
 // Gate: guests -> signin; signed-in-not-enrolled-not-staff -> notice;
 // enrolled or staff -> archive. Mirrors workshops/[slug].astro but uses
-// isStaff (instructor/ta/admin), per CLAUDE.md convention #12.
+// isStaff (instructor or admin), per CLAUDE.md convention #12.
 if (!user) {
   return Astro.redirect(
     `/auth/signin?next=${encodeURIComponent(Astro.url.pathname)}`,
@@ -33,6 +33,7 @@ try {
   archiveUnavailable = true;
   Astro.response.status = 503;
 }
+if (!canView && !archiveUnavailable) Astro.response.status = 403;
 const { items, facets } = archive;
 ---
 

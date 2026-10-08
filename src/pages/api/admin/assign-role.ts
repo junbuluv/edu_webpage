@@ -37,7 +37,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!email || email.length > 254 || !requestedRole) {
     return err('invalid_input');
   }
-  // Reject anything outside student/instructor/ta up front (e.g. a forged
+  // Reject anything outside student/instructor up front (e.g. a forged
   // 'admin' value) before touching the auth user list.
   if (!isAssignableRole(requestedRole)) return err('invalid_role');
 
