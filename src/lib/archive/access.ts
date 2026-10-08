@@ -6,7 +6,7 @@ import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
 /**
  * True iff the current viewer may see gated, course-scoped archive content
  * (past exams/assignments, etc.) for `courseSlug`: a signed-in user who is
- * either enrolled in the course or is staff (instructor/ta/admin).
+ * either enrolled in the course or is staff (instructor or admin).
  *
  * Centralizes the enrolled-or-staff check used by the archive pages, the
  * quiz viewer, and the grade API so the rule lives in one auditable place.
