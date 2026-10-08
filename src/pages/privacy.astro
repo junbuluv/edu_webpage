@@ -212,6 +212,12 @@ const lastUpdated = '2026-10-07';
     <h2>7. Security</h2>
     <ul>
       <li>
+        When you choose a password, the Service checks it against the public
+        Pwned Passwords list of passwords exposed in data breaches. Only the
+        first five characters of a one-way (SHA-1) hash of the password are
+        sent; the password itself never leaves our server.
+      </li>
+      <li>
         All data is encrypted in transit (TLS) and at rest (AES-256, via our
         database provider Supabase).
       </li>
