@@ -205,7 +205,7 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   re-runs `schema.sql`, and re-runs both suites. Step "Check privilege
   hygiene" (`supabase/tests/privilege_hygiene.sql`) fails if any public table
   is left to default privileges (anon holds anything, authenticated holds a
-  table-level write or DDL privilege, or service_role cannot read) or a retired
+  table-level write or DDL privilege, or `service_role` cannot read) or a retired
   function is back; the auth stub copies the legacy Supabase defaults on
   purpose so this bites in CI. The upgrade-path step finishes by applying
   today's `schema.sql` to the migrated July database and rerunning every
@@ -230,9 +230,10 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
     TA rebuild (#129) touched `role_requests` unconditionally, so an older
     database with `'ta'` but no `role_requests` (#120) could not run
     `schema.sql` at all (fixed 2026-10-07). Put such statements inside a
-    nested `if to_regclass('public.<table>') is not null then … end if;`:
-    PL/pgSQL plans a whole IF condition at once, so `to_regclass(...) is not
-    null and exists (select … from <table>)` still fails on a missing table.
+    nested `if to_regclass('public.<table>') is not null then … end if;`.
+    PL/pgSQL plans a whole IF condition at once, so joining the
+    `to_regclass` check and an `exists (select … from <table>)` with `and`
+    in one condition still fails on a missing table.
 - **`copyright-gate`** — runs `node scripts/check-copyright.mjs` over
   lesson MDX + quiz JSON (flags missing `credit`, external/hotlinked
   images, `materials/` references). Also **advisory**; the deeper,
@@ -266,8 +267,9 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
    Also add the table to the "Client privileges" block at the end of
    `schema.sql` (revoke all, then grant exactly what each role needs): RLS does
    not cover TRUNCATE, REFERENCES, or TRIGGER, and project default privileges
-   differ (production gives service_role everything; the audit staging project
-   gave it nothing). `privilege_hygiene.sql` fails CI for a table left out.
+   differ (production gives `service_role` everything; the audit staging
+   project gave it nothing). `privilege_hygiene.sql` fails CI for a table left
+   out.
    **Sanctioned exception:** instructor-facing data access (reads _and_ writes)
    goes through the service-role admin client (`@lib/supabase/admin`) + an
    app-side ownership / `isStaff` check, NOT RLS — see
@@ -439,6 +441,14 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   the dashboard — they are not in this repo, so re-check them after any
   project restore.
 
+- **The signup domain allowlist is also enforced by an Auth hook.** The form
+  checks `ALLOWED_EMAIL_DOMAINS`, but anyone with the public anon key can call
+  `/auth/v1/signup` directly, so Supabase Auth → Hooks → **Before User
+  Created** runs `public.hook_before_user_created` (in `schema.sql`), which
+  rejects other domains with a 403. The function ships with `schema.sql`; the
+  hook itself is enabled in the dashboard only, so re-check it after any
+  project restore. Keep the function's array equal to `ALLOWED_EMAIL_DOMAINS`
+  (`email-allowlist.test.ts` fails on drift).
 - **Outlook/Gmail link scanners consume one-time links.** A pre-fetched
   confirmation link is spent before the student clicks it; the account is
   confirmed anyway, so `/auth/confirm` answers with "already used — try
