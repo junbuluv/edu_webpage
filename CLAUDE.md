@@ -131,6 +131,13 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   recovery-link sessions, detected via the JWT `amr` claim in
   `src/lib/auth/session-amr.ts` (fails open when the claim is unreadable so
   a genuine recovery user is never stranded)
+- Breached-password check (2026-10-07): signup, `/account/password`, and
+  `/auth/reset` call `checkPwned` (`src/lib/auth/pwned.ts`, unit-tested): a
+  k-anonymity lookup in the Pwned Passwords range API (only a 5-character
+  SHA-1 prefix leaves the server, with `Add-Padding`), 2.5 s timeout, fails
+  open. It exists because Supabase's own leaked-password protection is
+  Pro-plan only and the org is on Free; if the org upgrades, turn that on
+  too (it also covers direct `/auth/v1` calls)
 - Cross-device email confirmation (PR #118): `src/pages/auth/confirm.ts`
   validates `?token_hash=&type=` with `verifyOtp`, entirely server-side, so
   confirmation and reset links work from any device. `/auth/callback` (PKCE
@@ -630,11 +637,11 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    strips TS types but does NOT resolve `@lib/*` path aliases, so anything
    it tests must be alias-free — that's why pure logic is split into
    `progress-aggregate.ts` / `roster-csv.ts` / `roster-export.ts` / `quiz/grade.ts` /
-   `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
+   `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 248 tests as of 2026-10-07.
+   when adding testable logic. 263 tests as of 2026-10-07.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
