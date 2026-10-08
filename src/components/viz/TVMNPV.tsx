@@ -13,6 +13,7 @@ import {
   YAxis,
 } from 'recharts';
 import { irrForCashflows } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // TVM + NPV calculator. CF stream: CF0 (initial outflow, negative) +
 // {C_1, C_2, ..., C_T} with growth rate g applied to a base annual cash
@@ -150,71 +151,91 @@ export default function TVMNPV() {
 
       <div>
         <h4 className="text-sm font-semibold mb-2">Cashflows by year</h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <BarChart data={cashflows}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                label={{
-                  value: 'year',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
-              <Legend verticalAlign="top" height={24} />
-              <Bar dataKey="cf" name="Cash flow" fill="var(--chart-1)" />
-              <Bar dataKey="pv" name="Discounted" fill="var(--chart-3)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            "Cash flows by year (vertical axis, dollars): a bar for each year's cash flow and one for its discounted value."
+          }
+          summary={`NPV ${totalNPV < 0 ? 'negative ' : ''}$${Math.abs(totalNPV).toFixed(0)}${irrVal !== null ? `, IRR about ${(irrVal * 100).toFixed(1)}%` : ''}.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <BarChart data={cashflows}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="t"
+                  label={{
+                    value: 'year',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
+                <Legend verticalAlign="top" height={24} />
+                <Bar dataKey="cf" name="Cash flow" fill="var(--chart-1)" />
+                <Bar dataKey="pv" name="Discounted" fill="var(--chart-3)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <div>
         <h4 className="text-sm font-semibold mb-2">
           NPV sensitivity to discount rate
         </h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <LineChart data={sensitivity}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="r"
-                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-                label={{
-                  value: 'discount rate r',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip
-                formatter={(v: number) => `$${v.toFixed(0)}`}
-                labelFormatter={(l: number) => `r = ${(l * 100).toFixed(1)}%`}
-              />
-              <ReferenceLine y={0} stroke="var(--chart-ref)" />
-              {irrVal !== null && irrVal > 0 && irrVal < 0.5 && (
-                <ReferenceLine
-                  x={irrVal}
-                  stroke="var(--chart-2)"
+        <ChartFrame
+          description={
+            'NPV profile: net present value (vertical axis, dollars) against the discount rate r (horizontal axis, percent). The curve falls as r rises and crosses zero at the internal rate of return (IRR).'
+          }
+          summary={`${irrVal !== null ? `NPV is zero at r ≈ ${(irrVal * 100).toFixed(1)}%, the IRR` : 'NPV does not cross zero in this range'}.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={sensitivity}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
                   strokeDasharray="3 3"
-                  label={{ value: 'IRR', position: 'top', fontSize: 10 }}
                 />
-              )}
-              <Line
-                type="monotone"
-                dataKey="npv"
-                name="NPV(r)"
-                stroke="var(--chart-1)"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+                <XAxis
+                  dataKey="r"
+                  tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                  label={{
+                    value: 'discount rate r',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip
+                  formatter={(v: number) => `$${v.toFixed(0)}`}
+                  labelFormatter={(l: number) => `r = ${(l * 100).toFixed(1)}%`}
+                />
+                <ReferenceLine y={0} stroke="var(--chart-ref)" />
+                {irrVal !== null && irrVal > 0 && irrVal < 0.5 && (
+                  <ReferenceLine
+                    x={irrVal}
+                    stroke="var(--chart-2)"
+                    strokeDasharray="3 3"
+                    label={{ value: 'IRR', position: 'top', fontSize: 10 }}
+                  />
+                )}
+                <Line
+                  type="monotone"
+                  dataKey="npv"
+                  name="NPV(r)"
+                  stroke="var(--chart-1)"
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
       <p className="md:col-span-2 text-xs text-ink-muted">
         Current parameters: CF₀ = ${s.cf0.toFixed(0)}, first annual cash flow =

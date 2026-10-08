@@ -13,6 +13,7 @@ import {
   YAxis,
 } from 'recharts';
 import { operatingIncome } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // Project FCF waterfall:
 //   Revenue       = R0 * (1+gR)^(t-1)
@@ -289,94 +290,114 @@ export default function CashflowWaterfall() {
         <h4 className="text-sm font-semibold mb-2">
           Project cash flow and terminal proceeds by year
         </h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <ComposedChart data={rows} stackOffset="sign">
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                label={{
-                  value: 'year',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
-              <Legend verticalAlign="top" height={24} />
-              <ReferenceLine y={0} stroke="var(--chart-ref)" />
-              <Bar
-                dataKey="nopat"
-                name="NOPAT"
-                stackId="a"
-                fill="var(--chart-3)"
-              />
-              <Bar
-                dataKey="da"
-                name="+ D&A"
-                stackId="a"
-                fill="var(--chart-3-soft)"
-              />
-              <Bar
-                dataKey="terminalValue"
-                name="Terminal value"
-                stackId="a"
-                fill="var(--chart-1)"
-              />
-              <Bar
-                dataKey="dWCNeg"
-                name="− ΔWC"
-                stackId="a"
-                fill="var(--chart-4)"
-              />
-              <Bar
-                dataKey="capexNeg"
-                name="− CapEx"
-                stackId="a"
-                fill="var(--chart-2)"
-              />
-              <Line
-                type="monotone"
-                dataKey="fcf"
-                name="Total cash flow incl. terminal value"
-                stroke="var(--chart-ink)"
-                strokeWidth={2}
-                dot
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            'Cash flows by year (vertical axis, dollars): stacked bars for NOPAT, plus depreciation and amortization, minus the change in working capital, minus capital expenditure, and the terminal value in the final year, with a line for the total.'
+          }
+          summary={`Net present value ${npv < 0 ? 'negative ' : ''}$${Math.abs(npv).toFixed(0)}.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <ComposedChart data={rows} stackOffset="sign">
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="t"
+                  label={{
+                    value: 'year',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
+                <Legend verticalAlign="top" height={24} />
+                <ReferenceLine y={0} stroke="var(--chart-ref)" />
+                <Bar
+                  dataKey="nopat"
+                  name="NOPAT"
+                  stackId="a"
+                  fill="var(--chart-3)"
+                />
+                <Bar
+                  dataKey="da"
+                  name="+ D&A"
+                  stackId="a"
+                  fill="var(--chart-3-soft)"
+                />
+                <Bar
+                  dataKey="terminalValue"
+                  name="Terminal value"
+                  stackId="a"
+                  fill="var(--chart-1)"
+                />
+                <Bar
+                  dataKey="dWCNeg"
+                  name="− ΔWC"
+                  stackId="a"
+                  fill="var(--chart-4)"
+                />
+                <Bar
+                  dataKey="capexNeg"
+                  name="− CapEx"
+                  stackId="a"
+                  fill="var(--chart-2)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="fcf"
+                  name="Total cash flow incl. terminal value"
+                  stroke="var(--chart-ink)"
+                  strokeWidth={2}
+                  dot
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <div>
         <h4 className="text-sm font-semibold mb-2">Cumulative NPV</h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <LineChart data={rows}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                label={{
-                  value: 'year',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
-              <Legend verticalAlign="top" height={24} />
-              <Line
-                type="monotone"
-                dataKey="cumNPV"
-                name="cumulative NPV"
-                stroke="var(--chart-1)"
-                dot
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            'Cumulative net present value (vertical axis, dollars) by year (horizontal axis). Where the line crosses zero, the project has paid back in present-value terms.'
+          }
+          summary={`Cumulative NPV reaches ${npv < 0 ? 'negative ' : ''}$${Math.abs(npv).toFixed(0)} by the final year.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={rows}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="t"
+                  label={{
+                    value: 'year',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip formatter={(v: number) => `$${v.toFixed(0)}`} />
+                <Legend verticalAlign="top" height={24} />
+                <Line
+                  type="monotone"
+                  dataKey="cumNPV"
+                  name="cumulative NPV"
+                  stroke="var(--chart-1)"
+                  dot
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <p className="md:col-span-2 text-xs text-ink-muted">

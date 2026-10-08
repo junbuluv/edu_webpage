@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // MM Proposition II in a perfect market (Berk & DeMarzo Ch 14): no taxes, no
 // distress. As leverage D/E rises, the cost of equity rises linearly,
@@ -88,60 +89,67 @@ export default function MMPropositionII() {
         </button>
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="de"
-              label={{
-                value: 'leverage D/E',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              tickFormatter={(v) => `${v}%`}
-              domain={[0, 'auto']}
-              label={{
-                value: 'rate (%)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `${v.toFixed(1)}%`}
-              labelFormatter={(l: number) => `D/E = ${l}`}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="rE"
-              name="Cost of equity r_E"
-              stroke="var(--chart-2)"
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="wacc"
-              name="WACC (= r_U, flat)"
-              stroke="var(--chart-3)"
-              strokeWidth={2.5}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="rD"
-              name="Cost of debt r_D"
-              stroke="var(--chart-1)"
-              strokeDasharray="5 4"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Modigliani-Miller Proposition II: cost of capital (vertical axis, percent) against leverage D/E (horizontal axis). The cost of equity rises with leverage, the cost of debt is flat, and the WACC stays flat at the unlevered cost of capital.'
+        }
+        summary={`At D/E = 1: cost of equity ${at1.rE.toFixed(1)}%, WACC ${at1.wacc.toFixed(1)}%, equal to the unlevered cost of capital.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="de"
+                label={{
+                  value: 'leverage D/E',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                tickFormatter={(v) => `${v}%`}
+                domain={[0, 'auto']}
+                label={{
+                  value: 'rate (%)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `${v.toFixed(1)}%`}
+                labelFormatter={(l: number) => `D/E = ${l}`}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="rE"
+                name="Cost of equity r_E"
+                stroke="var(--chart-2)"
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="wacc"
+                name="WACC (= r_U, flat)"
+                stroke="var(--chart-3)"
+                strokeWidth={2.5}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="rD"
+                name="Cost of debt r_D"
+                stroke="var(--chart-1)"
+                strokeDasharray="5 4"
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="mt-2 text-xs text-ink-muted">
         Raise leverage and the orange cost of equity climbs in a straight line,
         yet the green WACC never moves: it stays pinned at r_U. The firm trades

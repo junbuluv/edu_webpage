@@ -24,6 +24,7 @@ import {
   shareableURL,
   writeISLMToURL,
 } from '@lib/islm/url-state';
+import ChartFrame from './ChartFrame';
 
 // Closed-economy IS-LM in (Y, r).
 //   IS: r_IS(Y) = (alpha*A - Y) / (alpha*b),   A = A0 + G,  alpha = 1/(1 - c(1-t))
@@ -224,93 +225,100 @@ export default function ISLMChart() {
       </div>
 
       {/* Chart: shows current state, with drag handles on each curve */}
-      <div className="relative mt-4 h-80">
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
-          >
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="Y"
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={(v: number) => v.toFixed(0)}
-              label={{
-                value: 'Output (Y)',
-                position: 'insideBottom',
-                offset: -10,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              type="number"
-              domain={['auto', 'auto']}
-              tickFormatter={(v: number) => v.toFixed(0) + '%'}
-              label={{
-                value: 'Interest rate (r)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `${v.toFixed(2)}%`}
-              labelFormatter={(label: number) => `Y = ${label.toFixed(0)}`}
-            />
-            <Legend verticalAlign="top" height={28} />
-            <Line
-              type="linear"
-              dataKey="rIS"
-              name="IS (goods market)"
-              stroke="var(--chart-1)"
-              strokeWidth={2}
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="linear"
-              dataKey="rLM"
-              name="LM (money market)"
-              stroke="var(--chart-2)"
-              strokeWidth={2}
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceDot
-              x={eq.Yeq}
-              y={eq.req}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-              strokeWidth={2}
-              label={{
-                value: 'eq',
-                position: 'top',
-                fontSize: 11,
-                offset: 8,
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <ChartFrame
+        description={
+          'IS-LM diagram: interest rate r (vertical axis, percent) against output Y (horizontal axis). The IS curve (goods market) slopes down, the LM curve (money market) slopes up, and they cross at equilibrium. Both curves can be dragged.'
+        }
+        summary={`Equilibrium output Y* = ${eq.Yeq.toFixed(1)}, interest rate r* = ${eq.req.toFixed(2)}%.`}
+      >
+        <div className="relative mt-4 h-80">
+          <ResponsiveContainer>
+            <LineChart
+              data={data}
+              margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
+            >
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="Y"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                tickFormatter={(v: number) => v.toFixed(0)}
+                label={{
+                  value: 'Output (Y)',
+                  position: 'insideBottom',
+                  offset: -10,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                type="number"
+                domain={['auto', 'auto']}
+                tickFormatter={(v: number) => v.toFixed(0) + '%'}
+                label={{
+                  value: 'Interest rate (r)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `${v.toFixed(2)}%`}
+                labelFormatter={(label: number) => `Y = ${label.toFixed(0)}`}
+              />
+              <Legend verticalAlign="top" height={28} />
+              <Line
+                type="linear"
+                dataKey="rIS"
+                name="IS (goods market)"
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
+              <Line
+                type="linear"
+                dataKey="rLM"
+                name="LM (money market)"
+                stroke="var(--chart-2)"
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
+              <ReferenceDot
+                x={eq.Yeq}
+                y={eq.req}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+                strokeWidth={2}
+                label={{
+                  value: 'eq',
+                  position: 'top',
+                  fontSize: 11,
+                  offset: 8,
+                }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
 
-        {/* Drag overlays: capture horizontal pan and translate to ΔG / ΔM.
+          {/* Drag overlays: capture horizontal pan and translate to ΔG / ΔM.
             Positioned to roughly hug each curve label area on the right
             edge of the chart so they don't collide with the equilibrium
             dot in the middle. */}
-        <DragHandle
-          label="IS"
-          color="var(--chart-1)"
-          top="20%"
-          onDrag={onDragIS}
-        />
-        <DragHandle
-          label="LM"
-          color="var(--chart-2)"
-          top="65%"
-          onDrag={onDragLM}
-        />
-      </div>
+          <DragHandle
+            label="IS"
+            color="var(--chart-1)"
+            top="20%"
+            onDrag={onDragIS}
+          />
+          <DragHandle
+            label="LM"
+            color="var(--chart-2)"
+            top="65%"
+            onDrag={onDragLM}
+          />
+        </div>
+      </ChartFrame>
 
       {/* Pin & compare + share */}
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">

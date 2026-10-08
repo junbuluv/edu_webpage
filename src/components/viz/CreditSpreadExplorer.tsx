@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Break-even credit spread from Berk & DeMarzo Ch 6: a bond defaulting with
 // probability p and recovering fraction delta of face needs a spread of about
@@ -92,57 +93,64 @@ export default function CreditSpreadExplorer() {
         <strong className="text-emerald-700">{pct(yCorp)}</strong>.
       </p>
 
-      <div className="mt-3 h-72">
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
-          >
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="p"
-              type="number"
-              domain={[0, 10]}
-              tickFormatter={(v) => `${v}%`}
-              label={{
-                value: 'annual default probability p',
-                position: 'insideBottom',
-                offset: -6,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              tickFormatter={(v) => `${v}`}
-              width={48}
-              label={{
-                value: 'spread (bps)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `${v} bps`}
-              labelFormatter={(l: number) => `p = ${l}%`}
-            />
-            <Line
-              type="monotone"
-              dataKey="bps"
-              name="break-even spread"
-              stroke="var(--chart-2)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <ReferenceDot
-              x={+(s.p * 100).toFixed(2)}
-              y={bps}
-              r={5}
-              fill="var(--chart-2)"
-              stroke="none"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Break-even credit spread (vertical axis, basis points) against the annual default probability p (horizontal axis, percent). The spread rises with p; a marker shows the current p.'
+        }
+        summary={`Break-even spread ${bps} basis points; fair corporate yield ${pct(yCorp)}.`}
+      >
+        <div className="mt-3 h-72">
+          <ResponsiveContainer>
+            <LineChart
+              data={data}
+              margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
+            >
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="p"
+                type="number"
+                domain={[0, 10]}
+                tickFormatter={(v) => `${v}%`}
+                label={{
+                  value: 'annual default probability p',
+                  position: 'insideBottom',
+                  offset: -6,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                tickFormatter={(v) => `${v}`}
+                width={48}
+                label={{
+                  value: 'spread (bps)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `${v} bps`}
+                labelFormatter={(l: number) => `p = ${l}%`}
+              />
+              <Line
+                type="monotone"
+                dataKey="bps"
+                name="break-even spread"
+                stroke="var(--chart-2)"
+                strokeWidth={2}
+                dot={false}
+              />
+              <ReferenceDot
+                x={+(s.p * 100).toFixed(2)}
+                y={bps}
+                r={5}
+                fill="var(--chart-2)"
+                stroke="none"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="mt-2 text-xs text-ink-muted">
         The line is the spread that just compensates for expected loss; its
         slope is (1 − δ), so dragging recovery down steepens it. Drag δ to 0

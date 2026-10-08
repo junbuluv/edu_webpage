@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // PV of the four repeating cash-flow streams from Berk & DeMarzo Ch 4.
 // The chart plots PV against the discount rate r so students can see the
@@ -136,10 +137,7 @@ export default function AnnuityExplorer() {
               setS((x) => ({
                 ...x,
                 g: v,
-                r:
-                  x.type === 'growing-perp'
-                    ? Math.max(x.r, v + 0.005)
-                    : x.r,
+                r: x.type === 'growing-perp' ? Math.max(x.r, v + 0.005) : x.r,
               }))
             }
           />
@@ -178,59 +176,66 @@ export default function AnnuityExplorer() {
         )}
       </p>
 
-      <div className="mt-3 h-72">
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
-          >
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="r"
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={(v) => `${v}%`}
-              label={{
-                value: 'discount rate r',
-                position: 'insideBottom',
-                offset: -6,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              tickFormatter={(v) => '$' + (v / 1000).toFixed(0) + 'k'}
-              width={56}
-              label={{
-                value: 'present value',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => '$' + v.toLocaleString()}
-              labelFormatter={(l: number) => `r = ${l}%`}
-            />
-            <Line
-              type="monotone"
-              dataKey="pv"
-              name="PV"
-              stroke="var(--chart-1)"
-              strokeWidth={2}
-              dot={false}
-            />
-            {currentValid && s.r >= rMin && (
-              <ReferenceDot
-                x={+(s.r * 100).toFixed(2)}
-                y={Math.round(current)}
-                r={5}
-                fill="var(--chart-2)"
-                stroke="none"
+      <ChartFrame
+        description={
+          'Present value of the payment stream (vertical axis, dollars) against the discount rate r (horizontal axis, percent). The curve falls as r rises; a marker shows the current rate.'
+        }
+        summary={`At r = ${pct(s.r)} the present value is ${currentValid ? '$' + Math.round(current).toLocaleString('en-US') : 'undefined (it needs r greater than g)'}.`}
+      >
+        <div className="mt-3 h-72">
+          <ResponsiveContainer>
+            <LineChart
+              data={data}
+              margin={{ top: 8, right: 16, bottom: 16, left: 8 }}
+            >
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="r"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                tickFormatter={(v) => `${v}%`}
+                label={{
+                  value: 'discount rate r',
+                  position: 'insideBottom',
+                  offset: -6,
+                  fontSize: 11,
+                }}
               />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+              <YAxis
+                tickFormatter={(v) => '$' + (v / 1000).toFixed(0) + 'k'}
+                width={56}
+                label={{
+                  value: 'present value',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => '$' + v.toLocaleString()}
+                labelFormatter={(l: number) => `r = ${l}%`}
+              />
+              <Line
+                type="monotone"
+                dataKey="pv"
+                name="PV"
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                dot={false}
+              />
+              {currentValid && s.r >= rMin && (
+                <ReferenceDot
+                  x={+(s.r * 100).toFixed(2)}
+                  y={Math.round(current)}
+                  r={5}
+                  fill="var(--chart-2)"
+                  stroke="none"
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="mt-2 text-xs text-ink-muted">
         The orange dot is your chosen r. Drag r left and watch PV climb steeply:
         halving the rate roughly doubles the value of a perpetual stream. For

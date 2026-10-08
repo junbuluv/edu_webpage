@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // WACC = (E/V) * rE + (D/V) * rD * (1 - tax)
 // With MM-with-taxes intuition: as D/E rises, tax shield lowers WACC up to
@@ -133,66 +134,73 @@ export default function WACCVisualizer() {
         </div>
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="dv"
-              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{
-                value: 'D/V (leverage)',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{
-                value: 'cost of capital',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => (v * 100).toFixed(2) + '%'}
-              labelFormatter={(l: number) => `D/V = ${(l * 100).toFixed(0)}%`}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="re"
-              name="cost of equity rE"
-              stroke="var(--chart-2)"
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="rd"
-              name="after-tax rD"
-              stroke="var(--chart-3)"
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="wacc"
-              name="WACC"
-              stroke="var(--chart-1)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <ReferenceDot
-              x={optimal.dv}
-              y={optimal.wacc}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Capital structure trade-off: cost of equity, after-tax cost of debt, and WACC (vertical axis, percent) against the debt ratio D/V (horizontal axis). The WACC curve is U-shaped.'
+        }
+        summary={`Optimal D/V ≈ ${(optimal.dv * 100).toFixed(0)}%, minimum WACC ≈ ${(optimal.wacc * 100).toFixed(2)}%.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="dv"
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'D/V (leverage)',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'cost of capital',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => (v * 100).toFixed(2) + '%'}
+                labelFormatter={(l: number) => `D/V = ${(l * 100).toFixed(0)}%`}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="re"
+                name="cost of equity rE"
+                stroke="var(--chart-2)"
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="rd"
+                name="after-tax rD"
+                stroke="var(--chart-3)"
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="wacc"
+                name="WACC"
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                dot={false}
+              />
+              <ReferenceDot
+                x={optimal.dv}
+                y={optimal.wacc}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
 
       <p className="mt-3 text-xs text-ink-muted">
         With no taxes or distress (MM I), WACC is flat across leverage. Add a

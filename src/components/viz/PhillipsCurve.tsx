@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Expectations-augmented Phillips curve:
 //   pi_t = pi_e - beta*(u - u_n) + eps
@@ -84,47 +85,54 @@ export default function PhillipsCurve() {
         </div>
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="u"
-              tickFormatter={(v) => v.toFixed(0)}
-              label={{
-                value: 'Unemployment u (%)',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'Inflation π (%)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => v.toFixed(2)} />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="pi"
-              name="Phillips curve"
-              stroke="var(--chart-1)"
-              dot={false}
-            />
-            <ReferenceDot
-              x={state.u}
-              y={today}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Expectations-augmented Phillips curve: inflation (vertical axis, percent) against unemployment u (horizontal axis, percent). The curve slopes down and passes through expected inflation at the natural rate of unemployment.'
+        }
+        summary={`Today's inflation ${today.toFixed(2)}% at unemployment ${state.u.toFixed(2)}%.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="u"
+                tickFormatter={(v) => v.toFixed(0)}
+                label={{
+                  value: 'Unemployment u (%)',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'Inflation π (%)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => v.toFixed(2)} />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="pi"
+                name="Phillips curve"
+                stroke="var(--chart-1)"
+                dot={false}
+              />
+              <ReferenceDot
+                x={state.u}
+                y={today}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="mt-3 text-xs text-ink-muted">
         Current parameters: πᵉ = {state.piE.toFixed(1)}%, uₙ ={' '}
         {state.un.toFixed(1)}%, β = {state.beta.toFixed(2)}, and selected u ={' '}

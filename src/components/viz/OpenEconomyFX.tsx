@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { logNetExports, solveLogExchangeRate } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // Mankiw-style small open economy:
 //   S - I = NX  (net capital outflow = net exports)
@@ -124,52 +125,59 @@ export default function OpenEconomyFX() {
         <Stat label="Real exchange rate ε*" value={epsStar.toFixed(2)} />
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="eps"
-              type="number"
-              domain={[data[0].eps, data[data.length - 1].eps]}
-              tickFormatter={(v) => v.toFixed(1)}
-              label={{
-                value: 'Real exchange rate ε',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'Net exports NX',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `$${v.toFixed(0)}B`}
-              labelFormatter={(l: number) => `ε = ${l.toFixed(2)}`}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="NX"
-              name="NX(ε)"
-              stroke="var(--chart-1)"
-              dot={false}
-            />
-            <ReferenceDot
-              x={epsStar}
-              y={flows.capOutflow}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Open economy: net exports NX as a function of the real exchange rate ε. Net exports fall as ε rises, and net capital outflow S minus I sets the equilibrium exchange rate ε*.'
+        }
+        summary={`Saving $${flows.S.toFixed(0)} billion, investment $${flows.I.toFixed(0)} billion, net capital outflow $${flows.capOutflow.toFixed(0)} billion; equilibrium real exchange rate ε* = ${epsStar.toFixed(2)}.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="eps"
+                type="number"
+                domain={[data[0].eps, data[data.length - 1].eps]}
+                tickFormatter={(v) => v.toFixed(1)}
+                label={{
+                  value: 'Real exchange rate ε',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'Net exports NX',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `$${v.toFixed(0)}B`}
+                labelFormatter={(l: number) => `ε = ${l.toFixed(2)}`}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="NX"
+                name="NX(ε)"
+                stroke="var(--chart-1)"
+                dot={false}
+              />
+              <ReferenceDot
+                x={epsStar}
+                y={flows.capOutflow}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
 
       <p className="mt-3 text-xs text-ink-muted">
         Current parameters: r* = {s.rWorld.toFixed(2)}%, saving multiplier ={' '}
