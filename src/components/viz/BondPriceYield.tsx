@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import {
   CartesianGrid,
   Legend,
@@ -62,6 +62,7 @@ export default function BondPriceYield() {
   const [pinned, setPinned] = useState<State | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const presetId = useId();
 
   useEffect(() => {
     const fromUrl = readBondFromURL();
@@ -161,11 +162,14 @@ export default function BondPriceYield() {
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
       {/* Preset menu */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <label className="text-sm font-medium">Preset</label>
+        <label htmlFor={presetId} className="text-sm font-medium">
+          Preset
+        </label>
         <select
+          id={presetId}
           value={activePresetId}
           onChange={(e) => applyPreset(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
+          className="max-w-full rounded border border-slate-300 px-2 py-1 text-sm"
         >
           <option value="">— Custom —</option>
           {BOND_PRESETS.map((p) => (
@@ -406,6 +410,7 @@ function ParamControl({
 }) {
   const fmt = formatter ?? ((v: number) => v.toFixed(decimals));
   const parse = parser ?? ((t: string) => Number(t));
+  const labelId = useId();
   const [text, setText] = useState<string>(fmt(value));
 
   useEffect(() => {
@@ -425,10 +430,13 @@ function ParamControl({
 
   return (
     <div className={`flex flex-col text-sm ${disabled ? 'opacity-40' : ''}`}>
-      <span className="font-medium">{label}</span>
+      <span id={labelId} className="font-medium">
+        {label}
+      </span>
       <div className="mt-1 flex items-center gap-2">
         <input
           type="range"
+          aria-labelledby={labelId}
           min={min}
           max={max}
           step={step}
@@ -439,6 +447,7 @@ function ParamControl({
         />
         <input
           type="text"
+          aria-labelledby={labelId}
           value={text}
           disabled={disabled}
           onChange={(e) => setText(e.target.value)}
