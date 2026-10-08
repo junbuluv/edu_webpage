@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { pluralize } from '@lib/text/plural';
 
 interface Stats {
   lessonsCompleted: number;
@@ -12,10 +13,13 @@ interface Props {
   course: CollectionEntry<'courses'>;
   instructors: Array<CollectionEntry<'instructors'>>;
   enrolledSemester: string | null;
+  /** The student's own section (ECO 1002), when enrolled. */
+  enrolledSection?: string | null;
   stats: Stats;
 }
 
-const { course, instructors, enrolledSemester, stats } = Astro.props;
+const { course, instructors, enrolledSemester, enrolledSection, stats } =
+  Astro.props;
 
 const avgPct =
   stats.avgScore != null ? `${Math.round(stats.avgScore * 100)}%` : '—';
@@ -41,7 +45,7 @@ const avgPct =
         (enrolledSemester || course.data.defaultSemester) && (
           <p class="mt-2 text-xs text-ink-muted">
             {enrolledSemester
-              ? `Enrolled • ${enrolledSemester}`
+              ? `Enrolled • ${enrolledSemester}${enrolledSection ? ` • Section ${enrolledSection}` : ''}`
               : `Reference semester: ${course.data.defaultSemester}`}
           </p>
         )
@@ -51,7 +55,7 @@ const avgPct =
       instructors.length > 0 && (
         <div class="text-right text-sm">
           <p class="text-xs uppercase tracking-wide text-ink-muted">
-            Instructor{instructors.length > 1 ? 's' : ''}
+            {`Course ${pluralize(instructors.length, 'instructor')}`}
           </p>
           <ul class="mt-1 space-y-0.5">
             {instructors.map((i) => (

@@ -135,14 +135,14 @@ if (viewerCanManage && activeSlug && data) {
             <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
               <p>
                 <strong>Browse mode.</strong> You're not enrolled in this
-                course. You can read lessons and try the practice quizzes, but
-                enrollment-only features (proctored quizzes, instructor support,
-                roster-scoped exam administrations) won't appear until your
-                instructor adds you to the roster.
+                course. You can read lessons and try the practice quizzes. The
+                course archive, the AI study tutor, and workshop stamp-in open
+                once your instructor adds you to the roster.
               </p>
             </div>
           )}
           <CourseHeaderCard
+            enrolledSection={data.enrolledSection}
             course={data.course}
             instructors={data.instructors}
             enrolledSemester={data.enrolledSemester}
