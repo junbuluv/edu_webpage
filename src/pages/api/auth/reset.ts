@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { isRecoverySession } from '@lib/auth/session-amr';
+import { checkPwned, PWNED_PASSWORD_MESSAGE } from '@lib/auth/pwned';
 
 const MIN_PASSWORD_LEN = 8;
 
@@ -23,6 +24,11 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
       `/auth/reset?error=${encodeURIComponent(
         `Password must be at least ${MIN_PASSWORD_LEN} characters.`,
       )}`,
+    );
+  }
+  if ((await checkPwned(password)).status === 'pwned') {
+    return redirect(
+      `/auth/reset?error=${encodeURIComponent(PWNED_PASSWORD_MESSAGE)}`,
     );
   }
 

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { safeNext } from '@lib/auth/safe-next';
+import { checkPwned, PWNED_PASSWORD_MESSAGE } from '@lib/auth/pwned';
 import { buildAuthCallbackUrl } from '@lib/auth/callback-url';
 import {
   isAllowedEmail,
@@ -98,6 +99,17 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
         )}`,
       );
     }
+  }
+
+  // Last, since it is the one external call: breached passwords (fails open).
+  if ((await checkPwned(password)).status === 'pwned') {
+    return redirect(
+      `/auth/signup?next=${encodeURIComponent(
+        next,
+      )}&role=${encodeURIComponent(requestedRole)}&error=${encodeURIComponent(
+        PWNED_PASSWORD_MESSAGE,
+      )}`,
+    );
   }
 
   const { data, error } = await locals.supabase.auth.signUp({
