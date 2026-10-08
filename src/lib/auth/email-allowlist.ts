@@ -17,6 +17,10 @@
 // signup to Gmail does not widen who can see class data.
 // TODO: once custom SMTP lands and Baruch delivery is verified, decide
 // whether to keep Gmail or drop it back to Baruch-only.
+//
+// The same list is enforced at the Auth layer by public.hook_before_user_created
+// in supabase/schema.sql (direct API signups skip this form). Change both
+// together; email-allowlist.test.ts fails if they drift.
 export const ALLOWED_EMAIL_DOMAINS = [
   'baruchmail.cuny.edu',
   'baruch.cuny.edu',

@@ -439,6 +439,14 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
   the dashboard — they are not in this repo, so re-check them after any
   project restore.
 
+- **The signup domain allowlist is also enforced by an Auth hook.** The form
+  checks `ALLOWED_EMAIL_DOMAINS`, but anyone with the public anon key can call
+  `/auth/v1/signup` directly, so Supabase Auth → Hooks → **Before User
+  Created** runs `public.hook_before_user_created` (in `schema.sql`), which
+  rejects other domains with a 403. The function ships with `schema.sql`; the
+  hook itself is enabled in the dashboard only, so re-check it after any
+  project restore. Keep the function's array equal to `ALLOWED_EMAIL_DOMAINS`
+  (`email-allowlist.test.ts` fails on drift).
 - **Outlook/Gmail link scanners consume one-time links.** A pre-fetched
   confirmation link is spent before the student clicks it; the account is
   confirmed anyway, so `/auth/confirm` answers with "already used — try

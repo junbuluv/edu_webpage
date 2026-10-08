@@ -299,6 +299,62 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- =========================================================================
+-- Signup email allowlist at the Auth layer (role audit, 2026-10-07).
+--
+-- The signup form checks the domain (src/lib/auth/email-allowlist.ts), but
+-- anyone holding the public anon key can call /auth/v1/signup directly.
+-- Supabase's "Before User Created" hook runs this function for every new
+-- user and rejects addresses outside the same list ('{}' allows, an error
+-- object denies). Keep the array equal to ALLOWED_EMAIL_DOMAINS; a unit test
+-- fails if they drift. Like the TS check, the domain is everything after the
+-- last '@', lowercased and trimmed.
+--
+-- Enable once per project (not reproducible from SQL): Dashboard >
+-- Authentication > Hooks > Before User Created > Postgres >
+-- public.hook_before_user_created. Re-check after any project restore.
+-- =========================================================================
+create or replace function public.hook_before_user_created(event jsonb)
+returns jsonb
+language plpgsql
+stable
+set search_path = ''
+as $$
+declare
+  v_domain text := substring(
+    lower(trim(coalesce(event->'user'->>'email', ''))) from '@([^@]*)$'
+  );
+begin
+  if v_domain = any (array[
+    'baruchmail.cuny.edu',
+    'baruch.cuny.edu',
+    'login.cuny.edu',
+    'gmail.com'
+  ]) then
+    return '{}'::jsonb;
+  end if;
+  return jsonb_build_object(
+    'error', jsonb_build_object(
+      'http_code', 403,
+      'message', 'Sign up with your Baruch or CUNY email address (or Gmail).'
+    )
+  );
+end;
+$$;
+
+revoke all on function public.hook_before_user_created(jsonb)
+  from public, anon, authenticated, service_role;
+
+-- supabase_auth_admin exists only on hosted projects (not in the CI stub).
+do $$ begin
+  if exists (
+    select 1 from pg_catalog.pg_roles where rolname = 'supabase_auth_admin'
+  ) then
+    grant execute on function public.hook_before_user_created(jsonb)
+      to supabase_auth_admin;
+  end if;
+end $$;
+
+-- =========================================================================
 -- terms_acceptances --- immutable, versioned evidence of consent.
 -- =========================================================================
 do $$ begin
