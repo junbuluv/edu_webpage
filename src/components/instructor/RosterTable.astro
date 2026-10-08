@@ -51,7 +51,12 @@ function lastSeen(iso: string | null): string {
         {usesSections && <th class="px-3 py-2 font-medium">Section</th>}
         <th class="px-3 py-2 font-medium">Lessons</th>
         <th class="px-3 py-2 font-medium">Quizzes</th>
-        <th class="px-3 py-2 font-medium">Avg</th>
+        <th
+          class="px-3 py-2 font-medium whitespace-nowrap"
+          title="Average first-try score (the at-risk flag uses this) / average best score"
+        >
+          First / best
+        </th>
         <th class="px-3 py-2 font-medium">Attend</th>
         {
           weeks.map((w) => (
@@ -92,8 +97,18 @@ function lastSeen(iso: string | null): string {
             <td class="px-3 py-2 tabular-nums">
               {s.lessonsCompleted}/{lessonsTotal}
             </td>
-            <td class="px-3 py-2 tabular-nums">{s.quizzesTaken}</td>
-            <td class="px-3 py-2 tabular-nums">{pct(s.avgBestScore)}</td>
+            <td class="px-3 py-2 tabular-nums">
+              {s.quizzesTaken}
+              {s.quizAttempts > s.quizzesTaken && (
+                <span class="text-xs text-ink-muted">
+                  {' '}
+                  ({s.quizAttempts} tries)
+                </span>
+              )}
+            </td>
+            <td class="px-3 py-2 tabular-nums whitespace-nowrap">
+              {pct(s.avgFirstScore)} / {pct(s.avgBestScore)}
+            </td>
             <td class="px-3 py-2 tabular-nums">{s.attendanceCount}</td>
             {s.weeklyCells.map((cell) => (
               <td
