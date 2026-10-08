@@ -20,15 +20,21 @@ export type RosterExportStudent = {
   risk: { atRisk: boolean; reasons: readonly string[] };
 };
 
+// Spreadsheets read a cell as a formula when it starts with = + - @, tab, CR,
+// or LF. Some importers trim leading whitespace first or accept the
+// full-width forms (U+FF1D, U+FF0B, U+FF0D, U+FF20), so the first
+// non-whitespace character counts too. Names in this export are partly
+// student-controlled (display names), so this matters.
+const FORMULA_START = /^[\t\r\n]|^\s*[=+\-@＝＋－＠]/;
+
 /**
- * One CSV cell. A cell starting with = + - @ tab or CR is treated as a formula
- * by Excel and Sheets, so it is prefixed with an apostrophe; cells with a
- * quote, comma, or newline are quoted.
+ * One CSV cell: formula-like text gets a leading apostrophe so it stays text,
+ * and cells with a quote, comma, CR, or LF are quoted.
  */
 export function csvCell(v: string | number | null): string {
   let s = v == null ? '' : String(v);
-  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  if (FORMULA_START.test(s)) s = `'${s}`;
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 export function rosterExportHeader(weeks: readonly string[]): string[] {

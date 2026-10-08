@@ -4,6 +4,7 @@ import { getEntry } from 'astro:content';
 import { isAdmin as isAdminRole, isStaff } from '@lib/roles';
 import { getAdminClient, selectAllRows } from '@lib/supabase/admin';
 import { logDisclosureSafe } from '@lib/audit';
+import { csvCell } from '@lib/instructor/roster-export';
 import {
   canUseStudentWorkshopAttendance,
   formatNewYorkDateTime,
@@ -261,12 +262,6 @@ if (
     },
     request: Astro.request,
   });
-}
-
-function csvCell(value: string | null): string {
-  let safe = value ?? '';
-  if (/^[=+\-@\t\r]/.test(safe)) safe = `'${safe}`;
-  return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 if (csvRequested) {
