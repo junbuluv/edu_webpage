@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { ADASSnapshot } from '@lib/adas/presets';
+import ChartFrame from './ChartFrame';
 
 // Presentational variant of ADASChart: no sliders, no internal state.
 // Designed for compare mode (pinned snapshot side-by-side with live).
@@ -23,7 +24,9 @@ const params = { a: 800, b: 40, g: 1.5, m: 0.4, c: 0.05 };
 
 function solve(s: ADASSnapshot) {
   const { a, b, g, m, c } = params;
-  const P = (c * (a + s.A0) + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) / (1 + c * b);
+  const P =
+    (c * (a + s.A0) + c * g * s.G + c * m * s.M + s.Pe - c * s.Yn) /
+    (1 + c * b);
   const Y = a + s.A0 - b * P + g * s.G + m * s.M;
   return { Y, P };
 }
@@ -48,56 +51,63 @@ export default function ADASScenarioView({ state }: Props) {
         Equilibrium: <strong>Y* = {eq.Y.toFixed(0)}</strong>,{' '}
         <strong>P* = {eq.P.toFixed(2)}</strong>
       </div>
-      <div className="mt-2 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="Y"
-              tickFormatter={(v) => v.toFixed(0)}
-              label={{
-                value: 'Output (Y)',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'Price level (P)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => v.toFixed(2)} />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="AD"
-              name="AD"
-              stroke="var(--chart-1)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="SRAS"
-              name="SRAS"
-              stroke="var(--chart-2)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceDot
-              x={eq.Y}
-              y={eq.P}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'AD-AS diagram: price level P on the vertical axis, output Y on the horizontal axis. The aggregate demand curve AD slopes down, the short-run aggregate supply curve SRAS slopes up, and they cross at equilibrium.'
+        }
+        summary={`Equilibrium output Y* = ${eq.Y.toFixed(0)}, price level P* = ${eq.P.toFixed(2)}.`}
+      >
+        <div className="mt-2 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="Y"
+                tickFormatter={(v) => v.toFixed(0)}
+                label={{
+                  value: 'Output (Y)',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'Price level (P)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => v.toFixed(2)} />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="AD"
+                name="AD"
+                stroke="var(--chart-1)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="SRAS"
+                name="SRAS"
+                stroke="var(--chart-2)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <ReferenceDot
+                x={eq.Y}
+                y={eq.P}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
     </div>
   );
 }

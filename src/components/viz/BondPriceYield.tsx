@@ -24,6 +24,7 @@ import {
   shareableURL,
   writeBondToURL,
 } from '@lib/bonds/url-state';
+import ChartFrame from './ChartFrame';
 
 // Bond pricing: P = sum_{t=1..N} C/(1+y)^t + F/(1+y)^N
 // Macaulay duration = (1/P) * (sum t*C/(1+y)^t + N*F/(1+y)^N)
@@ -269,57 +270,64 @@ export default function BondPriceYield() {
       </div>
 
       {/* Chart with drag handle on YTM */}
-      <div className="relative mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="y"
-              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{
-                value: 'yield to maturity',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'price ($)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `$${v.toFixed(2)}`}
-              labelFormatter={(l: number) => `y = ${(l * 100).toFixed(1)}%`}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="p"
-              name="Price(y)"
-              stroke="var(--chart-1)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceDot
-              x={yieldRate}
-              y={currentP}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-        <DragHandle
-          label="YTM"
-          color="var(--chart-ink)"
-          top="45%"
-          onDrag={onDragYTM}
-        />
-      </div>
+      <ChartFrame
+        description={
+          'Bond price (vertical axis, dollars) against yield to maturity y (horizontal axis, percent): a downward-sloping, convex curve, with a draggable marker at the current yield.'
+        }
+        summary={`Price $${currentP.toFixed(2)}; Macaulay duration ${macaulay.toFixed(2)} years, modified duration ${modified.toFixed(2)}.`}
+      >
+        <div className="relative mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="y"
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'yield to maturity',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'price ($)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `$${v.toFixed(2)}`}
+                labelFormatter={(l: number) => `y = ${(l * 100).toFixed(1)}%`}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="p"
+                name="Price(y)"
+                stroke="var(--chart-1)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <ReferenceDot
+                x={yieldRate}
+                y={currentP}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          <DragHandle
+            label="YTM"
+            color="var(--chart-ink)"
+            top="45%"
+            onDrag={onDragYTM}
+          />
+        </div>
+      </ChartFrame>
 
       {/* Pin & compare + share */}
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">

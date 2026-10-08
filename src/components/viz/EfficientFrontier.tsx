@@ -10,6 +10,7 @@ import {
   YAxis,
   ZAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Two-asset mean-variance frontier explorer (Berk & DeMarzo Ch 11). For a
 // weight w in asset 1 (1-w in asset 2):
@@ -169,76 +170,89 @@ export default function EfficientFrontier() {
         />
       </div>
 
-      <div className="h-80">
-        <ResponsiveContainer>
-          <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              type="number"
-              dataKey="x"
-              name="risk"
-              unit="%"
-              domain={[0, Math.ceil(maxX)]}
-              label={{
-                value: 'risk σ (%)',
-                position: 'insideBottom',
-                offset: -8,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              type="number"
-              dataKey="y"
-              name="return"
-              unit="%"
-              label={{
-                value: 'expected return (%)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <ZAxis range={[60, 60]} />
-            <Tooltip
-              cursor={{ strokeDasharray: '3 3' }}
-              formatter={(v: number) => v.toFixed(1) + '%'}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Scatter
-              name="Opportunity set (all weights)"
-              data={frontier}
-              line={{ stroke: 'var(--chart-1)' }}
-              fill="var(--chart-1)"
-              shape={() => <></>}
-            />
-            <Scatter
-              name="Capital market line"
-              data={cml}
-              line={{ stroke: 'var(--chart-3)', strokeDasharray: '5 4' }}
-              fill="var(--chart-3)"
-              shape={() => <></>}
-            />
-            <Scatter
-              name="Assets"
-              data={[
-                { x: +(s.sd1 * 100).toFixed(2), y: +(s.er1 * 100).toFixed(2) },
-                { x: +(s.sd2 * 100).toFixed(2), y: +(s.er2 * 100).toFixed(2) },
-              ]}
-              fill="var(--chart-ink)"
-            />
-            <Scatter
-              name="Tangent portfolio"
-              data={[
-                {
-                  x: +(tangent.sd * 100).toFixed(2),
-                  y: +(tangent.er * 100).toFixed(2),
-                },
-              ]}
-              fill="var(--chart-2)"
-            />
-          </ScatterChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Mean-variance diagram: expected return (vertical axis, percent) against risk, the standard deviation (horizontal axis, percent). It shows the opportunity set of all weights on the two assets, the capital market line from the risk-free rate, the two assets, and the tangent portfolio.'
+        }
+        summary={`Tangent portfolio: ${(tangent.w * 100).toFixed(0)}% in asset 1, Sharpe ratio ${tangent.sharpe.toFixed(2)}; minimum-variance standard deviation ${(minVar.sd * 100).toFixed(1)}%.`}
+      >
+        <div className="h-80">
+          <ResponsiveContainer>
+            <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                type="number"
+                dataKey="x"
+                name="risk"
+                unit="%"
+                domain={[0, Math.ceil(maxX)]}
+                label={{
+                  value: 'risk σ (%)',
+                  position: 'insideBottom',
+                  offset: -8,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                type="number"
+                dataKey="y"
+                name="return"
+                unit="%"
+                label={{
+                  value: 'expected return (%)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <ZAxis range={[60, 60]} />
+              <Tooltip
+                cursor={{ strokeDasharray: '3 3' }}
+                formatter={(v: number) => v.toFixed(1) + '%'}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Scatter
+                name="Opportunity set (all weights)"
+                data={frontier}
+                line={{ stroke: 'var(--chart-1)' }}
+                fill="var(--chart-1)"
+                shape={() => <></>}
+              />
+              <Scatter
+                name="Capital market line"
+                data={cml}
+                line={{ stroke: 'var(--chart-3)', strokeDasharray: '5 4' }}
+                fill="var(--chart-3)"
+                shape={() => <></>}
+              />
+              <Scatter
+                name="Assets"
+                data={[
+                  {
+                    x: +(s.sd1 * 100).toFixed(2),
+                    y: +(s.er1 * 100).toFixed(2),
+                  },
+                  {
+                    x: +(s.sd2 * 100).toFixed(2),
+                    y: +(s.er2 * 100).toFixed(2),
+                  },
+                ]}
+                fill="var(--chart-ink)"
+              />
+              <Scatter
+                name="Tangent portfolio"
+                data={[
+                  {
+                    x: +(tangent.sd * 100).toFixed(2),
+                    y: +(tangent.er * 100).toFixed(2),
+                  },
+                ]}
+                fill="var(--chart-2)"
+              />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="text-xs text-ink-muted">
         Current parameters: asset 1 E[R] = {pct(s.er1)}, σ = {pct(s.sd1)}; asset
         2 E[R] = {pct(s.er2)}, σ = {pct(s.sd2)}; ρ = {s.rho.toFixed(2)}; and Rf

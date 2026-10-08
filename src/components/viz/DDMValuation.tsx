@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Gordon dividend-discount model with the value-creation lens (Berk &
 // DeMarzo Ch 9). Growth is not a free dial: it comes from retaining
@@ -136,57 +137,67 @@ export default function DDMValuation() {
           Price vs retention (benchmark = pay out everything, ${base.toFixed(2)}
           )
         </h4>
-        <div className="h-72">
-          <ResponsiveContainer>
-            <LineChart data={curve}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="b"
-                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-                label={{
-                  value: 'retention b',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis tickFormatter={(v) => `$${v}`} />
-              <Tooltip
-                formatter={(v: number) => `$${v.toFixed(2)}`}
-                labelFormatter={(l: number) =>
-                  `retention = ${(l * 100).toFixed(0)}%`
-                }
-              />
-              <ReferenceLine
-                y={base}
-                stroke="var(--chart-ref)"
-                strokeDasharray="4 4"
-                label={{
-                  value: 'no-growth benchmark',
-                  position: 'insideTopRight',
-                  fontSize: 10,
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="price"
-                name="P₀(b)"
-                stroke="var(--chart-1)"
-                dot={false}
-                connectNulls
-              />
-              {P !== null && (
-                <ReferenceDot
-                  x={s.retention}
-                  y={P}
-                  r={4}
-                  fill="var(--chart-2)"
-                  stroke="none"
+        <ChartFrame
+          description={
+            'Share price P0 (vertical axis, dollars) against the retention ratio b (horizontal axis), compared with the benchmark of paying out all earnings.'
+          }
+          summary={`Growth g = ${(g * 100).toFixed(2)}%; ${P === null ? 'price undefined because growth is not below the cost of equity' : `price $${P.toFixed(2)}`}, versus $${base.toFixed(2)} if all earnings are paid out.`}
+        >
+          <div className="h-72">
+            <ResponsiveContainer>
+              <LineChart data={curve}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
                 />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+                <XAxis
+                  dataKey="b"
+                  tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                  label={{
+                    value: 'retention b',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis tickFormatter={(v) => `$${v}`} />
+                <Tooltip
+                  formatter={(v: number) => `$${v.toFixed(2)}`}
+                  labelFormatter={(l: number) =>
+                    `retention = ${(l * 100).toFixed(0)}%`
+                  }
+                />
+                <ReferenceLine
+                  y={base}
+                  stroke="var(--chart-ref)"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: 'no-growth benchmark',
+                    position: 'insideTopRight',
+                    fontSize: 10,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="price"
+                  name="P₀(b)"
+                  stroke="var(--chart-1)"
+                  dot={false}
+                  connectNulls
+                />
+                {P !== null && (
+                  <ReferenceDot
+                    x={s.retention}
+                    y={P}
+                    r={4}
+                    fill="var(--chart-2)"
+                    stroke="none"
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
         <p className="mt-2 text-xs text-ink-muted">
           Current parameters: EPS₁ = ${s.eps1.toFixed(2)}, retention ={' '}
           {(s.retention * 100).toFixed(0)}%, return on new investment ={' '}

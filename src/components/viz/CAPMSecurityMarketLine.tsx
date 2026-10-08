@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { paddedReturnDomain } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // CAPM: E[R_i] = R_f + beta_i * (E[R_m] - R_f)
 // SML is the line in (beta, E[R]) space.
@@ -99,59 +100,66 @@ export default function CAPMSecurityMarketLine() {
         </div>
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <ComposedChart
-            data={line}
-            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
-          >
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="beta"
-              type="number"
-              domain={[0, 2]}
-              label={{
-                value: 'beta (β)',
-                position: 'insideBottom',
-                offset: -10,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              type="number"
-              domain={returnDomain}
-              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{
-                value: 'expected / observed return',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => (v * 100).toFixed(2) + '%'} />
-            <ReferenceLine
-              y={s.rf}
-              stroke="var(--chart-ref)"
-              strokeDasharray="3 3"
-              label={{ value: 'Rf', position: 'right', fontSize: 10 }}
-            />
-            <Line
+      <ChartFrame
+        description={
+          'Security market line: expected return (vertical axis, percent) against beta (horizontal axis). The line starts at the risk-free rate and rises with slope equal to the market risk premium; dots mark observed assets above or below it.'
+        }
+        summary={`Risk-free rate ${(s.rf * 100).toFixed(2)}%, market risk premium ${(s.mrp * 100).toFixed(1)}%, so a beta of 1 earns ${((s.rf + s.mrp) * 100).toFixed(2)}%.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <ComposedChart
               data={line}
-              dataKey="exp"
-              stroke="var(--chart-1)"
-              dot={false}
-              name="SML"
-              type="monotone"
-            />
-            <Scatter
-              data={points}
-              dataKey="observed"
-              fill="var(--chart-2)"
-              name="Observed assets"
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+              margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
+            >
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="beta"
+                type="number"
+                domain={[0, 2]}
+                label={{
+                  value: 'beta (β)',
+                  position: 'insideBottom',
+                  offset: -10,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                type="number"
+                domain={returnDomain}
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'expected / observed return',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => (v * 100).toFixed(2) + '%'} />
+              <ReferenceLine
+                y={s.rf}
+                stroke="var(--chart-ref)"
+                strokeDasharray="3 3"
+                label={{ value: 'Rf', position: 'right', fontSize: 10 }}
+              />
+              <Line
+                data={line}
+                dataKey="exp"
+                stroke="var(--chart-1)"
+                dot={false}
+                name="SML"
+                type="monotone"
+              />
+              <Scatter
+                data={points}
+                dataKey="observed"
+                fill="var(--chart-2)"
+                name="Observed assets"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-[34rem] w-full text-sm">

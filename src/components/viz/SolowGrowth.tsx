@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Solow with Cobb-Douglas: y = k^alpha
 // steady state k* = (s / (n + d))^(1/(1-alpha))
@@ -114,83 +115,103 @@ export default function SolowGrowth() {
 
       <div>
         <h4 className="text-sm font-semibold mb-2">Investment vs break-even</h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <AreaChart data={curves}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="k"
-                tickFormatter={(v) => v.toFixed(1)}
-                label={{
-                  value: 'Capital per worker (k)',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip />
-              <Legend verticalAlign="top" height={24} />
-              <Area
-                type="monotone"
-                dataKey="sy"
-                name="s·f(k)"
-                stroke="var(--chart-1)"
-                fill="var(--chart-1-soft)"
-              />
-              <Line
-                type="monotone"
-                dataKey="breakeven"
-                name="(n+δ)·k"
-                stroke="var(--chart-2)"
-                dot={false}
-              />
-              <ReferenceDot
-                x={kss}
-                y={(state.n + state.d) * kss}
-                r={5}
-                fill="var(--chart-ink)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            'Solow model: investment per worker s times f(k) and break-even investment (n plus δ) times k (vertical axis) against capital per worker k (horizontal axis). They cross at the steady state k*.'
+          }
+          summary={`Steady-state capital per worker k* ≈ ${kss.toFixed(2)}, output per worker y* ≈ ${Math.pow(kss, state.alpha).toFixed(2)}.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <AreaChart data={curves}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="k"
+                  tickFormatter={(v) => v.toFixed(1)}
+                  label={{
+                    value: 'Capital per worker (k)',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend verticalAlign="top" height={24} />
+                <Area
+                  type="monotone"
+                  dataKey="sy"
+                  name="s·f(k)"
+                  stroke="var(--chart-1)"
+                  fill="var(--chart-1-soft)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="breakeven"
+                  name="(n+δ)·k"
+                  stroke="var(--chart-2)"
+                  dot={false}
+                />
+                <ReferenceDot
+                  x={kss}
+                  y={(state.n + state.d) * kss}
+                  r={5}
+                  fill="var(--chart-ink)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <div>
         <h4 className="text-sm font-semibold mb-2">Transition path</h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <LineChart data={path}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                label={{
-                  value: 'time',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis />
-              <Tooltip />
-              <Legend verticalAlign="top" height={24} />
-              <Line
-                type="monotone"
-                dataKey="k"
-                name="k(t)"
-                stroke="var(--chart-1)"
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="y"
-                name="y(t)"
-                stroke="var(--chart-3)"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            'Transition path: capital per worker k(t) and output per worker y(t) (vertical axis) over time t (horizontal axis), converging to the steady state.'
+          }
+          summary={`Converging toward k* ≈ ${kss.toFixed(2)} and y* ≈ ${Math.pow(kss, state.alpha).toFixed(2)}.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={path}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="t"
+                  label={{
+                    value: 'time',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend verticalAlign="top" height={24} />
+                <Line
+                  type="monotone"
+                  dataKey="k"
+                  name="k(t)"
+                  stroke="var(--chart-1)"
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="y"
+                  name="y(t)"
+                  stroke="var(--chart-3)"
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
     </div>
   );

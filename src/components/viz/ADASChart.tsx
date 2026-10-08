@@ -24,6 +24,7 @@ import {
   shareableURL,
   writeADASToURL,
 } from '@lib/adas/url-state';
+import ChartFrame from './ChartFrame';
 
 // Short-run AD-AS in (Y, P).
 //   AD:   Y = a + A0 - b*P + g*G + m*M
@@ -233,69 +234,76 @@ export default function ADASChart() {
       </div>
 
       {/* Chart with drag handles */}
-      <div className="relative mt-4 h-80">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="Y"
-              tickFormatter={(v) => v.toFixed(0)}
-              label={{
-                value: 'Output (Y)',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'Price level (P)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => v.toFixed(2)} />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="AD"
-              name="AD"
-              stroke="var(--chart-1)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="SRAS"
-              name="SRAS"
-              stroke="var(--chart-2)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceDot
-              x={eq.Y}
-              y={eq.P}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <ChartFrame
+        description={
+          'AD-AS diagram: price level P on the vertical axis, output Y on the horizontal axis. The aggregate demand curve AD slopes down, the short-run aggregate supply curve SRAS slopes up, and they cross at equilibrium. Both curves can be dragged.'
+        }
+        summary={`Equilibrium output Y* = ${eq.Y.toFixed(0)}, price level P* = ${eq.P.toFixed(2)}.`}
+      >
+        <div className="relative mt-4 h-80">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="Y"
+                tickFormatter={(v) => v.toFixed(0)}
+                label={{
+                  value: 'Output (Y)',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'Price level (P)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => v.toFixed(2)} />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="AD"
+                name="AD"
+                stroke="var(--chart-1)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="SRAS"
+                name="SRAS"
+                stroke="var(--chart-2)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <ReferenceDot
+                x={eq.Y}
+                y={eq.P}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
 
-        <DragHandle
-          label="AD"
-          color="var(--chart-1)"
-          top="25%"
-          onDrag={onDragAD}
-        />
-        <DragHandle
-          label="SRAS"
-          color="var(--chart-2)"
-          top="60%"
-          onDrag={onDragSRAS}
-        />
-      </div>
+          <DragHandle
+            label="AD"
+            color="var(--chart-1)"
+            top="25%"
+            onDrag={onDragAD}
+          />
+          <DragHandle
+            label="SRAS"
+            color="var(--chart-2)"
+            top="60%"
+            onDrag={onDragSRAS}
+          />
+        </div>
+      </ChartFrame>
 
       {/* Pin & compare + share */}
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">

@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // Simple deposit multiplier:  m_simple = 1 / r
 // Full transaction-money multiplier (a stylized M1 proxy):
@@ -101,38 +102,46 @@ export default function MoneyMultiplier() {
         <Stat label="Currency C" value={`$${C.toFixed(0)}B`} />
       </div>
 
-      <div className="mt-4 h-64">
-        <ResponsiveContainer>
-          <BarChart data={chartData}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip formatter={(v: number) => `$${v.toFixed(0)}B`} />
-            <Legend />
-            <Bar
-              dataKey="currency"
-              name="Currency in circulation"
-              stackId="a"
-              fill="var(--chart-1)"
-            />
-            <Bar
-              dataKey="reserves"
-              name="Bank reserves"
-              stackId="a"
-              fill="var(--chart-2)"
-            />
-            <Bar
-              dataKey="deposits"
-              name="Checkable deposits"
-              stackId="a"
-              fill="var(--chart-3)"
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Money supply components (vertical axis, billions of dollars): currency in circulation, bank reserves, and checkable deposits.'
+        }
+        summary={`Multiplier m = ${m.toFixed(2)}; modeled M1 $${M1.toFixed(0)} billion, of which deposits $${D.toFixed(0)} billion and currency $${C.toFixed(0)} billion.`}
+      >
+        <div className="mt-4 h-64">
+          <ResponsiveContainer>
+            <BarChart data={chartData}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(v: number) => `$${v.toFixed(0)}B`} />
+              <Legend />
+              <Bar
+                dataKey="currency"
+                name="Currency in circulation"
+                stackId="a"
+                fill="var(--chart-1)"
+              />
+              <Bar
+                dataKey="reserves"
+                name="Bank reserves"
+                stackId="a"
+                fill="var(--chart-2)"
+              />
+              <Bar
+                dataKey="deposits"
+                name="Checkable deposits"
+                stackId="a"
+                fill="var(--chart-3)"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
 
       <p className="mt-3 text-xs text-ink-muted">
-        This stylized transaction-money model uses <code>M1 = m · MB</code> where
+        This stylized transaction-money model uses <code>M1 = m · MB</code>{' '}
+        where
         <code> m = (1 + C/D) / ((C/D) + (R/D))</code>. As banks hold more excess
         reserves (R/D ↑) or the public holds more cash (C/D ↑), the multiplier
         shrinks. It does not model M2, whose ratio to the monetary base is a

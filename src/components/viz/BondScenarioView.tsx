@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { BondSnapshot } from '@lib/bonds/presets';
+import ChartFrame from './ChartFrame';
 
 // Presentational variant of BondPriceYield: no sliders, no internal
 // state. Used in compare mode (pinned snapshot vs live bond).
@@ -61,51 +62,58 @@ export default function BondScenarioView({ state }: Props) {
         <Stat label="Macaulay D" value={macaulay.toFixed(2)} />
         <Stat label="Modified D" value={modified.toFixed(2)} />
       </div>
-      <div className="mt-2 h-64">
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="y"
-              tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
-              label={{
-                value: 'YTM',
-                position: 'insideBottom',
-                offset: -4,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              label={{
-                value: 'price ($)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip
-              formatter={(v: number) => `$${v.toFixed(2)}`}
-              labelFormatter={(l: number) => `y = ${(l * 100).toFixed(1)}%`}
-            />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
-              dataKey="p"
-              name="Price(y)"
-              stroke="var(--chart-1)"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceDot
-              x={state.yieldRate}
-              y={currentP}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartFrame
+        description={
+          'Bond price (vertical axis, dollars) against yield to maturity y (horizontal axis, percent): a downward-sloping, convex curve with a marker at the current yield.'
+        }
+        summary={`Price $${currentP.toFixed(2)}; Macaulay duration ${macaulay.toFixed(2)} years, modified duration ${modified.toFixed(2)}.`}
+      >
+        <div className="mt-2 h-64">
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="y"
+                tickFormatter={(v) => (v * 100).toFixed(0) + '%'}
+                label={{
+                  value: 'YTM',
+                  position: 'insideBottom',
+                  offset: -4,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'price ($)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                formatter={(v: number) => `$${v.toFixed(2)}`}
+                labelFormatter={(l: number) => `y = ${(l * 100).toFixed(1)}%`}
+              />
+              <Legend verticalAlign="top" height={24} />
+              <Line
+                type="monotone"
+                dataKey="p"
+                name="Price(y)"
+                stroke="var(--chart-1)"
+                dot={false}
+                isAnimationActive={false}
+              />
+              <ReferenceDot
+                x={state.yieldRate}
+                y={currentP}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
     </div>
   );
 }

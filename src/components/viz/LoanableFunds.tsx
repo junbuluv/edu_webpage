@@ -14,6 +14,7 @@ import {
   loanableFundsEquilibrium,
   loanableFundsRateDomain,
 } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // Loanable funds market:
 //   Demand for loanable funds (investment): I(r) = I0 - bI * r
@@ -150,75 +151,82 @@ export default function LoanableFunds() {
         )}
       </div>
 
-      <div className="mt-4 h-72">
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
-          >
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="I"
-              type="number"
-              domain={quantityDomain}
-              tickFormatter={(v) => `$${v.toFixed(0)}B`}
-              label={{
-                value: 'Loanable funds quantity',
-                position: 'insideBottom',
-                offset: -10,
-                fontSize: 11,
-              }}
-            />
-            <YAxis
-              dataKey="r"
-              type="number"
-              domain={[rateDomain.minimum, rateDomain.maximum]}
-              label={{
-                value: 'Real interest rate r (%)',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => v.toFixed(2)} />
-            <Legend verticalAlign="top" height={24} />
-            <Line
-              type="monotone"
+      <ChartFrame
+        description={
+          'Loanable funds market: real interest rate r (vertical axis, percent) against the quantity of funds (horizontal axis, billions of dollars). Investment demand slopes down; supply, private saving minus the deficit, slopes up; a third curve shows private saving alone.'
+        }
+        summary={`Equilibrium interest rate r* = ${eq.rStar.toFixed(2)}%, investment I* = $${eq.iStar.toFixed(0)} billion${Math.abs(crowdOut) > 1 ? `; deficit effect on investment $${crowdOut.toFixed(0)} billion` : ''}.`}
+      >
+        <div className="mt-4 h-72">
+          <ResponsiveContainer>
+            <LineChart
               data={data}
-              dataKey="r"
-              name="Demand (Investment)"
-              stroke="var(--chart-2)"
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              data={data.map((d) => ({ ...d, I: d.S }))}
-              dataKey="r"
-              name="Supply (Saving - Deficit)"
-              stroke="var(--chart-1)"
-              dot={false}
-            />
-            {s.deficit !== 0 && (
+              margin={{ top: 8, right: 16, bottom: 28, left: 8 }}
+            >
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="I"
+                type="number"
+                domain={quantityDomain}
+                tickFormatter={(v) => `$${v.toFixed(0)}B`}
+                label={{
+                  value: 'Loanable funds quantity',
+                  position: 'insideBottom',
+                  offset: -10,
+                  fontSize: 11,
+                }}
+              />
+              <YAxis
+                dataKey="r"
+                type="number"
+                domain={[rateDomain.minimum, rateDomain.maximum]}
+                label={{
+                  value: 'Real interest rate r (%)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => v.toFixed(2)} />
+              <Legend verticalAlign="top" height={24} />
               <Line
                 type="monotone"
-                data={data.map((d) => ({ ...d, I: d.Sprivate }))}
+                data={data}
                 dataKey="r"
-                name="Private saving alone"
-                stroke="var(--chart-ref)"
-                strokeDasharray="4 4"
+                name="Demand (Investment)"
+                stroke="var(--chart-2)"
                 dot={false}
               />
-            )}
-            <ReferenceDot
-              x={eq.iStar}
-              y={eq.rStar}
-              r={5}
-              fill="var(--chart-ink)"
-              stroke="white"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+              <Line
+                type="monotone"
+                data={data.map((d) => ({ ...d, I: d.S }))}
+                dataKey="r"
+                name="Supply (Saving - Deficit)"
+                stroke="var(--chart-1)"
+                dot={false}
+              />
+              {s.deficit !== 0 && (
+                <Line
+                  type="monotone"
+                  data={data.map((d) => ({ ...d, I: d.Sprivate }))}
+                  dataKey="r"
+                  name="Private saving alone"
+                  stroke="var(--chart-ref)"
+                  strokeDasharray="4 4"
+                  dot={false}
+                />
+              )}
+              <ReferenceDot
+                x={eq.iStar}
+                y={eq.rStar}
+                r={5}
+                fill="var(--chart-ink)"
+                stroke="white"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
 
       <p className="mt-3 text-xs text-ink-muted">
         Current parameters: deficit = ${s.deficit.toFixed(0)}B, private-saving

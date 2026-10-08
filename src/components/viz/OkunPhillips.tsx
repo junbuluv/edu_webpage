@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { maxLocalOkunGap, okunOutcome } from '@lib/viz/model-math';
+import ChartFrame from './ChartFrame';
 
 // Okun's law:  u - u_n = -k * (Y - Y_n)/Y_n           (k ≈ 0.5 for US)
 // Phillips curve (expectations-augmented):
@@ -158,98 +159,118 @@ export default function OkunPhillips() {
 
       <div>
         <h4 className="text-sm font-semibold mb-2">Okun: gap → unemployment</h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <LineChart data={data}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="gap"
-                tickFormatter={(v) => v.toFixed(0) + '%'}
-                label={{
-                  value: 'output gap',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis
-                tickFormatter={(v) => v.toFixed(0) + '%'}
-                label={{
-                  value: 'u (%)',
-                  angle: -90,
-                  position: 'insideLeft',
-                  fontSize: 11,
-                }}
-              />
-              <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
-              <Legend verticalAlign="top" height={24} />
-              <Line
-                type="monotone"
-                dataKey="u"
-                name="u(gap)"
-                stroke="var(--chart-1)"
-                dot={false}
-              />
-              <ReferenceDot
-                x={s.outputGap}
-                y={current.u}
-                r={5}
-                fill="var(--chart-ink)"
-                stroke="white"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            "Okun's law: unemployment rate u (vertical axis, percent) against the output gap (horizontal axis, percent). Unemployment falls as the gap rises; a dot marks the current gap."
+          }
+          summary={`Unemployment u = ${current.u.toFixed(2)}%.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={data}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="gap"
+                  tickFormatter={(v) => v.toFixed(0) + '%'}
+                  label={{
+                    value: 'output gap',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis
+                  tickFormatter={(v) => v.toFixed(0) + '%'}
+                  label={{
+                    value: 'u (%)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fontSize: 11,
+                  }}
+                />
+                <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
+                <Legend verticalAlign="top" height={24} />
+                <Line
+                  type="monotone"
+                  dataKey="u"
+                  name="u(gap)"
+                  stroke="var(--chart-1)"
+                  dot={false}
+                />
+                <ReferenceDot
+                  x={s.outputGap}
+                  y={current.u}
+                  r={5}
+                  fill="var(--chart-ink)"
+                  stroke="white"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <div>
         <h4 className="text-sm font-semibold mb-2">
           Phillips: unemployment → inflation
         </h4>
-        <div className="h-64">
-          <ResponsiveContainer>
-            <LineChart data={phillipsData}>
-              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="u"
-                type="number"
-                domain={['auto', 'auto']}
-                tickFormatter={(v) => v.toFixed(1) + '%'}
-                label={{
-                  value: 'unemployment u',
-                  position: 'insideBottom',
-                  offset: -4,
-                  fontSize: 11,
-                }}
-              />
-              <YAxis
-                tickFormatter={(v) => v.toFixed(1) + '%'}
-                label={{
-                  value: 'π (%)',
-                  angle: -90,
-                  position: 'insideLeft',
-                  fontSize: 11,
-                }}
-              />
-              <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
-              <Legend verticalAlign="top" height={24} />
-              <Line
-                type="monotone"
-                dataKey="pi"
-                name="π(u)"
-                stroke="var(--chart-2)"
-                dot={false}
-              />
-              <ReferenceDot
-                x={current.u}
-                y={current.pi}
-                r={5}
-                fill="var(--chart-ink)"
-                stroke="white"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartFrame
+          description={
+            'Phillips curve: inflation (vertical axis, percent) against unemployment u (horizontal axis, percent); a dot marks the current point.'
+          }
+          summary={`Inflation ${current.pi.toFixed(2)}% at unemployment ${current.u.toFixed(2)}%.`}
+        >
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={phillipsData}>
+                <CartesianGrid
+                  stroke="var(--chart-grid)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  dataKey="u"
+                  type="number"
+                  domain={['auto', 'auto']}
+                  tickFormatter={(v) => v.toFixed(1) + '%'}
+                  label={{
+                    value: 'unemployment u',
+                    position: 'insideBottom',
+                    offset: -4,
+                    fontSize: 11,
+                  }}
+                />
+                <YAxis
+                  tickFormatter={(v) => v.toFixed(1) + '%'}
+                  label={{
+                    value: 'π (%)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fontSize: 11,
+                  }}
+                />
+                <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
+                <Legend verticalAlign="top" height={24} />
+                <Line
+                  type="monotone"
+                  dataKey="pi"
+                  name="π(u)"
+                  stroke="var(--chart-2)"
+                  dot={false}
+                />
+                <ReferenceDot
+                  x={current.u}
+                  y={current.pi}
+                  r={5}
+                  fill="var(--chart-ink)"
+                  stroke="white"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartFrame>
       </div>
 
       <p className="md:col-span-2 mt-1 text-xs text-ink-muted">

@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import ChartFrame from './ChartFrame';
 
 // DuPont decomposition from Berk & DeMarzo Ch 2:
 //   ROE = (Net income / Revenue) x (Revenue / Assets) x (Assets / Equity)
@@ -108,52 +109,59 @@ export default function DuPontExplorer() {
         <strong className="text-accent">{mine.toFixed(1)}%</strong>
       </p>
 
-      <div className="mt-3 h-72">
-        <ResponsiveContainer>
-          <BarChart
-            data={bars}
-            margin={{ top: 16, right: 16, bottom: 8, left: 8 }}
-          >
-            <CartesianGrid
-              stroke="var(--chart-grid)"
-              strokeDasharray="3 3"
-              vertical={false}
-            />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
-            <YAxis
-              domain={[0, yMax]}
-              tickFormatter={(v) => `${v}%`}
-              width={44}
-              label={{
-                value: 'ROE',
-                angle: -90,
-                position: 'insideLeft',
-                fontSize: 11,
-              }}
-            />
-            <Tooltip formatter={(v: number) => `${v}%`} />
-            <ReferenceLine
-              y={mine}
-              stroke="var(--chart-2)"
-              strokeDasharray="5 4"
-              label={{
-                value: `your firm ${mine.toFixed(1)}%`,
-                position: 'right',
-                fontSize: 11,
-                fill: 'var(--chart-ink)',
-              }}
-            />
-            <Bar dataKey="roe" name="ROE" fill="var(--chart-1)">
-              <LabelList
-                dataKey="roe"
-                position="top"
-                formatter={(v: number) => `${v}%`}
-                style={{ fontSize: 11 }}
+      <ChartFrame
+        description={
+          'Return on equity (ROE, percent) by firm: bars for the comparison firms and for your firm.'
+        }
+        summary={`Your firm: ROE ${mine.toFixed(1)}% (net margin ${pct(s.margin)} times asset turnover ${s.turnover.toFixed(2)} times equity multiplier ${s.em.toFixed(1)}).`}
+      >
+        <div className="mt-3 h-72">
+          <ResponsiveContainer>
+            <BarChart
+              data={bars}
+              margin={{ top: 16, right: 16, bottom: 8, left: 8 }}
+            >
+              <CartesianGrid
+                stroke="var(--chart-grid)"
+                strokeDasharray="3 3"
+                vertical={false}
               />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis
+                domain={[0, yMax]}
+                tickFormatter={(v) => `${v}%`}
+                width={44}
+                label={{
+                  value: 'ROE',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip formatter={(v: number) => `${v}%`} />
+              <ReferenceLine
+                y={mine}
+                stroke="var(--chart-2)"
+                strokeDasharray="5 4"
+                label={{
+                  value: `your firm ${mine.toFixed(1)}%`,
+                  position: 'right',
+                  fontSize: 11,
+                  fill: 'var(--chart-ink)',
+                }}
+              />
+              <Bar dataKey="roe" name="ROE" fill="var(--chart-1)">
+                <LabelList
+                  dataKey="roe"
+                  position="top"
+                  formatter={(v: number) => `${v}%`}
+                  style={{ fontSize: 11 }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartFrame>
       <p className="mt-2 text-xs text-ink-muted">
         The three archetype bars are the same height: each reaches roughly the
         same ROE by a different route. Thin margin and fast turnover for the
