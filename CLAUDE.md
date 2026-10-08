@@ -49,9 +49,14 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/lib/instructor/class-roster.ts` (roster + per-student monitoring +
   at-risk flags + CSV export) and `roster-import.ts` (bulk CSV enrollment
   import with ownership gate); pure alias-free helpers
-  `src/lib/progress-aggregate.ts` + `src/lib/instructor/roster-csv.ts`
+  `src/lib/progress-aggregate.ts` + `src/lib/instructor/roster-csv.ts` +
+  `src/lib/instructor/roster-export.ts` (CSV export, formula-injection escape)
   (unit-tested — see "Verifying"); read-only audit-log viewer on
-  `src/pages/admin/index.astro`
+  `src/pages/admin/index.astro`. The low-scores at-risk rule uses the average
+  **first-try** quiz score (`firstScoreByQuiz`), never the best: practice
+  quizzes show the answers after each attempt, so a best score of 100% can
+  hide a struggling student. The roster shows first / best and the attempt
+  count
 - Enrollment CRUD (PR #101): instructors/admins add/drop/edit individual
   students from the roster page (`/instructor/classes/<course>`). Gated
   POST handlers `src/pages/api/instructor/classes/{enroll,drop,update}.ts`
@@ -624,12 +629,12 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    (aggregation, at-risk rules, CSV parsing, quiz grading). `node --test`
    strips TS types but does NOT resolve `@lib/*` path aliases, so anything
    it tests must be alias-free — that's why pure logic is split into
-   `progress-aggregate.ts` / `roster-csv.ts` / `quiz/grade.ts` /
+   `progress-aggregate.ts` / `roster-csv.ts` / `roster-export.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `admin/role-decision.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 229 tests as of 2026-10-07.
+   when adding testable logic. 248 tests as of 2026-10-07.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
