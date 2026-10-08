@@ -171,7 +171,11 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   the team, so buy credits before students use it; `--course <slug>
 --coaching-only` screens one course's coaching); its reports go to the gitignored
   `quality_reports/tutor-eval/` (transcripts can contain quiz answers; never
-  commit them)
+  commit them). `/privacy` discloses the tutor (Vercel AI Gateway to OpenAI,
+  usage rows purged after 365 days); `src/lib/privacy/disclosure.test.ts`
+  fails if the notice stops naming the processors or its retention periods
+  drift from the purge jobs in `schema.sql`, so update `/privacy` together
+  with any new processor or retention job
 
 ## Repository workflow
 
