@@ -19,7 +19,10 @@ exception when duplicate_object then null; end $$;
 -- Leftover TA accounts become students and TA staff requests are deleted.
 -- Audit rows by a TA stop the run instead: audit history is never rewritten.
 -- Production had none of either on 2026-10-07. Fresh databases never get
--- 'ta', so this block does nothing there.
+-- 'ta', so this block does nothing there. Databases older than role_requests
+-- (#120) or audit_log also reach this block, so statements touching those
+-- tables sit inside nested to_regclass checks (PL/pgSQL plans a whole IF
+-- condition at once, so an AND would still fail on a missing table).
 do $$
 declare
   r record;
@@ -35,8 +38,10 @@ begin
     return;
   end if;
 
-  if exists (select 1 from public.audit_log where actor_role::text = 'ta') then
-    raise exception 'audit_log has rows with actor_role ta; decide how to keep them before removing the role';
+  if pg_catalog.to_regclass('public.audit_log') is not null then
+    if exists (select 1 from public.audit_log where actor_role::text = 'ta') then
+      raise exception 'audit_log has rows with actor_role ta; decide how to keep them before removing the role';
+    end if;
   end if;
 
   create temp table if not exists _ta_dropped (
@@ -79,22 +84,31 @@ begin
     insert into _ta_dropped values ('trigger', r.name, r.tbl);
   end loop;
 
-  alter table public.role_requests drop constraint if exists role_requests_role_chk;
+  if pg_catalog.to_regclass('public.role_requests') is not null then
+    alter table public.role_requests drop constraint if exists role_requests_role_chk;
+    delete from public.role_requests where requested_role::text = 'ta';
+  end if;
   alter table public.profiles alter column role drop default;
 
   update public.profiles set role = 'student' where role::text = 'ta';
-  delete from public.role_requests where requested_role::text = 'ta';
 
   create type public.user_role_v2 as enum ('student', 'instructor', 'admin');
-  alter table public.profiles
-    alter column role type public.user_role_v2
-    using role::text::public.user_role_v2;
-  alter table public.role_requests
-    alter column requested_role type public.user_role_v2
-    using requested_role::text::public.user_role_v2;
-  alter table public.audit_log
-    alter column actor_role type public.user_role_v2
-    using actor_role::text::public.user_role_v2;
+  -- Every column of the old type (profiles.role, audit_log.actor_role, and
+  -- role_requests.requested_role where that table exists).
+  for r in
+    select a.attrelid::regclass as tbl, a.attname as col
+      from pg_catalog.pg_attribute a
+      join pg_catalog.pg_class c
+        on c.oid = a.attrelid and c.relkind in ('r', 'p')
+     where a.atttypid = 'public.user_role'::regtype
+       and a.attnum > 0
+       and not a.attisdropped
+  loop
+    execute format(
+      'alter table %s alter column %I type public.user_role_v2 using %I::text::public.user_role_v2',
+      r.tbl, r.col, r.col
+    );
+  end loop;
   drop type public.user_role;
   alter type public.user_role_v2 rename to user_role;
   -- Every signup takes this default; losing it would break account creation.
@@ -1443,42 +1457,11 @@ create policy "audit_log_authenticated_read"
 -- bypasses RLS by design) may write.
 
 -- =========================================================================
--- log_disclosure(action, target_user_id, target_resource, metadata) RPC
---
--- Called by the application layer (under the user's JWT) when an
--- instructor/admin is about to read another user's record. Runs with
--- definer rights to write the audit_log row even though no insert policy
--- exists for ordinary roles. Refuses to log for student-role actors so
--- it can't be misused as a write channel.
+-- log_disclosure() is retired (role audit, 2026-10-07). Nothing could call it:
+-- EXECUTE was revoked from client roles and the service role has no auth.uid().
+-- Disclosure logging goes through src/lib/audit.ts (convention #10).
 -- =========================================================================
-create or replace function public.log_disclosure(
-  p_action text,
-  p_target_user_id uuid,
-  p_target_resource text default null,
-  p_metadata jsonb default null
-) returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_role user_role;
-begin
-  select role into v_role from public.profiles where id = auth.uid();
-  if v_role is null or v_role = 'student' then
-    raise exception 'log_disclosure: caller must be instructor, ta, or admin';
-  end if;
-  insert into public.audit_log (
-    actor_id, actor_role, action, target_user_id, target_resource, metadata
-  ) values (
-    auth.uid(), v_role, p_action, p_target_user_id, p_target_resource, p_metadata
-  );
-end;
-$$;
-
-revoke all on function public.log_disclosure(text, uuid, text, jsonb) from public;
-revoke execute on function public.log_disclosure(text, uuid, text, jsonb)
-  from anon, authenticated;
+drop function if exists public.log_disclosure(text, uuid, text, jsonb);
 
 -- =========================================================================
 -- Retention jobs (pg_cron)
@@ -4184,6 +4167,7 @@ revoke all privileges on table
   public.profiles,
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,
@@ -4202,6 +4186,7 @@ grant select, insert, update, delete on table
   public.profiles,
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,
@@ -4227,6 +4212,7 @@ grant update (display_name, active_course_slug)
 grant select on table
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,

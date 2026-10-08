@@ -96,6 +96,12 @@ jobs:
       - name: Exercise lesson tutor RLS
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/lesson_tutor_rls.sql
 
+      # Every public table carries explicit grants (the auth stub copies the
+      # legacy Supabase defaults on purpose, so a table left to the defaults
+      # fails here), and retired functions stay dropped.
+      - name: Check privilege hygiene
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/privilege_hygiene.sql
+
       # The TA role was retired on 2026-10-07. Production was built while
       # schema.sql still added 'ta', so rehearse that database here: put 'ta'
       # and leftover TA rows back, re-run schema.sql (which must rebuild
@@ -108,6 +114,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/remove_ta_role_check.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/lesson_tutor_rls.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/privilege_hygiene.sql
 
       - name: Exercise pre-audit upgrade and migration idempotence
         run: |
@@ -278,6 +285,13 @@ jobs:
            );
           SQL
           psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
+          # Then bring that July database (which still has 'ta' and predates
+          # role_requests) up to today's schema.sql, as an old project would
+          # be upgraded, and rerun every suite against the result.
+          psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/lesson_tutor_rls.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/privilege_hygiene.sql
 
   # Deterministic copyright gate over lesson MDX + quiz JSON: missing figure
   # credit, external/hotlinked images, references to the gitignored materials/

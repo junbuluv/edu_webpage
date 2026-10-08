@@ -714,10 +714,11 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Retired in schema.sql (2026-10-07); older databases still have it, revoked.
   begin
     perform public.log_disclosure('rls_fixture', auth.uid());
     raise exception 'student audit RPC execute was permitted';
-  exception when insufficient_privilege then null;
+  exception when insufficient_privilege or undefined_function then null;
   end;
 end $$;
 
@@ -1860,8 +1861,13 @@ begin
      or has_function_privilege('authenticated', 'public.handle_new_user()', 'execute')
      or has_function_privilege('anon', 'public.backfill_email_hmac()', 'execute')
      or has_function_privilege('authenticated', 'public.backfill_email_hmac()', 'execute')
-     or has_function_privilege('anon', 'public.log_disclosure(text,uuid,text,jsonb)', 'execute')
-     or has_function_privilege('authenticated', 'public.log_disclosure(text,uuid,text,jsonb)', 'execute')
+     or exists (
+       -- Retired in schema.sql; when present (older databases) it must stay revoked.
+       select 1 from pg_catalog.pg_proc p
+        where p.oid = to_regprocedure('public.log_disclosure(text,uuid,text,jsonb)')
+          and (has_function_privilege('anon', p.oid, 'execute')
+               or has_function_privilege('authenticated', p.oid, 'execute'))
+     )
      or has_function_privilege('anon', 'public.purge_inactive_accounts(integer)', 'execute')
      or has_function_privilege('authenticated', 'public.purge_inactive_accounts(integer)', 'execute')
      or has_function_privilege('anon', 'public.purge_old_quiz_attempts(integer)', 'execute')

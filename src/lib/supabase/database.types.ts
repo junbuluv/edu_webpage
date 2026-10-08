@@ -699,15 +699,6 @@ export type Database = {
           remaining: number;
         }[];
       };
-      log_disclosure: {
-        Args: {
-          p_action: string;
-          p_target_user_id: string;
-          p_target_resource?: string | null;
-          p_metadata?: Json | null;
-        };
-        Returns: void;
-      };
       offboard_staff: {
         Args: {
           p_actor_id: string;
