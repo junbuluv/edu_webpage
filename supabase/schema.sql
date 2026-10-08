@@ -4198,6 +4198,7 @@ revoke all privileges on table
   public.profiles,
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,
@@ -4216,6 +4217,7 @@ grant select, insert, update, delete on table
   public.profiles,
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,
@@ -4241,6 +4243,7 @@ grant update (display_name, active_course_slug)
 grant select on table
   public.terms_acceptances,
   public.teaching_assignments,
+  public.role_requests,
   public.lesson_progress,
   public.offering_lesson_progress,
   public.quiz_attempts,
