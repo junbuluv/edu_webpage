@@ -131,6 +131,12 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   recovery-link sessions, detected via the JWT `amr` claim in
   `src/lib/auth/session-amr.ts` (fails open when the claim is unreadable so
   a genuine recovery user is never stranded)
+- Terms version: `CURRENT_TERMS_VERSION` in `src/lib/auth/terms.ts` (now
+  `2026-10-07`). Accepting the terms also acknowledges the Privacy Policy, so
+  bump it whenever `/terms` or `/privacy` gets a newer `lastUpdated`;
+  `terms.test.ts` fails otherwise. A bump sends every signed-in account
+  through `/account/terms` once (API calls answer 428 until then; the tutor
+  explains this)
 - Breached-password check (2026-10-07): signup, `/account/password`, and
   `/auth/reset` call `checkPwned` (`src/lib/auth/pwned.ts`, unit-tested): a
   k-anonymity lookup in the Pwned Passwords range API (only a 5-character
@@ -641,7 +647,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `theme/contrast.ts` / `chart/series-color.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 263 tests as of 2026-10-07.
+   when adding testable logic. 264 tests as of 2026-10-07.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
