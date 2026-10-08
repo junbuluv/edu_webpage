@@ -102,6 +102,11 @@ jobs:
       - name: Check privilege hygiene
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/privilege_hygiene.sql
 
+      # The Auth "Before User Created" hook enforces the signup domain list
+      # for direct API signups (enabled per project in the dashboard).
+      - name: Exercise the signup allowlist hook
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/signup_hook.sql
+
       # The TA role was retired on 2026-10-07. Production was built while
       # schema.sql still added 'ta', so rehearse that database here: put 'ta'
       # and leftover TA rows back, re-run schema.sql (which must rebuild
@@ -292,6 +297,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/security_hardening_rls.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/lesson_tutor_rls.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/privilege_hygiene.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/signup_hook.sql
 
   # Deterministic copyright gate over lesson MDX + quiz JSON: missing figure
   # credit, external/hotlinked images, references to the gitignored materials/
