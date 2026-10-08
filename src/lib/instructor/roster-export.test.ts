@@ -73,3 +73,17 @@ test('csvCell neutralizes spreadsheet formulas and escapes quotes', () => {
   assert.equal(csvCell(null), '');
   assert.equal(csvCell(7), '7');
 });
+
+test('csvCell also neutralizes formulas behind whitespace or in full-width form', () => {
+  // Importers that trim leading whitespace would otherwise evaluate these.
+  assert.equal(csvCell(' =1+1'), "' =1+1");
+  assert.equal(csvCell('\t\n@cmd'), `"'\t\n@cmd"`);
+  assert.equal(csvCell('\n=1+1'), `"'\n=1+1"`);
+  // Full-width = + - @ (U+FF1D, U+FF0B, U+FF0D, U+FF20).
+  for (const ch of ['\uFF1D', '\uFF0B', '\uFF0D', '\uFF20']) {
+    assert.equal(csvCell(`${ch}1`), `'${ch}1`);
+  }
+  // Ordinary text and numbers in text are untouched.
+  assert.equal(csvCell('Ada Lovelace'), 'Ada Lovelace');
+  assert.equal(csvCell('2026-10-01T12:00:00Z'), '2026-10-01T12:00:00Z');
+});
