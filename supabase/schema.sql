@@ -1457,42 +1457,11 @@ create policy "audit_log_authenticated_read"
 -- bypasses RLS by design) may write.
 
 -- =========================================================================
--- log_disclosure(action, target_user_id, target_resource, metadata) RPC
---
--- Called by the application layer (under the user's JWT) when an
--- instructor/admin is about to read another user's record. Runs with
--- definer rights to write the audit_log row even though no insert policy
--- exists for ordinary roles. Refuses to log for student-role actors so
--- it can't be misused as a write channel.
+-- log_disclosure() is retired (role audit, 2026-10-07). Nothing could call it:
+-- EXECUTE was revoked from client roles and the service role has no auth.uid().
+-- Disclosure logging goes through src/lib/audit.ts (convention #10).
 -- =========================================================================
-create or replace function public.log_disclosure(
-  p_action text,
-  p_target_user_id uuid,
-  p_target_resource text default null,
-  p_metadata jsonb default null
-) returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_role user_role;
-begin
-  select role into v_role from public.profiles where id = auth.uid();
-  if v_role is null or v_role = 'student' then
-    raise exception 'log_disclosure: caller must be instructor, ta, or admin';
-  end if;
-  insert into public.audit_log (
-    actor_id, actor_role, action, target_user_id, target_resource, metadata
-  ) values (
-    auth.uid(), v_role, p_action, p_target_user_id, p_target_resource, p_metadata
-  );
-end;
-$$;
-
-revoke all on function public.log_disclosure(text, uuid, text, jsonb) from public;
-revoke execute on function public.log_disclosure(text, uuid, text, jsonb)
-  from anon, authenticated;
+drop function if exists public.log_disclosure(text, uuid, text, jsonb);
 
 -- =========================================================================
 -- Retention jobs (pg_cron)
