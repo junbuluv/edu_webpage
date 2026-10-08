@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 
-const lastUpdated = '2026-07-14';
+const lastUpdated = '2026-10-07';
 ---
 
 <BaseLayout title="Privacy Policy">
@@ -66,6 +66,12 @@ const lastUpdated = '2026-07-14';
         IP and User-Agent are not stored). The actor identifier is set to null
         if that staff account is later deleted.
       </li>
+      <li>
+        If you use the AI study tutor: a usage record for each question you ask
+        (your account identifier, the course and lesson, the time, the model,
+        and token counts). The text of your messages and of the tutor's replies
+        is not stored.
+      </li>
     </ul>
 
     <h2>2. What we do not collect</h2>
@@ -108,15 +114,26 @@ const lastUpdated = '2026-07-14';
         are enforced in the database and rechecked by server routes.
       </li>
       <li>
-        <strong>Administrators</strong> (the project owner only) can read all records.
-        The Service attempts to audit staff roster-page access, exports, and management
-        actions; actions directed at one student include that student's account identifier.
-        A failed best-effort audit write is logged server-side, and availability-sensitive
-        operations may continue.
+        <strong>Administrators</strong> (a small group designated by the project owner)
+        can read all records. The Service attempts to audit staff roster-page access,
+        exports, and management actions; actions directed at one student include that
+        student's account identifier. A failed best-effort audit write is logged server-side,
+        and availability-sensitive operations may continue.
       </li>
       <li>
-        <strong>Nobody else.</strong> We do not sell, rent, or share records with
-        advertisers, data brokers, or any third party except as required by law.
+        <strong>Service providers</strong> process records only to run the Service:
+        Supabase (database and sign-in), Vercel (hosting), and Resend (account and
+        notification email). If you use the AI study tutor, your messages and the
+        text of the lesson you are on are sent through Vercel's AI Gateway to OpenAI
+        to generate replies; your name, email address, and student ID are never included.
+        Under its API terms, OpenAI does not use this data to train its models and
+        keeps it for up to 30 days to monitor for abuse. Using the tutor is optional,
+        and the panel asks you not to type personal information into it.
+      </li>
+      <li>
+        <strong>Nobody else.</strong> We do not sell or rent records or share them
+        with advertisers or data brokers, and we disclose them otherwise only as required
+        by law.
       </li>
     </ul>
 
@@ -131,6 +148,10 @@ const lastUpdated = '2026-07-14';
         transferred or removed.
       </li>
       <li>Quiz attempts older than 730 days are automatically purged.</li>
+      <li>
+        AI study tutor usage records older than 365 days are automatically
+        purged.
+      </li>
       <li>
         Workshop attendance is retained with the related education record until
         account deletion or the institution's applicable retention schedule. New
