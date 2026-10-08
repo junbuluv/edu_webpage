@@ -59,3 +59,10 @@ test('retention periods match the purge jobs in schema.sql', () => {
 test('administrator wording does not promise a single admin', () => {
   assert.equal(privacy.includes('the project owner only'), false);
 });
+
+test('the breached-password check is disclosed', () => {
+  assert.ok(
+    privacy.includes('Pwned Passwords'),
+    '/privacy does not mention the Pwned Passwords check',
+  );
+});

@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { checkPwned, PWNED_PASSWORD_MESSAGE } from '@lib/auth/pwned';
 
 const MIN_PASSWORD_LEN = 8;
 
@@ -27,6 +28,11 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   if (password === currentPassword) {
     return redirect(
       '/account/password?error=New+password+must+differ+from+the+current+one.',
+    );
+  }
+  if ((await checkPwned(password)).status === 'pwned') {
+    return redirect(
+      `/account/password?error=${encodeURIComponent(PWNED_PASSWORD_MESSAGE)}`,
     );
   }
 
