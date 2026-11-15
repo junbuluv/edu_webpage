@@ -658,7 +658,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    it tests must be alias-free — that's why pure logic is split into
    `progress-aggregate.ts` / `roster-csv.ts` / `roster-export.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
-   `theme/contrast.ts` / `chart/series-color.ts` /
+   `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
    when adding testable logic. 264 tests as of 2026-10-07.

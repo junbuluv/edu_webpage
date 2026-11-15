@@ -1,44 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
+import { canSwapAgain } from '@lib/animation/typing-limit';
 
 interface Props {
-  /** Verbs to cycle through. Order matters; cycles forever. */
+  /** Verbs to type in order. The run stops within 5 s (WCAG 2.2.2). */
   verbs: string[];
   /** Per-character type speed in ms. Default 70. */
   typeMs?: number;
   /** Per-character delete speed in ms. Default 35 (faster than typing). */
   deleteMs?: number;
-  /** How long to hold a fully typed verb before deleting. Default 1400ms. */
+  /** How long to hold a fully typed verb before deleting. Default 1000ms. */
   holdMs?: number;
 }
 
-type Phase = 'typing' | 'holding' | 'deleting';
+type Phase = 'typing' | 'holding' | 'deleting' | 'done';
 
 export default function TypingVerb({
   verbs,
   typeMs = 70,
   deleteMs = 35,
-  holdMs = 1400,
+  holdMs = 1000,
 }: Props) {
   const [index, setIndex] = useState(0);
   const [text, setText] = useState(verbs[0] ?? '');
   const [phase, setPhase] = useState<Phase>('holding');
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const startRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    setReducedMotion(mq?.matches ?? false);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq?.addEventListener?.('change', handler);
-    return () => mq?.removeEventListener?.('change', handler);
-  }, []);
-
-  useEffect(() => {
-    if (reducedMotion || verbs.length === 0) return;
-    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-
+    if (phase === 'done' || verbs.length === 0) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setText(verbs[index] ?? '');
+      setPhase('done');
+      return;
+    }
+    startRef.current ??= performance.now();
     const target = verbs[index];
+    const next = verbs[(index + 1) % verbs.length];
+    const elapsed = performance.now() - startRef.current;
+    const timing = { typeMs, deleteMs, holdMs };
 
     if (phase === 'typing') {
       if (text.length < target.length) {
@@ -49,48 +48,44 @@ export default function TypingVerb({
         setPhase('holding');
       }
     } else if (phase === 'holding') {
-      timerRef.current = window.setTimeout(() => {
-        setPhase('deleting');
-      }, holdMs);
-    } else {
-      // deleting
-      if (text.length > 0) {
-        timerRef.current = window.setTimeout(() => {
-          setText(text.slice(0, -1));
-        }, deleteMs);
+      // Stop here, cursor and all, unless one more swap ends in time.
+      const last = index === verbs.length - 1;
+      if (last || !canSwapAgain(elapsed, text.length, next.length, timing)) {
+        setPhase('done');
       } else {
-        setIndex((i) => (i + 1) % verbs.length);
-        setPhase('typing');
+        timerRef.current = window.setTimeout(() => {
+          setPhase('deleting');
+        }, holdMs);
       }
+    } else if (text.length > 0) {
+      timerRef.current = window.setTimeout(() => {
+        setText(text.slice(0, -1));
+      }, deleteMs);
+    } else {
+      setIndex((i) => i + 1);
+      setPhase('typing');
     }
 
     return () => {
-      if (timerRef.current !== null) {
-        window.clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      timerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, phase, index, reducedMotion]);
-
-  // When reduced-motion flips on after we've started animating, settle
-  // on the current verb (no further changes).
-  useEffect(() => {
-    if (reducedMotion) {
-      setText(verbs[index] ?? '');
-      setPhase('holding');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
+  }, [text, phase, index]);
 
   return (
-    <span className="inline-block text-brand-sky" aria-live="polite">
-      {text}
-      <span
-        aria-hidden="true"
-        className="ml-0.5 inline-block w-[2px] -translate-y-[2px] animate-pulse bg-brand-sky align-middle"
-        style={{ height: '0.9em' }}
-      />
-    </span>
+    <>
+      {/* Screen readers get one fixed sentence; the typing is visual only. */}
+      <span className="sr-only">{verbs[0]}</span>
+      <span className="inline-block text-brand-sky" aria-hidden="true">
+        {text}
+        {phase !== 'done' && (
+          <span
+            className="ml-0.5 inline-block w-[2px] -translate-y-[2px] animate-pulse bg-brand-sky align-middle"
+            style={{ height: '0.9em' }}
+          />
+        )}
+      </span>
+    </>
   );
 }
