@@ -319,3 +319,19 @@ jobs:
           node-version: '22'
       - name: Copyright check
         run: node scripts/check-copyright.mjs
+
+  # Impeccable's design detector (deterministic pattern rules, no LLM) over
+  # src/, reported as PR annotations. Exit 2 means findings. ADVISORY (not
+  # in required_status_checks). Keep the version equal to the plugin ref in
+  # .claude/settings.json.
+  design-detect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Impeccable detector
+        run: npx --yes impeccable@4.9.1 detect --github src/

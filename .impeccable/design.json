@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T15:57:06.975Z",
+  "title": "Design System: Baruch Econ & Finance Studio",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "tonalRamp": [
+          "#050B15",
+          "#1A2636",
+          "#354356",
+          "#536277",
+          "#74849A",
+          "#97A6BD",
+          "#BFCADA",
+          "#EBEFF4"
+        ]
+      },
+      "heading": {
+        "role": "primary",
+        "displayName": "Baruch Blue",
+        "tonalRamp": [
+          "#000A21",
+          "#002351",
+          "#15417A",
+          "#36629E",
+          "#5684C3",
+          "#7AA7E6",
+          "#ACCCF8",
+          "#E5EFFE"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "CUNY Blue",
+        "tonalRamp": [
+          "#00062A",
+          "#001B62",
+          "#0033A1",
+          "#2257C7",
+          "#437BEE",
+          "#74A3FE",
+          "#ADCAFF",
+          "#E7EFFE"
+        ]
+      },
+      "accent-strong": {
+        "role": "primary",
+        "displayName": "Baruch Blue",
+        "tonalRamp": [
+          "#000A21",
+          "#002351",
+          "#15417A",
+          "#36629E",
+          "#5684C3",
+          "#7AA7E6",
+          "#ACCCF8",
+          "#E5EFFE"
+        ]
+      },
+      "accent-soft": {
+        "role": "secondary",
+        "displayName": "Accent Soft",
+        "tonalRamp": [
+          "#00062A",
+          "#001B62",
+          "#0033A1",
+          "#2257C7",
+          "#437BEE",
+          "#74A3FE",
+          "#ADCAFF",
+          "#E7EFFE"
+        ]
+      },
+      "brand": {
+        "role": "primary",
+        "displayName": "Baruch Blue",
+        "tonalRamp": [
+          "#000A21",
+          "#002351",
+          "#15417A",
+          "#36629E",
+          "#5684C3",
+          "#7AA7E6",
+          "#ACCCF8",
+          "#E5EFFE"
+        ]
+      },
+      "brand-sky": {
+        "role": "secondary",
+        "displayName": "Sky",
+        "tonalRamp": [
+          "#000A21",
+          "#06244B",
+          "#22426F",
+          "#406292",
+          "#6184B6",
+          "#84A7D9",
+          "#B2CBEF",
+          "#E6EFFC"
+        ]
+      },
+      "brand-sky-soft": {
+        "role": "secondary",
+        "displayName": "Sky Soft",
+        "tonalRamp": [
+          "#000A21",
+          "#06244B",
+          "#22426F",
+          "#406292",
+          "#6184B6",
+          "#84A7D9",
+          "#B2CBEF",
+          "#E6EFFC"
+        ]
+      },
+      "brand-mist": {
+        "role": "secondary",
+        "displayName": "Sky Mist",
+        "tonalRamp": [
+          "#000A21",
+          "#06244B",
+          "#22426F",
+          "#406292",
+          "#6184B6",
+          "#84A7D9",
+          "#B2CBEF",
+          "#E6EFFC"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "neutral-50": {
+        "role": "neutral",
+        "displayName": "Pearl",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "neutral-100": {
+        "role": "neutral",
+        "displayName": "Pearl Deep",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "neutral-200": {
+        "role": "neutral",
+        "displayName": "Linen",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "neutral-300": {
+        "role": "neutral",
+        "displayName": "Dove",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "neutral-400": {
+        "role": "neutral",
+        "displayName": "Stone",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "course-eco-1002": {
+        "role": "tertiary",
+        "displayName": "CUNY Blue (ECO 1002)",
+        "tonalRamp": [
+          "#00062A",
+          "#001B62",
+          "#0033A1",
+          "#2257C7",
+          "#437BEE",
+          "#74A3FE",
+          "#ADCAFF",
+          "#E7EFFE"
+        ]
+      },
+      "course-fin-3610": {
+        "role": "tertiary",
+        "displayName": "Grape (FIN 3610)",
+        "tonalRamp": [
+          "#150023",
+          "#380154",
+          "#5B1B81",
+          "#7C40A5",
+          "#9F62CB",
+          "#C287EF",
+          "#DDB6FE",
+          "#F5E9FF"
+        ]
+      },
+      "chart-1": {
+        "role": "tertiary",
+        "displayName": "Midtown Blue",
+        "tonalRamp": [
+          "#000B1E",
+          "#00254B",
+          "#00427D",
+          "#2062A8",
+          "#4585CD",
+          "#6AA9F1",
+          "#A3CDFE",
+          "#E4F0FE"
+        ]
+      },
+      "chart-2": {
+        "role": "tertiary",
+        "displayName": "Tangerine",
+        "tonalRamp": [
+          "#1A0400",
+          "#441300",
+          "#722601",
+          "#A43900",
+          "#D7510E",
+          "#FD7944",
+          "#FEB59A",
+          "#FEE9E2"
+        ]
+      },
+      "chart-3": {
+        "role": "tertiary",
+        "displayName": "Bluish Green",
+        "tonalRamp": [
+          "#000F08",
+          "#002D1E",
+          "#034F38",
+          "#057353",
+          "#079970",
+          "#46BE92",
+          "#93DBBC",
+          "#DDF5EA"
+        ]
+      },
+      "chart-4": {
+        "role": "tertiary",
+        "displayName": "Reddish Purple",
+        "tonalRamp": [
+          "#1C0011",
+          "#460130",
+          "#6B214F",
+          "#8F426F",
+          "#B46391",
+          "#D887B4",
+          "#EFB5D4",
+          "#FDE8F2"
+        ]
+      },
+      "chart-1-soft": {
+        "role": "tertiary",
+        "displayName": "Midtown Tint",
+        "tonalRamp": [
+          "#000B1E",
+          "#00254B",
+          "#00427D",
+          "#2062A8",
+          "#4585CD",
+          "#6AA9F1",
+          "#A3CDFE",
+          "#E4F0FE"
+        ]
+      },
+      "chart-3-soft": {
+        "role": "tertiary",
+        "displayName": "Light Green",
+        "tonalRamp": [
+          "#000F08",
+          "#002D1E",
+          "#034F38",
+          "#057353",
+          "#079970",
+          "#46BE92",
+          "#93DBBC",
+          "#DDF5EA"
+        ]
+      },
+      "chart-grid": {
+        "role": "neutral",
+        "displayName": "Grid Gray",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "chart-ref": {
+        "role": "neutral",
+        "displayName": "Reference Gray",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#64748B",
+          "#A19E98",
+          "#D8D7D6",
+          "#E6E4DF",
+          "#EFECE5",
+          "#F7F4EB"
+        ]
+      },
+      "chart-ink": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero headline only, white on Baruch Blue."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Lesson titles (800); app page titles use the size at 600."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Lesson section headings (h2)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Lesson prose, 65ch column."
+      },
+      "body-ui": {
+        "displayName": "Body UI",
+        "purpose": "App pages, app tables, forms, buttons, chart controls."
+      },
+      "table": {
+        "displayName": "Table",
+        "purpose": "Markdown tables inside lessons."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase eyebrow labels."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Code only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "The hero's white course button on Baruch Blue."
+      },
+      {
+        "name": "handle",
+        "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        "purpose": "Chart drag handles at rest."
+      },
+      {
+        "name": "raised",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "A drag handle under the pointer."
+      },
+      {
+        "name": "floating",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Fixed corner buttons such as the tutor launcher."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1) 150ms",
+        "purpose": "Tailwind `transition` default for hover color and shadow changes."
+      },
+      {
+        "name": "value-tween",
+        "value": "easeOutCubic via requestAnimationFrame",
+        "purpose": "Chart values (useAnimatedValue); instant under prefers-reduced-motion."
+      },
+      {
+        "name": "page-fade",
+        "value": "Astro View Transitions fade",
+        "purpose": "Cross-page navigation on <main>."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action on white: save, submit, start.",
+      "html": "<button class=\"ds-btn-primary\">Save progress</button>",
+      "css": ".ds-btn-primary { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: rgb(var(--accent)); color: #fff; padding: 6px 12px; font-size: 0.875rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; } .ds-btn-primary:hover { background: rgb(var(--accent-strong)); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--accent)); } .ds-btn-primary:disabled { opacity: 0.6; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Lower-weight actions next to content: reset, previous, export.",
+      "html": "<button class=\"ds-btn-secondary\">Reset</button>",
+      "css": ".ds-btn-secondary { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; color: rgb(var(--ink)); padding: 4px 8px; font-size: 0.875rem; border: 1px solid rgb(var(--neutral-300)); border-radius: 4px; cursor: pointer; } .ds-btn-secondary:hover { border-color: rgb(var(--accent)); } .ds-btn-secondary:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; } .ds-btn-secondary:disabled { opacity: 0.4; }"
+    },
+    {
+      "name": "Header Sign In",
+      "kind": "button",
+      "refersTo": "button-header-sign-in",
+      "description": "The one Sky control on the Baruch Blue header.",
+      "html": "<div class=\"ds-on-brand\"><a class=\"ds-btn-signin\" href=\"#\">Sign in</a></div>",
+      "css": ".ds-on-brand { background: rgb(var(--brand)); padding: 12px 16px; } .ds-btn-signin { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; display: inline-block; background: rgb(var(--brand-sky)); color: rgb(var(--brand)); padding: 6px 12px; font-size: 0.875rem; font-weight: 500; border-radius: 4px; text-decoration: none; } .ds-btn-signin:hover { background: #fff; } .ds-btn-signin:focus-visible { outline: 2px solid rgb(var(--brand-sky)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Practice Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Toggle pills that filter practice quizzes; selected uses aria-pressed.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">ECO 1002</button><button class=\"ds-chip\" aria-pressed=\"false\">FIN 3610</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; color: rgb(var(--ink-muted)); padding: 4px 12px; font-size: 0.875rem; border: 1px solid rgb(var(--neutral-300)); border-radius: 9999px; cursor: pointer; } .ds-chip:hover { background: rgb(var(--neutral-50)); } .ds-chip[aria-pressed=\"true\"] { border-color: rgb(var(--accent)); background: rgb(var(--accent) / 0.1); color: rgb(var(--accent)); font-weight: 500; } .ds-chip:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled form field used on sign-in, sign-up and account pages.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"name@baruchmail.cuny.edu\"></label>",
+      "css": ".ds-field { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; display: block; max-width: 28rem; } .ds-field-label { display: block; font-size: 0.875rem; font-weight: 500; color: rgb(var(--ink)); } .ds-input { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; margin-top: 4px; width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 1rem; color: rgb(var(--ink)); background: #fff; border: 1px solid rgb(var(--neutral-300)); border-radius: 4px; } .ds-input:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 1px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat bordered container for course cards, dashboard sections and chart blocks.",
+      "html": "<section class=\"ds-card\"><p class=\"ds-card-eyebrow\">ECO 1002</p><h3 class=\"ds-card-title\">IS-LM: goods and money markets</h3><p class=\"ds-card-body\">Shift the IS curve with fiscal policy and watch output and the interest rate move together.</p></section>",
+      "css": ".ds-card { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; border: 1px solid rgb(var(--neutral-200)); border-radius: 8px; padding: 20px; max-width: 28rem; } .ds-card-eyebrow { margin: 0; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.025em; text-transform: uppercase; color: rgb(var(--accent)); } .ds-card-title { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; color: rgb(var(--heading)); } .ds-card-body { margin: 8px 0 0; font-size: 0.875rem; line-height: 1.43; color: rgb(var(--ink-muted)); }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "header",
+      "description": "Baruch Blue bar with the site name and Sky Soft links.",
+      "html": "<header class=\"ds-header\"><span class=\"ds-header-name\">Baruch Econ &amp; Finance Studio</span><nav class=\"ds-header-nav\"><a href=\"#\">Courses</a><a href=\"#\">Practice</a><a href=\"#\">Dashboard</a></nav></header>",
+      "css": ".ds-header { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgb(var(--brand)); border-bottom: 1px solid rgb(var(--brand-sky) / 0.25); padding: 12px 16px; } .ds-header-name { color: #fff; font-weight: 600; } .ds-header-nav { display: flex; gap: 12px; font-size: 0.875rem; } .ds-header-nav a { color: rgb(var(--brand-sky-soft)); text-decoration: none; } .ds-header-nav a:hover { color: #fff; } .ds-header-nav a:focus-visible { outline: 2px solid rgb(var(--brand-sky)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chart Drag Handle",
+      "kind": "custom",
+      "refersTo": "chip",
+      "description": "Signature control: a white pill on a curve, bordered in the series color, labeled in ink.",
+      "html": "<button class=\"ds-handle\" style=\"border-color: var(--chart-1)\">IS</button>",
+      "css": ".ds-handle { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; color: rgb(var(--ink)); padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border: 2px solid; border-radius: 9999px; cursor: ew-resize; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); transition: box-shadow 150ms; } .ds-handle:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); } .ds-handle:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Working Notebook",
+    "overview": "The Studio looks like a well-kept course notebook: warm paper surfaces, Baruch-blue ink, thin ruled borders, and on every lesson page an equation or chart that the student works on. The interface stays out of the way so the model is the thing on the page. Baruch Blue frames the site in the header and the home hero, and everything inside that frame is light and quiet.\n\nThe mood is calm and exact. Corners are small, borders are one pixel, surfaces sit flat, and motion only confirms that something changed. Density follows the task: lessons read in a single 65-character column at 17px, while app pages (dashboard, roster, admin) pack 14px text into tables and bordered cards. The site rejects publisher-platform clutter, gamification, startup gloss, and dark trading-terminal looks.",
+    "keyCharacteristics": [
+      "Baruch Blue chrome around a light, warm-neutral page.",
+      "One typeface, Figtree, for interface and reading; JetBrains Mono only for code.",
+      "Flat bordered surfaces; shadows only on things that float.",
+      "Charts use a colorblind-safe palette, and their text stays in ink.",
+      "Every color pair meets WCAG AA, enforced by tests."
+    ],
+    "rules": [
+      {
+        "name": "The Three Blues Rule",
+        "body": "The site chrome uses at most three official Baruch colors (Baruch Blue, CUNY Blue, Sky) plus neutrals, following Baruch's 2024 cheat sheet.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink, Not Series Rule",
+        "body": "Text never takes a series color. Tangerine and Reddish Purple pass as marks but fail as small text, so chart labels, legends, tooltips, and drag-handle labels are Charcoal and the series color moves to a border or swatch.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Stays Tailwind Rule",
+        "body": "Status colors are Tailwind's own: emerald for correct and success, amber for warnings, rose and red for errors and destructive actions, sky for open workshop windows. Emerald never marks a course, because it means \"correct.\"",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Rule",
+        "body": "Figtree for everything people read; JetBrains Mono only for code. No serif, no display face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lessons Speak Louder Rule",
+        "body": "Lesson titles and section headings are bold (700) or extrabold (800); app page titles stay at semibold (600).",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Paper Rule",
+        "body": "Cards, tables, and panels sit flat with a border. A shadow means the element floats or can be dragged; nothing else gets one.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the theme tokens through their Tailwind names (`text-ink`, `text-heading`, `bg-accent`, `hover:bg-accent-strong`, `bg-brand`, `border-slate-200`). `src/lib/theme/no-hardcoded-colors.test.ts` fails on a hex literal in `src/components`.",
+      "**Do** keep every text pair at WCAG AA (4.5:1 for text, 3:1 for large text and chart marks); `src/lib/theme/theme-tokens.test.ts` checks the tokens.",
+      "**Do** give every form control an accessible name from its visible label (`src/lib/a11y/control-labels.test.ts`).",
+      "**Do** wrap every chart in `ChartFrame` with a description and a summary of its current values (`src/lib/a11y/chart-alternatives.test.ts`).",
+      "**Do** use `var(--chart-1)` to `var(--chart-4)` in that order for series, and a slot name (`'chart-1'`) for `BarFigure` colors.",
+      "**Do** keep motion to color and opacity transitions and value tweens, and honor `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "**Don't** add publisher-platform clutter: promotional banners, badges, upsell sidebars, or dense toolbars.",
+      "**Don't** gamify: no points, streaks, confetti, or trophy icons.",
+      "**Don't** add startup gloss: purple-to-blue gradients, glassmorphism, glowing cards, or an icon tile above every heading.",
+      "**Don't** build a black, neon-ticker trading-terminal look; the site is light (`color-scheme: light`).",
+      "**Don't** use raw Tailwind `blue-*` classes or hex values for brand color.",
+      "**Don't** put a series color on text, or Stone (`neutral-400`) on any text.",
+      "**Don't** add a shadow to a card, table, or panel that does not float."
+    ]
+  }
+}

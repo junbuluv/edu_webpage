@@ -209,7 +209,7 @@ public-repo path):
   a second person is in the repo — see "When teammates join" in
   `CONTRIBUTING.md`.
 
-CI config: `.github/workflows/ci.yml`. Three jobs:
+CI config: `.github/workflows/ci.yml`. Four jobs:
 
 - **`verify`** (typecheck + build) — **required** by branch protection.
   Status check name in sync with the ruleset.
@@ -261,6 +261,10 @@ CI config: `.github/workflows/ci.yml`. Three jobs:
   images, `materials/` references). Also **advisory**; the deeper,
   on-demand AI review is the `/copyright-check` skill (see "New lesson
   figure" under Common tasks).
+- **`design-detect`** — runs impeccable's design detector
+  (`npx impeccable@<version> detect --github src/`) and posts findings as
+  PR annotations. Also **advisory**. Keep its version equal to the plugin
+  `ref` in `.claude/settings.json` (convention #25).
 
 If a job name changes, update the ruleset via:
 
@@ -435,6 +439,16 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     (scroll the container's `scrollTop` instead; `focus-start.test.ts`).
     `BaseLayout` owns the skip link (`#main`) and the footer link to
     `/accessibility`; keep that page's claims true when features change.
+25. **Impeccable's suggestions still answer to this repo's tests.** The
+    impeccable design skill is a Claude Code plugin pinned in
+    `.claude/settings.json` (`ref`, now `skill-v4.9.1`); its context files
+    are `PRODUCT.md` and `DESIGN.md` at the root, plus
+    `.impeccable/design.json`. Anything it proposes must still pass the
+    color tests (`theme-tokens.test.ts`, `no-hardcoded-colors.test.ts`,
+    convention #21) and the form-label test (`control-labels.test.ts`,
+    convention #24). Where its taste and the Baruch Blue spec disagree, the
+    spec wins. Update `DESIGN.md` together with any token change in
+    `global.css` or `tailwind.config.mjs`.
 
 ## Hosted Supabase gotchas
 
