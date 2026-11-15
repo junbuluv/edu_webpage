@@ -6,11 +6,11 @@ import {
   TYPING_RUN_LIMIT_MS,
 } from './typing-limit.ts';
 
-// TypingVerb's defaults.
+// TypingVerb.astro timing.
 const timing = { typeMs: 70, deleteMs: 35, holdMs: 1000 };
 const planned = TYPING_RUN_LIMIT_MS - TIMER_SLACK_MS;
 
-// Replays TypingVerb's schedule: swap while the next swap still fits.
+// Replays TypingVerb.astro's schedule: swap while the next swap still fits.
 function settle(verbs: string[]) {
   let elapsed = 0;
   let i = 0;

@@ -1,0 +1,57 @@
+---
+// Typing verb in the home headline. A plain script rather than a React
+// island, so a signed-out visitor's home page ships no React.
+// Screen readers hear verbs[0] once; the typing is visual only, and it
+// stops within 5 s (WCAG 2.2.2, see typing-limit.ts).
+// The script comes first so no whitespace follows the verb: the page puts
+// a period right after this component.
+interface Props {
+  verbs: string[];
+}
+const { verbs } = Astro.props;
+---
+
+<script>
+  import { canSwapAgain } from '@lib/animation/typing-limit';
+
+  const timing = { typeMs: 70, deleteMs: 35, holdMs: 1000 };
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  async function run(root: HTMLElement) {
+    const verbs: string[] = JSON.parse(root.dataset.typingVerb ?? '[]');
+    const out = root.querySelector<HTMLElement>('[data-text]')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const start = performance.now();
+    for (let i = 0; i + 1 < verbs.length; i++) {
+      const [word, next] = [verbs[i], verbs[i + 1]];
+      if (reduce.matches) break;
+      const elapsed = performance.now() - start;
+      if (!canSwapAgain(elapsed, word.length, next.length, timing)) break;
+      await wait(timing.holdMs);
+      for (let n = word.length - 1; n >= 0; n--) {
+        out.textContent = word.slice(0, n);
+        await wait(timing.deleteMs);
+      }
+      for (let n = 1; n <= next.length; n++) {
+        out.textContent = next.slice(0, n);
+        await wait(timing.typeMs);
+      }
+    }
+    root.querySelector('[data-cursor]')?.remove();
+  }
+
+  // Runs on the first load and after every client-side navigation.
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-typing-verb]').forEach(run);
+  });
+</script>
+
+<span class="sr-only">{verbs[0]}</span><span
+  class="inline-block text-brand-sky"
+  aria-hidden="true"
+  data-typing-verb={JSON.stringify(verbs)}
+  ><span data-text>{verbs[0]}</span><span
+    data-cursor
+    class="ml-0.5 inline-block w-[2px] -translate-y-[2px] animate-pulse bg-brand-sky align-middle motion-reduce:hidden"
+    style="height: 0.9em"></span></span
+>
