@@ -287,9 +287,9 @@ export default function CashflowWaterfall() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">
+        <h3 className="text-sm font-semibold mb-2">
           Project cash flow and terminal proceeds by year
-        </h4>
+        </h3>
         <ChartFrame
           description={
             'Cash flows by year (vertical axis, dollars): stacked bars for NOPAT, plus depreciation and amortization, minus the change in working capital, minus capital expenditure, and the terminal value in the final year, with a line for the total.'
@@ -309,7 +309,7 @@ export default function CashflowWaterfall() {
                     value: 'year',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />
@@ -361,7 +361,7 @@ export default function CashflowWaterfall() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">Cumulative NPV</h4>
+        <h3 className="text-sm font-semibold mb-2">Cumulative NPV</h3>
         <ChartFrame
           description={
             'Cumulative net present value (vertical axis, dollars) by year (horizontal axis). Where the line crosses zero, the project has paid back in present-value terms.'
@@ -381,7 +381,7 @@ export default function CashflowWaterfall() {
                     value: 'year',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />
@@ -400,7 +400,7 @@ export default function CashflowWaterfall() {
         </ChartFrame>
       </div>
 
-      <p className="md:col-span-2 text-xs text-ink-muted">
+      <p className="max-w-measure text-xs text-ink-muted md:col-span-2">
         Current parameters: year-1 revenue ${s.revenue0.toFixed(0)}, revenue
         growth {(s.growth * 100).toFixed(1)}%, gross margin{' '}
         {(s.grossMargin * 100).toFixed(0)}%, cash operating expenses{' '}

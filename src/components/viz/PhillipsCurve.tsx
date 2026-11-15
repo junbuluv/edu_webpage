@@ -102,7 +102,7 @@ export default function PhillipsCurve() {
                   value: 'Unemployment u (%)',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -110,7 +110,7 @@ export default function PhillipsCurve() {
                   value: 'Inflation π (%)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />
@@ -133,7 +133,7 @@ export default function PhillipsCurve() {
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         Current parameters: πᵉ = {state.piE.toFixed(1)}%, uₙ ={' '}
         {state.un.toFixed(1)}%, β = {state.beta.toFixed(2)}, and selected u ={' '}
         {state.u.toFixed(1)}%. The curve holds expected inflation and the

@@ -67,13 +67,22 @@ body {
   @apply max-w-prose text-[1.0625rem];
 }
 
-.prose h1 {
+/* Text blocks keep a reading width; charts, tables and math still use the
+   full column. */
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > blockquote {
+  @apply max-w-measure;
+}
+
+.prose > h1 {
   @apply text-3xl font-bold tracking-tight mt-0 mb-6;
 }
-.prose h2 {
+.prose > h2 {
   @apply text-2xl font-bold tracking-tight mt-10 mb-4;
 }
-.prose h3 {
+.prose > h3 {
   @apply text-xl font-semibold mt-8 mb-3;
 }
 .prose p {

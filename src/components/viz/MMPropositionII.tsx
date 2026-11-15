@@ -105,7 +105,7 @@ export default function MMPropositionII() {
                   value: 'leverage D/E',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -115,7 +115,7 @@ export default function MMPropositionII() {
                   value: 'rate (%)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -150,7 +150,7 @@ export default function MMPropositionII() {
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="mt-2 text-xs text-ink-muted">
+      <p className="mt-2 max-w-measure text-xs text-ink-muted">
         Raise leverage and the orange cost of equity climbs in a straight line,
         yet the green WACC never moves: it stays pinned at r_U. The firm trades
         cheap debt for costlier equity in exactly offsetting amounts, so its

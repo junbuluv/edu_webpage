@@ -251,7 +251,7 @@ export default function ADASChart() {
                   value: 'Output (Y)',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -259,7 +259,7 @@ export default function ADASChart() {
                   value: 'Price level (P)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />
@@ -352,7 +352,7 @@ export default function ADASChart() {
         </div>
       )}
 
-      <p className="mt-4 text-xs text-ink-muted">
+      <p className="mt-4 max-w-measure text-xs text-ink-muted">
         Short-run AD-AS. AD slopes down in (Y, P); SRAS slopes up around Yₙ.
         Demand shocks change A₀, G, or M; supply shocks change Pᵉ or Yₙ. Drag
         the AD or SRAS pill on the right edge, use sliders, or pick a preset.

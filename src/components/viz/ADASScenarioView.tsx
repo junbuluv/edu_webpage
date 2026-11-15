@@ -68,7 +68,7 @@ export default function ADASScenarioView({ state }: Props) {
                   value: 'Output (Y)',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -76,7 +76,7 @@ export default function ADASScenarioView({ state }: Props) {
                   value: 'Price level (P)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />

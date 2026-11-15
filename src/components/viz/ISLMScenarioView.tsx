@@ -86,7 +86,7 @@ export default function ISLMScenarioView({ state }: Props) {
                   value: 'Output (Y)',
                   position: 'insideBottom',
                   offset: -10,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -97,7 +97,7 @@ export default function ISLMScenarioView({ state }: Props) {
                   value: 'Interest rate (r)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip

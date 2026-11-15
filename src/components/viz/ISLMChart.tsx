@@ -247,7 +247,7 @@ export default function ISLMChart() {
                   value: 'Output (Y)',
                   position: 'insideBottom',
                   offset: -10,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -258,7 +258,7 @@ export default function ISLMChart() {
                   value: 'Interest rate (r)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -294,7 +294,7 @@ export default function ISLMChart() {
                 label={{
                   value: 'eq',
                   position: 'top',
-                  fontSize: 11,
+                  fontSize: 12,
                   offset: 8,
                 }}
               />
@@ -368,7 +368,7 @@ export default function ISLMChart() {
         </div>
       )}
 
-      <p className="mt-4 text-xs text-ink-muted">
+      <p className="mt-4 max-w-measure text-xs text-ink-muted">
         Closed-economy IS-LM. Parameters: c = 0.6, t = 0.2, b = 20, k = 0.5, h =
         10, P = 1. The IS curve slopes down (lower r ⇒ more investment ⇒ higher
         Y). The LM curve slopes up (higher Y ⇒ more money demand ⇒ higher r to

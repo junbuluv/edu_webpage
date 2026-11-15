@@ -133,10 +133,10 @@ export default function DDMValuation() {
       </div>
 
       <div className="md:col-span-2">
-        <h4 className="text-sm font-semibold mb-2">
+        <h3 className="text-sm font-semibold mb-2">
           Price vs retention (benchmark = pay out everything, ${base.toFixed(2)}
           )
-        </h4>
+        </h3>
         <ChartFrame
           description={
             'Share price P0 (vertical axis, dollars) against the retention ratio b (horizontal axis), compared with the benchmark of paying out all earnings.'
@@ -157,7 +157,7 @@ export default function DDMValuation() {
                     value: 'retention b',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis tickFormatter={(v) => `$${v}`} />
@@ -174,7 +174,7 @@ export default function DDMValuation() {
                   label={{
                     value: 'no-growth benchmark',
                     position: 'insideTopRight',
-                    fontSize: 10,
+                    fontSize: 12,
                   }}
                 />
                 <Line
@@ -198,7 +198,7 @@ export default function DDMValuation() {
             </ResponsiveContainer>
           </div>
         </ChartFrame>
-        <p className="mt-2 text-xs text-ink-muted">
+        <p className="mt-2 max-w-measure text-xs text-ink-muted">
           Current parameters: EPS₁ = ${s.eps1.toFixed(2)}, retention ={' '}
           {(s.retention * 100).toFixed(0)}%, return on new investment ={' '}
           {(s.roi * 100).toFixed(1)}%, and r_E = {(s.rE * 100).toFixed(1)}%.{' '}

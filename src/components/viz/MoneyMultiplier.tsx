@@ -139,7 +139,7 @@ export default function MoneyMultiplier() {
         </div>
       </ChartFrame>
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         This stylized transaction-money model uses <code>M1 = m · MB</code>{' '}
         where
         <code> m = (1 + C/D) / ((C/D) + (R/D))</code>. As banks hold more excess
@@ -188,7 +188,7 @@ function Slider({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-slate-200 px-3 py-2">
+    <div className="rounded bg-slate-50 px-3 py-2">
       <div className="text-xs text-ink-muted">{label}</div>
       <div className="mt-0.5 text-lg font-semibold">{value}</div>
     </div>

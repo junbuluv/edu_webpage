@@ -144,7 +144,7 @@ export default function OpenEconomyFX() {
                   value: 'Real exchange rate ε',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -152,7 +152,7 @@ export default function OpenEconomyFX() {
                   value: 'Net exports NX',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -179,7 +179,7 @@ export default function OpenEconomyFX() {
         </div>
       </ChartFrame>
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         Current parameters: r* = {s.rWorld.toFixed(2)}%, saving multiplier ={' '}
         {s.savingRate.toFixed(2)}x, and trade-policy wedge = $
         {s.tariff.toFixed(0)}B. Annual flows are USD billions: S = $1500B ×
@@ -236,7 +236,7 @@ function Slider({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-slate-200 px-3 py-2">
+    <div className="rounded bg-slate-50 px-3 py-2">
       <div className="text-xs text-ink-muted">{label}</div>
       <div className="mt-0.5 text-lg font-semibold">{value}</div>
     </div>
