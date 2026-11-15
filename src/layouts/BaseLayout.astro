@@ -6,7 +6,8 @@ import { listAvailableCourses, type AvailableCourse } from '@lib/dashboard';
 import { isStaff, isAdmin } from '@lib/roles';
 
 interface Props {
-  title: string;
+  /** Page name; omit it on the home page to show the site name alone. */
+  title?: string;
   description?: string;
 }
 
@@ -14,6 +15,7 @@ const {
   title,
   description = 'Interactive Economics & Finance lessons for undergraduates.',
 } = Astro.props;
+const SITE_NAME = 'Baruch Econ & Finance Studio';
 const user = Astro.locals.user;
 const profile = Astro.locals.profile;
 const supabase = Astro.locals.supabase;
@@ -50,7 +52,9 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
-    <title>{title} — Baruch Econ & Finance Studio</title>
+    <title>
+      {title ? `${title} — ${SITE_NAME}` : SITE_NAME}
+    </title>
     <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col">
