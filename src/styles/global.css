@@ -92,6 +92,7 @@ body {
   @apply rounded-lg bg-slate-900 text-slate-100 p-4 overflow-x-auto;
 }
 .prose blockquote {
+  /* impeccable-disable-next-line side-tab -- the Sky quote rule from the Baruch Blue spec, not a card */
   @apply border-l-4 border-brand-sky pl-4 italic text-ink-muted;
 }
 
