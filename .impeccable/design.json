@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-15T15:56:03.880Z",
+  "generatedAt": "2026-11-15T15:57:06.975Z",
   "title": "Design System: Baruch Econ & Finance Studio",
   "extensions": {
     "colorMeta": {
@@ -402,7 +402,11 @@
       },
       "body-ui": {
         "displayName": "Body UI",
-        "purpose": "App pages, tables, forms, buttons, chart controls."
+        "purpose": "App pages, app tables, forms, buttons, chart controls."
+      },
+      "table": {
+        "displayName": "Table",
+        "purpose": "Markdown tables inside lessons."
       },
       "label": {
         "displayName": "Label",

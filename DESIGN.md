@@ -58,6 +58,11 @@ typography:
     fontSize: '0.875rem'
     fontWeight: 400
     lineHeight: 1.43
+  table:
+    fontFamily: '"Figtree Variable", "Avenir Next", Avenir, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '0.9375rem'
+    fontWeight: 400
+    lineHeight: 1.5
   label:
     fontFamily: '"Figtree Variable", "Avenir Next", Avenir, ui-sans-serif, system-ui, sans-serif'
     fontSize: '0.75rem'
@@ -197,7 +202,8 @@ The palette is Baruch's official blues over warm Pearl and Dove neutrals, with a
 - **Headline** (800, 1.875rem, 1.2): the lesson title. An h1 written inside lesson prose is 700, and app page titles use the same size at 600 so app pages stay quieter than lessons.
 - **Title** (700, 1.5rem, 1.333): lesson section headings (h2). Lesson h3 is 1.25rem at 600.
 - **Body** (400, 1.0625rem, 1.7): lesson prose, capped at 65ch, in Charcoal at 90% opacity.
-- **Body UI** (400, 0.875rem, 1.43): the default for app pages, tables, forms, buttons, and chart controls.
+- **Body UI** (400, 0.875rem, 1.43): the default for app pages, app tables, forms, buttons, and chart controls.
+- **Table** (400, 0.9375rem, 1.5): Markdown tables inside lessons; header cells are 600 in Baruch Blue on Pearl.
 - **Label** (500, 0.75rem, tracking 0.025em, uppercase): eyebrow labels above titles and on the hero's course buttons, in CUNY Blue or Muted Slate.
 
 ### Named Rules
