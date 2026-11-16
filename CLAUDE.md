@@ -201,7 +201,8 @@ Branch protection is **active** on `main` (Repository Rulesets, free-tier
 public-repo path):
 
 - All changes go through a PR. Direct `git push origin main` is rejected.
-- CI's `verify` job (typecheck + build) must pass before merge.
+- CI's `verify` job (typecheck + build) and `design-detect` job must pass
+  before merge.
 - PR branch must be up-to-date with `main` before merge (`strict`).
 - Conversation threads must be resolved.
 - Force pushes and branch deletions are blocked.
@@ -261,10 +262,16 @@ CI config: `.github/workflows/ci.yml`. Four jobs:
   images, `materials/` references). Also **advisory**; the deeper,
   on-demand AI review is the `/copyright-check` skill (see "New lesson
   figure" under Common tasks).
-- **`design-detect`** — runs impeccable's design detector
-  (`npx impeccable@<version> detect --github src/`) and posts findings as
-  PR annotations. Also **advisory**. Keep its version equal to the plugin
-  `ref` in `.claude/settings.json` (convention #25).
+- **`design-detect`** — **required**. Runs impeccable's design detector
+  twice and posts findings as PR annotations: over `src/`, then over every
+  public page rendered by `npm run dev` with no Supabase env (URLs from
+  `scripts/design-detect-urls.mjs`), which runs the page-level rules (line
+  length, text under 12px, skipped headings, cards in cards, contrast).
+  Exit 2 means findings; advisory-severity findings (stragglers and the
+  like) never fail it. Reproduce locally with the dev server running:
+  `npx impeccable@<version> detect $(node scripts/design-detect-urls.mjs)`.
+  Keep its version equal to the plugin `ref` in `.claude/settings.json`
+  (convention #25).
 
 If a job name changes, update the ruleset via:
 
@@ -448,7 +455,9 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
     convention #21) and the form-label test (`control-labels.test.ts`,
     convention #24). Where its taste and the Baruch Blue spec disagree, the
     spec wins. Update `DESIGN.md` together with any token change in
-    `global.css` or `tailwind.config.mjs`.
+    `global.css` or `tailwind.config.mjs`. The required `design-detect`
+    job enforces two of its rules: text blocks stop at `max-w-measure`
+    (52ch, about 73 characters per line) and no text goes under 12px.
 
 ## Hosted Supabase gotchas
 

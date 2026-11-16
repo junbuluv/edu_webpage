@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-15T15:57:06.975Z",
+  "generatedAt": "2026-11-15T21:36:22.095Z",
   "title": "Design System: Baruch Econ & Finance Studio",
   "extensions": {
     "colorMeta": {
@@ -578,6 +578,11 @@
         "section": "typography"
       },
       {
+        "name": "The 12px Floor Rule",
+        "body": "No text is smaller than 12px, including chart ticks, legends, and labels inside charts.",
+        "section": "typography"
+      },
+      {
         "name": "The Flat Paper Rule",
         "body": "Cards, tables, and panels sit flat with a border. A shadow means the element floats or can be dragged; nothing else gets one.",
         "section": "elevation"
@@ -589,7 +594,8 @@
       "**Do** give every form control an accessible name from its visible label (`src/lib/a11y/control-labels.test.ts`).",
       "**Do** wrap every chart in `ChartFrame` with a description and a summary of its current values (`src/lib/a11y/chart-alternatives.test.ts`).",
       "**Do** use `var(--chart-1)` to `var(--chart-4)` in that order for series, and a slot name (`'chart-1'`) for `BarFigure` colors.",
-      "**Do** keep motion to color and opacity transitions and value tweens, and honor `prefers-reduced-motion`."
+      "**Do** keep motion to color and opacity transitions and value tweens, and honor `prefers-reduced-motion`.",
+      "**Do** cap every text block at `max-w-measure`; the `design-detect` CI job fails on lines over 80 characters."
     ],
     "donts": [
       "**Don't** add publisher-platform clutter: promotional banners, badges, upsell sidebars, or dense toolbars.",
@@ -598,7 +604,8 @@
       "**Don't** build a black, neon-ticker trading-terminal look; the site is light (`color-scheme: light`).",
       "**Don't** use raw Tailwind `blue-*` classes or hex values for brand color.",
       "**Don't** put a series color on text, or Stone (`neutral-400`) on any text.",
-      "**Don't** add a shadow to a card, table, or panel that does not float."
+      "**Don't** add a shadow to a card, table, or panel that does not float.",
+      "**Don't** put a bordered box inside a bordered card; use a Pearl fill instead."
     ]
   }
 }

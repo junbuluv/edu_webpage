@@ -173,7 +173,7 @@ export default function LoanableFunds() {
                   value: 'Loanable funds quantity',
                   position: 'insideBottom',
                   offset: -10,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -184,7 +184,7 @@ export default function LoanableFunds() {
                   value: 'Real interest rate r (%)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />
@@ -228,7 +228,7 @@ export default function LoanableFunds() {
         </div>
       </ChartFrame>
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         Current parameters: deficit = ${s.deficit.toFixed(0)}B, private-saving
         multiplier = {s.privSavingRate.toFixed(2)}x, and investment-demand
         multiplier = {s.expReturn.toFixed(2)}x. The calibrated slopes are bI ={' '}

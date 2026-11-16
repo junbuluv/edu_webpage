@@ -53,22 +53,22 @@ export default function BarFigure({
             margin={{ top: 16, right: 24, left: 8, bottom: 8 }}
           >
             <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
-            <XAxis dataKey={xKey} fontSize={11} />
+            <XAxis dataKey={xKey} fontSize={12} />
             <YAxis
-              fontSize={11}
+              fontSize={12}
               label={
                 yAxisLabel
                   ? {
                       value: yAxisLabel,
                       angle: -90,
                       position: 'insideLeft',
-                      fontSize: 11,
+                      fontSize: 12,
                     }
                   : undefined
               }
             />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
             {series.map((s, i) => (
               <Bar
                 key={s.key}

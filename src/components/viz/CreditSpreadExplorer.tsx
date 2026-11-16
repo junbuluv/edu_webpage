@@ -115,7 +115,7 @@ export default function CreditSpreadExplorer() {
                   value: 'annual default probability p',
                   position: 'insideBottom',
                   offset: -6,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -125,7 +125,7 @@ export default function CreditSpreadExplorer() {
                   value: 'spread (bps)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -151,7 +151,7 @@ export default function CreditSpreadExplorer() {
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="mt-2 text-xs text-ink-muted">
+      <p className="mt-2 max-w-measure text-xs text-ink-muted">
         The line is the spread that just compensates for expected loss; its
         slope is (1 − δ), so dragging recovery down steepens it. Drag δ to 0
         (lose everything in default) and the spread equals the default

@@ -114,7 +114,7 @@ export default function SolowGrowth() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">Investment vs break-even</h4>
+        <h3 className="text-sm font-semibold mb-2">Investment vs break-even</h3>
         <ChartFrame
           description={
             'Solow model: investment per worker s times f(k) and break-even investment (n plus δ) times k (vertical axis) against capital per worker k (horizontal axis). They cross at the steady state k*.'
@@ -135,7 +135,7 @@ export default function SolowGrowth() {
                     value: 'Capital per worker (k)',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />
@@ -168,7 +168,7 @@ export default function SolowGrowth() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">Transition path</h4>
+        <h3 className="text-sm font-semibold mb-2">Transition path</h3>
         <ChartFrame
           description={
             'Transition path: capital per worker k(t) and output per worker y(t) (vertical axis) over time t (horizontal axis), converging to the steady state.'
@@ -188,7 +188,7 @@ export default function SolowGrowth() {
                     value: 'time',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />

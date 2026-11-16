@@ -121,7 +121,7 @@ export default function CAPMSecurityMarketLine() {
                   value: 'beta (β)',
                   position: 'insideBottom',
                   offset: -10,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -132,7 +132,7 @@ export default function CAPMSecurityMarketLine() {
                   value: 'expected / observed return',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => (v * 100).toFixed(2) + '%'} />
@@ -140,7 +140,7 @@ export default function CAPMSecurityMarketLine() {
                 y={s.rf}
                 stroke="var(--chart-ref)"
                 strokeDasharray="3 3"
-                label={{ value: 'Rf', position: 'right', fontSize: 10 }}
+                label={{ value: 'Rf', position: 'right', fontSize: 12 }}
               />
               <Line
                 data={line}
@@ -193,7 +193,7 @@ export default function CAPMSecurityMarketLine() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         Current parameters: Rf = {(s.rf * 100).toFixed(2)}% and market risk
         premium = {(s.mrp * 100).toFixed(1)}%; observed asset returns and betas
         are held fixed. Points above the SML have positive α (mispriced cheap /

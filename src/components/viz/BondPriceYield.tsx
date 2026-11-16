@@ -287,7 +287,7 @@ export default function BondPriceYield() {
                   value: 'yield to maturity',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -295,7 +295,7 @@ export default function BondPriceYield() {
                   value: 'price ($)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -376,7 +376,7 @@ export default function BondPriceYield() {
         </div>
       )}
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         Price-yield curve is convex. For a small yield change Δy, price changes
         by approximately <code>−D_modified · P · Δy</code>. Longer maturity →
         steeper curve → more interest-rate risk. Drag the YTM pill on the right,
@@ -484,7 +484,7 @@ function StatWithDelta({
   const showDelta = Math.abs(delta) > 0.005;
   const positive = delta > 0;
   return (
-    <div className="rounded border border-slate-200 px-3 py-2">
+    <div className="rounded bg-slate-50 px-3 py-2">
       <div className="text-xs text-ink-muted">{label}</div>
       <div className="mt-0.5 text-lg font-semibold">{value}</div>
       {showDelta && (

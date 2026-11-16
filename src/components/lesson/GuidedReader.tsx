@@ -211,7 +211,7 @@ function CheckBlock({
   onSelect: (v: number) => void;
 }): ReactNode {
   return (
-    <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="mt-8 rounded-lg bg-slate-50 p-4">
       <p className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
         Check yourself
       </p>

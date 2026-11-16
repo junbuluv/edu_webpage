@@ -190,7 +190,7 @@ export default function EfficientFrontier() {
                   value: 'risk σ (%)',
                   position: 'insideBottom',
                   offset: -8,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -202,7 +202,7 @@ export default function EfficientFrontier() {
                   value: 'expected return (%)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <ZAxis range={[60, 60]} />
@@ -253,7 +253,7 @@ export default function EfficientFrontier() {
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="text-xs text-ink-muted">
+      <p className="max-w-measure text-xs text-ink-muted">
         Current parameters: asset 1 E[R] = {pct(s.er1)}, σ = {pct(s.sd1)}; asset
         2 E[R] = {pct(s.er2)}, σ = {pct(s.sd2)}; ρ = {s.rho.toFixed(2)}; and Rf
         = {pct(s.rf)}. The controls keep correlation strictly between −1 and 1

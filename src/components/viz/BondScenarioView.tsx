@@ -79,7 +79,7 @@ export default function BondScenarioView({ state }: Props) {
                   value: 'YTM',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -87,7 +87,7 @@ export default function BondScenarioView({ state }: Props) {
                   value: 'price ($)',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -120,10 +120,8 @@ export default function BondScenarioView({ state }: Props) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-slate-200 px-2 py-1">
-      <div className="text-[10px] uppercase tracking-wide text-ink-muted">
-        {label}
-      </div>
+    <div className="rounded bg-slate-50 px-2 py-1">
+      <div className="text-xs text-ink-muted">{label}</div>
       <div className="text-sm font-semibold">{value}</div>
     </div>
   );

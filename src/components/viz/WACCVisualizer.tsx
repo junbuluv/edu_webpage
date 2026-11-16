@@ -151,7 +151,7 @@ export default function WACCVisualizer() {
                   value: 'D/V (leverage)',
                   position: 'insideBottom',
                   offset: -4,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -160,7 +160,7 @@ export default function WACCVisualizer() {
                   value: 'cost of capital',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -202,7 +202,7 @@ export default function WACCVisualizer() {
         </div>
       </ChartFrame>
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 max-w-measure text-xs text-ink-muted">
         With no taxes or distress (MM I), WACC is flat across leverage. Add a
         tax shield (raise tax rate) and WACC slopes down with D/V. Add distress
         costs (raise α) and WACC bends back up — the{' '}

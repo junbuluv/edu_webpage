@@ -158,7 +158,7 @@ export default function OkunPhillips() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">Okun: gap → unemployment</h4>
+        <h3 className="text-sm font-semibold mb-2">Okun: gap → unemployment</h3>
         <ChartFrame
           description={
             "Okun's law: unemployment rate u (vertical axis, percent) against the output gap (horizontal axis, percent). Unemployment falls as the gap rises; a dot marks the current gap."
@@ -179,7 +179,7 @@ export default function OkunPhillips() {
                     value: 'output gap',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis
@@ -188,7 +188,7 @@ export default function OkunPhillips() {
                     value: 'u (%)',
                     angle: -90,
                     position: 'insideLeft',
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
@@ -214,9 +214,9 @@ export default function OkunPhillips() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">
+        <h3 className="text-sm font-semibold mb-2">
           Phillips: unemployment → inflation
-        </h4>
+        </h3>
         <ChartFrame
           description={
             'Phillips curve: inflation (vertical axis, percent) against unemployment u (horizontal axis, percent); a dot marks the current point.'
@@ -239,7 +239,7 @@ export default function OkunPhillips() {
                     value: 'unemployment u',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis
@@ -248,7 +248,7 @@ export default function OkunPhillips() {
                     value: 'π (%)',
                     angle: -90,
                     position: 'insideLeft',
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <Tooltip formatter={(v: number) => v.toFixed(2) + '%'} />
@@ -273,7 +273,7 @@ export default function OkunPhillips() {
         </ChartFrame>
       </div>
 
-      <p className="md:col-span-2 mt-1 text-xs text-ink-muted">
+      <p className="mt-1 max-w-measure text-xs text-ink-muted md:col-span-2">
         Current parameters: uₙ = {s.natUnemp.toFixed(1)}%, πᵉ ={' '}
         {s.inflExp.toFixed(1)}%, β = {s.beta.toFixed(2)}, and k ={' '}
         {s.okunK.toFixed(2)}. Okun's law is a local empirical approximation, not

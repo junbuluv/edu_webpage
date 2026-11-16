@@ -198,7 +198,7 @@ export default function AnnuityExplorer() {
                   value: 'discount rate r',
                   position: 'insideBottom',
                   offset: -6,
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <YAxis
@@ -208,7 +208,7 @@ export default function AnnuityExplorer() {
                   value: 'present value',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip
@@ -236,7 +236,7 @@ export default function AnnuityExplorer() {
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="mt-2 text-xs text-ink-muted">
+      <p className="mt-2 max-w-measure text-xs text-ink-muted">
         The orange dot is your chosen r. Drag r left and watch PV climb steeply:
         halving the rate roughly doubles the value of a perpetual stream. For
         {s.type === 'growing-perp'

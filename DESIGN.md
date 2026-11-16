@@ -212,9 +212,11 @@ The palette is Baruch's official blues over warm Pearl and Dove neutrals, with a
 
 **The Lessons Speak Louder Rule.** Lesson titles and section headings are bold (700) or extrabold (800); app page titles stay at semibold (600).
 
+**The 12px Floor Rule.** No text is smaller than 12px, including chart ticks, legends, and labels inside charts.
+
 ## Layout
 
-The site is a single centered column. The header and footer run to 72rem (`max-w-6xl`) with a 16px side gutter. Content pages sit at 48rem (`max-w-3xl`) to 56rem (`max-w-4xl`); forms narrow to 28rem (`max-w-md`). Lesson prose caps at 65ch. Cards inside a page break into two columns from `md` (768px) up and stack below it. The full desktop navigation appears at `xl` (1280px); below it, a "Menu" disclosure holds the links.
+The site is a single centered column. The header and footer run to 72rem (`max-w-6xl`) with a 16px side gutter. Content pages sit at 48rem (`max-w-3xl`) to 56rem (`max-w-4xl`); forms narrow to 28rem (`max-w-md`). The lesson column is 65ch, which charts, tables, and math use in full; paragraphs, lists, quotes, summaries, and captions stop at the reading width `max-w-measure` (52ch, about 73 characters per line at any size). Cards inside a page break into two columns from `md` (768px) up and stack below it. The full desktop navigation appears at `xl` (1280px); below it, a "Menu" disclosure holds the links.
 
 Spacing runs on Tailwind's 4px grid. The working steps are 4, 8, 12, 16, 20, 24, and 32px; 12px and 8px dominate inside components, 20px pads a card, and 32px separates a chart block from the prose around it. Wide lesson tables and math scroll sideways inside the column rather than widening the page.
 
@@ -278,7 +280,7 @@ Plain and direct: a flat fill, medium weight, no icons unless the action needs o
 
 ### Simulation Block (signature component)
 
-The block that makes a lesson a lesson: a white card (8px corners, Linen border, 20px padding) holding a Recharts chart and its controls, wrapped in `ChartFrame` so screen readers get a description and a live summary of the current values. Sliders sit under labels that name the parameter. Draggable curve handles are white pills with a 2px border in the series color and a Charcoal label. A Reset control returns the baseline. Animated values tween with `useAnimatedValue`, which honors `prefers-reduced-motion`.
+The block that makes a lesson a lesson: a white card (8px corners, Linen border, 20px padding) holding a Recharts chart and its controls, wrapped in `ChartFrame` so screen readers get a description and a live summary of the current values. Sliders sit under labels that name the parameter. Panel titles inside the block are 14px semibold `h3`s. Readouts (price, duration, totals) sit in Pearl tiles with 4px corners and no border, so they never read as a card inside the card. Draggable curve handles are white pills with a 2px border in the series color and a Charcoal label. A Reset control returns the baseline. Animated values tween with `useAnimatedValue`, which honors `prefers-reduced-motion`.
 
 ## Do's and Don'ts
 
@@ -290,6 +292,7 @@ The block that makes a lesson a lesson: a white card (8px corners, Linen border,
 - **Do** wrap every chart in `ChartFrame` with a description and a summary of its current values (`src/lib/a11y/chart-alternatives.test.ts`).
 - **Do** use `var(--chart-1)` to `var(--chart-4)` in that order for series, and a slot name (`'chart-1'`) for `BarFigure` colors.
 - **Do** keep motion to color and opacity transitions and value tweens, and honor `prefers-reduced-motion`.
+- **Do** cap every text block at `max-w-measure`; the `design-detect` CI job fails on lines over 80 characters.
 
 ### Don't:
 
@@ -300,3 +303,4 @@ The block that makes a lesson a lesson: a white card (8px corners, Linen border,
 - **Don't** use raw Tailwind `blue-*` classes or hex values for brand color.
 - **Don't** put a series color on text, or Stone (`neutral-400`) on any text.
 - **Don't** add a shadow to a card, table, or panel that does not float.
+- **Don't** put a bordered box inside a bordered card; use a Pearl fill instead.

@@ -150,7 +150,7 @@ export default function TVMNPV() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">Cashflows by year</h4>
+        <h3 className="text-sm font-semibold mb-2">Cashflows by year</h3>
         <ChartFrame
           description={
             "Cash flows by year (vertical axis, dollars): a bar for each year's cash flow and one for its discounted value."
@@ -170,7 +170,7 @@ export default function TVMNPV() {
                     value: 'year',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />
@@ -185,9 +185,9 @@ export default function TVMNPV() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold mb-2">
+        <h3 className="text-sm font-semibold mb-2">
           NPV sensitivity to discount rate
-        </h4>
+        </h3>
         <ChartFrame
           description={
             'NPV profile: net present value (vertical axis, dollars) against the discount rate r (horizontal axis, percent). The curve falls as r rises and crosses zero at the internal rate of return (IRR).'
@@ -208,7 +208,7 @@ export default function TVMNPV() {
                     value: 'discount rate r',
                     position: 'insideBottom',
                     offset: -4,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 />
                 <YAxis />
@@ -222,7 +222,7 @@ export default function TVMNPV() {
                     x={irrVal}
                     stroke="var(--chart-2)"
                     strokeDasharray="3 3"
-                    label={{ value: 'IRR', position: 'top', fontSize: 10 }}
+                    label={{ value: 'IRR', position: 'top', fontSize: 12 }}
                   />
                 )}
                 <Line
@@ -237,7 +237,7 @@ export default function TVMNPV() {
           </div>
         </ChartFrame>
       </div>
-      <p className="md:col-span-2 text-xs text-ink-muted">
+      <p className="max-w-measure text-xs text-ink-muted md:col-span-2">
         Current parameters: CF₀ = ${s.cf0.toFixed(0)}, first annual cash flow =
         ${s.baseCF.toFixed(0)}, growth = {(s.growth * 100).toFixed(1)}%, r ={' '}
         {(s.rate * 100).toFixed(1)}%, and T = {s.horizon} years. Cash flows grow
