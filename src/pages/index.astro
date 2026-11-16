@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import TypingVerb from '@components/hero/TypingVerb';
+import TypingVerb from '@components/hero/TypingVerb.astro';
 import { getCollection } from 'astro:content';
 
 const allLessons = (await getCollection('lessons', (l) => !l.data.draft)).sort(
@@ -9,14 +9,16 @@ const allLessons = (await getCollection('lessons', (l) => !l.data.draft)).sort(
 
 const courses = [
   {
-    code: 'eco-1002',
-    title: 'ECO 1002 — Introduction to Macroeconomics',
+    slug: 'eco-1002',
+    code: 'ECO 1002',
+    title: 'Introduction to Macroeconomics',
     blurb: 'First-year intro macro: GDP, inflation, the Fed, AD-AS, growth.',
     href: '/eco-1002',
   },
   {
-    code: 'fin-3610',
-    title: 'FIN 3610 — Corporate Finance',
+    slug: 'fin-3610',
+    code: 'FIN 3610',
+    title: 'Corporate Finance',
     blurb:
       'Upper-division: TVM, valuation, risk/return, capital structure, options.',
     href: '/fin-3610',
@@ -25,17 +27,18 @@ const courses = [
 
 const stats = courses.map((c) => ({
   ...c,
-  count: allLessons.filter((l) => l.data.course === c.code).length,
+  count: allLessons.filter((l) => l.data.course === c.slug).length,
 }));
 ---
 
-<BaseLayout title="Baruch Econ & Finance Studio">
+<BaseLayout>
   <section class="bg-brand">
     <div class="mx-auto max-w-4xl px-4 py-20 text-center">
-      <h1 class="text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+      <h1
+        class="break-words text-4xl font-extrabold tracking-tight text-white md:text-5xl"
+      >
         Economics &amp; Finance you can{' '}
         <TypingVerb
-          client:load
           verbs={[
             'play with',
             'explore',
@@ -83,11 +86,11 @@ const stats = courses.map((c) => ({
 
   <section class="mx-auto max-w-5xl px-4 py-16">
     <h2 class="text-2xl font-semibold">Courses</h2>
-    <ul class="mt-6 grid gap-4 md:grid-cols-2">
+    <ul class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
       {
         stats.map((c) => (
-          <li class="rounded-lg border border-slate-200 bg-white p-5 hover:border-accent transition">
-            <a href={c.href} class="block">
+          <li class="break-words rounded-lg border border-slate-200 bg-white hover:border-accent transition">
+            <a href={c.href} class="block h-full rounded-lg p-5">
               <p class="text-xs uppercase tracking-wide text-accent font-medium">
                 {c.code}
               </p>

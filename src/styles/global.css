@@ -1,7 +1,6 @@
 @import '@fontsource-variable/figtree';
 @import '@fontsource-variable/figtree/wght-italic.css';
 @import '@fontsource-variable/jetbrains-mono';
-@import 'katex/dist/katex.min.css';
 
 @tailwind base;
 @tailwind components;
@@ -117,7 +116,9 @@ body {
   @apply border-b border-slate-200 px-3.5 py-2 align-top;
 }
 
-.katex-display {
+/* KaTeX's stylesheet loads only on lesson pages (LessonLayout), possibly
+   after this file, so this override needs the extra .prose to win. */
+.prose .katex-display {
   @apply my-6 overflow-x-auto;
 }
 

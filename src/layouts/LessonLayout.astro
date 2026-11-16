@@ -1,4 +1,7 @@
 ---
+// Math styles only where math renders: lesson MDX, the guided reader and
+// the tutor all live on lesson pages.
+import 'katex/dist/katex.min.css';
 import BaseLayout from './BaseLayout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import LessonProgressButton from '@components/lesson/LessonProgressButton';
