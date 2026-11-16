@@ -320,10 +320,12 @@ jobs:
       - name: Copyright check
         run: node scripts/check-copyright.mjs
 
-  # Impeccable's design detector (deterministic pattern rules, no LLM) over
-  # src/, reported as PR annotations. Exit 2 means findings. ADVISORY (not
-  # in required_status_checks). Keep the version equal to the plugin ref in
-  # .claude/settings.json.
+  # Impeccable's design detector (deterministic rules, no LLM), reported as
+  # PR annotations; exit 2 means findings. Two passes: source files, then
+  # every public page rendered by the dev server (URLs from
+  # scripts/design-detect-urls.mjs), which runs the page-level rules such as
+  # line length, tiny text and contrast. REQUIRED in the main ruleset. Keep
+  # the version equal to the plugin ref in .claude/settings.json.
   design-detect:
     runs-on: ubuntu-latest
     steps:
@@ -333,5 +335,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Impeccable detector
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Scan source files
         run: npx --yes impeccable@4.9.1 detect --github src/
+      # No Supabase env on purpose: public pages render without it
+      # (CLAUDE.md convention #5), and signed-out is what the scan should see.
+      - name: Start the dev server
+        if: success() || failure()
+        run: |
+          npx astro preferences disable devToolbar
+          npm run dev -- --port 4321 > "$RUNNER_TEMP/astro.log" 2>&1 &
+          for i in $(seq 1 90); do
+            curl -sf -o /dev/null http://localhost:4321/ && exit 0
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/astro.log"
+          exit 1
+      - name: Scan rendered pages
+        if: success() || failure()
+        run: npx --yes impeccable@4.9.1 detect --github $(node scripts/design-detect-urls.mjs)

@@ -126,7 +126,7 @@ export default function DuPontExplorer() {
                 strokeDasharray="3 3"
                 vertical={false}
               />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} />
               <YAxis
                 domain={[0, yMax]}
                 tickFormatter={(v) => `${v}%`}
@@ -135,7 +135,7 @@ export default function DuPontExplorer() {
                   value: 'ROE',
                   angle: -90,
                   position: 'insideLeft',
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
               />
               <Tooltip formatter={(v: number) => `${v}%`} />
@@ -146,7 +146,7 @@ export default function DuPontExplorer() {
                 label={{
                   value: `your firm ${mine.toFixed(1)}%`,
                   position: 'right',
-                  fontSize: 11,
+                  fontSize: 12,
                   fill: 'var(--chart-ink)',
                 }}
               />
@@ -155,14 +155,14 @@ export default function DuPontExplorer() {
                   dataKey="roe"
                   position="top"
                   formatter={(v: number) => `${v}%`}
-                  style={{ fontSize: 11 }}
+                  style={{ fontSize: 12 }}
                 />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </ChartFrame>
-      <p className="mt-2 text-xs text-ink-muted">
+      <p className="mt-2 max-w-measure text-xs text-ink-muted">
         The three archetype bars are the same height: each reaches roughly the
         same ROE by a different route. Thin margin and fast turnover for the
         retailer, fat margin and slow turnover for the luxury brand, a thin

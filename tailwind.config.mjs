@@ -35,6 +35,12 @@ export default {
           400: token('neutral-400'),
         },
       },
+      // Reading width for text blocks: 52ch of Figtree is about 73
+      // characters per line at any font size (impeccable's line-length rule
+      // flags lines over 80).
+      maxWidth: {
+        measure: '52ch',
+      },
       fontFamily: {
         sans: [
           '"Figtree Variable"',
