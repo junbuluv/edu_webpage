@@ -555,22 +555,45 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   `target`).
 - **Production auto-deploy from `main` is not reliable.** Several merges to
   `main` have failed to trigger production deploys (only preview-on-PR fires
-  reliably). After merging an important change, confirm Vercel deployed that
-  SHA. Vercel reports to GitHub as a commit status named `Vercel` (plus a
-  GitHub Deployment), not a check-run, so a check-run query comes back empty
-  even after a good deploy. Check
+  reliably). On 2026-11-16 the #141 merge (`a54b12b`) got no deployment at
+  all: Vercel's activity log had no entry for it, nothing was skipped or
+  failed, and the project settings were fine (Git deploys on, production
+  branch `main`, no Ignored Build Step). GitHub's notice of the push never
+  reached Vercel, or Vercel dropped it; only Vercel support can trace that.
+  So after every merge, confirm Vercel deployed that SHA (an automatic
+  deploy starts within seconds). Vercel reports to GitHub as a commit status
+  named `Vercel` (plus a GitHub Deployment), not a check-run, so a check-run
+  query comes back empty even after a good deploy. Check
   `gh api repos/junbuluv/edu_webpage/commits/<sha>/status --jq '.statuses[] | select(.context == "Vercel") | .state'`
   (expect `success`) or
   `vercel ls edu-webpage --scope junbuluvs-projects -m githubCommitSha=<sha>`.
-  If neither shows a production deploy, force-redeploy via Vercel UI:
-  Deployments → `⋯` on latest → Redeploy → uncheck "Use existing Build
-  Cache", or deploy from the CLI (next bullet).
-- **Deploying via CLI works and is the reliable path.** The repo is linked
-  (gitignored `.vercel/`) to the canonical project **`edu-webpage`** (prod
-  alias `edu-webpage-fawn.vercel.app`); `vercel deploy --prod --yes` ships the
-  current `main` from your machine. A duplicate auto-created project
-  (`edu-webpage-m3av`) was deleted — if a second project reappears wired to
-  this same repo it double-deploys every push; remove it.
+  If neither shows a production deploy within a few minutes, start one: in
+  the Vercel dashboard, Deployments → Create Deployment → `main`, or from the
+  CLI (next bullet). Don't use Redeploy on the latest deployment: it rebuilds
+  that deployment's older commit, not the one that was missed.
+- **Deploy from the CLI out of an exact copy of the commit, never from the
+  working folder.** The working folder is not linked to the project
+  (`.vercel/` is gitignored, and was gone as of 2026-11-16). Vercel documents
+  `.vercelignore` as the way to keep files out of a CLI upload, and the repo
+  has none, so a deploy from the working folder may upload the gitignored
+  `materials/` (copyrighted, convention #14) and your `.env`, which the
+  production build would then read. Instead:
+
+  ```bash
+  D=$(mktemp -d) && git archive <sha> | tar -x -C "$D" && cd "$D"
+  vercel link --yes --project edu-webpage --scope junbuluvs-projects
+  rm -f .env.local  # link saves a Vercel login token here
+  vercel deploy --prod --yes --scope junbuluvs-projects --meta githubCommitSha=<sha>
+  ```
+
+  `vercel login` is the owner's to do (a device code approved in the
+  browser). `--meta githubCommitSha` keeps the `vercel ls` check above
+  working; GitHub still shows no `Vercel` status for a CLI deploy. The
+  canonical project is **`edu-webpage`** (aliases `baruchfinance.com`, `www`,
+  and `edu-webpage-fawn.vercel.app`). A duplicate auto-created project
+  (`edu-webpage-m3av`) was deleted; if a second project reappears wired to
+  this same repo it double-deploys every push, so remove it.
+
 - **Astro 5's built-in `security.checkOrigin` is disabled** in
   `astro.config.mjs`; `src/middleware.ts` performs the replacement check. It
   accepts the request/forwarded/configured Vercel origins and rejects
