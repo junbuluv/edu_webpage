@@ -1,0 +1,59 @@
+# Vercel sometimes never starts the production deploy for a push to main: on
+# 2026-11-16 the #141 merge got no deployment and no Vercel log entry at all
+# (CLAUDE.md, "Vercel deployment gotchas"). This waits for Vercel's commit
+# status on the pushed commit and, if none appears, calls the `deploy-guard`
+# deploy hook (secret VERCEL_DEPLOY_HOOK_URL). The hook builds the head of
+# main from GitHub, which may be newer than this commit.
+name: Vercel deploy guard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Call the deploy hook without waiting (tests the fallback)
+        type: boolean
+        default: false
+
+permissions:
+  statuses: read
+
+# A newer push supersedes an older wait: its commit includes the older changes.
+concurrency:
+  group: vercel-deploy-guard
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Wait for Vercel, or start a deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          FORCE: ${{ inputs.force }}
+          HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ "$FORCE" != "true" ]; then
+            # Vercel posts a "Vercel" status (pending first) within seconds of
+            # creating a deployment, so any state means it saw the push. A
+            # failed build is a different problem and is not retried here.
+            for _ in $(seq 15); do
+              if gh api "repos/$REPO/commits/$SHA/status" \
+                --jq '.statuses[].context' | grep -qx Vercel; then
+                echo "Vercel picked up $SHA"
+                exit 0
+              fi
+              sleep 20
+            done
+          fi
+          if [ -z "$HOOK_URL" ]; then
+            echo "::error::Secret VERCEL_DEPLOY_HOOK_URL is not set"
+            exit 1
+          fi
+          echo "::warning::No Vercel deploy for $SHA (or force); calling the deploy hook for main"
+          curl -fsS -X POST "$HOOK_URL"
+          echo
