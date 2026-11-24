@@ -561,7 +561,13 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   branch `main`, no Ignored Build Step). GitHub's notice of the push never
   reached Vercel, or Vercel dropped it; only Vercel support can trace that.
   So after every merge, confirm Vercel deployed that SHA (an automatic
-  deploy starts within seconds). Vercel reports to GitHub as a commit status
+  deploy starts within seconds). The `Vercel deploy guard` workflow
+  (`.github/workflows/vercel-deploy-guard.yml`, added 2026-11-24) does this
+  after every push to `main`: if no `Vercel` status appears within 5
+  minutes, it calls the `deploy-guard` deploy hook (GitHub secret
+  `VERCEL_DEPLOY_HOOK_URL`), which builds the head of `main`, and its run
+  ends with a warning. Run it by hand with `force` to test the hook. To check
+  by hand: Vercel reports to GitHub as a commit status
   named `Vercel` (plus a GitHub Deployment), not a check-run, so a check-run
   query comes back empty even after a good deploy. Check
   `gh api repos/junbuluv/edu_webpage/commits/<sha>/status --jq '.statuses[] | select(.context == "Vercel") | .state'`
