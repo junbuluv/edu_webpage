@@ -4,19 +4,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseRosterCsv } from './roster-csv.ts';
 
-test('parses header-based CSV with name + section', () => {
+test('parses header-based CSV with a name and ignores other columns', () => {
   const { rows, errors } = parseRosterCsv(
-    'email,name,section\njane@x.edu,Jane Doe,CML\njohn@x.edu,John Roe,CTL',
+    'email,name,major\njane@x.edu,Jane Doe,FIN\njohn@x.edu,John Roe,ACC',
   );
   assert.equal(errors.length, 0);
   assert.deepEqual(rows, [
-    { email: 'jane@x.edu', name: 'Jane Doe', section: 'CML' },
-    { email: 'john@x.edu', name: 'John Roe', section: 'CTL' },
+    { email: 'jane@x.edu', name: 'Jane Doe' },
+    { email: 'john@x.edu', name: 'John Roe' },
   ]);
 });
 
 test('email is required as a header column', () => {
-  const { rows, errors } = parseRosterCsv('name,section\nJane,CML');
+  const { rows, errors } = parseRosterCsv('name,major\nJane,FIN');
   assert.equal(rows.length, 0);
   assert.match(errors[0], /must include an "email" column/);
 });
@@ -26,11 +26,7 @@ test('email is normalized (trim + lowercase) and de-duplicated, last wins', () =
     'email,name\n  JANE@X.edu ,First\njane@x.edu,Second',
   );
   assert.equal(rows.length, 1);
-  assert.deepEqual(rows[0], {
-    email: 'jane@x.edu',
-    name: 'Second',
-    section: null,
-  });
+  assert.deepEqual(rows[0], { email: 'jane@x.edu', name: 'Second' });
 });
 
 test('missing and invalid emails are skipped with reported errors', () => {
@@ -46,24 +42,22 @@ test('missing and invalid emails are skipped with reported errors', () => {
   assert.match(errors[1], /not a valid email/);
 });
 
-test('optional columns absent -> name/section null', () => {
+test('name column absent -> name null', () => {
   const { rows } = parseRosterCsv('email\na@x.edu\nb@x.edu');
   assert.deepEqual(rows, [
-    { email: 'a@x.edu', name: null, section: null },
-    { email: 'b@x.edu', name: null, section: null },
+    { email: 'a@x.edu', name: null },
+    { email: 'b@x.edu', name: null },
   ]);
 });
 
 test('quoted fields handle embedded commas and CRLF endings', () => {
   const { rows } = parseRosterCsv('email,name\r\na@x.edu,"Doe, Jane"\r\n');
-  assert.deepEqual(rows, [
-    { email: 'a@x.edu', name: 'Doe, Jane', section: null },
-  ]);
+  assert.deepEqual(rows, [{ email: 'a@x.edu', name: 'Doe, Jane' }]);
 });
 
 test('header column order does not matter', () => {
-  const { rows } = parseRosterCsv('section,email,name\nCWL,a@x.edu,Al');
-  assert.deepEqual(rows[0], { email: 'a@x.edu', name: 'Al', section: 'CWL' });
+  const { rows } = parseRosterCsv('name,email\nAl,a@x.edu');
+  assert.deepEqual(rows[0], { email: 'a@x.edu', name: 'Al' });
 });
 
 test('empty input yields a friendly error, no rows', () => {

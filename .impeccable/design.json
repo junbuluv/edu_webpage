@@ -228,20 +228,6 @@
           "#F7F4EB"
         ]
       },
-      "course-eco-1002": {
-        "role": "tertiary",
-        "displayName": "CUNY Blue (ECO 1002)",
-        "tonalRamp": [
-          "#00062A",
-          "#001B62",
-          "#0033A1",
-          "#2257C7",
-          "#437BEE",
-          "#74A3FE",
-          "#ADCAFF",
-          "#E7EFFE"
-        ]
-      },
       "course-fin-3610": {
         "role": "tertiary",
         "displayName": "Grape (FIN 3610)",
@@ -310,20 +296,6 @@
           "#D887B4",
           "#EFB5D4",
           "#FDE8F2"
-        ]
-      },
-      "chart-1-soft": {
-        "role": "tertiary",
-        "displayName": "Midtown Tint",
-        "tonalRamp": [
-          "#000B1E",
-          "#00254B",
-          "#00427D",
-          "#2062A8",
-          "#4585CD",
-          "#6AA9F1",
-          "#A3CDFE",
-          "#E4F0FE"
         ]
       },
       "chart-3-soft": {
@@ -505,7 +477,7 @@
       "kind": "chip",
       "refersTo": "chip",
       "description": "Toggle pills that filter practice quizzes; selected uses aria-pressed.",
-      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">ECO 1002</button><button class=\"ds-chip\" aria-pressed=\"false\">FIN 3610</button></div>",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">All courses</button><button class=\"ds-chip\" aria-pressed=\"false\">FIN 3610</button></div>",
       "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; color: rgb(var(--ink-muted)); padding: 4px 12px; font-size: 0.875rem; border: 1px solid rgb(var(--neutral-300)); border-radius: 9999px; cursor: pointer; } .ds-chip:hover { background: rgb(var(--neutral-50)); } .ds-chip[aria-pressed=\"true\"] { border-color: rgb(var(--accent)); background: rgb(var(--accent) / 0.1); color: rgb(var(--accent)); font-weight: 500; } .ds-chip:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }"
     },
     {
@@ -521,7 +493,7 @@
       "kind": "card",
       "refersTo": "card",
       "description": "Flat bordered container for course cards, dashboard sections and chart blocks.",
-      "html": "<section class=\"ds-card\"><p class=\"ds-card-eyebrow\">ECO 1002</p><h3 class=\"ds-card-title\">IS-LM: goods and money markets</h3><p class=\"ds-card-body\">Shift the IS curve with fiscal policy and watch output and the interest rate move together.</p></section>",
+      "html": "<section class=\"ds-card\"><p class=\"ds-card-eyebrow\">FIN 3610</p><h3 class=\"ds-card-title\">Bond pricing and yield to maturity</h3><p class=\"ds-card-body\">Drag the yield and watch the bond's price move the other way.</p></section>",
       "css": ".ds-card { font-family: \"Figtree Variable\", \"Avenir Next\", Avenir, ui-sans-serif, system-ui, sans-serif; background: #fff; border: 1px solid rgb(var(--neutral-200)); border-radius: 8px; padding: 20px; max-width: 28rem; } .ds-card-eyebrow { margin: 0; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.025em; text-transform: uppercase; color: rgb(var(--accent)); } .ds-card-title { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; color: rgb(var(--heading)); } .ds-card-body { margin: 8px 0 0; font-size: 0.875rem; line-height: 1.43; color: rgb(var(--ink-muted)); }"
     },
     {

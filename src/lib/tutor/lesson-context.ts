@@ -2,7 +2,7 @@
 // text for the tutor's instructions. Pure and alias-free. Imports are dropped;
 // <Figure> becomes its caption; <BarFigure> becomes a small table of its
 // literal data; other components become "[Interactive: Name]" plus any prose
-// found in their string props (GuidedReader keeps its steps); children of
+// found in their string props; children of
 // components with closing tags stay in place. Prose and $…$ math are kept
 // verbatim. Components are only
 // recognized at the start of a line, so math like $r<R$ is never mistaken
@@ -17,9 +17,9 @@ export interface LessonMeta {
 
 export const TUTOR_MAX_CONTEXT_CHARS = 30_000;
 
-// Prop keys whose strings answer a lesson's self-checks (GuidedReader's
-// `check.explanation`). The tutor must not read answers off the page it
-// is coaching on, so these never enter the context.
+// Prop keys whose strings answer a self-check built into a lesson component
+// (for example `check.explanation`). The tutor must not read answers off the
+// page it is coaching on, so these never enter the context.
 const ANSWER_KEYS = new Set([
   'explanation',
   'answer',
@@ -188,7 +188,7 @@ function describeComponent(tag: ScannedTag): string {
     if (chart) return chart;
   }
   // Prose-like props only: long enough and containing a space (skips slugs,
-  // paths, and ids such as lessonSlug="eco-1002/is-lm-guided").
+  // paths, and ids such as lessonSlug="fin-3610/npv-decision-rule").
   const prose = tag.strings
     .map(stripHtml)
     .filter((s) => s.length >= 20 && /\s/.test(s));

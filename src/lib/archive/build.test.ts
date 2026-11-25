@@ -7,36 +7,30 @@ import {
   semesterKey,
   semesterLabel,
 } from './build.ts';
-import type {
-  LessonInput,
-  LessonRef,
-  PaperInput,
-  QuizInput,
-  VideoInput,
-} from './types.ts';
+import type { LessonInput, LessonRef, PaperInput, QuizInput } from './types.ts';
 
 const lessons: LessonInput[] = [
   {
-    id: 'eco-1002/solow.mdx',
-    course: 'eco-1002',
-    title: 'The Solow Model',
-    unit: 'Growth',
-    summary: 'Capital accumulation and steady state.',
-    tags: ['growth'],
+    id: 'fin-3610/valuing-stocks.mdx',
+    course: 'fin-3610',
+    title: 'Valuing Stocks',
+    unit: 'Valuation',
+    summary: 'Dividends, payouts and free cash flow.',
+    tags: ['valuation'],
     draft: false,
   },
   {
-    id: 'eco-1002/draft-topic',
-    course: 'eco-1002',
+    id: 'fin-3610/draft-topic',
+    course: 'fin-3610',
     title: 'Draft',
-    unit: 'Growth',
+    unit: 'Valuation',
     summary: 'x',
     tags: [],
     draft: true,
   },
   {
-    id: 'fin-3610/bond-pricing-and-yield',
-    course: 'fin-3610',
+    id: 'other-course/bond-pricing-and-yield',
+    course: 'other-course',
     title: 'Bonds',
     unit: 'Rates',
     summary: 'y',
@@ -47,109 +41,81 @@ const lessons: LessonInput[] = [
 
 const quizzes: QuizInput[] = [
   {
-    slug: 'eco-1002-practice',
-    course: 'eco-1002',
+    slug: 'fin-3610-practice',
+    course: 'fin-3610',
     title: 'Practice',
     kind: 'practice',
-    lessonSlug: 'eco-1002/solow',
+    lessonSlug: 'fin-3610/valuing-stocks',
     covers: [],
     semester: null,
   },
   {
-    slug: 'eco-1002-midterm-f24',
-    course: 'eco-1002',
+    slug: 'fin-3610-midterm-f24',
+    course: 'fin-3610',
     title: 'Midterm',
     kind: 'exam',
-    covers: ['eco-1002/solow'],
+    covers: ['fin-3610/valuing-stocks'],
     semester: { term: 'fall', year: 2024 },
   },
 ];
 
-const videos: VideoInput[] = [
+const papers: PaperInput[] = [
   {
-    slug: 'eco-vid',
-    course: 'eco-1002',
-    title: 'Solow lecture',
-    lessonSlug: 'eco-1002/solow',
-    provider: 'youtube',
-    videoId: 'abc123',
+    id: 'p1',
+    course: 'fin-3610',
+    kind: 'assignment',
+    title: 'Problem set 1',
+    covers: ['fin-3610/valuing-stocks'],
     semester: { term: 'spring', year: 2025 },
+    fileUrl: 'https://signed.example/p1.pdf',
+    fileName: 'ps1.pdf',
   },
 ];
 
 test('notes come from non-draft lessons of the course', () => {
-  const items = buildArchiveItems({
-    lessons,
-    quizzes,
-    videos,
-    course: 'eco-1002',
-  });
+  const items = buildArchiveItems({ lessons, quizzes, course: 'fin-3610' });
   const notes = items.filter((i) => i.type === 'notes');
   assert.equal(notes.length, 1);
-  assert.equal(notes[0].title, 'The Solow Model');
-  assert.equal(notes[0].href, '/lessons/eco-1002/solow');
-  assert.deepEqual(notes[0].units, ['Growth']);
+  assert.equal(notes[0].title, 'Valuing Stocks');
+  assert.equal(notes[0].href, '/lessons/fin-3610/valuing-stocks');
+  assert.deepEqual(notes[0].units, ['Valuation']);
   assert.equal(notes[0].semester, null);
 });
 
 test('practice quizzes are excluded; exams included with semester + units', () => {
-  const items = buildArchiveItems({
-    lessons,
-    quizzes,
-    videos,
-    course: 'eco-1002',
-  });
+  const items = buildArchiveItems({ lessons, quizzes, course: 'fin-3610' });
   assert.equal(
     items.some((i) => i.title === 'Practice'),
     false,
   );
   const exam = items.find((i) => i.type === 'exam');
   assert.ok(exam);
-  assert.equal(exam.href, '/practice/eco-1002-midterm-f24');
-  assert.deepEqual(exam.units, ['Growth']);
+  assert.equal(exam.href, '/practice/fin-3610-midterm-f24');
+  assert.deepEqual(exam.units, ['Valuation']);
   assert.deepEqual(exam.semester, { term: 'fall', year: 2024 });
 });
 
-test('videos map with provider/videoId and empty href', () => {
+test('a different course yields only its own items', () => {
   const items = buildArchiveItems({
     lessons,
     quizzes,
-    videos,
-    course: 'eco-1002',
+    papers,
+    course: 'other-course',
   });
-  const v = items.find((i) => i.type === 'video');
-  assert.ok(v);
-  assert.equal(v.provider, 'youtube');
-  assert.equal(v.videoId, 'abc123');
-  assert.equal(v.href, '');
-  assert.deepEqual(v.units, ['Growth']);
-});
-
-test('a different course yields no videos and only its own items', () => {
-  const items = buildArchiveItems({
-    lessons,
-    quizzes,
-    videos,
-    course: 'fin-3610',
-  });
-  assert.equal(
-    items.some((i) => i.type === 'video'),
-    false,
-  );
-  assert.equal(
-    items.every((i) => i.course === 'fin-3610'),
-    true,
+  assert.deepEqual(
+    items.map((i) => i.title),
+    ['Bonds'],
   );
 });
 
 test('exam with empty covers falls back to lessonSlug for units', () => {
   const fallbackQuiz: QuizInput[] = [
     {
-      slug: 'eco-1002-final-f24',
-      course: 'eco-1002',
+      slug: 'fin-3610-final-f24',
+      course: 'fin-3610',
       title: 'Final',
       kind: 'exam',
-      lessonSlug: 'eco-1002/solow',
+      lessonSlug: 'fin-3610/valuing-stocks',
       covers: [],
       semester: { term: 'fall', year: 2024 },
     },
@@ -157,17 +123,20 @@ test('exam with empty covers falls back to lessonSlug for units', () => {
   const items = buildArchiveItems({
     lessons,
     quizzes: fallbackQuiz,
-    videos: [],
-    course: 'eco-1002',
+    course: 'fin-3610',
   });
   const exam = items.find((i) => i.type === 'exam');
   assert.ok(exam);
-  assert.deepEqual(exam.lessonSlugs, ['eco-1002/solow']);
-  assert.deepEqual(exam.units, ['Growth']);
+  assert.deepEqual(exam.lessonSlugs, ['fin-3610/valuing-stocks']);
+  assert.deepEqual(exam.units, ['Valuation']);
 });
 
 const lessonIndex: LessonRef[] = [
-  { slug: 'eco-1002/solow', title: 'The Solow Model', unit: 'Growth' },
+  {
+    slug: 'fin-3610/valuing-stocks',
+    title: 'Valuing Stocks',
+    unit: 'Valuation',
+  },
 ];
 
 test('semesterKey / semesterLabel format correctly', () => {
@@ -180,19 +149,19 @@ test('deriveFacets sorts semesters newest-first and lists present types', () => 
   const items = buildArchiveItems({
     lessons,
     quizzes,
-    videos,
-    course: 'eco-1002',
+    papers,
+    course: 'fin-3610',
   });
   const f = deriveFacets(items, lessonIndex);
-  assert.deepEqual(f.types, ['notes', 'exam', 'video']);
+  assert.deepEqual(f.types, ['notes', 'exam', 'assignment']);
   // spring 2025 is newer than fall 2024
   assert.deepEqual(
     f.semesters.map((s) => s.key),
     ['spring-2025', 'fall-2024'],
   );
-  assert.deepEqual(f.units, ['Growth']);
+  assert.deepEqual(f.units, ['Valuation']);
   assert.deepEqual(f.lessons, [
-    { slug: 'eco-1002/solow', title: 'The Solow Model' },
+    { slug: 'fin-3610/valuing-stocks', title: 'Valuing Stocks' },
   ]);
 });
 
@@ -203,26 +172,25 @@ test('deriveFacets orders same-year semesters fall-before-spring; labels all ter
   const sameYear: QuizInput[] = [
     {
       slug: 'q-spring',
-      course: 'eco-1002',
+      course: 'fin-3610',
       title: 'Spring exam',
       kind: 'exam',
-      covers: ['eco-1002/solow'],
+      covers: ['fin-3610/valuing-stocks'],
       semester: { term: 'spring', year: 2025 },
     },
     {
       slug: 'q-fall',
-      course: 'eco-1002',
+      course: 'fin-3610',
       title: 'Fall exam',
       kind: 'exam',
-      covers: ['eco-1002/solow'],
+      covers: ['fin-3610/valuing-stocks'],
       semester: { term: 'fall', year: 2025 },
     },
   ];
   const items = buildArchiveItems({
     lessons,
     quizzes: sameYear,
-    videos: [],
-    course: 'eco-1002',
+    course: 'fin-3610',
   });
   const f = deriveFacets(items, lessonIndex);
   assert.deepEqual(
@@ -235,11 +203,11 @@ test('filterItems narrows by type, semester, unit, lesson, and query', () => {
   const items = buildArchiveItems({
     lessons,
     quizzes,
-    videos,
-    course: 'eco-1002',
+    papers,
+    course: 'fin-3610',
   });
 
-  assert.equal(filterItems(items, { type: 'video' }).length, 1);
+  assert.equal(filterItems(items, { type: 'assignment' }).length, 1);
   assert.equal(filterItems(items, { semester: 'fall-2024' }).length, 1);
   // notes have no semester -> excluded when a semester is selected
   assert.equal(
@@ -248,19 +216,25 @@ test('filterItems narrows by type, semester, unit, lesson, and query', () => {
     ),
     true,
   );
-  assert.equal(filterItems(items, { unit: 'Growth' }).length, 3);
-  assert.equal(filterItems(items, { lesson: 'eco-1002/solow' }).length, 3);
+  assert.equal(filterItems(items, { unit: 'Valuation' }).length, 3);
+  assert.equal(
+    filterItems(items, { lesson: 'fin-3610/valuing-stocks' }).length,
+    3,
+  );
   // keyword: all tokens must appear in searchText
-  assert.equal(filterItems(items, { query: 'solow lecture' }).length, 1);
+  assert.equal(filterItems(items, { query: 'problem set' }).length, 1);
   assert.equal(filterItems(items, { query: 'nonexistent' }).length, 0);
   // empty filters -> everything
   assert.equal(filterItems(items, {}).length, items.length);
 
-  // multi-facet AND: a video that is also in unit 'Growth'
-  assert.equal(filterItems(items, { type: 'video', unit: 'Growth' }).length, 1);
-  // multi-facet AND that yields zero: a video tagged with the exam's semester
+  // multi-facet AND: an assignment that is also in unit 'Valuation'
   assert.equal(
-    filterItems(items, { type: 'video', semester: 'fall-2024' }).length,
+    filterItems(items, { type: 'assignment', unit: 'Valuation' }).length,
+    1,
+  );
+  // multi-facet AND that yields zero: an assignment in the exam's semester
+  assert.equal(
+    filterItems(items, { type: 'assignment', semester: 'fall-2024' }).length,
     0,
   );
   // whitespace-only query is treated as no query
@@ -268,40 +242,22 @@ test('filterItems narrows by type, semester, unit, lesson, and query', () => {
 });
 
 test('papers become file-exam/assignment items with fileUrl and no /practice href', () => {
-  const papers: PaperInput[] = [
-    {
-      id: 'p1',
-      course: 'eco-1002',
-      kind: 'assignment',
-      title: 'PS1 (Fall 2024)',
-      covers: ['eco-1002/solow'],
-      semester: { term: 'fall', year: 2024 },
-      fileUrl: 'https://signed.example/p1.pdf',
-      fileName: 'ps1.pdf',
-    },
-  ];
   const items = buildArchiveItems({
     lessons,
     quizzes: [],
-    videos: [],
     papers,
-    course: 'eco-1002',
+    course: 'fin-3610',
   });
   const paper = items.find((i) => i.type === 'assignment');
   assert.ok(paper);
   assert.equal(paper.href, '');
   assert.equal(paper.fileUrl, 'https://signed.example/p1.pdf');
   assert.equal(paper.fileName, 'ps1.pdf');
-  assert.deepEqual(paper.units, ['Growth']);
-  assert.deepEqual(paper.semester, { term: 'fall', year: 2024 });
+  assert.deepEqual(paper.units, ['Valuation']);
+  assert.deepEqual(paper.semester, { term: 'spring', year: 2025 });
 });
 
-test('buildArchiveItems works when papers is omitted (back-compat)', () => {
-  const items = buildArchiveItems({
-    lessons,
-    quizzes,
-    videos,
-    course: 'eco-1002',
-  });
+test('buildArchiveItems works when papers is omitted', () => {
+  const items = buildArchiveItems({ lessons, quizzes, course: 'fin-3610' });
   assert.ok(items.length > 0);
 });

@@ -1,6 +1,4 @@
 export const WORKSHOP_TIME_ZONE = 'America/New_York';
-export const WORKSHOP_SECTIONS = ['CML', 'CTL', 'CWL', 'CRL'] as const;
-export type WorkshopSection = (typeof WORKSHOP_SECTIONS)[number];
 export type WorkshopWindowStatus = 'upcoming' | 'open' | 'closed' | 'cancelled';
 
 export function canUseStudentWorkshopAttendance(
@@ -11,13 +9,6 @@ export function canUseStudentWorkshopAttendance(
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const SECTION_WEEKDAY: Record<WorkshopSection, number> = {
-  CML: 1,
-  CTL: 2,
-  CWL: 3,
-  CRL: 4,
-};
 
 interface WallParts {
   year: number;
@@ -33,7 +24,6 @@ export type WallTimeResult =
       date: Date;
       iso: string;
       weekOf: string;
-      weekday: number;
     }
   | { ok: false; reason: 'invalid' | 'nonexistent' | 'ambiguous' };
 
@@ -165,15 +155,11 @@ export function parseNewYorkWallTime(raw: string): WallTimeResult {
   if (unique.length > 1) return { ok: false, reason: 'ambiguous' };
 
   const date = new Date(unique[0]);
-  const weekdayDate = new Date(
-    Date.UTC(target.year, target.month - 1, target.day),
-  );
   return {
     ok: true,
     date,
     iso: date.toISOString(),
     weekOf: mondayFor(target),
-    weekday: weekdayDate.getUTCDay() === 0 ? 7 : weekdayDate.getUTCDay(),
   };
 }
 
@@ -212,13 +198,6 @@ export function newYorkReportingRangeStartISO(
     throw new Error(`Could not resolve New York ${range} boundary`);
   }
   return parsed.iso;
-}
-
-export function sectionMatchesWeekday(
-  section: WorkshopSection,
-  isoWeekday: number,
-): boolean {
-  return SECTION_WEEKDAY[section] === isoWeekday;
 }
 
 export function validWorkshopWindow(opensAt: Date, closesAt: Date): boolean {
@@ -272,23 +251,16 @@ export function workshopWindowStatus(
 export interface WorkshopEnrollment {
   courseSlug: string;
   semester: string;
-  section: string | null;
   instructorId: string;
 }
 
 export interface WorkshopAdministrationScope {
   courseSlug: string;
   semester: string;
-  section: string | null;
   instructorId: string;
 }
 
-export type EnrollmentMatch =
-  | 'ok'
-  | 'not_enrolled'
-  | 'wrong_instructor'
-  | 'section_assignment_required'
-  | 'wrong_section';
+export type EnrollmentMatch = 'ok' | 'not_enrolled' | 'wrong_instructor';
 
 export function matchWorkshopEnrollment(
   enrollment: WorkshopEnrollment | null,
@@ -304,9 +276,7 @@ export function matchWorkshopEnrollment(
   if (enrollment.instructorId !== administration.instructorId) {
     return 'wrong_instructor';
   }
-  if (administration.section == null) return 'ok';
-  if (enrollment.section == null) return 'section_assignment_required';
-  return enrollment.section === administration.section ? 'ok' : 'wrong_section';
+  return 'ok';
 }
 
 export interface WorkshopQuestion {

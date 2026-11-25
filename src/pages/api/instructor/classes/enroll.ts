@@ -10,9 +10,6 @@ import { classifyEnroll } from '@lib/instructor/enroll-classify';
 import { logDisclosureSafe } from '@lib/audit';
 import { isUuid } from '@lib/workshop-policy';
 
-const SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
-const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
-
 function redirect(
   course: string,
   semester: string,
@@ -52,7 +49,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .trim()
     .toLowerCase();
   const studentName = String(form.get('student_name') ?? '').trim() || null;
-  const rawSection = String(form.get('section') ?? '').trim();
   const requestedInstructorId = String(form.get('instructor_id') ?? '').trim();
   const targetInstructorId = isAdmin(role) ? requestedInstructorId : user.id;
 
@@ -81,13 +77,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     !(await hasActiveTeachingAssignment(targetInstructorId, course, semester))
   )
     return fail('invalid_instructor');
-  const usesSections = COURSES_WITH_SECTIONS.has(course);
-  let section: string | null = null;
-  if (usesSections) {
-    if (!SECTIONS.has(rawSection))
-      return err(course, semester, targetInstructorId, 'invalid_section');
-    section = rawSection;
-  }
 
   // The admin client + auth-user listing can throw (missing service-role
   // env, transient auth-API failure). Degrade to a banner on the page
@@ -127,7 +116,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     p_semester: semester,
     p_instructor_id: targetInstructorId,
     p_student_name: studentName,
-    p_section: section,
+    // The database function still takes a section until the schema change
+    // that drops it; it must be null.
+    p_section: null,
     p_operation: 'insert',
   });
   if (error?.code === '23505')

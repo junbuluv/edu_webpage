@@ -25,8 +25,6 @@ if (!slug) return new Response(null, { status: 404 });
 
 const workshop = await getEntry('workshops', slug);
 if (!workshop) return new Response(null, { status: 404 });
-const SECTIONS = ['CML', 'CTL', 'CWL', 'CRL'] as const;
-const courseUsesSections = workshop.data.course === 'eco-1002';
 
 const assignmentRowsResult = await selectAllRows<{
   instructor_id: string;
@@ -58,14 +56,11 @@ if (!viewerIsAdmin && assignmentRowsResult.rows.length === 0) {
 const activeViewerSemesters = assignmentRowsResult.rows.map(
   (row) => row.semester,
 );
-const classOptions = assignmentRowsResult.rows.flatMap((row) =>
-  (courseUsesSections ? SECTIONS : [null]).map((section) => ({
-    instructorId: row.instructor_id,
-    semester: row.semester,
-    section,
-    assignedAt: row.assigned_at,
-  })),
-);
+const classOptions = assignmentRowsResult.rows.map((row) => ({
+  instructorId: row.instructor_id,
+  semester: row.semester,
+  assignedAt: row.assigned_at,
+}));
 const classInstructorIds = [
   ...new Set(classOptions.map((item) => item.instructorId)),
 ];
@@ -83,13 +78,11 @@ classOptions.sort(
   (a, b) =>
     b.assignedAt.localeCompare(a.assignedAt) ||
     b.semester.localeCompare(a.semester) ||
-    a.instructorId.localeCompare(b.instructorId) ||
-    (a.section ?? '').localeCompare(b.section ?? ''),
+    a.instructorId.localeCompare(b.instructorId),
 );
 const administrationsResult = await selectAllRows<{
   id: string;
   semester: string;
-  section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
   week_of: string;
   instructor_id: string;
   opens_at: string;
@@ -105,7 +98,7 @@ const administrationsResult = await selectAllRows<{
   let query = admin
     .from('workshop_administrations')
     .select(
-      'id, semester, section, week_of, instructor_id, opens_at, closes_at, required_lat, required_lng, required_radius_meters, location_label, questions_revealed_at, cancelled_at, notes',
+      'id, semester, week_of, instructor_id, opens_at, closes_at, required_lat, required_lng, required_radius_meters, location_label, questions_revealed_at, cancelled_at, notes',
     )
     .eq('workshop_slug', slug);
   if (!viewerIsAdmin) {
@@ -115,7 +108,6 @@ const administrationsResult = await selectAllRows<{
   }
   return query
     .order('week_of', { ascending: false })
-    .order('section', { ascending: true })
     .order('id', { ascending: true })
     .range(from, to);
 });
@@ -162,7 +154,6 @@ let enrollmentRows: Array<{
   user_id: string;
   instructor_id: string;
   semester: string;
-  section: string | null;
   student_name: string | null;
 }> = [];
 let enrollmentReadFailed = false;
@@ -172,7 +163,7 @@ if (semestersInView.length > 0) {
     (from, to) =>
       supabase
         .from('enrollments')
-        .select('user_id, instructor_id, semester, section, student_name')
+        .select('user_id, instructor_id, semester, student_name')
         .eq('course_slug', workshop.data.course)
         .in('semester', semestersInView)
         .order('semester', { ascending: true })
@@ -266,7 +257,7 @@ if (
 
 if (csvRequested) {
   const lines = [
-    'administration_id,semester,section,week_of,user_id,student_name,stamped_at,verification_method,correction_reason',
+    'administration_id,semester,week_of,user_id,student_name,stamped_at,verification_method,correction_reason',
   ];
   const adminById = new Map(admins.map((row) => [row.id, row]));
   for (const row of attendance) {
@@ -276,7 +267,6 @@ if (csvRequested) {
       [
         row.administration_id,
         administration.semester,
-        administration.section ?? '',
         administration.week_of,
         row.user_id,
         studentName(row.user_id, administration.semester) ?? '',
@@ -338,16 +328,11 @@ const ERROR_MESSAGES: Record<string, string> = {
     'Manual attendance can only be recorded for a student account.',
   not_enrolled: 'That student is no longer enrolled in this class.',
   wrong_instructor: 'That student belongs to a different instructor roster.',
-  wrong_section: 'That student belongs to a different section.',
-  section_assignment_required:
-    'That student needs a section assignment before attendance can be recorded.',
   invalid_time: 'Enter valid opening and closing times.',
   ambiguous_or_missing_time:
     'That time falls in a daylight-saving transition. Choose an unambiguous time.',
   invalid_window:
     'The window must last more than zero and no more than 24 hours.',
-  wrong_section_day:
-    'ECO sections must open on their assigned day: CML Monday, CTL Tuesday, CWL Wednesday, or CRL Thursday.',
   invalid_location:
     'Enter a valid location, coordinates, and radius from 10 to 50,000 meters.',
   not_course_instructor:
@@ -439,13 +424,7 @@ const defaultClosesAt = newYorkDateTimeInputValue(
     </details>
 
     <section class="mt-8 rounded-lg border border-slate-200 p-5">
-      <h2 class="text-lg font-semibold">
-        {
-          courseUsesSections
-            ? 'Open a new section window'
-            : 'Open a new workshop window'
-        }
-      </h2>
+      <h2 class="text-lg font-semibold">Open a new workshop window</h2>
       <p
         class="mt-2 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950"
       >
@@ -482,9 +461,7 @@ const defaultClosesAt = newYorkDateTimeInputValue(
             />
 
             <label class="text-sm">
-              <span class="font-medium">
-                Class / semester{courseUsesSections ? ' / section' : ''}
-              </span>
+              <span class="font-medium">Class / semester</span>
               <select
                 name="class_key"
                 required
@@ -498,11 +475,9 @@ const defaultClosesAt = newYorkDateTimeInputValue(
                     value={JSON.stringify({
                       instructorId: classOption.instructorId,
                       semester: classOption.semester,
-                      section: classOption.section,
                     })}
                   >
                     {classOption.semester}
-                    {classOption.section ? ` · ${classOption.section}` : ''}
                     {viewerIsAdmin
                       ? ` — ${instructorNameById.get(classOption.instructorId) ?? `Instructor ${classOption.instructorId.slice(0, 8)}`}`
                       : ''}
@@ -607,9 +582,7 @@ const defaultClosesAt = newYorkDateTimeInputValue(
                 type="submit"
                 class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-strong"
               >
-                {courseUsesSections
-                  ? 'Open section window'
-                  : 'Open workshop window'}
+                Open workshop window
               </button>
             </div>
           </form>
@@ -656,25 +629,20 @@ const defaultClosesAt = newYorkDateTimeInputValue(
               const eligibleStudents = enrollmentRows.filter(
                 (enrollment) =>
                   enrollment.semester === administration.semester &&
-                  enrollment.instructor_id === administration.instructor_id &&
-                  (administration.section == null ||
-                    enrollment.section === administration.section),
+                  enrollment.instructor_id === administration.instructor_id,
               );
               const missingStudents = eligibleStudents.filter(
                 (enrollment) => !stampedUsers.has(enrollment.user_id),
               );
-              const sessionLabel = `${administration.semester}${administration.section ? ` section ${administration.section}` : ''}, week of ${formatWeekOf(administration.week_of)}`;
+              const sessionLabel = `${administration.semester}, week of ${formatWeekOf(administration.week_of)}`;
               const sessionHeadingId = `workshop-session-${administration.id}`;
               return (
                 <li class="rounded-lg border border-slate-200 p-4">
                   <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 id={sessionHeadingId} class="text-sm font-medium">
-                        {administration.semester} ·{' '}
-                        {administration.section ? (
-                          <>Section {administration.section} · </>
-                        ) : null}
-                        week of {formatWeekOf(administration.week_of)}
+                        {administration.semester} · week of{' '}
+                        {formatWeekOf(administration.week_of)}
                       </h3>
                       <p class="mt-1 text-xs text-ink-muted">
                         {formatNewYorkDateTime(administration.opens_at)} —{' '}
@@ -921,9 +889,6 @@ const defaultClosesAt = newYorkDateTimeInputValue(
                                 <option value={student.user_id}>
                                   {student.student_name ?? 'Student'} ·{' '}
                                   {student.user_id.slice(0, 8)}
-                                  {student.section
-                                    ? ` (${student.section})`
-                                    : ''}
                                 </option>
                               ))}
                             </select>

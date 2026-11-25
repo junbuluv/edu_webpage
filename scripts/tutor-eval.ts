@@ -1,12 +1,12 @@
 // Picks the lesson tutor's model before launch (2026-10-05 tutor plan,
-// Task 6 / Task 10). Pass bar from the interview: >= 90% of ECO quiz points,
-// >= 8/10 FIN numeric, then coach behavior PASS in >= 8 of 10 transcripts,
-// read by a person in the report.
+// Task 6 / Task 10). Pass bar: >= 90% of the points on FIN 3610 multiple-choice
+// and multi-select quiz questions, >= 8/10 numeric questions, then coach
+// behavior PASS in >= 8 of 10 transcripts, read by a person in the report.
 //
 // WHERE: terminal, repo root. Needs AI_GATEWAY_API_KEY (from .env):
 //   node --env-file=.env scripts/tutor-eval.ts openai/gpt-6-luna:low openai/gpt-6-luna:medium
 // Each argument is <gateway model id>[:<effort>]. --course <slug> picks whose
-// 10 coaching transcripts run (default eco-1002); --coaching-only skips the
+// 10 coaching transcripts run (default fin-3610); --coaching-only skips the
 // accuracy pass. Writes quality_reports/tutor-eval/<date>-tutor-eval[-...].md
 // (gitignored: transcripts can contain quiz answers, and the repo is public)
 // and prints a summary.
@@ -54,31 +54,6 @@ const CONCEPT_PROMPTS: Record<
   string,
   { lessonSlug: string; message: string }[]
 > = {
-  'eco-1002': [
-    {
-      lessonSlug: 'eco-1002/is-lm-intro',
-      message: 'Why does the IS curve slope downward?',
-    },
-    {
-      lessonSlug: 'eco-1002/ad-as',
-      message:
-        'What is the difference between a shift of aggregate demand and a movement along it?',
-    },
-    {
-      lessonSlug: 'eco-1002/phillips-curve',
-      message: 'Why might the short-run Phillips curve shift up?',
-    },
-    {
-      lessonSlug: 'eco-1002/fed-balance-sheet',
-      message:
-        'What happens to bank reserves when the Fed buys Treasury bonds?',
-    },
-    {
-      lessonSlug: 'eco-1002/solow',
-      message:
-        'Why does growth from capital accumulation slow down in the Solow model?',
-    },
-  ],
   'fin-3610': [
     {
       lessonSlug: 'fin-3610/bond-pricing-and-yield',
@@ -259,7 +234,7 @@ function cell(text: string): string {
 async function main(): Promise<void> {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   const args = process.argv.slice(2);
-  let course = 'eco-1002';
+  let course = 'fin-3610';
   let coachingOnly = false;
   const configs: string[] = [];
   for (let i = 0; i < args.length; i++) {
@@ -274,7 +249,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   const gateway = createGateway({ apiKey });
-  const eco = loadQuizzes('eco-1002');
+  // Multiple-choice and multi-select questions; numeric ones are sampled below.
+  const conceptual = loadQuizzes('fin-3610')
+    .map((quiz) => ({
+      ...quiz,
+      questions: quiz.questions.filter((q) => q.type !== 'numeric'),
+    }))
+    .filter((quiz) => quiz.questions.length > 0);
   const finNumeric = loadQuizzes('fin-3610')
     .flatMap((quiz) =>
       quiz.questions
@@ -289,7 +270,6 @@ async function main(): Promise<void> {
         .map((q) => ({ quiz, q })),
     )
     .slice(0, 5);
-  const ecoCourse = courseInfo('eco-1002');
   const finCourse = courseInfo('fin-3610');
   const coachCourse = courseInfo(course);
 
@@ -301,15 +281,15 @@ async function main(): Promise<void> {
     const tally: Tally = { input: 0, output: 0 };
     console.log(`Running ${modelId} (${effort})...`);
 
-    let ecoScore = 0;
-    let ecoMax = 0;
+    let quizScore = 0;
+    let quizMax = 0;
     let finCorrect = 0;
     const misses: Miss[] = [];
     const replies = new Map<string, string>();
     if (!coachingOnly) {
-      for (const quiz of eco) {
+      for (const quiz of conceptual) {
         const instructions = accuracyInstructions(
-          ecoCourse.code,
+          finCourse.code,
           lessonContext(quiz.lessonSlug),
         );
         const answers: AnswerMap = {};
@@ -327,8 +307,8 @@ async function main(): Promise<void> {
           replies.set(`${quiz.slug}:${q.id}`, reply);
         }
         const graded = gradeQuiz(quiz.questions, answers);
-        ecoScore += graded.score;
-        ecoMax += graded.maxScore;
+        quizScore += graded.score;
+        quizMax += graded.maxScore;
         for (const q of quiz.questions) {
           if (graded.perQuestion[q.id]?.correct) continue;
           misses.push({
@@ -413,22 +393,22 @@ async function main(): Promise<void> {
     const cost = price
       ? `$${((tally.input * price[0] + tally.output * price[1]) / 1e6).toFixed(4)}`
       : 'n/a';
-    const pct = ecoMax ? ((100 * ecoScore) / ecoMax).toFixed(1) : '0.0';
-    const pass = accuracyPasses(ecoScore, ecoMax, finCorrect) ? 'yes' : 'no';
+    const pct = quizMax ? ((100 * quizScore) / quizMax).toFixed(1) : '0.0';
+    const pass = accuracyPasses(quizScore, quizMax, finCorrect) ? 'yes' : 'no';
     rows.push(
       coachingOnly
         ? `| ${modelId} | ${effort} | skipped | skipped | skipped | ${cost} | ${tally.input} / ${tally.output} |`
-        : `| ${modelId} | ${effort} | ${pct}% (${ecoScore}/${ecoMax}) | ${finCorrect}/${finNumeric.length} | ${pass} | ${cost} | ${tally.input} / ${tally.output} |`,
+        : `| ${modelId} | ${effort} | ${pct}% (${quizScore}/${quizMax}) | ${finCorrect}/${finNumeric.length} | ${pass} | ${cost} | ${tally.input} / ${tally.output} |`,
     );
   }
 
   const date = new Date().toISOString().slice(0, 10);
   const header =
-    '| Model | Effort | ECO score | FIN numeric | Accuracy pass | Eval cost | Tokens in / out |\n|---|---|---|---|---|---|---|';
+    '| Model | Effort | Quiz score | Numeric | Accuracy pass | Eval cost | Tokens in / out |\n|---|---|---|---|---|---|---|';
   const report = [
     `# Tutor model eval, ${date}`,
     '',
-    'Pass bar: ECO >= 90% of points and FIN numeric >= 8/10, then coach PASS in >= 8 of the 10 transcripts for that configuration.',
+    'Pass bar: >= 90% of multiple-choice and multi-select quiz points and numeric >= 8/10, then coach PASS in >= 8 of the 10 transcripts for that configuration.',
     'Coach PASS: correct and grounded in the lesson; for "just give me the final answer" prompts, no final number or choice, only a question about their attempt or one step; short; math written as \\( \\), not $.',
     'Pick the cheapest configuration (Eval cost) that passes all three. Cost assumes outputTokens includes reasoning tokens (true for OpenAI).',
     '',
@@ -439,7 +419,7 @@ async function main(): Promise<void> {
   ].join('\n');
   mkdirSync(join(ROOT, 'quality_reports/tutor-eval'), { recursive: true });
   const suffix = [
-    course === 'eco-1002' ? '' : course,
+    course === 'fin-3610' ? '' : course,
     coachingOnly ? 'coaching' : '',
   ]
     .filter(Boolean)

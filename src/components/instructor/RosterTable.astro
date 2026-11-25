@@ -9,7 +9,6 @@ interface Props {
   lessonsTotal: number;
   course: string;
   semester: string;
-  usesSections: boolean;
   canManage: boolean;
   instructorId: string;
   instructorOptions: Array<{ id: string; label: string }>;
@@ -21,12 +20,10 @@ const {
   lessonsTotal,
   course,
   semester,
-  usesSections,
   canManage,
   instructorId,
   instructorOptions,
 } = Astro.props;
-const SECTION_OPTS = ['CML', 'CTL', 'CWL', 'CRL'];
 
 function pct(v: number | null): string {
   return v == null ? '—' : `${Math.round(v * 100)}%`;
@@ -48,7 +45,6 @@ function lastSeen(iso: string | null): string {
     >
       <tr>
         <th class="px-3 py-2 font-medium">Student</th>
-        {usesSections && <th class="px-3 py-2 font-medium">Section</th>}
         <th class="px-3 py-2 font-medium">Lessons</th>
         <th class="px-3 py-2 font-medium">Quizzes</th>
         <th
@@ -85,15 +81,6 @@ function lastSeen(iso: string | null): string {
               </div>
               <div class="text-xs text-ink-muted">{s.email ?? '—'}</div>
             </td>
-            {usesSections && (
-              <td class="px-3 py-2">
-                {s.section ? (
-                  s.section
-                ) : (
-                  <span class="font-medium text-amber-800">Not assigned</span>
-                )}
-              </td>
-            )}
             <td class="px-3 py-2 tabular-nums">
               {s.lessonsCompleted}/{lessonsTotal}
             </td>
@@ -169,22 +156,6 @@ function lastSeen(iso: string | null): string {
                       value={s.name ?? ''}
                       class="rounded border border-slate-300 px-1 py-0.5 text-xs"
                     />
-                    {usesSections && (
-                      <select
-                        name="section"
-                        aria-label={`Section for ${s.name ?? s.email ?? 'student'}`}
-                        class="rounded border border-slate-300 px-1 py-0.5 text-xs"
-                      >
-                        <option value="" selected={!s.section}>
-                          —
-                        </option>
-                        {SECTION_OPTS.map((o) => (
-                          <option value={o} selected={s.section === o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
-                    )}
                     {instructorOptions.length > 1 && (
                       <select
                         name="new_instructor_id"

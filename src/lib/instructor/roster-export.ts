@@ -5,7 +5,6 @@
 export type RosterExportStudent = {
   name: string | null;
   email: string | null;
-  section: string | null;
   lessonsCompleted: number;
   lessonsTotal: number;
   /** Distinct quizzes attempted. */
@@ -41,7 +40,6 @@ export function rosterExportHeader(weeks: readonly string[]): string[] {
   return [
     'name',
     'email',
-    'section',
     'lessons_completed',
     'lessons_total',
     'quizzes_taken',
@@ -66,7 +64,6 @@ export function rosterExportRow<Cell extends string>(
   return [
     csvCell(s.name),
     csvCell(s.email),
-    csvCell(s.section),
     s.lessonsCompleted,
     s.lessonsTotal,
     s.quizzesTaken,

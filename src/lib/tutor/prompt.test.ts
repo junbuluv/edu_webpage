@@ -5,20 +5,22 @@ import assert from 'node:assert/strict';
 import { buildTutorInstructions, COACH_RULES } from './prompt.ts';
 
 const input = {
-  courseCode: 'ECO 1002',
-  courseTitle: 'Introduction to Macroeconomics',
-  lessonContext: 'Lesson: IS-LM\n\nLower $r$ raises $Y$.',
+  courseCode: 'FIN 3610',
+  courseTitle: 'Corporate Finance',
+  lessonContext: 'Lesson: NPV\n\nA higher $r$ lowers $NPV$.',
 };
 
 test('names the course and wraps the lesson', () => {
   const out = buildTutorInstructions(input);
   assert.ok(
     out.startsWith(
-      'You are the study coach for ECO 1002 (Introduction to Macroeconomics) at Baruch College.',
+      'You are the study coach for FIN 3610 (Corporate Finance) at Baruch College.',
     ),
   );
   assert.ok(
-    out.endsWith('<lesson>\nLesson: IS-LM\n\nLower $r$ raises $Y$.\n</lesson>'),
+    out.endsWith(
+      '<lesson>\nLesson: NPV\n\nA higher $r$ lowers $NPV$.\n</lesson>',
+    ),
   );
   assert.ok(!out.includes('{COURSE}'));
 });

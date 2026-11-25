@@ -9,7 +9,7 @@
 // Adding a course: (1) append the slug below, (2) drop a JSON file under
 // src/content/courses/<slug>.json.
 
-export const COURSE_SLUGS = ['eco-1002', 'fin-3610'] as const;
+export const COURSE_SLUGS = ['fin-3610'] as const;
 
 export type CourseSlug = (typeof COURSE_SLUGS)[number];
 
