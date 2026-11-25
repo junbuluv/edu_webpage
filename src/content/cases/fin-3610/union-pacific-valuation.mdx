@@ -3,7 +3,7 @@ title: 'What Is Union Pacific Worth?'
 course: fin-3610
 topic: 'Discounted cash flow'
 order: 4
-summary: 'Value a real railroad from five years of its own cash flows and the 7.57% cost of capital from the previous case. Then run 2,000 random futures to see how far the answer can move, and what the share price was assuming.'
+summary: 'Value a real railroad from five years of its own cash flows and the 7.57% cost of capital from the previous case. Then run 2,000 random scenarios to see how far the answer can move, and what the share price was assuming.'
 estimatedMinutes: 25
 relatedLessons:
   - 'fin-3610/capital-budgeting-cashflows'
@@ -47,8 +47,11 @@ $$
 $$
 
 EBIT is operating income. The tax rate $t$ is 24.1%, the rate on the
-next dollar of income from the previous case. Every other number comes
-from Union Pacific's annual reports. Amounts are in millions of dollars.
+next dollar of income from the previous case. Revenue, operating income,
+depreciation, capital investments and the working capital lines come
+from Union Pacific's annual reports. The margin, working capital
+investment and free cash flow columns are computed from them. Amounts
+are in millions of dollars.
 
 | Year | Revenue | Operating income | Operating margin | Depreciation | Capital investments | Working capital investment | Free cash flow |
 | ---- | ------- | ---------------- | ---------------- | ------------ | ------------------- | -------------------------- | -------------- |
@@ -58,11 +61,17 @@ from Union Pacific's annual reports. Amounts are in millions of dollars.
 | 2024 | 24,250  | 9,713            | 40.1%            | 2,398        | 3,452               | −186                       | 6,504          |
 | 2025 | 24,510  | 9,846            | 40.2%            | 2,465        | 3,791               | 361                        | 5,786          |
 
-Working capital investment is the five "changes in current assets and
-liabilities" lines of the cash flow statement with the sign reversed: a
-positive number used cash. Railroads report the same margin as an
+Working capital investment is the sum of the five "changes in current
+assets and liabilities" lines of the cash flow statement, with the sign
+reversed: a positive number used cash. Railroads report the margin as an
 **operating ratio**, operating expenses over revenue. Union Pacific's
 was 59.8% in 2025, which is a margin of 40.2%.
+
+The 10-K also reports a "free cash flow" of its own, defined
+differently: cash from operations less investing and dividends, \$2,292
+million in 2025. This case uses the lesson's definition: the cash the
+operations produce for all investors, before any of it is paid to them
+as interest or dividends.
 
 **By hand, 2025.**
 
@@ -89,16 +98,18 @@ $$
     { key: 'fcf', name: 'Free cash flow ($M)', color: 'chart-2' },
   ]}
   yAxisLabel="USD millions"
-  caption="Union Pacific's operating income after a 24.1% tax, and its free cash flow, 2021 to 2025. The gap between each pair of bars is what the railroad reinvested: capital investments above depreciation, plus working capital."
-  credit="Union Pacific Form 10-K reports for 2023 and 2025 via SEC EDGAR; after-tax amounts computed at 24.1%"
+  caption="Union Pacific's operating income after a 24.1% tax, and its free cash flow, 2021 to 2025. The gap between each pair of bars is what the railroad reinvested: capital investments above depreciation, plus the investment in working capital."
+  credit="Computed by this case from Union Pacific's Form 10-K for fiscal years 2023 and 2025 (SEC EDGAR): operating income taxed at 24.1%, and free cash flow as defined above, not the company's reported free cash flow"
   creditHref="https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm"
 />
 
-Over the five years together, the railroad reinvested 6,037 of its
-36,353 million dollars of after-tax operating income: a **reinvestment
-share** of 16.6%. Revenue grew from 21,804 to 24,510, which is 2.97% a
-year compounded. The margin averaged 40.1% and ranged from 37.7% to
-42.8%.
+Over the five years together, the railroad reinvested \$6,037 million
+of its \$36,353 million of after-tax operating income: a **reinvestment
+share** of 16.6%. The valuing stocks lesson calls this the retention
+rate $b$. Revenue grew from 21,804 to 24,510, which is 2.97% a year
+compounded over the four years. Nearly all of that came in 2022; from
+2022 to 2025 revenue slipped about 0.5% a year. The margin averaged
+40.1% and ranged from 37.7% to 42.8%.
 
 ## The forecast
 
@@ -106,7 +117,9 @@ Three numbers drive it:
 
 - **Revenue growth, years 1 to 5: 3%.** The 2021 to 2025 rate, rounded.
 - **Operating margin: 40%.** The five-year average, rounded.
-- **Long-run growth after year 5: 3%.** This case's assumption.
+- **Long-run growth after year 5: 3%.** This case's assumption: the
+  same as revenue growth in years 1 to 5, and below the 7.57% cost of
+  capital, as the terminal value formula requires.
 
 The reinvestment share stays at 16.6% and the tax rate at 24.1%, so
 each year
@@ -127,6 +140,9 @@ flow is 25,245 × 0.40 × 0.759 × 0.834 = 6,392.
 | 2030 | 28,414  | 7,194          | 4,995                  |
 | Sum  |         |                | 27,292                 |
 
+Every figure is computed before rounding; working from the rounded
+numbers can move the last digit by one.
+
 The terminal value at the end of 2030 is the value of every later cash
 flow:
 
@@ -134,8 +150,9 @@ $$
 \text{TV} = \frac{\text{FCF}_{2030} \times 1.03}{0.0757 - 0.03} = \frac{7{,}194 \times 1.03}{0.0457} = 162{,}140,
 $$
 
-worth $162{,}140 / 1.0757^5 = 112{,}574$ today. (The code keeps more
-decimals and gets 112,580; the difference is rounding.)
+worth $162{,}140 / 1.0757^5 = 112{,}573$ today. Carried without
+rounding, the terminal value is 162,150 and its present value 112,580,
+the figure used below.
 
 ## From the firm to one share
 
@@ -150,16 +167,14 @@ $$
 
 Net debt is the fair value of the debt, \$26,500 million, less cash of
 \$1,266 million and short-term investments of \$250 million, all at
-December 31, 2025. Fair value, as in the previous case: it is what the
-bonds would cost to buy back today.
+December 31, 2025. As in the previous case, debt is at fair value: what
+the bonds would have cost to buy back on that date.
 
-Two things stand out.
-
-- **The terminal value is 80% of the enterprise value** (112,580 of
-  139,872). What happens after 2030 matters more than the five years
-  you forecast.
-- **The answer is \$193.61, and the price was \$235.10.** The model puts
-  the shares about 18% below what the market paid.
+- **The terminal value's present value is 80% of the enterprise
+  value** (112,580 of 139,872). What happens after 2030 matters more
+  than the five years you forecast.
+- **The answer is \$193.61, and the price was \$235.10.** The model's
+  value is about 18% below the price.
 
 ## What was the price assuming?
 
@@ -172,71 +187,92 @@ and find the value of that one which makes the model equal \$235.10:
 | Operating margin      | 40.0%     | 47.0%                        |
 | Cost of capital, WACC | 7.57%     | 6.89%                        |
 
+A 47% margin is about 4 points above the best year in the table (42.8%
+in 2021). A 6.89% WACC is below the low end of every range in the
+previous case, where the lowest was 7.32%.
+
 Is 3.79% growth forever plausible? The valuing stocks lesson ties
-growth to reinvestment: growth = reinvestment share × return on new
-investment. With 16.6% reinvested, 3.79% growth needs new investment to
-earn 3.79 / 16.6 = 22.8%. Union Pacific's own report puts its return on
-invested capital at 16.3% in 2025. Either new projects must earn far
-more than the existing railroad, or the railroad must reinvest more,
-which lowers free cash flow.
+growth to reinvestment: growth = $b$ × return on new investment. With
+$b$ = 16.6%, even the base case's 3% needs a return of 3 / 16.6 =
+18.1%, and the price's 3.79% needs 3.79 / 16.6 = 22.8%. Union Pacific's
+report puts its return on invested capital, as adjusted (a measure the
+company defines), at 16.3% in 2025: after-tax operating income over all
+the capital already in the business, at book value. That is an
+average, not the return on the next project, so treat it as a
+yardstick. By that yardstick the price needs new projects far more
+profitable than the railroad's average, or more reinvestment, which
+lowers free cash flow.
 
 There are other readings of the gap. Investors may expect margins to
-keep improving. The price may also reflect the pending merger with
-Norfolk Southern, which this valuation of Union Pacific alone leaves
-out. The case teaches a method; it is not a view on whether to buy or
-sell the stock.
+keep improving. The price may also reflect the merger with Norfolk
+Southern, then pending, which this valuation of Union Pacific alone
+leaves out. The case teaches a method; it is not a view on whether to
+buy or sell the stock.
 
 ## Simulate it
 
-A single number hides how uncertain it is. The chart below draws 2,000
-possible futures. Each draw picks one revenue growth rate, one margin
-and one long-run growth rate, then values the share. You set three
-numbers for each input: low, most likely and high. A draw is most often
-near the most likely value and less often near the ends (a
-**triangular** distribution).
+A single number hides how uncertain it is. The chart below uses the
+Monte Carlo method from the
+[sensitivity lesson](/lessons/fin-3610/sensitivity-and-scenario): it
+draws 2,000 random scenarios. Each draw picks one revenue growth rate,
+one margin and one long-run growth rate, then values the share.
+
+You set three numbers for each input: low, most likely and high. Each
+input comes from a **triangular** distribution: never below low or
+above high, most often near the most likely value, with the chance
+falling in a straight line toward each end. Its average is (low + most
+likely + high) / 3, so the revenue range (0, 3, 5) averages 2.67%.
 
 <DcfMonteCarlo client:visible />
 
 Work through these steps.
 
 1. Read the readouts. With every input at its most likely value the
-   share is worth \$193.61. The middle of the 2,000 draws is \$190.45,
-   and the middle 80% runs from \$164.94 to \$220.81. Only 3.5% of the
-   draws reach the market price.
+   share is worth \$193.61. The middle of the 2,000 draws is \$190.45.
+   The middle 80% (10% of draws fall below it and 10% above) runs from
+   \$164.94 to \$220.81. Of the draws, 3.5% reach the market price.
 2. Press **Draw again** a few times. The middle moves by a dollar or so,
    and the share of draws at or above the price stays near 3% to 4%.
-3. In **Long-run growth after year 5**, drag low up to 3.0% and high
-   down to 3.0%. The middle 80% narrows to \$173.47 to \$206.59, and no
-   draw reaches the price.
+3. Press **Reset**. Then, in **Long-run growth after year 5**, drag low
+   up to 3.0% and high down to 3.0%. The middle 80% narrows to \$173.47
+   to \$206.59, and no draw reaches the price: the best possible draw is
+   now \$234.75.
 4. Press **Reset**, then drag long-run growth high to 5.0%. Now 22.6%
-   of the draws reach the price.
+   of the draws reach the price. (5% forever would outgrow the economy,
+   so treat this as a stress test.)
 5. Press **Reset**, then drag long-run growth most likely to 3.8%. The
    most likely case is worth \$235.66, about the price.
 
 ## What the draws show
 
-**Long-run growth drives the spread.** Fixing one input at its most
-likely value and drawing the other two:
+**Of the three inputs drawn, long-run growth drives the spread.**
+Fixing one input at its most likely value and drawing the other two:
 
 | Input fixed at most likely | Middle 80% of values | Width |
 | -------------------------- | -------------------- | ----- |
-| None (all three drawn)     | \$164.94 to \$220.81 | 55.86 |
+| None (all three drawn)     | \$164.94 to \$220.81 | 55.87 |
 | Revenue growth             | \$170.58 to \$221.85 | 51.27 |
 | Operating margin           | \$166.25 to \$219.84 | 53.59 |
-| Long-run growth            | \$173.47 to \$206.59 | 33.13 |
+| Long-run growth            | \$173.47 to \$206.59 | 33.12 |
 
-Removing the uncertainty in long-run growth narrows the range by \$22.73.
-Removing either of the others narrows it by less than \$5. That is the
-terminal value at work: it is 80% of the value, and long-run growth
-sits in its denominator.
+Removing the uncertainty in long-run growth narrows the range by \$22.75.
+Removing either of the others narrows it by less than \$5. Spreads do
+not add up: independent uncertainties partly offset, so a smaller one
+adds little once a larger one is present. On its own, the margin range
+still spans about \$20 of value. Long-run growth matters most because
+the terminal value is 80% of the value and long-run growth sits in its
+denominator.
 
 **The middle is below the most likely case.** The revenue growth range
-runs from 0% to 5% around 3%, so it has more room below 3% than above.
-Its draws average 2.67%, which pulls the middle down to \$190.45.
+runs from 0% to 5% around 3%, so 60% of its draws fall below 3%. That
+pulls the middle down. Long-run growth pulls the other way: a point more
+adds more value than a point less takes away (\$249.12 at 4% and
+\$158.04 at 2%, against \$193.61 at 3%), which stretches the right tail.
+Here the first effect wins, and the middle ends at \$190.45.
 
-**Wider ranges are a choice.** The draws are only as good as the
-ranges. Moving one end of one range, as in step 4, moved the share of
-draws at or above the price from 3.5% to 22.6%.
+**The ranges are a choice.** The draws are only as good as the ranges.
+Moving one end of one range, as in step 4, moved the share of draws at
+or above the price from 3.5% to 22.6%.
 
 ## Takeaways
 
@@ -245,19 +281,32 @@ draws at or above the price from 3.5% to 22.6%.
   operating income from 2021 to 2025.
 - Most of the value sits in the terminal value, so long-run growth and
   the cost of capital matter most. Spend your judgment there.
-- Turning the model around ("what does the price assume?") is often
-  more useful than the model's own answer.
+- Asking what the price assumes turns one uncertain answer into a
+  question you can check: is 3.79% growth forever believable?
 
 ## Limits
 
 - One revenue growth rate covers all five years, and the three draws
   are independent. In a recession, growth and margins fall together,
-  which would widen the low end.
-- The reinvestment share stays at 16.6% whatever the growth rate. The
-  valuing stocks lesson says faster growth needs more reinvestment.
-- Taxes are 24.1% of operating income. The firm's effective rate was
-  22.1% in 2025.
-- Net debt leaves out operating leases and pension obligations.
-- The value is at December 31, 2025, and the price is from January 30, 2026.
-- The ranges for the draws are this case's judgments, not estimates
-  from data.
+  which would widen both ends of the range.
+- The reinvestment share stays at 16.6% whatever the growth rate, so in
+  the model faster growth costs nothing. The valuing stocks lesson says
+  it does: at a given return on new investment, more growth needs more
+  reinvestment and leaves less free cash flow. Holding the share fixed
+  makes high-growth draws too valuable and low-growth draws too cheap.
+  If the return on new investment were held at the base case's 18.1%
+  instead, 2% to 4% long-run growth would move the value from \$168.27
+  to \$232.85, not \$158.04 to \$249.12, and the price would imply 4.04%
+  growth.
+- The cost of capital stays at 7.57% in every draw. At the previous
+  case's 9.75% (with the historical premium) the base case is worth
+  \$117.49 a share.
+- Taxes are 24.1% of operating income. At the firm's 2025 effective
+  rate of 22.1% the value would be about \$201.
+- Lease payments are inside operating income, so lease liabilities stay
+  out of net debt. Pension obligations are left out.
+- The value is at December 31, 2025, and the price is from January 30, 2026. Rolling the value forward a month at 7.57% adds about \$1.44 a
+  share.
+- The margin range spans 2021 to 2025 (37.7% to 42.8%, rounded
+  outward). The two growth ranges are this case's judgments, not
+  estimates from data.

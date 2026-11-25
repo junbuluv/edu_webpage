@@ -219,7 +219,7 @@ export default function DcfMonteCarlo() {
                 // number of bins.
                 interval={Math.max(0, Math.ceil(histogram.length / 8) - 1)}
                 label={{
-                  value: 'value per share (bin starts at)',
+                  value: 'value per share, start of each $10 bin',
                   position: 'insideBottom',
                   offset: -6,
                   fontSize: 12,
@@ -274,12 +274,16 @@ export default function DcfMonteCarlo() {
         Each draw picks one revenue growth rate for all five years, one
         operating margin and one long-run growth rate, each from a triangle that
         peaks at its most likely value. The draws are independent of each other.
-        Everything else stays at the base case: a 24.1% tax rate, 16.6% of
-        after-tax operating income reinvested, a 7.57% cost of capital, net debt
-        of $24,984 million and 593.4 million shares. The dashed line marks the
-        ten-dollar bin that holds the market price of {dollars(PRICE)} on
-        January 30, 2026. Sources: Union Pacific's 10-K reports for 2023 and
-        2025 (SEC EDGAR).
+        The margin range at reset spans 2021 to 2025, rounded outward; the two
+        growth ranges are the case's judgments. Everything else stays at the
+        base case: a {DCF_BASE.taxRate}% tax rate, {DCF_BASE.reinvestmentShare}%
+        of after-tax operating income reinvested, a {DCF_BASE.wacc}% cost of
+        capital, net debt of ${DCF_BASE.netDebt.toLocaleString('en-US')} million
+        and {DCF_BASE.shares.toFixed(1)} million shares. The dashed line marks
+        the ten-dollar bin that holds the market price of {dollars(PRICE)} on
+        January 30, 2026. Sources: Union Pacific's Form 10-K for fiscal years
+        2023 and 2025 (SEC EDGAR); the cost of capital comes from the previous
+        case (FRED and Aswath Damodaran's data).
       </p>
     </div>
   );

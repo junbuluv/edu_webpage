@@ -8,11 +8,11 @@
     {
       "type": "numeric",
       "id": "q1",
-      "prompt": "Figures in this quiz come from Union Pacific's annual reports (Form 10-K) and the case. In 2025 the railroad had operating income of $9,846 million, depreciation of $2,465 million, capital investments of $3,791 million and a $361 million investment in working capital. With a 24.1% tax rate, what was its free cash flow? Answer in millions of dollars to the nearest million.",
-      "answer": 5786,
+      "prompt": "Figures in this quiz come from Union Pacific's annual reports (Form 10-K) and the case. In 2024 the railroad had operating income of $9,713 million, depreciation of $2,398 million and capital investments of $3,452 million. Its five working capital lines added $186 million of cash. With a 24.1% tax rate, what was its free cash flow? Answer in millions of dollars to the nearest million.",
+      "answer": 6504,
       "tolerance": 2,
       "unit": "million dollars",
-      "explanation": "FCF = 9,846 × (1 − 0.241) + 2,465 − 361 − 3,791 = 7,473 + 2,465 − 361 − 3,791 = 5,786.",
+      "explanation": "Working capital released cash, so the investment in working capital is −186. FCF = 9,713 × (1 − 0.241) + 2,398 − (−186) − 3,452 = 7,372 + 2,398 + 186 − 3,452 = 6,504.",
       "points": 1
     },
     {
@@ -40,10 +40,10 @@
       "id": "q4",
       "prompt": "The case discounts free cash flow at the WACC and then subtracts net debt. Why?",
       "choices": [
-        "Because the cost of equity is always lower than the WACC",
+        "Because free cash flow belongs only to shareholders, so discounting it at the WACC gives the equity value directly",
         "Because debt is paid out of revenue before operating income is measured",
         "Because free cash flow belongs to lenders and shareholders together, so its value is the whole firm, and shareholders get what is left after the debt",
-        "Because the 10-K reports free cash flow after interest has been paid"
+        "Because the annual report states free cash flow after interest has been paid to lenders"
       ],
       "correctIndex": 2,
       "explanation": "Free cash flow is the cash available to everyone who financed the firm. Discounting it at the WACC values the whole enterprise; subtracting what is owed to lenders, net of cash, leaves the shareholders' part.",
@@ -52,11 +52,11 @@
     {
       "type": "numeric",
       "id": "q5",
-      "prompt": "The share price implies long-run growth of 3.79% a year. Union Pacific reinvests 16.6% of its after-tax operating income. Using growth = reinvestment share × return on new investment, what return must new investment earn? Answer as a percent to one decimal.",
+      "prompt": "Over 2021 to 2025, by the case's measure, Union Pacific reinvested 16.6% of its after-tax operating income. Using growth = reinvestment share × return on new investment, what return must new investment earn to support 3.79% growth a year? Answer as a percent to one decimal.",
       "answer": 22.8,
       "tolerance": 0.1,
       "unit": "%",
-      "explanation": "Return on new investment = 3.79 / 16.6 = 0.228, or 22.8%. The report puts the railroad's return on invested capital at 16.3% in 2025, so the price needs new projects to earn much more than the existing railroad, or more reinvestment.",
+      "explanation": "Return on new investment = 3.79 / 16.6 = 0.228, or 22.8%. Union Pacific's report puts its return on invested capital, as adjusted, at 16.3% in 2025, an average over all its capital. 3.79% growth needs new investment to earn well above that average, or more reinvestment.",
       "points": 1
     },
     {
@@ -65,12 +65,12 @@
       "prompt": "The base case values a share at $193.61 and the market price was $235.10. Which statement does the case support?",
       "choices": [
         "The stock was overpriced, so it should have been sold",
-        "With every other input at the base case, the price implies long-run growth of about 3.8% a year",
+        "With every other input at the base case, the price implies an operating margin of about 47% in every year",
         "The share price will fall to $193.61 within five years",
         "The gap must come from an error in the annual report"
       ],
       "correctIndex": 1,
-      "explanation": "Turning the model around shows what the price assumes: 3.79% long-run growth, or a 47% margin, or a 6.89% WACC. That is a statement about assumptions, not a prediction or a recommendation.",
+      "explanation": "Turning the model around shows what the price assumes: a 47% margin, or 3.79% long-run growth, or a 6.89% WACC, each with the other inputs at the base case. That is a statement about assumptions, not a prediction or a recommendation.",
       "points": 1
     },
     {
@@ -90,7 +90,7 @@
     {
       "type": "multiple_choice",
       "id": "q8",
-      "prompt": "Which input's uncertainty widens the spread of values the most in this case?",
+      "prompt": "Of the three inputs the simulation draws, which one's uncertainty widens the spread of values the most?",
       "choices": [
         "Revenue growth in years 1 to 5",
         "The operating margin",
@@ -98,7 +98,7 @@
         "Long-run growth after year 5"
       ],
       "correctIndex": 3,
-      "explanation": "Fixing long-run growth at 3% narrows the middle 80% of values from $55.86 wide to $33.13 wide. Fixing either of the others narrows it by less than $5. Long-run growth drives the terminal value, which is 80% of the firm's value.",
+      "explanation": "Fixing long-run growth at 3% narrows the middle 80% of values from $55.87 wide to $33.12 wide. Fixing either of the others narrows it by less than $5. Long-run growth drives the terminal value, which is 80% of the firm's value.",
       "points": 1
     }
   ]
