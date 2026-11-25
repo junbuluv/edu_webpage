@@ -1,0 +1,87 @@
+{
+  "slug": "fin-3610-case-union-pacific-cost-of-capital",
+  "title": "Case study: Union Pacific's cost of capital",
+  "course": "fin-3610",
+  "caseSlug": "fin-3610/union-pacific-cost-of-capital",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Figures in this quiz come from Union Pacific's 2025 annual report (Form 10-K) and the market data in the case. On January 30, 2026 the firm had 593.4 million shares outstanding and the share price closed at $235.10. What was the market value of its equity? Answer in billions of dollars to one decimal.",
+      "answer": 139.5,
+      "tolerance": 0.1,
+      "unit": "billion dollars",
+      "explanation": "E = 593.4 million × $235.10 = $139,508 million, about $139.5 billion.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "The fair value of Union Pacific's debt was $26.5 billion and the market value of its equity $139.5 billion. What share of firm value was debt? Answer as a percent to one decimal.",
+      "answer": 16.0,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "D/V = 26.5 / (139.5 + 26.5) = 26.5 / 166.0 = 0.1596, or 16.0%.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Union Pacific's balance sheet shows debt of $31.8 billion and shareholders' equity of $18.5 billion, so debt is 63% of the total. Why does the case use 16% instead?",
+      "choices": [
+        "Because the 10-K understates the firm's debt",
+        "Because the tax shield reduces the weight on debt",
+        "Because weights should be market values, and the shares are worth far more than book equity",
+        "Because short-term debt is left out of the WACC"
+      ],
+      "correctIndex": 2,
+      "explanation": "The WACC weights are the market values of equity and debt. The equity is worth $139.5 billion in the stock market against $18.5 billion on the books, so book weights hugely overstate debt's share.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "Use a risk-free rate of 4.26%, a beta of 0.98 and the historical-average equity risk premium of 7.03%. What is the cost of equity? Answer as a percent to two decimals.",
+      "answer": 11.15,
+      "tolerance": 0.02,
+      "unit": "%",
+      "explanation": "r_E = r_f + beta × premium = 4.26 + 0.98 × 7.03 = 4.26 + 6.89 = 11.15%. With the implied premium of 4.23% the same formula gives 8.41%.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Equity is 84.04% of firm value with a cost of 8.405%. Debt is 15.96% of firm value with a cost of 5.61% before tax, and the tax rate is 24.1%. What is the WACC? Answer as a percent to two decimals.",
+      "answer": 7.74,
+      "tolerance": 0.03,
+      "unit": "%",
+      "explanation": "After-tax cost of debt = 5.61 × (1 − 0.241) = 4.258%. WACC = 0.8404 × 8.405 + 0.1596 × 4.258 = 7.06 + 0.68 = 7.74%.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q6",
+      "prompt": "Across the ranges in the case, which input moves Union Pacific's WACC the most?",
+      "choices": [
+        "The tax rate, between 21.0% and 24.1%",
+        "The cost of debt, between 4.10% and 5.88%",
+        "The risk-free rate, between 4.18% and 4.87%",
+        "The equity risk premium, between 4.23% and 7.03%"
+      ],
+      "correctIndex": 3,
+      "explanation": "The premium moves the WACC by 2.31 points, from 7.74% to 10.05%. The risk-free rate moves it 0.58, the cost of debt 0.22 and the tax rate 0.03. Equity is 84% of the firm, so whatever moves the cost of equity moves the WACC.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q7",
+      "prompt": "A cash flow of $100 a year forever is discounted at a WACC of 10.05%. What is it worth? Answer in dollars to the nearest dollar.",
+      "answer": 995,
+      "tolerance": 1,
+      "unit": "dollars",
+      "explanation": "Value = 100 / 0.1005 = $995. At the case's estimate of 7.74% the same cash flow is worth $1,291, so the choice of premium alone changes the value by 23%.",
+      "points": 1
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+---
+title: "Union Pacific's Cost of Capital"
+course: fin-3610
+topic: 'Cost of capital'
+order: 3
+summary: "Build a real railroad's weighted average cost of capital from its annual report, a Treasury yield and two published tables. Then see which of the six inputs two careful analysts would actually disagree about."
+estimatedMinutes: 25
+relatedLessons:
+  - 'fin-3610/cost-of-capital'
+  - 'fin-3610/capm-and-sml'
+quizSlug: 'fin-3610-case-union-pacific-cost-of-capital'
+dataThrough: 'January 2026'
+sources:
+  - name: 'Union Pacific Corporation, Form 10-K for fiscal year 2025, filed 6 February 2026 (SEC EDGAR)'
+    url: 'https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm'
+  - name: 'Aswath Damodaran, NYU Stern: Betas by Sector (US), data as of January 2026'
+    url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/Betas.html'
+  - name: 'Aswath Damodaran, NYU Stern: Historical Implied Equity Risk Premiums, January 2026'
+    url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html'
+  - name: 'Aswath Damodaran, NYU Stern: Historical Returns on Stocks, Bonds and Bills, updated 5 January 2026'
+    url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html'
+  - name: 'FRED, Federal Reserve Bank of St. Louis: 10-year and 30-year Treasury yields (DGS10, DGS30), retrieved 25 November 2026'
+    url: 'https://fred.stlouisfed.org/series/DGS10'
+  - name: "FRED: Moody's seasoned Aaa and Baa corporate bond yields (AAA, BAA), retrieved 25 November 2026"
+    url: 'https://fred.stlouisfed.org/series/BAA'
+draft: false
+---
+
+import WaccInputsExplorer from '@components/viz/WaccInputsExplorer';
+
+## The question
+
+On January 30, 2026, Union Pacific had 593.4 million shares trading at
+\$235.10 and about \$32 billion of debt on its balance sheet. If the
+railroad spends another dollar on track or locomotives, what return must
+that dollar earn to be worth spending? For an investment of average
+risk, the answer is the firm's **weighted average cost of capital**
+(WACC).
+
+The lesson gives the formulas. This case is about the inputs: where each
+number comes from, and how far apart two careful analysts can land.
+
+One note on timing. In July 2025 Union Pacific agreed to merge with
+Norfolk Southern, and when this report was filed the deal was still
+waiting for regulators. The case estimates the cost of capital of Union
+Pacific as it stood.
+
+## The formula
+
+$$
+r_{\text{wacc}} = \frac{E}{V}\, r_E + \frac{D}{V}\, r_D (1 - t),
+\qquad
+r_E = r_f + \beta \times \text{premium}.
+$$
+
+$E$ and $D$ are the market values of equity and debt, and $V = E + D$.
+There are six inputs: the risk-free rate $r_f$, beta, the equity risk
+premium, the cost of debt $r_D$, the tax rate $t$, and debt's share of
+value $D/V$.
+
+## Input by input
+
+### The weights
+
+Equity is worth what the stock market says. The annual report gives the
+share count and the closing price on January 30, 2026:
+
+$$
+E = 593{,}391{,}460 \times 235.10 = 139.5 \text{ billion dollars.}
+$$
+
+Debt is on the balance sheet at \$31.8 billion. The report also gives
+its **fair value**, what the same bonds would sell for today: \$26.5
+billion. The bonds are worth less than their face value because
+today's yields are higher than the rates those bonds pay. Use the fair
+value:
+
+$$
+\begin{aligned}
+V &= 139.5 + 26.5 = 166.0 \\
+\frac{D}{V} &= \frac{26.5}{166.0} = 15.96\%, \qquad \frac{E}{V} = 84.04\%.
+\end{aligned}
+$$
+
+**The trap.** The balance sheet shows debt of \$31.8 billion and
+shareholders' equity of \$18.5 billion, which makes debt 63% of the
+total. Book equity is roughly what shareholders paid in plus the profits
+the firm kept, minus buybacks. It is not what the shares are worth
+today. Weights come from market values.
+
+### The cost of equity
+
+- **Risk-free rate, 4.26%.** The 10-year Treasury yield on January 30, 2026.
+- **Beta, 0.98.** The average for the four US railroads in Aswath
+  Damodaran's January 2026 table. An industry average is steadier than
+  one firm's estimate, because the errors in the single estimates partly
+  cancel.
+- **Equity risk premium, 4.23%.** Damodaran's implied premium at the
+  start of 2026: the premium at which the present value of the stock
+  market's expected cash flows equals its price.
+
+$$
+r_E = 4.26\% + 0.98 \times 4.23\% = 8.405\%.
+$$
+
+### The cost of debt
+
+The report says Union Pacific paid an effective interest rate of 4.1% on
+its debt in 2025. That is the cost of bonds sold in the past. The cost
+of capital is about the next dollar, and new borrowing costs more: in
+January 2026 Moody's index of long-term Aaa corporate bonds yielded
+5.34% and its Baa index 5.88%. The report lists a fall "below investment
+grade" among its risks, so the debt is investment grade today. That band
+runs from Aaa down to Baa, so take the midpoint of the two indexes:
+
+$$
+r_D = \frac{5.34\% + 5.88\%}{2} = 5.61\%.
+$$
+
+Interest is deducted before tax. The rate that matters is the one on the
+next dollar of income: 21.0% federal plus 3.1% state, 24.1% in all. (The
+firm's effective rate for 2025, taxes paid over pre-tax income, was
+22.1%.)
+
+$$
+r_D (1 - t) = 5.61\% \times (1 - 0.241) = 4.258\%.
+$$
+
+### Putting it together
+
+$$
+\begin{aligned}
+r_{\text{wacc}} &= 0.8404 \times 8.405\% + 0.1596 \times 4.258\% \\
+&= 7.06\% + 0.68\% = 7.74\%.
+\end{aligned}
+$$
+
+## Try it
+
+<WaccInputsExplorer client:visible />
+
+Work through these steps.
+
+1. Press **Historical-average premium**. The premium goes from 4.23% to
+   7.03%, the cost of equity from 8.41% to 11.15%, and the WACC from
+   7.74% to 10.05%.
+2. Press **Book-value weights**. The WACC falls to 5.78%. Nothing about
+   the railroad changed. The weights are wrong.
+3. Press **Our estimate**, then drag the tax rate from 24.1% down to
+   21%. The WACC moves by 0.03 points.
+4. Read the lower chart from the top bar to the bottom one.
+
+## How far apart do reasonable analysts land?
+
+Move one input at a time across the range a careful analyst might use,
+and hold the other five at the estimate:
+
+| Input               | Low    | High   | WACC at low | WACC at high | Swing (points) |
+| ------------------- | ------ | ------ | ----------- | ------------ | -------------- |
+| Equity risk premium | 4.23%  | 7.03%  | 7.74%       | 10.05%       | 2.31           |
+| Beta                | 0.86   | 1.10   | 7.32%       | 8.17%        | 0.85           |
+| Risk-free rate      | 4.18%  | 4.87%  | 7.68%       | 8.26%        | 0.58           |
+| Debt share          | 15.96% | 21.75% | 7.74%       | 7.50%        | 0.24           |
+| Cost of debt        | 4.10%  | 5.88%  | 7.56%       | 7.78%        | 0.22           |
+| Tax rate            | 21.0%  | 24.1%  | 7.77%       | 7.74%        | 0.03           |
+
+Where the ranges come from:
+
+- **Premium.** The low end is the implied premium. The high end is the
+  1928 to 2025 average of the stock market's return over the 10-year
+  Treasury bond's: 11.86% minus 4.82%.
+- **Beta.** The low end is Damodaran's beta for all transportation
+  firms. The high end is an assumption: the same distance above 0.98.
+- **Risk-free rate.** The 10-year yield at year-end 2025, and the
+  30-year yield on January 30, 2026.
+- **Debt share.** Union Pacific's own, and the railroad industry's
+  average.
+- **Cost of debt.** What Union Pacific pays on its existing bonds, and
+  the Baa yield.
+- **Tax rate.** Federal only, and federal plus state.
+
+**One input does most of the work.** The premium moves the WACC by 2.31
+points, more than the other five together (1.92). Both ends of its range
+are defensible: one reads today's prices, the other averages 98 years of
+history.
+
+**It changes what things are worth.** \$100 a year forever is worth
+\$1,291 at 7.74% and \$995 at 10.05%, which is 23% less. Two analysts
+who agree on every cash flow can disagree by a quarter of the value.
+
+**Debt barely matters here.** Debt is 16% of Union Pacific's value, so
+the cost of debt and the tax rate together move the WACC by a quarter of
+a point.
+
+## Takeaways
+
+- Weights come from market values. Book values put Union Pacific's debt
+  at 63% of the firm when it is 16%.
+- The cost of debt is the yield on new borrowing, 5.61% here, not the
+  4.1% the firm pays on old bonds.
+- Spend your effort on the premium and beta. The tax rate is worth 0.03
+  points.
+
+## Limits
+
+- The beta is the average of four railroads, not Union Pacific's own.
+  Estimating its own beta needs its monthly stock returns.
+- A slider moves one input and holds the rest. In reality more debt
+  makes the equity riskier and raises its cost, which is the subject of
+  the capital structure unit.
+- The cost of debt comes from indexes of bonds with 20 or more years to
+  maturity, not from Union Pacific's own bond prices.
+- The inputs are not all from one day: the share price is from January
+  30, 2026, the debt from December 31, 2025, and the beta and premium
+  tables from January 2026.
+- This is the rate for an investment as risky as the railroad itself. A
+  riskier project needs a higher rate.
