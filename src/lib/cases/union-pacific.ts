@@ -2,7 +2,7 @@
 // (Form 10-K) for fiscal year 2025, filed 6 February 2026, and the market
 // inputs the cost of capital case pairs with them. Dollar amounts are in
 // millions; rates are in percent. Each group names where it was read.
-import type { InputRanges, WaccInputs } from './wacc.ts';
+import { relever, type InputRanges, type WaccInputs } from './wacc.ts';
 
 export const FILING_URL =
   'https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm';
@@ -54,18 +54,19 @@ export const MARKET = {
   aaaYield: 5.34,
   baaYield: 5.88,
 
-  // Aswath Damodaran, "Betas by Sector (US)", data as of January 2026:
-  // Transportation (Railroads), 4 firms: beta 0.98, D/E 27.79%. All of
-  // Transportation, 19 firms: beta 0.86.
+  // Aswath Damodaran, "Betas by Sector (US)", data as of January 2026. The
+  // row Transportation (Railroads), 4 firms: beta 0.98, D/E 27.79%, unlevered
+  // beta 0.81. The row Transportation, 19 firms: beta 0.86.
   railroadBeta: 0.98,
+  railroadUnleveredBeta: 0.81,
   railroadDebtToEquity: 27.79,
   transportationBeta: 0.86,
 
   // Damodaran, "Historical Implied Equity Risk Premiums", January 2026: the
   // implied premium at the end of 2025. And the 1928-2025 arithmetic average
   // of the S&P 500 return minus the 10-year Treasury bond return, computed
-  // from his "Historical Returns on Stocks, Bonds and Bills" table (11.86%
-  // minus 4.82%).
+  // from the 98 yearly rows of his "Historical Returns on Stocks, Bonds and
+  // Bills" table: 11.855% minus 4.822% (11.86% and 4.82% when rounded).
   impliedPremium: 4.23,
   historicalPremium: 7.03,
 } as const;
@@ -86,32 +87,40 @@ export const INDUSTRY_DEBT_SHARE = round2(
   (MARKET.railroadDebtToEquity / (100 + MARKET.railroadDebtToEquity)) * 100,
 );
 
+const TAX_RATE = round2(UP.federalTaxRate + UP.stateTaxRate);
+
 /** The case's own estimate, as of 30 January 2026. */
 export const ESTIMATE: WaccInputs = {
   riskFree: MARKET.tenYear,
   premium: MARKET.impliedPremium,
-  beta: MARKET.railroadBeta,
+  // The lesson's procedure: the railroads' unlevered beta, re-levered at
+  // Union Pacific's own debt-to-equity ratio (26.5 / 139.5 = 0.19).
+  beta: round2(
+    relever(
+      MARKET.railroadUnleveredBeta,
+      TAX_RATE,
+      UP.fairValueOfDebt / UP.marketValueOfEquity,
+    ),
+  ),
   // Investment grade (the 10-K lists a fall "below investment grade" as a
   // risk): halfway between the Aaa and Baa yields.
   costOfDebt: round2((MARKET.aaaYield + MARKET.baaYield) / 2),
   // The rate on the next dollar of income: federal plus state.
-  taxRate: round2(UP.federalTaxRate + UP.stateTaxRate),
+  taxRate: TAX_RATE,
   debtShare: MARKET_DEBT_SHARE,
 };
 
 /**
- * What a reasonable analyst might use instead, one input at a time. Only the
- * top of the beta range is an assumption: it sits as far above the railroad
- * beta as the all-Transportation beta sits below it.
+ * What a careful analyst might use instead, one input at a time. Every end
+ * of every range is a published or filed number. For beta: Damodaran's
+ * Transportation group, and the railroad average as published, before any
+ * adjustment for Union Pacific's lighter debt.
  */
 export const RANGES: InputRanges = {
   riskFree: [MARKET.tenYearAtYearEnd, MARKET.thirtyYear],
   premium: [MARKET.impliedPremium, MARKET.historicalPremium],
-  beta: [
-    MARKET.transportationBeta,
-    round2(2 * MARKET.railroadBeta - MARKET.transportationBeta),
-  ],
-  costOfDebt: [UP.effectiveInterestRate, MARKET.baaYield],
-  taxRate: [UP.federalTaxRate, round2(UP.federalTaxRate + UP.stateTaxRate)],
+  beta: [MARKET.transportationBeta, MARKET.railroadBeta],
+  costOfDebt: [MARKET.aaaYield, MARKET.baaYield],
+  taxRate: [UP.federalTaxRate, TAX_RATE],
   debtShare: [MARKET_DEBT_SHARE, INDUSTRY_DEBT_SHARE],
 };

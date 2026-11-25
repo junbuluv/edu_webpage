@@ -24,11 +24,12 @@ import {
 } from '@lib/cases/wacc';
 import ChartFrame from './ChartFrame';
 
-// Union Pacific's weighted average cost of capital as of 30 January 2026.
+// Union Pacific's weighted average cost of capital as of January 30, 2026.
 // The sliders start at the case's estimate (src/lib/cases/union-pacific.ts,
 // where every number names its source). The second chart moves one input at
-// a time across the range a reasonable analyst might use, so the student sees
-// which choice matters: the equity risk premium, by a wide margin.
+// a time across the range a careful analyst might use, so the student sees
+// which choice matters: the equity risk premium, by a wide margin. Both
+// x-axes widen when a slider pushes the WACC past 12%, so nothing clips.
 
 const CONTROLS: {
   key: keyof WaccInputs;
@@ -38,6 +39,7 @@ const CONTROLS: {
   max: number;
   step: number;
   unit: string;
+  digits: number;
 }[] = [
   {
     key: 'riskFree',
@@ -47,6 +49,7 @@ const CONTROLS: {
     max: 6,
     step: 0.01,
     unit: '%',
+    digits: 2,
   },
   {
     key: 'premium',
@@ -56,6 +59,7 @@ const CONTROLS: {
     max: 8,
     step: 0.01,
     unit: '%',
+    digits: 2,
   },
   {
     key: 'beta',
@@ -65,6 +69,7 @@ const CONTROLS: {
     max: 1.4,
     step: 0.01,
     unit: '',
+    digits: 2,
   },
   {
     key: 'costOfDebt',
@@ -74,6 +79,7 @@ const CONTROLS: {
     max: 7,
     step: 0.01,
     unit: '%',
+    digits: 2,
   },
   {
     key: 'taxRate',
@@ -83,6 +89,7 @@ const CONTROLS: {
     max: 30,
     step: 0.1,
     unit: '%',
+    digits: 1,
   },
   {
     key: 'debtShare',
@@ -92,8 +99,10 @@ const CONTROLS: {
     max: 70,
     step: 0.01,
     unit: '%',
+    digits: 2,
   },
 ];
+const control = (key: keyof WaccInputs) => CONTROLS.find((c) => c.key === key)!;
 
 const PRESETS: { name: string; inputs: WaccInputs }[] = [
   { name: 'Our estimate', inputs: ESTIMATE },
@@ -107,9 +116,14 @@ const PRESETS: { name: string; inputs: WaccInputs }[] = [
   },
 ];
 
-const f2 = (v: number) => v.toFixed(2);
-const pct = (v: number) => `${f2(v)}%`;
+const pct = (v: number, digits = 2) => `${v.toFixed(digits)}%`;
 const dollars = (v: number) => `$${Math.round(v).toLocaleString('en-US')}`;
+/** An input's value with its own unit and number of decimals. */
+const shown = (key: keyof WaccInputs, v: number) =>
+  `${v.toFixed(control(key).digits)}${control(key).unit}`;
+/** "4.18% to 4.87%" for an input's range. */
+const span = (key: keyof WaccInputs) =>
+  `${shown(key, RANGES[key][0])} to ${shown(key, RANGES[key][1])}`;
 
 export default function WaccInputsExplorer() {
   const [inputs, setInputs] = useState<WaccInputs>(ESTIMATE);
@@ -117,19 +131,22 @@ export default function WaccInputsExplorer() {
   const value = perpetuityValue(100, r.wacc);
 
   const parts = [{ name: 'WACC', equity: r.equityPart, debt: r.debtPart }];
-  const swings = sensitivity(inputs, RANGES).map((s) => {
-    const c = CONTROLS.find((x) => x.key === s.key)!;
-    return {
-      name: c.short,
-      range: [
-        Math.min(s.waccAtLow, s.waccAtHigh),
-        Math.max(s.waccAtLow, s.waccAtHigh),
-      ],
-      detail: `${s.low}${c.unit} to ${s.high}${c.unit}: WACC ${pct(s.waccAtLow)} to ${pct(s.waccAtHigh)}`,
-      swing: s.swing,
-    };
-  });
+  const swings = sensitivity(inputs, RANGES).map((s) => ({
+    name: control(s.key).short,
+    range: [
+      Math.min(s.waccAtLow, s.waccAtHigh),
+      Math.max(s.waccAtLow, s.waccAtHigh),
+    ],
+    detail: `${span(s.key)}: WACC ${pct(s.waccAtLow)} to ${pct(s.waccAtHigh)}`,
+    swing: s.swing,
+  }));
   const top = swings[0];
+
+  // Fixed at 12% for the case's numbers; wider only at slider extremes.
+  const highest = Math.max(r.wacc, ...swings.map((s) => s.range[1]));
+  const lowest = Math.min(r.wacc, ...swings.map((s) => s.range[0]));
+  const axisMax = Math.max(12, Math.ceil(highest) + 1);
+  const axisMin = Math.max(0, Math.min(4, Math.floor(lowest) - 1));
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -138,12 +155,7 @@ export default function WaccInputsExplorer() {
           <label key={c.key} className="flex flex-col text-sm">
             <span className="font-medium">
               {c.label}:{' '}
-              <span className="text-accent">
-                {c.key === 'taxRate'
-                  ? inputs[c.key].toFixed(1)
-                  : f2(inputs[c.key])}
-                {c.unit}
-              </span>
+              <span className="text-accent">{shown(c.key, inputs[c.key])}</span>
             </span>
             <input
               type="range"
@@ -175,29 +187,31 @@ export default function WaccInputsExplorer() {
 
       <ul className="mt-4 space-y-1 text-sm">
         <li>
-          Cost of equity = {pct(inputs.riskFree)} + {f2(inputs.beta)} ×{' '}
+          Cost of equity = {pct(inputs.riskFree)} + {inputs.beta.toFixed(2)} ×{' '}
           {pct(inputs.premium)} ={' '}
-          <strong className="text-accent">{pct(r.costOfEquity)}</strong>
+          <strong className="text-accent">{pct(r.costOfEquity, 3)}</strong>
         </li>
         <li>
           After-tax cost of debt = {pct(inputs.costOfDebt)} × (1 −{' '}
-          {inputs.taxRate.toFixed(1)}%) ={' '}
-          <strong className="text-accent">{pct(r.afterTaxCostOfDebt)}</strong>
+          {pct(inputs.taxRate, 1)}) ={' '}
+          <strong className="text-accent">
+            {pct(r.afterTaxCostOfDebt, 3)}
+          </strong>
         </li>
         <li>
-          WACC = {pct(100 - inputs.debtShare)} × {pct(r.costOfEquity)} +{' '}
-          {pct(inputs.debtShare)} × {pct(r.afterTaxCostOfDebt)} ={' '}
+          WACC = {pct(100 - inputs.debtShare)} × {pct(r.costOfEquity, 3)} +{' '}
+          {pct(inputs.debtShare)} × {pct(r.afterTaxCostOfDebt, 3)} ={' '}
           <strong className="text-accent">{pct(r.wacc)}</strong>
         </li>
         <li>
-          $100 a year forever, discounted at that rate, is worth{' '}
+          $100 a year forever, discounted at that rate before rounding, is worth{' '}
           <strong className="text-accent">{dollars(value)}</strong>.
         </li>
       </ul>
 
       <ChartFrame
         description="Two bar charts. First: the weighted average cost of capital as one bar split into the part that comes from equity and the part that comes from debt. Second: for each of the six inputs, a bar showing how far the cost of capital moves when that input goes across its plausible range and the others stay where the sliders are, with the widest bar on top and a line at the current cost of capital."
-        summary={`Cost of equity ${pct(r.costOfEquity)}, after-tax cost of debt ${pct(r.afterTaxCostOfDebt)}, WACC ${pct(r.wacc)}. ${top.name} moves the WACC most, by ${f2(top.swing)} points.`}
+        summary={`Cost of equity ${pct(r.costOfEquity)}, after-tax cost of debt ${pct(r.afterTaxCostOfDebt)}, WACC ${pct(r.wacc)}. ${top.name} moves the WACC most, by ${top.swing.toFixed(2)} points.`}
       >
         <p className="mt-5 text-sm font-medium">
           Where the {pct(r.wacc)} comes from
@@ -216,12 +230,12 @@ export default function WaccInputsExplorer() {
               />
               <XAxis
                 type="number"
-                domain={[0, 12]}
-                ticks={[0, 2, 4, 6, 8, 10, 12]}
+                domain={[0, axisMax]}
+                allowDecimals={false}
                 tickFormatter={(v) => `${v}%`}
               />
               <YAxis type="category" dataKey="name" width={96} />
-              <Tooltip formatter={(v: number) => `${f2(v)} points`} />
+              <Tooltip formatter={(v: number) => `${v.toFixed(2)} points`} />
               <Legend verticalAlign="top" height={28} />
               <Bar
                 dataKey="equity"
@@ -261,10 +275,10 @@ export default function WaccInputsExplorer() {
               />
               <XAxis
                 type="number"
-                domain={[4, 12]}
-                ticks={[4, 5, 6, 7, 8, 9, 10, 11, 12]}
+                domain={[axisMin, axisMax]}
+                allowDecimals={false}
+                tickCount={axisMax - axisMin + 1}
                 tickFormatter={(v) => `${v}%`}
-                allowDataOverflow
                 label={{
                   value: 'WACC',
                   position: 'insideBottom',
@@ -294,19 +308,19 @@ export default function WaccInputsExplorer() {
       </ChartFrame>
 
       <p className="mt-2 max-w-measure text-xs text-ink-muted">
-        The sliders start at the case's estimate for 30 January 2026. In the
+        The sliders start at the case's estimate for January 30, 2026. In the
         lower chart each bar moves one input across its range while the others
-        stay where the sliders are; the line marks the current WACC. Ranges:
-        risk-free rate {pct(RANGES.riskFree[0])} to {pct(RANGES.riskFree[1])}{' '}
-        (10-year Treasury at year-end to 30-year), risk premium{' '}
-        {pct(RANGES.premium[0])} (implied) to {pct(RANGES.premium[1])} (1928 to
-        2025 average), beta {f2(RANGES.beta[0])} to {f2(RANGES.beta[1])}, cost
-        of debt {pct(RANGES.costOfDebt[0])} (what Union Pacific pays on its
-        existing debt) to {pct(RANGES.costOfDebt[1])} (Baa bonds), tax rate{' '}
-        {pct(RANGES.taxRate[0])} to {pct(RANGES.taxRate[1])}, debt share{' '}
-        {pct(RANGES.debtShare[0])} to {pct(RANGES.debtShare[1])} (railroad
-        average). Sources: Union Pacific's 2025 Form 10-K (SEC EDGAR), FRED, and
-        Aswath Damodaran's data library, January 2026.
+        stay where the sliders are; the line marks the current WACC. When a
+        slider sits outside its range, the line falls outside that input's bar.
+        Moving the debt share keeps the costs of equity and debt fixed, which a
+        real change in borrowing would not. Ranges: risk-free rate{' '}
+        {span('riskFree')} (10-year Treasury at year-end to 30-year), risk
+        premium {span('premium')} (implied to 1928 to 2025 average), beta{' '}
+        {span('beta')} (Transportation group to railroad average), cost of debt{' '}
+        {span('costOfDebt')} (Aaa to Baa bonds), tax rate {span('taxRate')}{' '}
+        (federal to federal plus state), debt share {span('debtShare')} (Union
+        Pacific to railroad average). Sources: Union Pacific's 2025 Form 10-K
+        (SEC EDGAR), FRED, and Aswath Damodaran's data library, January 2026.
       </p>
     </div>
   );

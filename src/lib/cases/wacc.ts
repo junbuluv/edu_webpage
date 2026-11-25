@@ -74,6 +74,19 @@ export function sensitivity(base: WaccInputs, ranges: InputRanges): Swing[] {
     .sort((a, b) => b.swing - a.swing);
 }
 
+/**
+ * The lesson's re-levering step: an unlevered beta at a firm's own debt-to-
+ * equity ratio (a plain ratio, not a percent) and tax rate (percent).
+ * beta_L = beta_U x [1 + (1 - t) x D/E].
+ */
+export function relever(
+  unleveredBeta: number,
+  taxRate: number,
+  debtToEquity: number,
+): number {
+  return unleveredBeta * (1 + (1 - taxRate / 100) * debtToEquity);
+}
+
 /** Present value of `cashFlow` a year forever at `rate` percent. */
 export function perpetuityValue(cashFlow: number, rate: number): number {
   return cashFlow / (rate / 100);

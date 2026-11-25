@@ -2,12 +2,18 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   perpetuityValue,
+  relever,
   sensitivity,
   wacc,
   type InputRanges,
   type WaccInputs,
 } from './wacc.ts';
-import { ESTIMATE, RANGES, UNION_PACIFIC as UP } from './union-pacific.ts';
+import {
+  ESTIMATE,
+  MARKET,
+  RANGES,
+  UNION_PACIFIC as UP,
+} from './union-pacific.ts';
 
 const near = (a: number, b: number, tol = 1e-9) =>
   assert.ok(Math.abs(a - b) < tol, `${a} is not within ${tol} of ${b}`);
@@ -70,6 +76,13 @@ test('a level cash flow forever is worth the cash flow over the rate', () => {
   near(perpetuityValue(100, 10), 1000);
 });
 
+test('re-levering applies the lesson formula, and no debt leaves beta alone', () => {
+  // beta_L = beta_U x [1 + (1 - t) x D/E]
+  near(relever(0.8, 25, 0.5), 0.8 * (1 + 0.75 * 0.5));
+  near(relever(0.8, 25, 0), 0.8);
+  assert.ok(relever(0.8, 25, 1) > relever(0.8, 25, 0.5));
+});
+
 // Union Pacific: the numbers copied from the 10-K must agree with each other.
 
 test('book debt is the two balance-sheet lines, about 5.3 billion above fair value', () => {
@@ -101,12 +114,23 @@ test('the reported tax and interest rates follow from the reported amounts', () 
   near(UP.federalTaxRate + UP.stateTaxRate, ESTIMATE.taxRate);
 });
 
-test('the case estimate uses market-value weights and gives a WACC near 7.7%', () => {
+test('the case beta is the railroad unlevered beta re-levered at the firm’s own debt', () => {
+  const debtToEquity = UP.fairValueOfDebt / UP.marketValueOfEquity;
+  near(debtToEquity, 0.19, 0.001);
+  near(
+    ESTIMATE.beta,
+    relever(MARKET.railroadUnleveredBeta, ESTIMATE.taxRate, debtToEquity),
+    0.005,
+  );
+  assert.equal(ESTIMATE.beta, 0.93);
+});
+
+test('the case estimate uses market-value weights and gives a WACC near 7.6%', () => {
   const v = UP.marketValueOfEquity + UP.fairValueOfDebt;
   near(ESTIMATE.debtShare, (UP.fairValueOfDebt / v) * 100, 0.05);
   const r = wacc(ESTIMATE);
-  near(r.costOfEquity, 4.26 + 0.98 * 4.23);
-  assert.ok(r.wacc > 7.6 && r.wacc < 7.9, String(r.wacc));
+  near(r.costOfEquity, 4.26 + 0.93 * 4.23);
+  assert.ok(r.wacc > 7.5 && r.wacc < 7.65, String(r.wacc));
 });
 
 test('every estimate lies inside its range, and the premium matters most', () => {
@@ -114,6 +138,8 @@ test('every estimate lies inside its range, and the premium matters most', () =>
     const [low, high] = RANGES[key];
     assert.ok(low <= ESTIMATE[key] && ESTIMATE[key] <= high, key);
   }
+  // Both ends of the cost of debt range are yields on new borrowing.
+  assert.deepEqual(RANGES.costOfDebt, [MARKET.aaaYield, MARKET.baaYield]);
   const s = sensitivity(ESTIMATE, RANGES);
   assert.equal(s[0].key, 'premium');
   assert.equal(s[s.length - 1].key, 'taxRate');
