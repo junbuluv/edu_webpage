@@ -21,6 +21,7 @@ import {
   lastVintage,
   marketReturnsFor,
   pme,
+  pmeVerdict,
   tvpi,
   type MarketData,
 } from '@lib/cases/pme';
@@ -73,10 +74,11 @@ export default function PmeExplorer() {
   const top = Math.ceil(Math.max(...byVintage.map((r) => r.pme)) * 2) / 2;
   const pmeTicks = Array.from({ length: top * 2 + 1 }, (_, i) => i / 2);
 
-  const verdict =
-    ratio >= 1
-      ? 'at or above 1: the fund did at least as well as the same money in the stock market'
-      : 'below 1: the same money in the stock market would have done better';
+  const verdict = {
+    beat: 'above 1: the fund did better than the same money in the stock market',
+    matched: 'about 1: the fund roughly matched the stock market',
+    lost: 'below 1: the same money in the stock market would have done better',
+  }[pmeVerdict(ratio)];
 
   return (
     <div className="my-8 rounded-lg border border-slate-200 bg-white p-5">
@@ -141,13 +143,13 @@ export default function PmeExplorer() {
           whatever the first year.
         </li>
         <li>
-          Paid out over paid in (TVPI):{' '}
+          Total value over paid in (TVPI):{' '}
           <strong className="text-accent">{f2(multiple)}</strong>.
         </li>
         <li>
-          Stock market return over the fund's life ({vintage + 1} to{' '}
-          {vintage + 9}): <strong className="text-accent">{pct(market)}</strong>{' '}
-          a year.
+          Stock market, compound average, {vintage + 1} to {vintage + 9}:{' '}
+          <strong className="text-accent">{pct(market)}</strong> a year (a
+          guide; the PME is the test).
         </li>
         <li>
           Public market equivalent (PME):{' '}
@@ -157,11 +159,11 @@ export default function PmeExplorer() {
 
       <ChartFrame
         description={`Two charts. First: for the chosen ten-year window, the value of two stock market accounts at the end of each year, one holding every pay-in to the fund and one holding every payout from it; the PME is the payout account over the pay-in account in the last year. Second: the fund's PME for every first year from ${FIRST} to ${LAST}, with a line at 1 and a marker at the chosen year.`}
-        summary={`Fund started ${vintage}: IRR ${pct(irr)}, TVPI ${f2(multiple)}, stock market ${pct(market)} a year, PME ${f2(ratio)}. ${beat} of ${byVintage.length} first years give a PME of 1 or more.`}
+        summary={`Fund started ${vintage}: IRR ${pct(irr)}, TVPI ${f2(multiple)}, stock market ${pct(market)} a year, PME ${f2(ratio)}, ${verdict}. ${beat} of ${byVintage.length} first years give a PME of 1 or more.`}
       >
         <p className="mt-5 text-sm font-medium">
-          The fund's cash, each dollar put in the stock market, {vintage} to{' '}
-          {vintage + 9}, per 100 committed
+          Two stock market accounts, {vintage} to {vintage + 9}, per 100
+          committed: one takes every pay-in, one every payout
         </p>
         <div className="mt-1 h-64">
           <ResponsiveContainer>
@@ -205,8 +207,8 @@ export default function PmeExplorer() {
         </div>
 
         <p className="mt-5 text-sm font-medium">
-          The same fund's PME for every first year, {FIRST} to {LAST} (click to
-          pick a year)
+          This fund's PME for every first year, {FIRST} to {LAST}, at the
+          payouts chosen above (click to pick a year)
         </p>
         <div className="mt-1 h-44 cursor-pointer">
           <ResponsiveContainer>
@@ -249,7 +251,7 @@ export default function PmeExplorer() {
               <ReferenceLine y={1} stroke="var(--chart-ink)" />
               <ReferenceLine
                 x={vintage}
-                stroke="var(--chart-2)"
+                stroke="var(--chart-3)"
                 strokeWidth={2}
               />
             </BarChart>
@@ -259,12 +261,14 @@ export default function PmeExplorer() {
 
       <p className="mt-2 max-w-measure text-xs text-ink-muted">
         The fund is made up: 100 paid in over years 1 to 4, 190 paid out over
-        years 4 to 10, all at year end. The stock market is the US market's
-        total return, dividends included, from the Ken French Data Library
+        years 4 to 10, all at year end. Payouts run from 50% to 150% of that;
+        {LAST} is the last first year with ten years of data. The stock market
+        is the value-weighted total return, dividends included, of US firms
+        listed on the NYSE, AMEX or NASDAQ, from the Ken French Data Library
         (Mkt-RF plus RF, January to December, {FIRST} to{' '}
-        {FIRST + DATA.market.length - 1}). {DATA.copyright}. The orange line in
+        {FIRST + DATA.market.length - 1}). {DATA.copyright}. The green line in
         the lower chart marks the chosen first year; the black line marks a PME
-        of 1. The chart opens on 1990, when the same fund lost to the market.
+        of 1. The chart opens on 1990, when this fund lost to the market.
       </p>
     </div>
   );

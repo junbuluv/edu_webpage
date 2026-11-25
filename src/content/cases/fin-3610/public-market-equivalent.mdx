@@ -7,12 +7,14 @@ summary: "A buyout fund's 13% IRR sounds good, but good compared with what? Meas
 estimatedMinutes: 20
 relatedLessons:
   - 'fin-3610/investment-decision-rules'
-  - 'fin-3610/valuing-stocks'
+  - 'fin-3610/capm-and-sml'
 quizSlug: 'fin-3610-case-public-market-equivalent'
 dataThrough: 'December 2025'
 sources:
   - name: 'Ken French Data Library, Tuck School of Business at Dartmouth: Fama/French 3 Factors, annual Mkt-RF and RF, 1927 to 2025, retrieved 25 November 2026. Copyright 2026 Eugene F. Fama and Kenneth R. French.'
     url: 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html'
+  - name: 'Steven N. Kaplan and Antoinette Schoar, "Private Equity Performance: Returns, Persistence, and Capital Flows," The Journal of Finance, 2005, pages 1791 to 1823'
+    url: 'https://doi.org/10.1111/j.1540-6261.2005.00780.x'
 extensionOf: 'fin-3610/union-pacific-valuation'
 draft: false
 ---
@@ -21,16 +23,20 @@ import PmeExplorer from '@components/viz/PmeExplorer';
 
 ## The question
 
-Private equity funds report how they did with an internal rate of
-return (IRR). Take a fund whose investors pay in 100 over four years and
-get back 190 over the next seven. Its IRR is 13.28% a year. Is that
-good?
+A buyout fund buys whole companies, mostly with borrowed money.
+Investors promise (commit) money up front, and the fund calls it as it
+buys companies. Funds report how they did with an internal rate of
+return (IRR).
 
-The investors had an alternative: put the same money into the whole US
-stock market, at the same times. This case measures the fund against
-that alternative. The fund is made up, because real funds' cash flows
-are private. The stock market is real: its total return in every year
-from 1927 to 2025.
+Take a fund whose investors pay in 100 over years 1 to 4 and get back
+190 over years 4 to 10. Its IRR is 13.28% a year. Is that good?
+
+The investors had an alternative: put the same money into the stock
+market, at the same times. This case measures the fund against that
+alternative. The fund is made up, because real funds' cash flows are
+private. The stock market is real: the total return, dividends
+included, of US stocks listed on the NYSE, AMEX and NASDAQ, weighted by
+market value, in every year from 1927 to 2025.
 
 ## The fund
 
@@ -51,7 +57,12 @@ $$
 \quad\Longrightarrow\quad \text{IRR} = 13.28\%.
 $$
 
-Funds also report total paid out over total paid in, called **TVPI**:
+Time is counted from the first pay-in; starting the clock a year
+earlier gives the same IRR.
+
+Funds also report **TVPI**, total value over paid-in: what the fund has
+paid out plus the value of what it still holds, divided by what
+investors paid in. This fund holds nothing after year 10, so TVPI =
 190 / 100 = 1.90.
 
 Neither number mentions the stock market. A 13% return is excellent
@@ -69,37 +80,46 @@ $$
 
 where $G_t$ is what one dollar in the stock market at the end of year
 $t$ grows to by the end of year 10. A PME above 1 means the fund beat
-the market; below 1, the same money in the market would have done
-better. Steven Kaplan and Antoinette Schoar proposed this measure in 2005.
+the market with the same timing; below 1, the same money in the market
+would have done better. The PME is a ratio over the whole ten years, not
+a rate per year.
 
-The previous case discounted cash flows at a cost of capital chosen in
-advance. Dividing every flow by the market's growth to the end does the
-same thing with one change: the discount rate in each year is what the
-stock market actually returned that year.
+Steven Kaplan and Antoinette Schoar used this ratio in a 2005 paper,
+with the S&P 500 as the market. This case uses the broader market
+described above.
+
+Carrying a flow forward at the market's return is the same as
+discounting it back at that return. So the PME is also a ratio of two
+present values, where the discount rate in each year is what the stock
+market actually returned that year. The previous case discounted at a
+cost of capital chosen in advance. The PME can be computed only after
+the fact, once the market's returns are known; a valuation must pick its
+rate before.
 
 ## By hand: a fund started in 1990
 
 Pay-ins arrive at the end of 1990 to 1993 and payouts at the end of
 1993 to 1999. Each is carried to the end of 1999 at the market's return.
 
-| Year | Market return | Pay-in | Payout | Growth to end of 1999 | Pay-in, 1999 dollars | Payout, 1999 dollars |
-| ---- | ------------- | ------ | ------ | --------------------- | -------------------- | -------------------- |
-| 1990 | −6.05%        | 25     |        | 5.565                 | 139.1                |                      |
-| 1991 | 34.82%        | 25     |        | 4.128                 | 103.2                |                      |
-| 1992 | 9.78%         | 25     |        | 3.760                 | 94.0                 |                      |
-| 1993 | 11.16%        | 25     | 5      | 3.383                 | 84.6                 | 16.9                 |
-| 1994 | −0.15%        |        | 15     | 3.388                 |                      | 50.8                 |
-| 1995 | 36.85%        |        | 25     | 2.476                 |                      | 61.9                 |
-| 1996 | 21.21%        |        | 35     | 2.042                 |                      | 71.5                 |
-| 1997 | 31.26%        |        | 40     | 1.556                 |                      | 62.2                 |
-| 1998 | 24.25%        |        | 40     | 1.252                 |                      | 50.1                 |
-| 1999 | 25.23%        |        | 30     | 1.000                 |                      | 30.0                 |
-| Sum  |               | 100    | 190    |                       | 420.9                | 343.4                |
+| Year | Market return     | Pay-in | Payout | Growth to end of 1999 | Pay-in, worth at end of 1999 | Payout, worth at end of 1999 |
+| ---- | ----------------- | ------ | ------ | --------------------- | ---------------------------- | ---------------------------- |
+| 1990 | −6.05% (not used) | 25     |        | 5.565                 | 139.1                        |                              |
+| 1991 | 34.82%            | 25     |        | 4.128                 | 103.2                        |                              |
+| 1992 | 9.78%             | 25     |        | 3.760                 | 94.0                         |                              |
+| 1993 | 11.16%            | 25     | 5      | 3.383                 | 84.6                         | 16.9                         |
+| 1994 | −0.15%            |        | 15     | 3.388                 |                              | 50.8                         |
+| 1995 | 36.85%            |        | 25     | 2.476                 |                              | 61.9                         |
+| 1996 | 21.21%            |        | 35     | 2.042                 |                              | 71.5                         |
+| 1997 | 31.26%            |        | 40     | 1.556                 |                              | 62.2                         |
+| 1998 | 24.25%            |        | 40     | 1.252                 |                              | 50.1                         |
+| 1999 | 25.23%            |        | 30     | 1.000                 |                              | 30.0                         |
+| Sum  |                   | 100    | 190    |                       | 420.9                        | 343.4                        |
 
-The growth to the end of 1999 multiplies the market's returns in the
-later years: for 1997 it is 1.2425 × 1.2523 = 1.556. The return in 1990
-itself never applies, because the first pay-in arrives at the end of
-that year.
+The growth to the end of 1999 multiplies one plus the market's return
+for each later year: for 1997 it is 1.2425 × 1.2523 = 1.556. The return
+in 1990 itself never applies, because the first pay-in arrives at the
+end of that year. Every figure is computed before rounding; chaining the
+rounded factors can move the last digit by one.
 
 $$
 \text{PME} = \frac{343.4}{420.9} = 0.82.
@@ -107,8 +127,8 @@ $$
 
 The stock market returned 21.01% a year from 1991 to 1999. The 100 paid
 in would have grown to 420.9 in the market; the fund's 190 of payouts,
-reinvested, reached only 343.4. With a 13.28% IRR, the fund lost to the
-market.
+reinvested, reached only 343.4. With a 13.28% IRR, the made-up fund
+would have lost to the market.
 
 ## Replay it
 
@@ -122,17 +142,37 @@ Work through these steps.
 2. Press **2000: weak decade**. The IRR is still 13.28%, but the market
    returned 0.96% a year from 2001 to 2009. The PME is 1.51.
 3. Keep 2000 and drag the payouts down to 70%. The IRR falls to 5.64%
-   and the TVPI to 1.33, yet the PME is 1.06: a fund that earned 5.64% a
-   year still beat the stock market in that decade.
+   and the TVPI to 1.33, yet the PME is 1.06: a fund earning 5.64% a year
+   would still have beaten the stock market in that decade.
 4. Press **Reset**, then drag the payouts up to 125%. The PME reaches
-   1.02 and the IRR is 18.43%. In 1990 the fund needed about a quarter
-   more in payouts, and an IRR near 18%, to match the market.
-5. Read the lower chart. Each bar is the same fund, at 100% payouts,
-   started in a different year.
+   1.02 and the IRR is 18.43%. Exactly 1 takes 122.6%, between two
+   slider steps, with an IRR of 17.96%: the 1990 fund needs about 23%
+   more in payouts to match the market.
+5. Press **Reset**, then **2007: crisis start** (PME 1.06) and then
+   **2016: latest** (PME 0.96).
+6. Press **Reset** and read the lower chart. Each bar is this fund, at
+   100% payouts, started in a different year. Bars under the black line
+   are years when the same money in the market did better. Click a bar to
+   load that year.
 
-## What the record shows
+## IRR against the market's average
 
-The same fund, with the same 13.28% IRR, by the year it started:
+Do not compare the IRR with the market's average return one for one. If
+the market returned the same rate every year, the PME would be 1 exactly
+when the IRR equals that rate. Real returns vary. Roughly, the PME
+counts each year's return by how much of the investors' money is in the
+fund that year, while the average counts every year the same.
+
+That is why the 1990 fund needs an IRR of about 18%, not 21%, to match
+the market: the money in the fund peaks around 1994, a flat year, and
+little of it is there for 1991's 34.82%. A fund started in 2009 earns
+13.28% while the market averaged 11.87% a year, and its PME is still
+0.96. One started in 2012 roughly matches the market (PME 1.00) although
+the market averaged 16.68% a year.
+
+## The same fund in every decade
+
+This fund, with the same 13.28% IRR, by the year it started:
 
 | First year   | PME          |
 | ------------ | ------------ |
@@ -142,18 +182,21 @@ The same fund, with the same 13.28% IRR, by the year it started:
 | 2008 to 2016 | 0.92 to 1.02 |
 
 Of the 90 possible first years from 1927 to 2016, 51 give a PME of 1 or
-more; of the 37 since 1980, 17 do. Nothing about the fund changed. Only
-the market it is measured against did.
+more; of the 37 since 1980, 17 do. This is a record of the stock market,
+not of private equity: nothing about the fund changed, only the market
+it is measured against.
 
 That has two consequences.
 
-- **A high IRR can lose and a low IRR can win.** The fund lost to the
-  market at 13.28% in 1990 and beat it at 5.64% in 2000.
-- **IRRs from different years do not compare.** A fund started in 1997
-  and one started in 2010 could have identical cash flows and the same
-  IRR, yet one beat the market by 78% (a PME of 1.78) and the other
-  roughly matched it (0.99).
-  The PME separates what the fund did from what the market did.
+- **A high IRR can lose and a low IRR can win.** The made-up fund would
+  have lost to the market at 13.28% started in 1990, and beaten it at
+  5.64% started in 2000.
+- **An IRR alone cannot rank funds that started in different years.**
+  Two funds started in 1997 and 2010 could have identical cash flows and
+  the same IRR. Over its ten years the first ends with 78% more than the
+  same money in the market (a PME of 1.78), while the second roughly
+  matches it (0.99). The PME separates what the fund did from what the
+  market did.
 
 ## Takeaways
 
@@ -169,14 +212,19 @@ That has two consequences.
 
 - The fund is made up. Real funds report their cash flows only to their
   investors.
-- Every payment is at a year end. Real funds call and pay money at any
-  time, and daily or quarterly timing would move the figures a little.
+- Every payment is at a year end. Using the actual dates and monthly
+  market returns would change the PME: moving every flow of the 1990
+  fund to mid-year raises it from 0.82 to 0.86.
 - The fund has paid everything out by year 10. Real funds often still
-  hold companies then, and their remaining value is counted as a final
-  payout.
-- The market here is all US stocks, weighted by size. Buyout funds
-  borrow heavily, so their equity is riskier than the market, and a PME
-  just above 1 may not pay enough for that risk. Some researchers raise
-  the market's return by a beta above 1 to allow for it.
-- The cash flows are what investors actually paid and received, so the
-  fund's fees are already taken out.
+  hold companies then. That remaining value counts as a final payout,
+  and it is the managers' own estimate, not a market price.
+- The companies a buyout fund owns carry a lot of debt, so their equity
+  is riskier than the market, and a PME just above 1 may not pay enough
+  for that risk. Some studies compare buyout funds with a levered market
+  instead: the risk-free rate plus a beta above 1 times the market's
+  return over the risk-free rate, as in the CAPM. That benchmark rises
+  more than the market in good years and falls more in bad ones.
+- Investors cannot easily sell a stake in a fund and must keep cash
+  ready for calls, so many want more than the market for that too.
+- The cash flows stand for what investors pay and receive, so the fund's
+  fees are already taken out. The market alternative is treated as free.

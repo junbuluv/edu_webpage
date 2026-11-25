@@ -25,20 +25,25 @@ export interface MarketData {
   source: string;
   sourceUrl: string;
   copyright: string;
+  dataset: string;
+  derivation: string;
+  /** Date the source file was downloaded, YYYY-MM-DD. */
+  retrieved: string;
   units: string;
   /** Calendar year of the first entry. */
   start: number;
   /** US stock market total return per calendar year. */
   market: number[];
-  /** One-month Treasury bill return per calendar year. */
-  riskFree: number[];
 }
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 const scaled = (fund: Fund, scale: number) =>
   fund.distributions.map((d) => d * scale);
 
-/** Total paid out over total paid in. */
+/**
+ * Total value over paid in. The fund holds nothing after year 10, so total
+ * value is everything it paid out.
+ */
 export function tvpi(fund: Fund, scale: number): number {
   return sum(scaled(fund, scale)) / sum(fund.calls);
 }
@@ -90,6 +95,15 @@ export function accounts(fund: Fund, scale: number, returns: number[]) {
 export function pme(fund: Fund, scale: number, returns: number[]): number {
   const last = accounts(fund, scale, returns)[FUND_YEARS - 1];
   return last.payOut / last.payIn;
+}
+
+/**
+ * How a PME reads. The page prints it to two decimals, so one that prints as
+ * 1.00 is a tie rather than a win or a loss.
+ */
+export function pmeVerdict(ratio: number): 'beat' | 'matched' | 'lost' {
+  if (ratio.toFixed(2) === '1.00') return 'matched';
+  return ratio > 1 ? 'beat' : 'lost';
 }
 
 /** The market's compound return per year over years 2 to 10 of the fund. */

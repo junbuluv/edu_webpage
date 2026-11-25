@@ -10,6 +10,7 @@ import {
   lastVintage,
   marketReturnsFor,
   pme,
+  pmeVerdict,
   tvpi,
   type MarketData,
 } from './pme.ts';
@@ -89,16 +90,30 @@ test('the market return over the fund life compounds years 2 to 10', () => {
   near(compoundReturn(r), 10);
 });
 
+test('a PME that prints as 1.00 reads as a tie, not a win or a loss', () => {
+  assert.equal(pmeVerdict(1.2), 'beat');
+  assert.equal(pmeVerdict(0.8), 'lost');
+  // 0.9989 prints as 1.00, so it must not be called a loss.
+  assert.equal(pmeVerdict(0.9989), 'matched');
+  assert.equal(pmeVerdict(1.0041), 'matched');
+  assert.equal(pmeVerdict(0.9949), 'lost');
+  assert.equal(pmeVerdict(1.0051), 'beat');
+});
+
 // The committed data file, built by scripts/cases/market-annual-data.ts.
 const data = JSON.parse(
   readFileSync(new URL('./market-annual.json', import.meta.url), 'utf8'),
 ) as MarketData;
 
-test('the data file covers 1927 to 2025 and gives market and bill returns', () => {
+test('the data file covers 1927 to 2025 and names its dataset and derivation', () => {
   assert.equal(data.start, 1927);
   assert.equal(data.market.length, 99);
-  assert.equal(data.riskFree.length, data.market.length);
   assert.match(data.copyright, /Fama and Kenneth R\. French/);
+  assert.match(data.dataset, /Fama\/French 3 Factors/);
+  assert.match(data.derivation, /Mkt-RF \+ RF/);
+  assert.match(data.retrieved, /^\d{4}-\d{2}-\d{2}$/);
+  // The bill returns were an input only; the file does not republish them.
+  assert.equal('riskFree' in data, false);
   // 2022: Mkt-RF -21.32 plus RF 1.42.
   near(data.market[2022 - data.start], -19.9);
   near(data.market[2025 - data.start], 17.55);
