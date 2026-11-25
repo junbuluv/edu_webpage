@@ -29,9 +29,4 @@ export default defineConfig({
     }),
     sitemap(),
   ],
-  vite: {
-    ssr: {
-      noExternal: ['react-plotly.js', 'plotly.js-finance-dist-min'],
-    },
-  },
 });

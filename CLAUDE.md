@@ -10,7 +10,7 @@ quizzes are JSON; progress + auth live in Supabase. Public repo at
 - **Astro 5** with `output: 'server'` and the **`@astrojs/vercel`** adapter
 - **React 19** islands (Tailwind for styling, no shadcn-ui yet)
 - **MDX** with `remark-math` + `rehype-katex` for inline/display math
-- **Recharts** for most charts; Plotly available for heavier finance visualizations
+- **Recharts** for charts
 - **Supabase** (Postgres + auth + RLS) — see `supabase/schema.sql`
 - **Node 22.x** required (matches Vercel and CI; enforced in `package.json#engines` and `.nvmrc`)
 
@@ -107,9 +107,9 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   for uniqueness, never the raw cookie or submitted coordinates
 - Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
   tween honoring `prefers-reduced-motion`)
-- MDX components in `src/components/mdx/`: `ScenarioPlayer`,
-  `CompareScenarios`, `Figure` (static images with caption + source
-  credit), `BarFigure` (Recharts wrapper for hand-curated tabular data)
+- MDX components in `src/components/mdx/`: `CompareScenarios`, `Figure`
+  (static images with caption + source credit), `BarFigure` (Recharts wrapper
+  for hand-curated tabular data)
 - Lesson figures: `public/figures/<course>/<lesson-slug>/<name>.png`
   for committed images; `BarFigure` data lives inline in MDX
 - Bond chart presets + URL state: `src/lib/bonds/{presets,url-state}.ts`
@@ -232,19 +232,18 @@ CI config: `.github/workflows/ci.yml`. Four jobs:
   table-level write or DDL privilege, or `service_role` cannot read) or a
   retired object is back (a retired function, a `section` column,
   `archive_videos`); the auth stub copies the legacy Supabase defaults on
-  purpose so this bites in CI. Two steps rehearse one-off removals the way
-  production met them, then rerun every suite:
-  - "Rehearse removing the TA role" puts production's pre-2026-10-07 state
-    (`'ta'` plus TA rows) back on the fresh database and re-runs `schema.sql`.
-  - "Rehearse removing ECO 1002" builds a second database from
-    `supabase/tests/fixtures/pre_eco_removal_schema.sql` (the schema
-    production had before 2026-11-25: two courses, per-day `section` columns,
-    `archive_videos`), seeds ECO and FIN rows (`eco_removal_setup.sql`),
-    applies `schema.sql` twice, and checks what went and what stayed
-    (`eco_removal_check.sql`). That fixture is a historical snapshot, so never
-    "update" it to match the current schema. It replaced the July 2026
-    upgrade rehearsal; `schema.sql` is only expected to upgrade a database at
-    the pre-removal schema or newer.
+  purpose so this bites in CI. Step "Rehearse removing ECO 1002" rehearses
+  that one-off removal the way production met it, then reruns every suite: it
+  builds a second database from
+  `supabase/tests/fixtures/pre_eco_removal_schema.sql` (the schema production
+  had before 2026-11-25: two courses, per-day `section` columns,
+  `archive_videos`), seeds ECO and FIN rows (`eco_removal_setup.sql`), applies
+  `schema.sql` twice, and checks what went and what stayed
+  (`eco_removal_check.sql`). That fixture is a historical snapshot, so never
+  "update" it to match the current schema. `schema.sql` is only expected to
+  upgrade a database at the pre-removal schema or newer, with no `'ta'` value
+  in `user_role` (the block that rebuilt that type, and its rehearsal, were
+  deleted on 2026-11-25 after production had run it).
 
   Currently **advisory**, not blocking — flip to required in the ruleset when
   ready by adding `schema-roundtrip` to `required_status_checks`. Traps this
@@ -356,10 +355,9 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 12. **Use `isStaff(role)` / `isAdmin(role)` from `@lib/roles`** for any
     staff/admin gate — never inline `role === 'instructor' || role === 'admin'`.
     The `user_role` enum has three values: `student`, `instructor`,
-    `admin` (TA was retired on 2026-10-07; the block at the top of
-    `schema.sql` rebuilt the type). Role is only half of a management check:
-    managing a course also needs a teaching assignment (`canManageClass`,
-    `instructorOwnsCourse`).
+    `admin` (TA was retired on 2026-10-07). Role is only half of a management
+    check: managing a course also needs a teaching assignment
+    (`canManageClass`, `instructorOwnsCourse`).
 13. **`<ClientRouter />` is mounted in `BaseLayout`.** Cross-page nav
     uses Astro View Transitions. If a React island appears unresponsive
     after navigation, suspect stale DOM references in test/debug code
@@ -539,8 +537,10 @@ must be committed before they can be used` — the `ALTER TYPE`
 TYPE` standalone first; on the re-paste it becomes a no-op (since
     the value now exists) and the rest runs cleanly.
 - **Removing a value from an enum** has no `DROP VALUE`: rebuild the type.
-  The guarded block at the top of `schema.sql` (TA removal, 2026-10-07) is
-  the pattern: record and drop the policies and column triggers that depend
+  The TA removal (2026-10-07) is the pattern. Its guarded block was deleted
+  from `schema.sql` on 2026-11-25, once production had run it; a copy is at
+  the top of `supabase/tests/fixtures/pre_eco_removal_schema.sql`. It works
+  like this: record and drop the policies and column triggers that depend
   on the type, remap or reject leftover rows, swap the columns to a new type,
   drop and rename, restore defaults, and let the rest of the script recreate
   what was dropped, with a check at the end of the script.

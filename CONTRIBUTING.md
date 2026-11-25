@@ -1,8 +1,8 @@
 # Contributing
 
 Thanks for working on Baruch Econ & Finance Studio. This document is the short version of "how
-to add things without breaking other things." For the _why_, see
-`ARCHITECTURE.md`. For agent collaborators, see `AGENTS.md`.
+to add things without breaking other things." For the conventions and the
+reasons behind them, see `CLAUDE.md`.
 
 ## Local setup
 
@@ -96,7 +96,8 @@ Email this verbatim to a new collaborator:
 ## Adding a lesson
 
 1. Pick the course folder under `src/content/lessons/`.
-2. Copy an existing lesson (e.g. `macro/is-lm-intro.mdx`) and rename.
+2. Copy an existing lesson (e.g. `fin-3610/credit-risk-and-spreads.mdx`) and
+   rename.
 3. Edit the frontmatter:
    - Unique `slug` (the filename without `.mdx`).
    - `order:` should be unique within its `unit`.
@@ -105,7 +106,8 @@ Email this verbatim to a new collaborator:
 4. Body conventions:
    - Equation first, intuition second, simulation last.
    - Use `$inline$` and `$$display$$` for math.
-   - Import visualizations: `import ISLMChart from '@components/viz/ISLMChart';`
+   - Import visualizations:
+     `import CreditSpreadExplorer from '@components/viz/CreditSpreadExplorer';`
    - Mark interactive components `client:load` (or `client:visible` if below
      the fold).
 5. If the lesson has a quiz, add the JSON under `src/content/quizzes/` and
@@ -134,8 +136,8 @@ If you need a new question type, **extend the union and the renderer in
    baseline.
 3. Include a "Reset" affordance if there are sliders.
 4. Caption parameters used (so a reader can reproduce the chart by hand).
-5. Avoid pulling in a new charting library. Recharts handles most cases;
-   Plotly is already wired for the heavy ones.
+5. Avoid pulling in a new charting library; Recharts draws every chart
+   here.
 
 ## Adding a lesson figure
 
@@ -518,14 +520,14 @@ If yes-no-yes, it's probably fine. Otherwise expect pushback.
 - Path aliases: `@components/*`, `@layouts/*`, `@lib/*`, `@content/*`, `@/*`.
 - No comments explaining what the code says. Reserve comments for non-obvious
   _why_ (parameter calibration rationale, RLS subtleties).
-- React: per-component `useState` is fine; reach for Zustand only when 3+
-  components share state on a page.
+- React: per-component `useState`. No shared-state library is installed;
+  ask before adding one.
 - Tailwind utility classes; no shadcn-ui unless we commit to it across the
   app.
 
 ## CI
 
-GitHub Actions runs three verification jobs on every PR (see
+GitHub Actions runs four jobs on every PR (see
 `.github/workflows/ci.yml`):
 
 **`verify`** (required by branch protection):
@@ -542,14 +544,17 @@ GitHub Actions runs three verification jobs on every PR (see
   table, `auth.uid()` function).
 - Applies `supabase/schema.sql` twice via `psql -v ON_ERROR_STOP=1`.
 - Exercises synthetic student, instructor, admin, and cross-user RLS cases.
-- Rehearses the two one-off removals (the TA role, ECO 1002) on a database
-  shaped like production was before each, then reruns every suite.
+- Rehearses the ECO 1002 removal on a database shaped like production was
+  before it, then reruns every suite.
 - The second apply is what catches idempotency regressions —
   drop/create policy name mismatches, ALTER TYPE + use-in-same-txn
   errors, and similar bugs that only surface on a re-paste.
 
-**`copyright-gate`** scans lesson and quiz content for missing provenance,
-hotlinked assets, and disallowed source patterns.
+**`copyright-gate`** (advisory) scans lesson and quiz content for missing
+provenance, hotlinked assets, and disallowed source patterns.
+
+**`design-detect`** (required) runs the impeccable design detector over
+`src/` and over every public page rendered by the dev server.
 
 A red `verify` blocks merge. A red `schema-roundtrip` is a strong
 signal that re-running `schema.sql` against an existing project
