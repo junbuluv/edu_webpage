@@ -47,8 +47,8 @@ The Studio teaches corporate finance by letting students change a model and watc
 
 ## Evidence on Hand
 
-- 28 FIN 3610 lessons in `src/content/lessons/`, 1 case study in `src/content/cases/`, 29 quizzes in `src/content/quizzes/`, 6 workshops in `src/content/workshops/`.
-- 13 interactive chart components in `src/components/viz/`.
+- 28 FIN 3610 lessons in `src/content/lessons/`, 2 case studies in `src/content/cases/`, 30 quizzes in `src/content/quizzes/`, 6 workshops in `src/content/workshops/`.
+- 14 interactive chart components in `src/components/viz/`.
 - Instructor headshots in `public/instructors/`; lesson figures in `public/figures/<course>/<lesson>/`.
 - No testimonials, outcome data, enrollment numbers, or institutional endorsements exist. Do not invent them.
 
