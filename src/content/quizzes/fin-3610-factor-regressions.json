@@ -1,0 +1,67 @@
+{
+  "slug": "fin-3610-factor-regressions",
+  "title": "Factor regressions",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/factor-regressions",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Using Ken French Data Library returns from July 1963 to September 2026, the utilities portfolio's average excess return was 0.465% per month and the market's was 0.600% per month. Its CAPM market beta is 0.523. What is its CAPM alpha, in percent per month? Give three decimals.",
+      "answer": 0.151,
+      "tolerance": 0.003,
+      "unit": "% per month",
+      "explanation": "The OLS fit passes through the sample averages, so alpha = average excess return − beta × average market excess return = 0.465 − 0.523 × 0.600 = 0.465 − 0.314 = 0.151% per month.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "The CAPM regression for big value stocks gives a market beta of 0.979 with a standard error of 0.021. What is the t-statistic for the hypothesis that the true beta equals one? Include the sign and give one decimal.",
+      "answer": -1.0,
+      "tolerance": 0.05,
+      "explanation": "Test against one, not zero: t = (0.979 − 1) / 0.021 = −1.0. That is well inside two standard errors, so the data cannot reject a beta of one. The t-statistic printed in the regression table, about 47, tests against zero, which answers a different question.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "Moving from CAPM to the three-factor model, the small growth portfolio's alpha shrinks in size from −0.23 to −0.17% per month, yet its t-statistic goes from −1.84 to −4.20. Why?",
+      "choices": [
+        "The three-factor model uses more months of data",
+        "The added factors cut the unexplained variance, so alpha is estimated more precisely",
+        "The standard error of alpha rose, and a larger standard error raises the t-statistic",
+        "The market beta rose, which raises every t-statistic in the table"
+      ],
+      "correctIndex": 1,
+      "explanation": "A t-statistic is the coefficient divided by its standard error. R-squared rises from 0.76 to 0.97, the residuals get much smaller, and the standard error of alpha falls from 0.122 to 0.040, about a third of its CAPM value. The alpha is smaller but measured far more precisely. Both regressions use the same 759 months.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which statements about reading a factor regression are correct?",
+      "choices": [
+        "Alpha equals the portfolio's average excess return minus the sum of each beta times its factor's average return",
+        "An R-squared of 0.99 means alpha is statistically different from zero",
+        "A beta of 0.55 with a standard error of 0.11 has a rough 95% confidence interval of 0.33 to 0.77",
+        "Adding factors to a model always moves a portfolio's alpha closer to zero",
+        "A t-statistic of 0.31 on alpha means the data cannot reject an alpha of zero at the 5% level"
+      ],
+      "correctIndices": [0, 2, 4],
+      "explanation": "The first is the identity that defines the OLS intercept. The interval is the estimate plus or minus two standard errors: 0.55 ± 0.22. A t-statistic below about 2 in absolute value cannot reject zero. R-squared measures how closely the portfolio moves with the factors and says nothing about alpha: small value has an R-squared of 0.99 under three factors and an alpha t-statistic of only 1.72. And alpha can grow: high tech's goes from 0.03 under CAPM to 0.40% per month under five factors.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Big growth stocks have three-factor betas of 1.00 on the market, −0.15 on SMB and −0.28 on HML. Using a risk-free rate of 4% and annual factor premia of 5.5% (market), 1.7% (SMB) and 3.5% (HML), what cost of equity does the three-factor model imply, in percent? Give two decimals.",
+      "answer": 8.27,
+      "tolerance": 0.05,
+      "unit": "%",
+      "explanation": "r = 4 + 1.00 × 5.5 + (−0.15) × 1.7 + (−0.28) × 3.5 = 4 + 5.5 − 0.255 − 0.98 = 8.265, about 8.27%. CAPM with a beta of 1.01 would give 4 + 1.01 × 5.5, about 9.6%; the negative SMB and HML betas pull the factor estimate lower. The betas are this site's own regression estimates from Ken French Data Library returns. The 4% and 5.5% inputs are illustrative; the SMB and HML premia are the 1963 to 2026 sample averages.",
+      "points": 2
+    }
+  ]
+}
