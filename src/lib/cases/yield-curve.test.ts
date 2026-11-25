@@ -137,10 +137,18 @@ test('the data file has one row and one recession flag per month', () => {
   assert.ok(data.recession.every((r) => r === 0 || r === 1));
 });
 
-test('every month has a plausible yield at every maturity', () => {
+// FRED's notes for DGS30: "The 30-year Treasury constant maturity series was
+// discontinued on February 18, 2002, and reintroduced on February 9, 2006."
+test('yields are plausible; only the discontinued 30-year months are empty', () => {
+  const from = at('2002-02');
+  const to = at('2006-01');
   data.yields.forEach((row, i) => {
     row.forEach((y, j) => {
       const where = `${monthAt(data.start, i)} column ${j}`;
+      if (j === TENOR.y30 && i >= from && i <= to) {
+        assert.equal(y, null, where);
+        return;
+      }
       assert.notEqual(y, null, where);
       assert.ok(y! >= 0 && y! < 8, `${where}: ${y}`);
     });

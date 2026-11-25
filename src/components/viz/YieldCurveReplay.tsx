@@ -29,7 +29,8 @@ import ChartFrame from './ChartFrame';
 // chart is one month's curve; the strip is the 10-year minus 2-year gap for
 // the whole period with recessions shaded. The y-axis of the curve is fixed
 // at 0 to 7% (the data's range is 0 to 6.71%) so the curve's moves are
-// comparable from month to month while it plays.
+// comparable from month to month while it plays. The 30-year point is null
+// for February 2002 to January 2006 (see scripts/cases/yield-curve-data.ts).
 
 const DATA: YieldCurveData = raw;
 const LAST = DATA.yields.length - 1;
@@ -219,7 +220,9 @@ export default function YieldCurveReplay() {
                 tickFormatter={(v) => `${v}%`}
                 width={48}
               />
-              <Tooltip formatter={(v: number) => pct(v)} />
+              <Tooltip
+                formatter={(v) => (typeof v === 'number' ? pct(v) : 'n/a')}
+              />
               <Legend verticalAlign="top" height={28} />
               <Line
                 type="linear"
@@ -313,11 +316,15 @@ export default function YieldCurveReplay() {
 
       <p className="mt-2 max-w-measure text-xs text-ink-muted">
         Month-end US Treasury yields from FRED (series DGS3MO, DGS1, DGS2, DGS5,
-        DGS10, DGS30), January 2000 to {label(LAST)}. Shaded bands are US
-        recessions (FRED series USREC). Below the zero line the 10-year yield is
-        under the 2-year yield: the curve is inverted. The implied 1-year rate
-        treats the published yields as if the bonds paid no coupons. The chart
-        opens on July 2023, the middle of the longest inversion in the data.
+        DGS10, DGS30), January 2000 to {label(LAST)}. Maturities are evenly
+        spaced on the axis. The 30-year point is empty from February 2002 to
+        January 2006: FRED notes that the 30-year series was discontinued on
+        February 18, 2002 and reintroduced on February 9, 2006. Shaded bands are
+        US recessions (FRED series USREC). Below the zero line the 10-year yield
+        is under the 2-year yield: the curve is inverted. The implied 1-year
+        rate treats the published yields as if the bonds paid no coupons. The
+        chart opens on July 2023, the middle of the longest inversion in the
+        data.
       </p>
     </div>
   );

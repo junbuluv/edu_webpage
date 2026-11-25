@@ -1,5 +1,5 @@
 ---
-title: 'Reading the Yield Curve, 2000 to Today'
+title: 'Reading the Yield Curve, 2000 to 2026'
 course: fin-3610
 topic: 'Yield curve'
 order: 1
@@ -11,9 +11,9 @@ relatedLessons:
 quizSlug: 'fin-3610-case-yield-curve'
 dataThrough: 'October 2026'
 sources:
-  - name: 'FRED, Federal Reserve Bank of St. Louis: 10-year Treasury yield (DGS10). The other maturities are series DGS3MO, DGS1, DGS2, DGS5 and DGS30.'
+  - name: 'FRED, Federal Reserve Bank of St. Louis: 10-year Treasury yield (DGS10), retrieved 25 November 2026. The other maturities are series DGS3MO, DGS1, DGS2, DGS5 and DGS30.'
     url: 'https://fred.stlouisfed.org/series/DGS10'
-  - name: 'FRED: recession indicator based on NBER dates (USREC)'
+  - name: 'FRED: recession indicator based on NBER dates (USREC), retrieved 25 November 2026'
     url: 'https://fred.stlouisfed.org/series/USREC'
 draft: false
 ---
@@ -28,9 +28,10 @@ tying up money for ten years than for three months. That shape is called
 an **inverted yield curve**, and it has a reputation as a recession
 warning.
 
-This case uses month-end Treasury yields from January 2000 to October
-2026 to answer two questions. What has an inverted curve been followed
-by? And when the curve implies falling rates, how close is it?
+This case uses month-end Treasury yields from FRED, the data service of
+the Federal Reserve Bank of St. Louis, from January 2000 to October 2026.
+It asks two questions. What has an inverted curve been followed by? And
+when the curve implies a rate a year ahead, how close does it come?
 
 ## The data
 
@@ -38,26 +39,31 @@ Each month has six yields, one per maturity: 3 months, 1 year, 2 years,
 5 years, 10 years and 30 years. Plot yield against maturity and you have
 that month's **yield curve**. Two numbers summarize its slope:
 
-- the **10-year minus 2-year gap**, and
+- the **10-year minus 2-year gap**, also called the term spread, and
 - the **10-year minus 3-month gap**.
 
 A gap is measured in percentage points. When it is negative, the curve
 is inverted by that measure. Four months show the range of shapes:
 
-| Month         | 3-month | 2-year | 10-year | 10-year minus 2-year |
-| ------------- | ------- | ------ | ------- | -------------------- |
-| June 2004     | 1.33%   | 2.70%  | 4.62%   | 1.92                 |
-| February 2007 | 5.16%   | 4.65%  | 4.56%   | −0.09                |
-| December 2008 | 0.11%   | 0.76%  | 2.25%   | 1.49                 |
-| July 2023     | 5.55%   | 4.88%  | 3.97%   | −0.91                |
+| Month         | 3-month | 2-year | 10-year | 10-year minus 2-year (points) |
+| ------------- | ------- | ------ | ------- | ----------------------------- |
+| June 2004     | 1.33%   | 2.70%  | 4.62%   | 1.92                          |
+| February 2007 | 5.16%   | 4.65%  | 4.56%   | −0.09                         |
+| December 2008 | 0.11%   | 0.76%  | 2.25%   | 1.49                          |
+| July 2023     | 5.55%   | 4.88%  | 3.97%   | −0.91                         |
+
+Recession months come from FRED's USREC series. It codes the dates set
+by the National Bureau of Economic Research (NBER) and starts each
+recession in the month after the peak. Sources that count from the peak
+month date the 2008 recession from December 2007, one month earlier than
+this case does.
 
 ## What an inverted curve implies
 
 Start with a choice every lender has. To lend for two years you can buy
 a 2-year note at yield $y_2$. Or you can buy a 1-year bill at yield
-$y_1$ and lend again for the second year at whatever the 1-year rate is
-by then. Call that future rate $f$. If the two routes are to pay the
-same,
+$y_1$ and lend again for the second year at the 1-year rate of that day.
+Call $f$ the second-year rate that makes the two routes pay the same:
 
 $$
 (1 + y_2)^2 = (1 + y_1)(1 + f)
@@ -75,16 +81,15 @@ $$
 f = \frac{1.0488^2}{1.0537} - 1 = \frac{1.09998}{1.0537} - 1 = 4.39\% .
 $$
 
-The curve implied that the 1-year rate would fall from 5.37% to about
-4.39% within a year. Rates usually fall that far when the Federal
-Reserve cuts them, and the Fed usually cuts when the economy weakens.
-That is why an inverted curve is read as a recession warning: the bond
-market is pricing in lower rates ahead.
+The curve implied that the 1-year rate would fall from 5.37% to 4.39% a
+year later. Rates usually fall that far when the Federal Reserve cuts
+them, and the Fed usually cuts when the economy weakens. That is why an
+inverted curve is read as a recession warning: the bond market is
+pricing in lower rates ahead.
 
 The implied rate is not a pure forecast. Lenders also ask for a term
 premium, extra yield for holding a longer bond, which pushes $y_2$ up
-and $f$ with it. Keep that in mind when you compare $f$ with what
-happened.
+and $f$ with it. So $f$ sits above the rate lenders expect.
 
 ## Replay it
 
@@ -92,18 +97,20 @@ happened.
 
 Work through these steps.
 
-1. Press **June 2004**. The curve slopes up, and the gap is 1.92 points.
-2. Press **Play** (or drag the slider) and watch 2005 and 2006 go by.
-   Pause, then press **February 2007**. Short yields climbed: the 3-month
-   yield went from 1.33% to 5.16%. The 10-year yield barely moved, from
-   4.62% to 4.56%. The curve flattened, then inverted. In the lower
-   chart, the shaded band that follows, January 2008 to June 2009, is a
-   recession.
-3. Press **December 2008**. The 3-month yield is 0.11% and the curve is
-   steep again.
-4. Press **July 2023**. Read the implied 1-year rate and decide whether
-   you believe it.
-5. Tick **Show what happened one year later**.
+1. Press **June 2004: normal**. The curve slopes up, and the gap is 1.92
+   points.
+2. Press **Play** (or drag the slider) and watch 2005 and 2006 go by,
+   then press **February 2007: inverted**. Short yields climbed: the
+   3-month yield went from 1.33% to 5.16%. The 10-year yield ended
+   almost where it began, 4.62% to 4.56%. The curve flattened, then
+   inverted. In the lower chart, the shaded band that follows, January
+   2008 to June 2009, is a recession.
+3. Press **December 2008: crisis**. The 3-month yield is 0.11% and the
+   curve is steep again.
+4. Press **July 2023: deeply inverted**. Read the implied 1-year rate
+   and decide whether you believe it.
+5. Tick **Show what happened one year later**. The dashed curve is July
+   2024, and the readout gives the actual 1-year yield.
 
 ## How good was the warning?
 
@@ -118,18 +125,22 @@ at month-end, and what followed.
 
 **The lag is long and uneven.** The 2001 recession started 14 months
 after the first inverted month. The 2008 recession started 25 months
-after. A warning that arrives one to two years early is hard to act on.
+after. The lesson's rule of thumb is 6 to 18 months, and only the 2001
+recession fits it. A warning that arrives one to two years early is hard
+to act on.
 
 **The largest inversion has had no recession so far.** The 2022 to 2024
 stretch was the longest in the data and the deepest: the gap reached
 −1.06 points in June 2023. Through October 2026 no recession has been
-dated after it.
+dated after it. Rates can fall without one: the 3-month yield went from
+5.41% in July 2024 to 4.37% in December 2024.
 
 **The measure matters.** In 2019 the 10-year minus 2-year gap touched
 0.00 at the end of August and never closed a month below zero. The
-10-year minus 3-month gap was negative from May to September 2019. A
-recession did follow, in March and April 2020, but it began with the
-pandemic shutdowns, which no bond yield could have foreseen.
+10-year minus 3-month gap was negative from May to September 2019, and
+again in January and February 2020. A recession did follow, in March and
+April 2020, but it began with the pandemic shutdowns, which no bond
+yield could have foreseen.
 
 Now check the forecasts themselves, in four months:
 
@@ -140,15 +151,28 @@ Now check the forecasts themselves, in four months:
 | December 2021 | 0.39%        | 1.07%                | 4.73%               |
 | July 2023     | 5.37%        | 4.39%                | 4.73%               |
 
-The curve had the direction right all four times. It had the size right
-once, in June 2004. In February 2007 it implied a small fall, and the
-1-year yield dropped to 1.77% as the 2008 recession began. In December
-2021 it implied 1.07%, and a year later the 1-year yield was 4.73%.
+In these four months the curve had the direction right every time and
+the size right once, in June 2004. In February 2007 it implied a small
+fall, and the 1-year yield dropped to 1.77% as the 2008 recession began.
+In December 2021 it implied 1.07%, and a year later the 1-year yield was
+4.73%. In July 2023 it implied a fall of 0.98 points, and the fall was
+0.64.
+
+Four chosen months are not a test. Across all 310 months with a known
+outcome, the curve had the direction of the 1-year yield right in about
+6 months of 10. From January 2009 to May 2011 it implied a rise every
+month, and a year later the 1-year yield was lower or unchanged every
+time.
+
+A term premium alone would put the actual rate below $f$. In three of
+the four months in the table it came in above, so those misses were
+surprises about where rates went, not the premium.
 
 ## What this means for valuation
 
 Discount a cash flow at the yield that matches its horizon. In July 2023
-that rule mattered more than usual. Take \$100 due in ten years:
+breaking that rule cut the opposite way from usual. Take a certain \$100
+due in ten years:
 
 $$
 \frac{100}{1.0397^{10}} = 67.75
@@ -157,8 +181,10 @@ $$
 $$
 
 Its present value was \$67.75 at the 10-year yield of 3.97%, and \$58.27
-at the 3-month yield of 5.55%. Discounting a long cash flow at the short
-rate would have understated its value by 14%.
+at the 3-month yield of 5.55%. Discounting the long cash flow at the
+short rate would have understated its value by 14%. With a normal curve
+the same mistake overstates value. In June 2004 it would have given
+\$87.62 instead of \$63.66, about 38% too much.
 
 ## Takeaways
 
@@ -166,16 +192,18 @@ rate would have understated its value by 14%.
   formula turns two yields into that implied rate.
 - Since 2000, two of the three inversions were followed by a recession,
   14 and 25 months after they began. The longest one has not been.
-- The implied rate has told the direction of rates better than the size
-  of the move. Treat it as the market's price, not as a promise.
+- The implied rate had the direction of the 1-year yield right in about
+  6 months of 10, and it often missed the size by a wide margin. Treat it
+  as the market's price, not as a promise.
 
 ## Limits
 
 - The data is month-end. An inversion that lasts a few days inside a
-  month does not show, as in August 2019.
+  month does not show: the 10-year yield was below the 2-year yield on
+  three days in late August 2019, and the month closed at 0.00.
 - Three inversions are a small sample. One more episode could change
   the count from two in three to two in four.
 - The forward-rate arithmetic treats published Treasury yields as if the
-  bonds paid no coupons, and it ignores the term premium.
-- Recessions are dated after the fact by the National Bureau of Economic
-  Research, sometimes a year later.
+  bonds paid no coupons.
+- The NBER dates recessions after the fact, sometimes a year later, so
+  the last months of the data can still change.
