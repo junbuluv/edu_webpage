@@ -1,0 +1,145 @@
+---
+// A case study page: a real episode or company worked through with data and
+// a simulation. Modeled on LessonLayout, without the lesson sidebar, the
+// progress button or the tutor, because a case is not a lesson.
+import 'katex/dist/katex.min.css';
+import BaseLayout from './BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'cases'>;
+}
+const { entry } = Astro.props;
+const data = entry.data;
+
+const [courseCases, lessons] = await Promise.all([
+  getCollection('cases', (c) => !c.data.draft && c.data.course === data.course),
+  getCollection('lessons', (l) => !l.data.draft),
+]);
+courseCases.sort((a, b) => a.data.order - b.data.order);
+const position = courseCases.findIndex((c) => c.slug === entry.slug);
+const prev = position > 0 ? courseCases[position - 1] : null;
+const next =
+  position >= 0 && position < courseCases.length - 1
+    ? courseCases[position + 1]
+    : null;
+
+// src/lib/cases/content.test.ts fails the build's test step on a slug that
+// names no lesson, so a miss here only happens for a draft lesson.
+const readFirst = data.relatedLessons.flatMap(
+  (slug) => lessons.find((l) => l.slug === slug) ?? [],
+);
+const courseCode = data.course.toUpperCase().replace('-', ' ');
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="mx-auto w-full max-w-3xl px-4 py-10">
+    <p class="text-sm font-medium uppercase tracking-wide text-accent">
+      <a href={`/${data.course}#case-studies`} class="hover:underline"
+        >{courseCode} case study</a
+      > · {data.topic}
+    </p>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight">{data.title}</h1>
+    <p class="mt-3 max-w-measure text-ink-muted">{data.summary}</p>
+
+    <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
+      <span>⏱ {data.estimatedMinutes} min</span>
+      {data.dataThrough && <span>Data through {data.dataThrough}</span>}
+    </div>
+
+    {
+      readFirst.length > 0 && (
+        <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+            Read first
+          </h2>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            {readFirst.map((l) => (
+              <li>
+                <a href={`/lessons/${l.slug}`} class="text-accent underline">
+                  {l.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <div class="prose mt-10">
+      <slot />
+    </div>
+
+    <section class="mt-12 border-t border-slate-200 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+        Sources
+      </h2>
+      <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+        {
+          data.sources.map((s) => (
+            <li>
+              <a href={s.url} class="text-accent underline">
+                {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    {
+      data.quizSlug && (
+        <p class="mt-8">
+          <a
+            href={`/practice/${data.quizSlug}`}
+            class="inline-block rounded bg-accent px-4 py-2 font-medium text-white hover:bg-accent-strong"
+          >
+            Practice quiz →
+          </a>
+        </p>
+      )
+    }
+
+    <nav
+      class="mt-8 grid gap-3 border-t border-slate-200 pt-6 md:grid-cols-2"
+      aria-label="Case study navigation"
+    >
+      {
+        prev ? (
+          <a
+            href={`/cases/${prev.slug}`}
+            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
+          >
+            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+              ← Previous case
+            </span>
+            <span class="mt-1 font-medium text-ink">{prev.data.title}</span>
+          </a>
+        ) : (
+          <a
+            href={`/${data.course}#case-studies`}
+            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5"
+          >
+            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+              ← All case studies
+            </span>
+            <span class="mt-1 font-medium text-ink">{courseCode}</span>
+          </a>
+        )
+      }
+      {
+        next && (
+          <a
+            href={`/cases/${next.slug}`}
+            class="group flex flex-col rounded-lg border border-slate-200 px-4 py-3 transition hover:border-accent hover:bg-accent/5 md:items-end md:text-right"
+          >
+            <span class="text-xs uppercase tracking-wide text-ink-muted group-hover:text-accent">
+              Next case →
+            </span>
+            <span class="mt-1 font-medium text-ink">{next.data.title}</span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</BaseLayout>

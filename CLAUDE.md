@@ -19,6 +19,17 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 ## Where things live
 
 - Lessons: `src/content/lessons/<course>/<slug>.mdx`
+- Case studies (2026-11-25): `src/content/cases/<course>/<slug>.mdx`, the
+  `cases` collection in `config.ts`. A case works one real episode or company
+  through with data and a simulation. Page `src/pages/cases/[...slug].astro`
+  with `src/layouts/CaseLayout.astro`; listed in the "Case studies" block of
+  `src/pages/fin-3610/index.astro`. A case is not a lesson: no progress
+  tracking, no tutor, no place in the unit order. Its quiz is an ordinary quiz
+  file that sets `caseSlug` instead of `lessonSlug`. Calculations and data
+  live in `src/lib/cases/` (pure, alias-free, unit-tested); data files are
+  built by `scripts/cases/*.ts` from downloads that are not committed.
+  `src/lib/cases/content.test.ts` fails on a case whose lesson or quiz slug
+  names no file
 - Quizzes: `src/content/quizzes/<slug>.json`
 - Content schemas (frontmatter + quiz shape): `src/content/config.ts`
 - Visualizations: `src/components/viz/`
@@ -273,7 +284,7 @@ CI config: `.github/workflows/ci.yml`. Four jobs:
     then the files in the order `ci.yml` lists them.
 
 - **`copyright-gate`** — runs `node scripts/check-copyright.mjs` over
-  lesson MDX + quiz JSON (flags missing `credit`, external/hotlinked
+  lesson and case MDX + quiz JSON (flags missing `credit`, external/hotlinked
   images, `materials/` references). Also **advisory**; the deeper,
   on-demand AI review is the `/copyright-check` skill (see "New lesson
   figure" under Common tasks).
@@ -639,6 +650,13 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   as a template; pick a unique `order:` within the course.
 - **New quiz**: add JSON under `src/content/quizzes/`. The slug must match
   `quizSlug:` in the lesson frontmatter to link them.
+- **New case study**: add MDX under `src/content/cases/<course>/` (copy
+  `yield-curve.mdx`): the question, the data, the calculation once by hand,
+  the simulation, takeaways, limits. List `sources` in the frontmatter, name
+  the lessons to read first in `relatedLessons`, and add a quiz whose
+  `caseSlug` is the case's slug. Every number in the text must come from the
+  case's data file or a cited filing; recompute quiz answers from the data.
+  Use only sources in `accepted-sources.md`.
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
   self-contained, accept props for any tunable parameters, default to a
   calibrated baseline, include a "Reset" affordance for sliders. Wrap the
@@ -713,9 +731,10 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `progress-aggregate.ts` / `roster-csv.ts` / `roster-export.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
-   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
+   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts` /
+   `cases/yield-curve.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 261 tests as of 2026-11-25.
+   when adding testable logic. 280 tests as of 2026-11-25.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

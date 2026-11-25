@@ -12,6 +12,8 @@ signed-in students keep their progress.
 
 - **Lessons**: MDX lessons with math (KaTeX) and interactive charts (bond
   pricing, the efficient frontier, WACC, credit spreads and others).
+- **Case studies**: real episodes and companies worked through with data and
+  a simulation, each with a practice quiz.
 - **Practice quizzes**: answers never reach the browser; the server grades
   each attempt.
 - **Workshops**: weekly small-group sessions. Students stamp in during an
@@ -59,6 +61,7 @@ and the auth email settings.
 | Path                            | Purpose                                                                      |
 | ------------------------------- | ---------------------------------------------------------------------------- |
 | `src/content/lessons/fin-3610/` | Lessons (MDX). Frontmatter is typed in `src/content/config.ts`.              |
+| `src/content/cases/fin-3610/`   | Case studies (MDX): a real episode or company, with data and a simulation.   |
 | `src/content/quizzes/`          | Quiz banks (JSON), checked against the same config file.                     |
 | `src/content/workshops/`        | Workshop question sets (JSON).                                               |
 | `src/components/viz/`           | Interactive charts (React islands, Recharts).                                |

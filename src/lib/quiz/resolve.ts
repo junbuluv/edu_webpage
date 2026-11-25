@@ -13,6 +13,7 @@ export interface GradableQuiz {
   questions: QuestionT[];
   passingScore: number;
   lessonSlug?: string;
+  caseSlug?: string;
   furtherReading?: {
     title: string;
     url: string;
@@ -42,6 +43,7 @@ export async function loadGradableQuiz(
       questions: d.questions,
       passingScore: d.passingScore,
       lessonSlug: d.lessonSlug,
+      caseSlug: d.caseSlug,
       furtherReading: d.furtherReading,
     };
   }
