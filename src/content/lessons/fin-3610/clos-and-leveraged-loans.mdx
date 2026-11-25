@@ -1,0 +1,362 @@
+---
+title: 'CLOs: How Leveraged Loans Are Funded'
+course: fin-3610
+unit: 'Credit markets and private equity'
+order: 31
+summary: 'How a collateralized loan obligation turns a pool of risky corporate loans into notes rated from AAA down to BB, plus an unrated equity tranche: the order of payments, the coverage tests, what protects the senior notes, and what the equity earns.'
+learningObjectives:
+  - 'Compute the loss on a loan pool from its default and recovery rates, and allocate it to tranches from the bottom up.'
+  - 'Explain the order of interest and principal payments and what a failed coverage test changes.'
+  - 'Explain why AAA notes can be backed by B-rated loans, and why defaults that arrive together break that protection.'
+  - 'Compute the income of the equity tranche as loan interest minus fees and note interest.'
+prerequisites:
+  - 'Credit risk and spreads.'
+  - 'Private equity and LBOs (prior lesson).'
+estimatedMinutes: 30
+tags: ['fin-3610', 'CLO', 'leveraged loans', 'securitization', 'credit risk']
+quizSlug: 'fin-3610-clos-and-leveraged-loans'
+draft: false
+---
+
+import CLOWaterfall from '@components/viz/CLOWaterfall';
+
+## A company that only owns loans
+
+A company bought in a leveraged buyout borrows a large part of its
+purchase price, the subject of the lesson on private equity and LBOs.
+This lesson follows that loan to its most common owner.
+
+A **collateralized loan obligation (CLO)** is a company with one
+activity. It buys loans to roughly 200 companies and pays for them by
+selling its own notes, which are bonds. An asset management firm, the
+CLO manager, picks the loans and is paid a fee out of the pool. The
+notes come in layers called **tranches**, ranked from AAA at the top
+down to an unrated equity tranche at the bottom. Turning a pool of
+loans into ranked securities this way is called **securitization**.
+
+Cash from the loans is paid out from the top down. If the loans do not
+pay enough, the tranche paid last falls short first, so losses climb
+from the bottom up.
+
+Two equations describe the losses. If a fraction $d$ of the pool
+defaults over the life of the deal, and lenders recover a fraction $R$
+of each defaulted loan, the pool loses a fraction
+
+$$
+L = d \times (1 - R)
+$$
+
+of its principal. Let tranche $i$ have size $S_i$, and let the tranches
+ranked below it add up to $A_i$, both as fractions of the pool. Its
+loss is
+
+$$
+\text{loss}_i = \min\bigl(S_i,\ \max(0,\ L - A_i)\bigr).
+$$
+
+The tranche loses nothing while $L$ is below $A_i$, loses dollar for
+dollar after that, and is wiped out once $L$ reaches $A_i + S_i$. The
+cushion $A_i$ is the tranche's **subordination**: what has to burn
+before the tranche is touched. This loss is a fraction of the pool.
+Divide it by $S_i$ for the share of the tranche's own principal that
+is lost.
+
+The first equation is the expected-loss logic from
+[Credit Risk and Spreads](/lessons/fin-3610/credit-risk-and-spreads),
+applied to a pool. There $p$ was one bond's chance of default in a
+year. Here $d$ is the share of the whole pool that defaults over the
+deal's life, and $R$ is the recovery rate written $\delta$ there.
+
+This lesson uses one illustrative funding mix throughout:
+
+| Tranche | Share of funding $S_i$ | Subordination $A_i$ |
+| ------- | ---------------------- | ------------------- |
+| AAA     | 62%                    | 38%                 |
+| AA      | 12%                    | 26%                 |
+| A       | 6%                     | 20%                 |
+| BBB     | 6%                     | 14%                 |
+| BB      | 5%                     | 9%                  |
+| Equity  | 9%                     | 0%                  |
+
+Suppose 20% of the loans default and lenders recover 65% of each.
+Then $L = 0.20 \times 0.35 = 7\%$. The equity tranche loses
+$7 / 9 = 78\%$ of its principal, and every note is repaid in full.
+
+<CLOWaterfall client:visible />
+
+_Baseline: 20% cumulative defaults and 65% recovery, both illustrative,
+giving the 7% pool loss above. Raise defaults to 100% at 65% recovery:
+the pool loses 35%, short of the 38% cushion, so the AAA notes are
+still whole. Then lower the recovery rate and watch the loss reach
+them._
+
+The mix is illustrative but close to reported averages. Federal
+Reserve staff describe the equity as typically less than 10% of a deal
+(DeMarco, Liu, and Schmidt-Eisenlohr 2020). In U.S. CLOs issued from
+2010 to 2019, AAA notes averaged 61% of the funding and all notes
+together 89% (Cordell, Roberts, and Schwert 2021).
+
+## What the pool holds: leveraged loans
+
+A **leveraged loan** is a loan to a company that already carries a lot
+of debt. Three features define it:
+
+- **Floating rate.** The borrower pays a benchmark rate plus a fixed
+  spread, reset every few months. In the U.S. the benchmark is SOFR
+  (the Secured Overnight Financing Rate), which replaced LIBOR
+  in 2023. A loan at SOFR + 3.5% pays 7.5% when SOFR is 4%.
+- **Senior secured.** The lenders hold a first claim on the borrower's
+  assets, so in a bankruptcy they are paid before unsecured
+  bondholders.
+- **Below investment grade.** The borrower is rated BB+ or lower, the
+  speculative side of the line drawn in Credit Risk and Spreads, or is
+  not rated at all.
+
+Companies bought by private equity firms are typical borrowers. Banks
+arrange the loans and sell them on, and CLOs are the main buyers. A
+2019 Federal Reserve staff note reports that U.S. CLOs account for
+about half of U.S. leveraged loans outstanding, with \$617 billion of
+CLO securities outstanding at the end of 2018 (Liu and
+Schmidt-Eisenlohr 2019).
+
+Cordell, Roberts, and Schwert (2021) describe the typical pool. It
+holds floating-rate, senior secured loans with original maturities of
+five to seven years, made to 150 to 250 different borrowers. The deal
+contract caps any one company at 2% of the pool and any one industry
+at 15%. In deals issued since 2010, the median loan is rated B.
+
+The CLO's own notes also pay a floating rate. A rise in SOFR raises
+what the CLO collects and what it owes by about the same amount, so
+the deal carries credit risk and very little interest rate risk. That
+risk has not vanished. It sits with the borrowers, whose interest bill
+rises with SOFR.
+
+## The order of payments
+
+Every quarter the CLO collects interest from its loans and pays it out
+in a fixed order called the **waterfall**:
+
+1. Administrative expenses and the manager's senior fee.
+2. Interest on the AAA notes, then AA, A, BBB, and BB, in that order.
+3. The manager's subordinated fee.
+4. Whatever is left, to the equity tranche.
+
+Principal follows the same ranking with a difference in timing. For
+the first four to five years, called the reinvestment period, the
+manager uses principal repaid by borrowers to buy new loans. After
+that, repaid principal retires the notes from the top down: AAA first,
+equity last (Cordell, Roberts, and Schwert 2021).
+
+Each tranche is paid only after everything above it is paid in full.
+Senior notes therefore have the safest claim and the lowest interest
+rate. Equity has no promised payment at all.
+
+Each layer has its own buyers. Of the CLO securities held by U.S.
+banks at the end of 2018, 95% were senior notes (DeMarco, Liu, and
+Schmidt-Eisenlohr 2020). Capital rules make low-rated assets costly
+for banks and insurers to hold, so a AAA note backed by risky loans
+suits them where the loans themselves would not (Cordell, Roberts, and
+Schwert 2021). Hedge funds and the CLO managers themselves are typical
+holders of the riskiest notes and the equity (Liu and
+Schmidt-Eisenlohr 2019).
+
+## Coverage tests
+
+The waterfall has tripwires called **coverage tests**. The main one is
+the overcollateralization (OC) test, run for each class of notes. It
+divides the principal of the loan pool by the principal of that class
+and every class above it:
+
+$$
+\text{OC}_i = \frac{\text{loan pool}}{\text{notes at or above } i}.
+$$
+
+The deal contract sets a minimum for each class. Take the illustrative
+mix on a \$500 million pool, so the notes from AAA through BB total
+\$455 million, and suppose the BB minimum is 105% (illustrative). At
+the start $\text{OC}_{BB} = 500 / 455 = 109.9\%$, and the test passes.
+
+Defaulted loans are counted below face value. Suppose \$60 million of
+loans default and the contract counts them at half of face value until
+the actual recovery is known. The pool now counts as \$470 million,
+and $\text{OC}_{BB} = 470 / 455 = 103.3\%$. The test fails.
+
+A failed test changes the waterfall. Interest that would have flowed
+to the claims below the failed test is used to repay principal on the
+most senior notes until the test passes again. Here the notes must
+shrink to $470 / 1.05 = 447.6$ million. So \$7.4 million of interest
+that would have gone to the subordinated fee and the equity is paid to
+the AAA holders instead, over as many quarters as it takes. An
+interest coverage test works the same way, comparing interest
+collected with interest owed.
+
+Coverage tests make the deal pay down its own debt when the pool gets
+worse, before losses reach the notes. The cost falls on the equity. In
+the 2008 financial crisis, payments to equity fell to zero in the
+majority of CLOs for this reason (Cordell, Roberts, and Schwert 2021).
+
+## Why AAA notes can sit on B-rated loans
+
+No loan in the pool is rated anywhere near AAA. The rating on the
+senior notes comes from the structure, through three protections:
+
+- **Diversification.** With 200 equal loans, one default costs the
+  pool $0.5\% \times (1 - R)$. No single borrower can sink the deal.
+- **Subordination.** In the illustrative mix, 38% of the funding
+  absorbs losses before the AAA notes lose a dollar.
+- **Excess interest.** The loans pay more interest than the notes
+  cost, and the coverage tests turn that surplus into repayment of
+  senior notes when the pool weakens.
+
+The record so far supports the rating. Of 1,250 AAA-rated CLO tranches
+issued from 1997 to 2009, none had defaulted by March 2021, a period
+that includes the 2008 crisis. Of the tranches rated BB or B from
+those years, 3.33% defaulted (Cordell, Roberts, and Schwert 2021,
+compiled from rating-agency reports).
+
+### What breaks it: defaults that arrive together
+
+Diversification works only if loans default for separate reasons. Give
+each of 200 loans a 20% chance of defaulting over the deal's life
+(illustrative). If the defaults are independent, the pool's default
+rate $d$ has a mean of 20% and a standard deviation of
+
+$$
+\sqrt{\frac{0.20 \times 0.80}{200}} = 2.8\%.
+$$
+
+Two standard deviations either way puts $d$ between 14.3% and 25.7%.
+At 65% recovery the pool loss stays between 5.0% and 9.0%: the bad end
+uses up the equity tranche and stops there. Wiping out the BB tranche
+as well ($L = 14\%$) would take $d = 40\%$, seven standard deviations
+above the mean.
+
+Now suppose one shock, such as a deep recession, decides the fate of
+all 200 borrowers at once. The average default rate is still 20%, but
+it arrives as an 80% chance of no defaults and a 20% chance that every
+loan defaults. In the bad case $L = 35\%$ at 65% recovery: the equity,
+BB, BBB, and A tranches are wiped out, and the AA tranche loses 75% of
+its principal. Recoveries also tend to fall when many firms fail
+together. At 40% recovery $L = 60\%$, and the AAA notes lose
+$(60 - 38) / 62 = 35\%$ of their principal.
+
+Real pools sit between these two cases. The borrowers are in different
+industries, but they are all heavily indebted companies paying
+floating rates in the same economy. The AAA rating therefore rests on
+an estimate of how correlated the loans are, and that correlation
+cannot be observed directly. Loan quality matters too. Loans without
+maintenance covenants, the financial tests a borrower must keep
+passing, rose from 20% of leveraged loans in 2012 to 80% in 2018.
+Weaker terms delay defaults but raise the loss when one comes (BIS
+2019).
+
+## What the equity tranche earns
+
+The equity tranche has no promised interest. It receives what is left:
+
+$$
+\begin{aligned}
+\text{equity income} = {} & \text{loan interest} - \text{fees} \\
+& - \text{note interest}.
+\end{aligned}
+$$
+
+Take a \$500 million pool funded with the illustrative mix, so the
+equity is \$45 million. The loans pay SOFR + 3.5%, and SOFR is 4%.
+Fees are 0.5% of the pool a year, a typical total for the manager's
+senior and subordinated fees (Cordell, Roberts, and Schwert 2021). The
+note spreads below are illustrative.
+
+| Notes     | Size (\$ millions) | Rate                | Interest (\$ millions) |
+| --------- | ------------------ | ------------------- | ---------------------- |
+| AAA       | 310                | SOFR + 1.3% = 5.3%  | 16.430                 |
+| AA        | 60                 | SOFR + 1.8% = 5.8%  | 3.480                  |
+| A         | 30                 | SOFR + 2.3% = 6.3%  | 1.890                  |
+| BBB       | 30                 | SOFR + 3.3% = 7.3%  | 2.190                  |
+| BB        | 25                 | SOFR + 6.5% = 10.5% | 2.625                  |
+| All notes | 455                |                     | 26.615                 |
+
+In millions of dollars:
+
+- Loan interest: $7.5\% \times 500 = 37.5$.
+- Fees: $0.5\% \times 500 = 2.5$.
+- Note interest: $26.615$.
+- Equity income: $37.5 - 2.5 - 26.615 = 8.385$, a cash yield of
+  $8.385 / 45 = 18.6\%$.
+
+That 18.6% is before any loan loses money. Equity is 9% of the funding
+and takes the first loss, so each 1% of the pool that is lost costs
+the equity $1 / 0.09 = 11$ percentage points. If 2% of the loans
+default in a year and 65% is recovered, the pool loses 0.7%, which is
+\$3.5 million. The equity's return after losses that year is
+$(8.385 - 3.5) / 45 = 10.9\%$.
+
+Kept up for ten years, that pace is the chart's baseline: 20%
+cumulative defaults, a 7% pool loss, and 78% of the equity's principal
+gone. The equity's bar in the chart looks grim, but its holders were
+paid interest every year along the way.
+
+The return comes from a gap you met in Credit Risk and Spreads. Risky
+loans pay a spread larger than their expected loss, while most of the
+CLO's funding is AAA debt that pays a small spread. Equity holders
+collect the gap on about 11 dollars of loans for every dollar they put
+in, and they bear the first loss on all of it. That is leveraged
+credit risk.
+
+Among CLOs issued from 1997 to 2016 and fully repaid by March 2021,
+the equity tranche earned an average internal rate of return of 9.9%
+after fees: 13.0% in deals issued before 2010 and 4.9% in later ones.
+The authors caution that the later figure is likely too low, because
+the recent deals that had already finished were mostly ones liquidated
+early (Cordell, Roberts, and Schwert 2021).
+
+## How this differs from the mortgage CDOs of 2008
+
+The collateralized debt obligations (CDOs) at the center of the 2008
+crisis used the same design: a pool, tranches, and a waterfall. Their
+AAA tranches defaulted widely. CLO AAA tranches did not. A 2019 study
+by the Bank for International Settlements (BIS) points to four
+differences:
+
+- **What is in the pool.** Almost 70% of the assets backing CDOs
+  issued in 2006 were subprime mortgage securities, which are bonds
+  backed by home loans to weak borrowers, and another 15% were other
+  CDOs. Nearly everything depended on U.S. house prices. A CLO holds
+  loans to companies spread across industries.
+- **Layers.** Cut another way, more than 40% of those 2006 assets were
+  not securities at all but credit default swaps, which are side bets
+  on mortgage securities. A CLO holds the actual loans, with little
+  repackaging.
+- **Funding.** Banks held many CDO tranches in off-balance-sheet
+  vehicles financed with short-term borrowing that lenders could pull.
+  Holders of CLO notes rarely borrow short-term against them, and the
+  CLO's own notes are long-term: investors cannot redeem them early
+  (Liu and Schmidt-Eisenlohr 2019).
+- **Cushion.** Junior and middle tranches make up a larger share of a
+  CLO than they did of a pre-crisis subprime CDO. CLOs added more
+  after the crisis: the AAA share of funding fell from 72% in deals
+  issued from 1997 to 2009 to 61% in deals issued from 2010 to 2019
+  (Cordell, Roberts, and Schwert 2021).
+
+The comparison is not a guarantee. The same BIS study warns that the
+safety of senior CLO notes rests on how correlated loan losses turn
+out to be, the weak point described above. A clean record through two
+downturns is evidence, not proof.
+
+## Sources
+
+- Cordell, L., M. Roberts, and M. Schwert (2021), "CLO Performance,"
+  [NBER Working Paper 29410](https://www.nber.org/papers/w29410).
+- DeMarco, L., E. Liu, and T. Schmidt-Eisenlohr (2020),
+  ["Who Owns U.S. CLO Securities? An Update by Tranche,"](https://www.federalreserve.gov/econres/notes/feds-notes/who-owns-us-clo-securities-an-update-by-tranche-20200625.html)
+  FEDS Notes, Board of Governors of the Federal Reserve System.
+- Liu, E., and T. Schmidt-Eisenlohr (2019),
+  ["Who Owns U.S. CLO Securities?"](https://www.federalreserve.gov/econres/notes/feds-notes/who-owns-us-clo-securities-20190719.htm)
+  FEDS Notes, Board of Governors of the Federal Reserve System.
+- Bank for International Settlements (2019),
+  ["Structured finance then and now: a comparison of CDOs and CLOs,"](https://www.bis.org/publ/qtrpdf/r_qt1909w.htm)
+  BIS Quarterly Review, September 2019.
+
+Tranche sizes, pool sizes, loan and note spreads, the SOFR level,
+default rates, recovery rates, and test minimums in the examples are
+illustrative unless a source is named.

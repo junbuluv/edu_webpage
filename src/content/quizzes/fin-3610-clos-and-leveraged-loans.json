@@ -1,0 +1,78 @@
+{
+  "slug": "fin-3610-clos-and-leveraged-loans",
+  "title": "CLOs and leveraged loans",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/clos-and-leveraged-loans",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Over the life of a CLO, 30% of the loans in its pool default, and lenders recover 60% of each defaulted loan. The CLO is funded with 62% AAA notes, 12% AA, 6% A, 6% BBB, 5% BB, and 9% equity. Counting principal losses only, what percent of the BB tranche's principal is lost?",
+      "answer": 60,
+      "tolerance": 0.5,
+      "unit": "%",
+      "explanation": "Pool loss = d × (1 − R) = 0.30 × (1 − 0.60) = 12% of the pool. Losses climb from the bottom. The equity absorbs the first 9 points and is wiped out. The remaining 12 − 9 = 3 points fall on the BB tranche, which is 5 points thick: 3 / 5 = 60%. BBB and above lose nothing.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q2",
+      "prompt": "Loan defaults push a CLO's BB overcollateralization ratio below its required minimum. What happens next?",
+      "choices": [
+        "The CLO must sell its loans immediately and repay every tranche in proportion",
+        "Interest that would have gone to the equity tranche is used to repay principal on the most senior notes until the test passes",
+        "The equity holders must put in new money to restore the ratio",
+        "The AAA notes are downgraded to BB"
+      ],
+      "correctIndex": 1,
+      "explanation": "A failed coverage test redirects cash inside the waterfall: interest headed for the claims below the test repays senior principal until the ratio recovers. Nobody is required to add money, and a failed coverage test alone does not force the CLO to sell loans. The cost falls on the equity, which is why equity payments stopped in most CLOs during the 2008 crisis (Cordell, Roberts, and Schwert 2021).",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "A $400 million CLO holds loans paying 8% a year. It is funded with $360 million of notes that pay 6% on average and $40 million of equity. Fees are 0.5% of the pool a year. Before any loan losses, what is the equity tranche's cash yield in percent?",
+      "answer": 21,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "Loan interest = 8% × 400 = $32.0 million. Fees = 0.5% × 400 = $2.0 million. Note interest = 6% × 360 = $21.6 million. Equity income = 32.0 − 2.0 − 21.6 = $8.4 million, and 8.4 / 40 = 21%. That yield is before losses: equity is one tenth of the funding, so each 1% of the pool that is lost costs it 10 percentage points.",
+      "points": 2
+    },
+    {
+      "type": "multi_select",
+      "id": "q4",
+      "prompt": "Which of the following help explain why a CLO's senior notes can be rated AAA when the loans in the pool are rated around B?",
+      "choices": [
+        "The junior notes and the equity absorb losses before the senior notes do",
+        "The pool holds loans to many borrowers in different industries",
+        "The loans pay more interest than the notes cost, and failed coverage tests use that surplus to repay senior notes",
+        "The CLO manager must cover any shortfall on the senior notes"
+      ],
+      "correctIndices": [0, 1, 2],
+      "explanation": "Subordination, diversification, and excess interest protect the senior notes. The manager guarantees nothing: noteholders can look only to the loan pool.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "Two CLOs each hold 200 loans. In both, each loan has a 20% chance of defaulting, and lenders recover 50% of a defaulted loan. Both are funded with 62% AAA notes above a 38% cushion. In CLO A the loans default independently. In CLO B one shock decides whether all of the loans default or none do. Counting principal losses only, which statement is correct?",
+      "choices": [
+        "CLO B has the higher expected pool loss",
+        "Both have the same expected pool loss, but the AAA notes face a 20% chance of losing principal in CLO B and almost none in CLO A",
+        "The AAA notes are equally safe in both, because the cushion is the same",
+        "CLO A is riskier for the AAA notes, because 200 separate things can go wrong"
+      ],
+      "correctIndex": 1,
+      "explanation": "Expected pool loss is 20% × (1 − 50%) = 10% in both. In CLO A the default rate stays close to 20% (its standard deviation is 2.8 points), so the loss stays near 10%, far below the 38% cushion. In CLO B there is a 20% chance that every loan defaults: a 50% loss that burns through the cushion and costs the AAA notes (50 − 38) / 62 = 19% of their principal. The cushion is the same. The correlation is what differs.",
+      "points": 1
+    }
+  ],
+  "furtherReading": {
+    "title": "Who Owns U.S. CLO Securities? An Update by Tranche",
+    "url": "https://www.federalreserve.gov/econres/notes/feds-notes/who-owns-us-clo-securities-an-update-by-tranche-20200625.html",
+    "source": "Federal Reserve Board, FEDS Notes",
+    "why": "Federal Reserve staff trace which investors hold each layer of a CLO, from banks in the senior notes to investment funds in the riskier layers, and ask who would bear the losses in a downturn.",
+    "date": "2020-06"
+  }
+}
