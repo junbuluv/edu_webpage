@@ -719,6 +719,32 @@ begin
   end;
 end $$;
 
+-- The read policy also matches on course. One allowed course cannot show
+-- that, so for the next block only, instructor 202 gets a window in another
+-- course for the same semester as student 105's class: without the course
+-- predicate, 105 would see two windows instead of one. The one-course checks
+-- step aside while these two rows exist (the block only reads) and are added
+-- back, validated, as soon as the rows are gone.
+reset role;
+alter table public.teaching_assignments
+  drop constraint teaching_assignments_course_slug_check;
+alter table public.workshop_administrations
+  drop constraint workshop_admins_course_check;
+insert into public.teaching_assignments (
+  instructor_id, course_slug, semester, active, assigned_by
+) values (
+  '00000000-0000-0000-0000-000000000202', 'other-0000', 'fall-2026', true,
+  '00000000-0000-0000-0000-000000000204'
+);
+insert into public.workshop_administrations (
+  workshop_slug, course_slug, semester, week_of,
+  instructor_id, opens_at, closes_at
+) values (
+  'other-0000-rls-fixture', 'other-0000', 'fall-2026', '2026-07-13',
+  '00000000-0000-0000-0000-000000000202',
+  '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00'
+);
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000105', true);
 do $$
@@ -761,6 +787,20 @@ begin
     raise exception 'second-instructor student could read the other instructor workshop row';
   end if;
 end $$;
+
+reset role;
+delete from public.workshop_administrations
+ where workshop_slug = 'other-0000-rls-fixture';
+update public.teaching_assignments
+   set active = false
+ where course_slug = 'other-0000';
+delete from public.teaching_assignments where course_slug = 'other-0000';
+alter table public.teaching_assignments
+  add constraint teaching_assignments_course_slug_check
+  check (course_slug in ('fin-3610'));
+alter table public.workshop_administrations
+  add constraint workshop_admins_course_check
+  check (course_slug in ('fin-3610'));
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000103', true);

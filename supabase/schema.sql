@@ -124,71 +124,101 @@ end $$;
 --   3. every CHECK that still names 'eco-1002'.
 -- This runs before anything else touches those tables, so the rest of the
 -- script can assume one course and simply (re)create the current rules. Once
--- the retired objects are gone, and on a fresh database, the block returns at
--- once. Tables are checked with nested to_regclass calls because PL/pgSQL
--- plans a whole IF condition at once. audit_log is left alone: audit history
--- is never rewritten. Stored archive paper files are not touched either;
+-- archive_videos and the workshop_section type are gone, and on a fresh
+-- database, the block returns at once. Tables are checked with nested to_regclass calls because PL/pgSQL
+-- plans a whole IF condition at once. Existing audit_log rows are left alone
+-- (audit history is never rewritten); the block adds one row recording how
+-- many rows it deleted. Stored archive paper files are not touched either;
 -- production had no ECO 1002 papers on 2026-11-25.
 do $$
 declare
   r record;
+  v_n integer;
+  v_more integer;
+  v_counts jsonb := '{}'::jsonb;
 begin
+  -- Both markers exist only on the two-course schema. The `section` columns
+  -- are deliberately not part of this test: a later column that happens to
+  -- carry that name must not be mistaken for the retired one.
   if pg_catalog.to_regclass('public.archive_videos') is null
-     and pg_catalog.to_regtype('public.workshop_section') is null
-     and not exists (
-       select 1
-         from pg_catalog.pg_attribute a
-        where a.attrelid in (
-                pg_catalog.to_regclass('public.enrollments'),
-                pg_catalog.to_regclass('public.workshop_administrations')
-              )
-          and a.attname = 'section'
-          and not a.attisdropped
-     ) then
+     and pg_catalog.to_regtype('public.workshop_section') is null then
     return;
   end if;
 
   -- 1. Rows, in an order the foreign keys allow. Attendance rows go with
-  -- their workshop window (on delete cascade).
+  -- their workshop window (on delete cascade). Each count is kept for the
+  -- audit row written below.
   if pg_catalog.to_regclass('public.workshop_administrations') is not null then
+    if pg_catalog.to_regclass('public.workshop_attendance') is not null then
+      select count(*) into v_n
+        from public.workshop_attendance a
+        join public.workshop_administrations w on w.id = a.administration_id
+       where w.course_slug = 'eco-1002' or w.workshop_slug like 'eco-1002-%';
+      v_counts := v_counts || jsonb_build_object('workshop_attendance', v_n);
+    end if;
     delete from public.workshop_administrations
      where course_slug = 'eco-1002' or workshop_slug like 'eco-1002-%';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('workshop_administrations', v_n);
   end if;
   if pg_catalog.to_regclass('public.enrollments') is not null then
     delete from public.enrollments where course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('enrollments', v_n);
   end if;
   if pg_catalog.to_regclass('public.offering_lesson_progress') is not null then
     delete from public.offering_lesson_progress
      where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('offering_lesson_progress', v_n);
   end if;
   if pg_catalog.to_regclass('public.quiz_attempts') is not null then
     delete from public.quiz_attempts
      where course_slug = 'eco-1002' or quiz_slug like 'eco-1002-%';
+    get diagnostics v_n = row_count;
     -- Attempts on instructor-authored ECO quizzes are stored under the
     -- quiz's id, not an eco-1002- slug.
     if pg_catalog.to_regclass('public.archive_quizzes') is not null then
       delete from public.quiz_attempts q
        using public.archive_quizzes a
        where a.course_slug = 'eco-1002' and q.quiz_slug = a.id::text;
+      get diagnostics v_more = row_count;
+      v_n := v_n + v_more;
     end if;
+    v_counts := v_counts || jsonb_build_object('quiz_attempts', v_n);
   end if;
   if pg_catalog.to_regclass('public.lesson_progress') is not null then
     delete from public.lesson_progress
      where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('lesson_progress', v_n);
   end if;
   if pg_catalog.to_regclass('public.tutor_messages') is not null then
     delete from public.tutor_messages
      where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('tutor_messages', v_n);
   end if;
   if pg_catalog.to_regclass('public.archive_papers') is not null then
     delete from public.archive_papers where course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('archive_papers', v_n);
   end if;
   if pg_catalog.to_regclass('public.archive_paper_upload_intents') is not null then
     delete from public.archive_paper_upload_intents
      where course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts
+      || jsonb_build_object('archive_paper_upload_intents', v_n);
   end if;
   if pg_catalog.to_regclass('public.archive_quizzes') is not null then
     delete from public.archive_quizzes where course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('archive_quizzes', v_n);
+  end if;
+  if pg_catalog.to_regclass('public.archive_videos') is not null then
+    select count(*) into v_n from public.archive_videos;
+    v_counts := v_counts || jsonb_build_object('archive_videos', v_n);
   end if;
   -- Assignments last (the rows above reference them), and inactive first:
   -- a trigger refuses to delete an active assignment.
@@ -197,11 +227,26 @@ begin
        set active = false
      where course_slug = 'eco-1002' and active;
     delete from public.teaching_assignments where course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts || jsonb_build_object('teaching_assignments', v_n);
   end if;
   if pg_catalog.to_regclass('public.profiles') is not null then
     update public.profiles
        set active_course_slug = null
      where active_course_slug = 'eco-1002';
+    get diagnostics v_n = row_count;
+    v_counts := v_counts
+      || jsonb_build_object('profiles_active_course_cleared', v_n);
+  end if;
+  -- One audit row for the whole removal, counts only, in the same form the
+  -- retention jobs use for their own deletions.
+  if pg_catalog.to_regclass('public.audit_log') is not null then
+    insert into public.audit_log (
+      actor_id, actor_role, action, target_resource, metadata
+    ) values (
+      null, null, 'system_retire_course', 'eco-1002',
+      jsonb_build_object('deleted', v_counts)
+    );
   end if;
 
   -- 2. Per-day sections. The read policy and the scope trigger name the
@@ -600,13 +645,12 @@ create table if not exists public.teaching_assignments (
   check (course_slug in ('fin-3610')),
   check (char_length(semester) between 1 and 64)
 );
--- A database that had the two-course check lost it in the ECO 1002 block at
--- the top; a fresh one already has it under this name from the line above.
-do $$ begin
-  alter table public.teaching_assignments
-    add constraint teaching_assignments_course_slug_check
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+-- Course checks are dropped and re-added on every run (here and next to
+-- each table below), so that editing the list reaches an existing database:
+-- the inline check above only shapes a fresh one.
+alter table public.teaching_assignments drop constraint if exists teaching_assignments_course_slug_check;
+alter table public.teaching_assignments
+  add constraint teaching_assignments_course_slug_check check (course_slug in ('fin-3610'));
 
 create index if not exists teaching_assignments_course_term_idx
   on public.teaching_assignments (course_slug, semester, active);
@@ -701,11 +745,9 @@ update public.lesson_progress
   set course_slug = split_part(lesson_slug, '/', 1)
   where course_slug is null
     and split_part(lesson_slug, '/', 1) in ('fin-3610');
-do $$ begin
-  alter table public.lesson_progress
-    add constraint lesson_progress_course_chk
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.lesson_progress drop constraint if exists lesson_progress_course_chk;
+alter table public.lesson_progress
+  add constraint lesson_progress_course_chk check (course_slug in ('fin-3610'));
 create index if not exists lesson_progress_user_course_idx
   on public.lesson_progress (user_id, course_slug, updated_at desc);
 drop index if exists public.lesson_progress_offering_idx;
@@ -756,11 +798,9 @@ update public.quiz_attempts
     when quiz_slug like 'fin-3610-%' then 'fin-3610'
   end
   where course_slug is null;
-do $$ begin
-  alter table public.quiz_attempts
-    add constraint quiz_attempts_course_chk
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.quiz_attempts drop constraint if exists quiz_attempts_course_chk;
+alter table public.quiz_attempts
+  add constraint quiz_attempts_course_chk check (course_slug in ('fin-3610'));
 do $$ begin
   alter table public.quiz_attempts
     add constraint quiz_attempts_scope_chk
@@ -901,11 +941,9 @@ alter table public.enrollments
   foreign key (instructor_id, course_slug, semester)
   references public.teaching_assignments (instructor_id, course_slug, semester)
   on update restrict on delete restrict;
-do $$ begin
-  alter table public.enrollments
-    add constraint enrollments_course_check
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.enrollments drop constraint if exists enrollments_course_check;
+alter table public.enrollments
+  add constraint enrollments_course_check check (course_slug in ('fin-3610'));
 do $$ begin
   alter table public.enrollments
     add constraint enrollments_semester_check
@@ -937,11 +975,9 @@ create table if not exists public.offering_lesson_progress (
       instructor_id, course_slug, semester
     ) on update restrict on delete restrict
 );
-do $$ begin
-  alter table public.offering_lesson_progress
-    add constraint offering_lesson_progress_course_slug_check
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.offering_lesson_progress drop constraint if exists offering_lesson_progress_course_slug_check;
+alter table public.offering_lesson_progress
+  add constraint offering_lesson_progress_course_slug_check check (course_slug in ('fin-3610'));
 
 -- Projects that applied the prior scoped-progress schema still have the
 -- legacy semester/instructor columns. Copy those exact rows before removing
@@ -2686,11 +2722,9 @@ create table if not exists public.archive_paper_upload_intents (
   check (expires_at > created_at),
   check ((state = 'finalized') = (finalized_at is not null))
 );
-do $$ begin
-  alter table public.archive_paper_upload_intents
-    add constraint archive_paper_upload_intents_course_slug_check
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.archive_paper_upload_intents drop constraint if exists archive_paper_upload_intents_course_slug_check;
+alter table public.archive_paper_upload_intents
+  add constraint archive_paper_upload_intents_course_slug_check check (course_slug in ('fin-3610'));
 
 create index if not exists archive_paper_upload_intents_expiry_idx
   on public.archive_paper_upload_intents (state, expires_at);
@@ -3067,14 +3101,12 @@ alter table public.archive_quizzes enable row level security;
 
 -- Backstop: restrict archive content to known course slugs (defense-in-depth;
 -- the create routes also validate). Idempotent.
-do $$ begin
-  alter table public.archive_papers
-    add constraint archive_papers_course_chk check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
-do $$ begin
-  alter table public.archive_quizzes
-    add constraint archive_quizzes_course_chk check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.archive_papers drop constraint if exists archive_papers_course_chk;
+alter table public.archive_papers
+  add constraint archive_papers_course_chk check (course_slug in ('fin-3610'));
+alter table public.archive_quizzes drop constraint if exists archive_quizzes_course_chk;
+alter table public.archive_quizzes
+  add constraint archive_quizzes_course_chk check (course_slug in ('fin-3610'));
 
 alter table public.archive_papers
   drop constraint if exists archive_papers_input_check;
@@ -4052,11 +4084,9 @@ create table if not exists public.tutor_messages (
   reasoning_tokens integer check (reasoning_tokens >= 0),
   created_at timestamptz not null default now()
 );
-do $$ begin
-  alter table public.tutor_messages
-    add constraint tutor_messages_course_slug_check
-    check (course_slug in ('fin-3610'));
-exception when duplicate_object then null; end $$;
+alter table public.tutor_messages drop constraint if exists tutor_messages_course_slug_check;
+alter table public.tutor_messages
+  add constraint tutor_messages_course_slug_check check (course_slug in ('fin-3610'));
 
 create index if not exists tutor_messages_user_created_idx
   on public.tutor_messages (user_id, created_at desc);

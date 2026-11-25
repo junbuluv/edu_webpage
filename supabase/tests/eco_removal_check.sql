@@ -63,6 +63,36 @@ begin
     raise exception 'a FIN 3610 active-course preference was cleared';
   end if;
 
+  -- One audit row records the removal, with the number of rows deleted.
+  if (
+    select count(*) from public.audit_log
+     where action = 'system_retire_course' and target_resource = 'eco-1002'
+  ) <> 1 then
+    raise exception 'expected exactly one audit row for the removal';
+  end if;
+  if (
+    select metadata -> 'deleted' from public.audit_log
+     where action = 'system_retire_course'
+  ) is distinct from jsonb_build_object(
+    'workshop_attendance', 1,
+    'workshop_administrations', 2,
+    'enrollments', 3,
+    'offering_lesson_progress', 1,
+    'quiz_attempts', 3,
+    'lesson_progress', 2,
+    'tutor_messages', 1,
+    'archive_papers', 1,
+    'archive_paper_upload_intents', 2,
+    'archive_quizzes', 1,
+    'archive_videos', 1,
+    'teaching_assignments', 2,
+    'profiles_active_course_cleared', 1
+  ) then
+    raise exception 'the removal audit row has unexpected counts: %',
+      (select metadata from public.audit_log
+        where action = 'system_retire_course');
+  end if;
+
   -- Per-day sections and lecture videos are gone.
   if exists (
     select 1 from information_schema.columns
