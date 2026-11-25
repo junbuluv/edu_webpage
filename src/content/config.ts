@@ -198,6 +198,8 @@ const cases = defineCollection({
     sources: z
       .array(z.object({ name: z.string(), url: z.string().url() }))
       .min(1),
+    // Set on a case that extends another, e.g. "fin-3610/union-pacific-valuation".
+    extensionOf: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });
