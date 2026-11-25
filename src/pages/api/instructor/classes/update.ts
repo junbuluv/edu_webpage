@@ -91,7 +91,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
         p_current_instructor_id: currentInstructorId,
         p_new_instructor_id: newInstructorId,
         p_student_name: studentName,
-        p_section: null,
       },
     );
     if (error) return fail('update_failed');
@@ -104,7 +103,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       p_semester: semester,
       p_instructor_id: currentInstructorId,
       p_student_name: studentName,
-      p_section: null,
       p_operation: 'update',
     });
     if (error) return fail('update_failed');
