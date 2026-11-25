@@ -2,10 +2,14 @@
 // (Form 10-K) for fiscal year 2025, filed 6 February 2026, and the market
 // inputs the cost of capital case pairs with them. Dollar amounts are in
 // millions; rates are in percent. Each group names where it was read.
-import { relever, type InputRanges, type WaccInputs } from './wacc.ts';
+import { historicalFcf, type DcfInputs, type DcfRanges } from './dcf.ts';
+import { relever, wacc, type InputRanges, type WaccInputs } from './wacc.ts';
 
 export const FILING_URL =
   'https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm';
+/** The 10-K for fiscal year 2023, filed 9 February 2024: years 2021 and 2022. */
+export const FILING_2023_URL =
+  'https://www.sec.gov/Archives/edgar/data/100885/000143774924003599/unp20231231_10k.htm';
 
 export const UNION_PACIFIC = {
   // Item 5: "At January 30, 2026, there were 593,391,460 shares of common
@@ -20,6 +24,8 @@ export const UNION_PACIFIC = {
   debtDueAfterOneYear: 30_294,
   bookDebt: 31_814,
   bookEquity: 18_467, // total common shareholders' equity
+  cash: 1_266, // cash and cash equivalents
+  shortTermInvestments: 250,
 
   // Fair value note: "At December 31, 2025, the fair value of total debt was
   // $26.5 billion, approximately $5.3 billion less than the carrying value."
@@ -40,6 +46,11 @@ export const UNION_PACIFIC = {
   effectiveTaxRate: 22.1,
   federalTaxRate: 21.0,
   stateTaxRate: 3.1,
+
+  // Item 7: "our operating ratio improved 10 basis points to 59.8% in 2025",
+  // and the non-GAAP table: "Return on invested capital as adjusted" 16.3%.
+  operatingRatio2025: 59.8,
+  roic2025: 16.3,
 } as const;
 
 export const MARKET = {
@@ -123,4 +134,105 @@ export const RANGES: InputRanges = {
   costOfDebt: [MARKET.aaaYield, MARKET.baaYield],
   taxRate: [UP.federalTaxRate, TAX_RATE],
   debtShare: [MARKET_DEBT_SHARE, INDUSTRY_DEBT_SHARE],
+};
+
+// ---------------------------------------------------------------------------
+// The valuation case (case 4)
+
+/**
+ * Consolidated Statements of Income and of Cash Flows. 2023 to 2025 from the
+ * 10-K for 2025; 2021 and 2022 from the 10-K for 2023, which also prints 2023
+ * with the same figures. `currentItems` are the five "Changes in current
+ * assets and liabilities" lines as printed: accounts receivable; materials
+ * and supplies; other current assets; accounts payable and other current
+ * liabilities; income and other taxes.
+ */
+export const HISTORY = [
+  {
+    year: 2021,
+    revenue: 21_804,
+    operatingIncome: 9_338,
+    depreciation: 2_208,
+    capitalInvestments: 2_936,
+    currentItems: [-217, 17, 31, 184, 188],
+    incomeTaxExpense: 1_955,
+  },
+  {
+    year: 2022,
+    revenue: 24_875,
+    operatingIncome: 9_917,
+    depreciation: 2_246,
+    capitalInvestments: 3_620,
+    currentItems: [-169, -120, 5, 565, -273],
+    incomeTaxExpense: 2_074,
+  },
+  {
+    year: 2023,
+    revenue: 24_119,
+    operatingIncome: 9_082,
+    depreciation: 2_318,
+    capitalInvestments: 3_606,
+    currentItems: [-177, -2, -38, -215, 129],
+    incomeTaxExpense: 1_854,
+  },
+  {
+    year: 2024,
+    revenue: 24_250,
+    operatingIncome: 9_713,
+    depreciation: 2_398,
+    capitalInvestments: 3_452,
+    currentItems: [179, -26, -69, 189, -87],
+    incomeTaxExpense: 2_047,
+  },
+  {
+    year: 2025,
+    revenue: 24_510,
+    operatingIncome: 9_846,
+    depreciation: 2_465,
+    capitalInvestments: 3_791,
+    currentItems: [34, -18, 25, -196, -206],
+    incomeTaxExpense: 2_028,
+  },
+];
+
+const round1 = (x: number) => Math.round(x * 10) / 10;
+
+/** Debt at fair value, less cash and short-term investments, 31 Dec 2025. */
+export const NET_DEBT = UP.fairValueOfDebt - UP.cash - UP.shortTermInvestments;
+
+/** Net investment over after-tax operating income, 2021 to 2025 together. */
+export const REINVESTMENT_SHARE = (() => {
+  const rows = HISTORY.map((h) => historicalFcf(h, TAX_RATE));
+  const reinvested = rows.reduce((a, r) => a + r.reinvestment, 0);
+  const nopat = rows.reduce((a, r) => a + r.nopat, 0);
+  return round1((reinvested / nopat) * 100);
+})();
+
+/**
+ * The case's base case, valued at 31 December 2025. Revenue growth of 3% is
+ * 2021 to 2025 compound growth (2.97%) rounded; the 40% margin is the 2021
+ * to 2025 average (40.1%) rounded; long-run growth of 3% is the case's
+ * assumption.
+ */
+export const DCF_BASE: DcfInputs = {
+  revenue: HISTORY[HISTORY.length - 1].revenue,
+  revenueGrowth: 3,
+  operatingMargin: 40,
+  taxRate: TAX_RATE,
+  reinvestmentShare: REINVESTMENT_SHARE,
+  wacc: round2(wacc(ESTIMATE).wacc),
+  longRunGrowth: 3,
+  netDebt: NET_DEBT,
+  shares: UP.sharesOutstanding / 1e6,
+};
+
+/**
+ * Low, most likely and high values for the random draws. The margin range
+ * covers 2021 to 2025 (37.7% to 42.8%) rounded outward; the growth ranges
+ * are the case's assumptions.
+ */
+export const DCF_RANGES: DcfRanges = {
+  revenueGrowth: { low: 0, mode: 3, high: 5 },
+  operatingMargin: { low: 37, mode: 40, high: 43 },
+  longRunGrowth: { low: 2, mode: 3, high: 4 },
 };

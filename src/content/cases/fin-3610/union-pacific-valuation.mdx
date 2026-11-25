@@ -1,0 +1,263 @@
+---
+title: 'What Is Union Pacific Worth?'
+course: fin-3610
+topic: 'Discounted cash flow'
+order: 4
+summary: 'Value a real railroad from five years of its own cash flows and the 7.57% cost of capital from the previous case. Then run 2,000 random futures to see how far the answer can move, and what the share price was assuming.'
+estimatedMinutes: 25
+relatedLessons:
+  - 'fin-3610/capital-budgeting-cashflows'
+  - 'fin-3610/valuing-stocks'
+  - 'fin-3610/sensitivity-and-scenario'
+quizSlug: 'fin-3610-case-union-pacific-valuation'
+dataThrough: 'January 2026'
+sources:
+  - name: 'Union Pacific Corporation, Form 10-K for fiscal year 2025, filed 6 February 2026 (SEC EDGAR): years 2023 to 2025, the balance sheet, the share count and price'
+    url: 'https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm'
+  - name: 'Union Pacific Corporation, Form 10-K for fiscal year 2023, filed 9 February 2024 (SEC EDGAR): years 2021 and 2022'
+    url: 'https://www.sec.gov/Archives/edgar/data/100885/000143774924003599/unp20231231_10k.htm'
+draft: false
+---
+
+import BarFigure from '@components/mdx/BarFigure';
+import DcfMonteCarlo from '@components/viz/DcfMonteCarlo';
+
+## The question
+
+On January 30, 2026, a Union Pacific share closed at \$235.10. What is
+a share worth if you count only the cash the railroad's operations can
+pay out, discounted at the
+[7.57% cost of capital](/cases/fin-3610/union-pacific-cost-of-capital)
+from the previous case?
+
+The method is the one in
+[Valuing Stocks](/lessons/fin-3610/valuing-stocks): forecast free
+cash flow, add a terminal value, discount at the WACC, and subtract net
+debt. This case builds the forecast from the railroad's own five-year
+record, then asks how much the answer depends on the guesses.
+
+## Five years of cash flow
+
+The lesson
+[Capital Budgeting: Incremental Free Cash Flows](/lessons/fin-3610/capital-budgeting-cashflows)
+defines free cash flow as
+
+$$
+\text{FCF} = \text{EBIT} \times (1 - t) + \text{depreciation} - \Delta \text{working capital} - \text{capital investments}.
+$$
+
+EBIT is operating income. The tax rate $t$ is 24.1%, the rate on the
+next dollar of income from the previous case. Every other number comes
+from Union Pacific's annual reports. Amounts are in millions of dollars.
+
+| Year | Revenue | Operating income | Operating margin | Depreciation | Capital investments | Working capital investment | Free cash flow |
+| ---- | ------- | ---------------- | ---------------- | ------------ | ------------------- | -------------------------- | -------------- |
+| 2021 | 21,804  | 9,338            | 42.8%            | 2,208        | 2,936               | −203                       | 6,563          |
+| 2022 | 24,875  | 9,917            | 39.9%            | 2,246        | 3,620               | −8                         | 6,161          |
+| 2023 | 24,119  | 9,082            | 37.7%            | 2,318        | 3,606               | 303                        | 5,302          |
+| 2024 | 24,250  | 9,713            | 40.1%            | 2,398        | 3,452               | −186                       | 6,504          |
+| 2025 | 24,510  | 9,846            | 40.2%            | 2,465        | 3,791               | 361                        | 5,786          |
+
+Working capital investment is the five "changes in current assets and
+liabilities" lines of the cash flow statement with the sign reversed: a
+positive number used cash. Railroads report the same margin as an
+**operating ratio**, operating expenses over revenue. Union Pacific's
+was 59.8% in 2025, which is a margin of 40.2%.
+
+**By hand, 2025.**
+
+$$
+9{,}846 \times (1 - 0.241) + 2{,}465 - 361 - 3{,}791 = 7{,}473 + 2{,}465 - 361 - 3{,}791 = 5{,}786.
+$$
+
+<BarFigure
+  client:visible
+  data={[
+    { year: '2021', nopat: 7088, fcf: 6563 },
+    { year: '2022', nopat: 7527, fcf: 6161 },
+    { year: '2023', nopat: 6893, fcf: 5302 },
+    { year: '2024', nopat: 7372, fcf: 6504 },
+    { year: '2025', nopat: 7473, fcf: 5786 },
+  ]}
+  xKey="year"
+  series={[
+    {
+      key: 'nopat',
+      name: 'Operating income after tax ($M)',
+      color: 'chart-1',
+    },
+    { key: 'fcf', name: 'Free cash flow ($M)', color: 'chart-2' },
+  ]}
+  yAxisLabel="USD millions"
+  caption="Union Pacific's operating income after a 24.1% tax, and its free cash flow, 2021 to 2025. The gap between each pair of bars is what the railroad reinvested: capital investments above depreciation, plus working capital."
+  credit="Union Pacific Form 10-K reports for 2023 and 2025 via SEC EDGAR; after-tax amounts computed at 24.1%"
+  creditHref="https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm"
+/>
+
+Over the five years together, the railroad reinvested 6,037 of its
+36,353 million dollars of after-tax operating income: a **reinvestment
+share** of 16.6%. Revenue grew from 21,804 to 24,510, which is 2.97% a
+year compounded. The margin averaged 40.1% and ranged from 37.7% to
+42.8%.
+
+## The forecast
+
+Three numbers drive it:
+
+- **Revenue growth, years 1 to 5: 3%.** The 2021 to 2025 rate, rounded.
+- **Operating margin: 40%.** The five-year average, rounded.
+- **Long-run growth after year 5: 3%.** This case's assumption.
+
+The reinvestment share stays at 16.6% and the tax rate at 24.1%, so
+each year
+
+$$
+\text{FCF}_t = \text{revenue}_t \times 0.40 \times (1 - 0.241) \times (1 - 0.166).
+$$
+
+**By hand, year 1.** Revenue is 24,510 × 1.03 = 25,245, so free cash
+flow is 25,245 × 0.40 × 0.759 × 0.834 = 6,392.
+
+| Year | Revenue | Free cash flow | Present value at 7.57% |
+| ---- | ------- | -------------- | ---------------------- |
+| 2026 | 25,245  | 6,392          | 5,942                  |
+| 2027 | 26,003  | 6,584          | 5,690                  |
+| 2028 | 26,783  | 6,781          | 5,448                  |
+| 2029 | 27,586  | 6,985          | 5,217                  |
+| 2030 | 28,414  | 7,194          | 4,995                  |
+| Sum  |         |                | 27,292                 |
+
+The terminal value at the end of 2030 is the value of every later cash
+flow:
+
+$$
+\text{TV} = \frac{\text{FCF}_{2030} \times 1.03}{0.0757 - 0.03} = \frac{7{,}194 \times 1.03}{0.0457} = 162{,}140,
+$$
+
+worth $162{,}140 / 1.0757^5 = 112{,}574$ today. (The code keeps more
+decimals and gets 112,580; the difference is rounding.)
+
+## From the firm to one share
+
+$$
+\begin{aligned}
+\text{Enterprise value} &= 27{,}292 + 112{,}580 = 139{,}872 \\
+\text{Net debt} &= 26{,}500 - 1{,}266 - 250 = 24{,}984 \\
+\text{Equity value} &= 139{,}872 - 24{,}984 = 114{,}888 \\
+\text{Per share} &= 114{,}888 / 593.4 = 193.61
+\end{aligned}
+$$
+
+Net debt is the fair value of the debt, \$26,500 million, less cash of
+\$1,266 million and short-term investments of \$250 million, all at
+December 31, 2025. Fair value, as in the previous case: it is what the
+bonds would cost to buy back today.
+
+Two things stand out.
+
+- **The terminal value is 80% of the enterprise value** (112,580 of
+  139,872). What happens after 2030 matters more than the five years
+  you forecast.
+- **The answer is \$193.61, and the price was \$235.10.** The model puts
+  the shares about 18% below what the market paid.
+
+## What was the price assuming?
+
+Turn the question around. Hold every input at the base case except one,
+and find the value of that one which makes the model equal \$235.10:
+
+| Input changed         | Base case | Value that matches the price |
+| --------------------- | --------- | ---------------------------- |
+| Long-run growth       | 3.00%     | 3.79%                        |
+| Operating margin      | 40.0%     | 47.0%                        |
+| Cost of capital, WACC | 7.57%     | 6.89%                        |
+
+Is 3.79% growth forever plausible? The valuing stocks lesson ties
+growth to reinvestment: growth = reinvestment share × return on new
+investment. With 16.6% reinvested, 3.79% growth needs new investment to
+earn 3.79 / 16.6 = 22.8%. Union Pacific's own report puts its return on
+invested capital at 16.3% in 2025. Either new projects must earn far
+more than the existing railroad, or the railroad must reinvest more,
+which lowers free cash flow.
+
+There are other readings of the gap. Investors may expect margins to
+keep improving. The price may also reflect the pending merger with
+Norfolk Southern, which this valuation of Union Pacific alone leaves
+out. The case teaches a method; it is not a view on whether to buy or
+sell the stock.
+
+## Simulate it
+
+A single number hides how uncertain it is. The chart below draws 2,000
+possible futures. Each draw picks one revenue growth rate, one margin
+and one long-run growth rate, then values the share. You set three
+numbers for each input: low, most likely and high. A draw is most often
+near the most likely value and less often near the ends (a
+**triangular** distribution).
+
+<DcfMonteCarlo client:visible />
+
+Work through these steps.
+
+1. Read the readouts. With every input at its most likely value the
+   share is worth \$193.61. The middle of the 2,000 draws is \$190.45,
+   and the middle 80% runs from \$164.94 to \$220.81. Only 3.5% of the
+   draws reach the market price.
+2. Press **Draw again** a few times. The middle moves by a dollar or so,
+   and the share of draws at or above the price stays near 3% to 4%.
+3. In **Long-run growth after year 5**, drag low up to 3.0% and high
+   down to 3.0%. The middle 80% narrows to \$173.47 to \$206.59, and no
+   draw reaches the price.
+4. Press **Reset**, then drag long-run growth high to 5.0%. Now 22.6%
+   of the draws reach the price.
+5. Press **Reset**, then drag long-run growth most likely to 3.8%. The
+   most likely case is worth \$235.66, about the price.
+
+## What the draws show
+
+**Long-run growth drives the spread.** Fixing one input at its most
+likely value and drawing the other two:
+
+| Input fixed at most likely | Middle 80% of values | Width |
+| -------------------------- | -------------------- | ----- |
+| None (all three drawn)     | \$164.94 to \$220.81 | 55.86 |
+| Revenue growth             | \$170.58 to \$221.85 | 51.27 |
+| Operating margin           | \$166.25 to \$219.84 | 53.59 |
+| Long-run growth            | \$173.47 to \$206.59 | 33.13 |
+
+Removing the uncertainty in long-run growth narrows the range by \$22.73.
+Removing either of the others narrows it by less than \$5. That is the
+terminal value at work: it is 80% of the value, and long-run growth
+sits in its denominator.
+
+**The middle is below the most likely case.** The revenue growth range
+runs from 0% to 5% around 3%, so it has more room below 3% than above.
+Its draws average 2.67%, which pulls the middle down to \$190.45.
+
+**Wider ranges are a choice.** The draws are only as good as the
+ranges. Moving one end of one range, as in step 4, moved the share of
+draws at or above the price from 3.5% to 22.6%.
+
+## Takeaways
+
+- Free cash flow is operating income after tax less what the firm
+  reinvests. For Union Pacific that was about 83% of after-tax
+  operating income from 2021 to 2025.
+- Most of the value sits in the terminal value, so long-run growth and
+  the cost of capital matter most. Spend your judgment there.
+- Turning the model around ("what does the price assume?") is often
+  more useful than the model's own answer.
+
+## Limits
+
+- One revenue growth rate covers all five years, and the three draws
+  are independent. In a recession, growth and margins fall together,
+  which would widen the low end.
+- The reinvestment share stays at 16.6% whatever the growth rate. The
+  valuing stocks lesson says faster growth needs more reinvestment.
+- Taxes are 24.1% of operating income. The firm's effective rate was
+  22.1% in 2025.
+- Net debt leaves out operating leases and pension obligations.
+- The value is at December 31, 2025, and the price is from January 30, 2026.
+- The ranges for the draws are this case's judgments, not estimates
+  from data.
