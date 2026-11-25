@@ -1,7 +1,7 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseServerClient } from '@lib/supabase/server';
-import { type CourseSlug, isCourseSlug } from '@lib/courses';
+import { COURSE_SLUGS, type CourseSlug, isCourseSlug } from '@lib/courses';
 import {
   computeAvgBestScore,
   countDistinctQuizzes,
@@ -24,7 +24,6 @@ export type CourseDashboardData = {
   course: CollectionEntry<'courses'>;
   instructors: Array<CollectionEntry<'instructors'>>;
   enrolledSemester: string | null;
-  enrolledSection: string | null;
   stats: {
     lessonsCompleted: number;
     lessonsTotal: number;
@@ -72,7 +71,8 @@ export class DashboardUnavailableError extends Error {
  *   2. profile.active_course_slug             -> redirect with ?course=that
  *   3. First enrolled course (by order)       -> redirect
  *   4. First activity course (by order)       -> redirect
- *   5. None                                   -> render empty state (null)
+ *   5. Only one course in the catalog         -> redirect (browse mode)
+ *   6. None                                   -> render empty state (null)
  */
 export async function resolveActiveCourse(
   supabase: AnyClient,
@@ -112,7 +112,13 @@ export async function resolveActiveCourse(
     return { kind: 'redirect', to: `/dashboard?course=${ordered[0]}` };
   }
 
-  // 5. Nothing — render empty state.
+  // 5. With one course there is nothing to pick, so open it in browse mode.
+  const catalog: readonly CourseSlug[] = COURSE_SLUGS;
+  if (catalog.length === 1) {
+    return { kind: 'redirect', to: `/dashboard?course=${catalog[0]}` };
+  }
+
+  // 6. Nothing — render empty state.
   return { kind: 'render', courseSlug: null };
 }
 
@@ -187,7 +193,7 @@ export async function getDashboardData(
       .order('submitted_at', { ascending: false }),
     supabase
       .from('enrollments')
-      .select('semester, section')
+      .select('semester')
       .eq('user_id', userId)
       .eq('course_slug', courseSlug)
       .order('enrolled_at', { ascending: false })
@@ -237,15 +243,15 @@ export async function getDashboardData(
 
   // Weekly workshop attendance. The administrations RLS policy already
   // limits rows to windows matching this student's enrollment (course,
-  // semester, instructor, and section-or-null), so no extra filtering is
-  // needed beyond dropping cancelled windows. Failures degrade to null —
+  // semester and instructor), so no extra filtering is needed beyond
+  // dropping cancelled windows. Failures degrade to null —
   // the dashboard card simply doesn't render.
   let attendance: CourseDashboardData['attendance'] = null;
   try {
     const [adminRes, stampRes] = await Promise.all([
       supabase
         .from('workshop_administrations')
-        .select('id, workshop_slug, section, week_of, opens_at, closes_at')
+        .select('id, workshop_slug, week_of, opens_at, closes_at')
         .eq('course_slug', courseSlug)
         .is('cancelled_at', null),
       supabase
@@ -257,18 +263,12 @@ export async function getDashboardData(
       const nowMs = Date.now();
       const admins = adminRes.data ?? [];
       const weekly = buildWeeklyAttendance(
-        // RLS pre-filtered to eligible windows; null section = all match.
-        admins.map((a) => ({
-          id: a.id,
-          week_of: a.week_of,
-          section: null,
-          closes_at: a.closes_at,
-        })),
+        admins,
         (stampRes.data ?? []).map((s) => ({
           user_id: userId,
           administration_id: s.administration_id,
         })),
-        new Map([[userId, null]]),
+        [userId],
         nowMs,
       );
       const cells = weekly.cellsByUser.get(userId) ?? [];
@@ -284,7 +284,7 @@ export async function getDashboardData(
       attendance = {
         weeks: weekly.weeks.map((weekOf, i) => ({
           weekOf,
-          cell: cells[i] ?? 'ineligible',
+          cell: cells[i] ?? 'pending',
         })),
         attendedCount: cells.filter((c) => c === 'attended').length,
         openNow: open
@@ -300,7 +300,6 @@ export async function getDashboardData(
     course,
     instructors,
     enrolledSemester: enrollmentRows.data?.[0]?.semester ?? null,
-    enrolledSection: enrollmentRows.data?.[0]?.section ?? null,
     stats: {
       lessonsCompleted,
       lessonsTotal: lessons.length,

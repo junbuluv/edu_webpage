@@ -19,7 +19,6 @@ import type { CourseSlug } from '@lib/courses';
 import { hasActiveTeachingAssignment } from './class-access';
 import { parseRosterCsv } from './roster-csv';
 
-const ECO_SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
 const MAX_CSV_CHARS = 1_000_000;
 const MAX_ROSTER_ROWS = 5_000;
 
@@ -31,7 +30,6 @@ export { parseRosterCsv } from './roster-csv';
 export interface ImportMatchRow {
   email: string;
   name: string | null;
-  section: string | null;
   userId: string | null;
   alreadyEnrolled: boolean;
 }
@@ -71,7 +69,6 @@ type ExistingEnrollment = {
   user_id: string;
   instructor_id: string;
   student_name: string | null;
-  section: string | null;
 };
 
 async function fetchEmailToId(): Promise<Map<string, string>> {
@@ -93,7 +90,7 @@ async function fetchExisting(
   const { rows, error } = await selectAllRows<ExistingEnrollment>((from, to) =>
     admin
       .from('enrollments')
-      .select('user_id, instructor_id, student_name, section')
+      .select('user_id, instructor_id, student_name')
       .eq('course_slug', course)
       .eq('semester', semester)
       .order('user_id', { ascending: true })
@@ -138,24 +135,13 @@ async function planImport(
   if (parsed.rows.length > MAX_ROSTER_ROWS) {
     throw new RosterImportError('invalid', 'Roster has too many rows.');
   }
-  const validRows: Array<{
-    email: string;
-    name: string | null;
-    section: string | null;
-  }> = [];
+  const validRows: Array<{ email: string; name: string | null }> = [];
   for (const row of parsed.rows) {
     if ((row.name?.length ?? 0) > 120) {
       parsed.errors.push(`${row.email}: name exceeds 120 characters`);
       continue;
     }
-    if (course === 'eco-1002' && !ECO_SECTIONS.has(row.section ?? '')) {
-      parsed.errors.push(`${row.email}: a valid ECO 1002 section is required`);
-      continue;
-    }
-    validRows.push({
-      ...row,
-      section: course === 'eco-1002' ? row.section : null,
-    });
+    validRows.push(row);
   }
   const admin = getAdminClient();
   const [emailToId, existing] = await Promise.all([
@@ -256,7 +242,6 @@ export async function applyImport(
       return {
         user_id: r.userId,
         student_name: r.name ?? ex?.student_name ?? null,
-        section: r.section ?? ex?.section ?? null,
         expected_existing: ex != null,
       };
     });

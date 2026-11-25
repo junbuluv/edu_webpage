@@ -43,7 +43,6 @@ export interface RosterStudent {
   userId: string;
   instructorId: string;
   name: string | null;
-  section: string | null;
   email: string | null;
   lessonsCompleted: number;
   lessonsTotal: number;
@@ -231,11 +230,10 @@ export async function loadClassRoster(
     user_id: string;
     instructor_id: string;
     student_name: string | null;
-    section: string | null;
   }>((from, to) => {
     let query = admin
       .from('enrollments')
-      .select('user_id, instructor_id, student_name, section')
+      .select('user_id, instructor_id, student_name')
       .eq('course_slug', course)
       .eq('semester', semester)
       .eq('instructor_id', scopedInstructorId);
@@ -249,10 +247,8 @@ export async function loadClassRoster(
   // Registrar-provided name (from roster import) is authoritative; it
   // falls back to profiles.display_name below.
   const registrarNameById = new Map<string, string | null>();
-  const sectionById = new Map<string, string | null>();
   for (const r of roster) {
     registrarNameById.set(r.user_id, r.student_name ?? null);
-    sectionById.set(r.user_id, r.section ?? null);
   }
 
   const emptyRows = <T>() => Promise.resolve({ rows: [] as T[], error: null });
@@ -338,12 +334,11 @@ export async function loadClassRoster(
         id: string;
         closes_at: string;
         instructor_id: string;
-        section: string | null;
         week_of: string;
       }>((from, to) => {
         const query = admin
           .from('workshop_administrations')
-          .select('id, closes_at, instructor_id, section, week_of')
+          .select('id, closes_at, instructor_id, week_of')
           .eq('course_slug', course)
           .eq('semester', semester)
           .eq('instructor_id', scopedInstructorId)
@@ -398,9 +393,6 @@ export async function loadClassRoster(
         continue;
       }
       rosterStamps.push(s);
-      if ((sectionById.get(s.user_id) ?? null) !== administration.section) {
-        continue;
-      }
       attendanceByUser.set(
         s.user_id,
         (attendanceByUser.get(s.user_id) ?? 0) + 1,
@@ -409,17 +401,7 @@ export async function loadClassRoster(
   }
 
   // Weekly matrix over this instructor's non-cancelled windows.
-  const weekly = buildWeeklyAttendance(
-    adminRows.map((a) => ({
-      id: a.id,
-      week_of: a.week_of,
-      section: a.section,
-      closes_at: a.closes_at,
-    })),
-    rosterStamps,
-    new Map(userIds.map((id) => [id, sectionById.get(id) ?? null])),
-    nowMs,
-  );
+  const weekly = buildWeeklyAttendance(adminRows, rosterStamps, userIds, nowMs);
 
   const dataIncomplete = Boolean(
     profileRes.error ||
@@ -484,12 +466,10 @@ export async function loadClassRoster(
     };
     const attempts = quizByUser.get(id) ?? [];
     const attendanceCount = attendanceByUser.get(id) ?? 0;
-    const studentSection = sectionById.get(id) ?? null;
     const eligibleClosedWindowCount = adminRows.filter(
       (administration) =>
         administration.instructor_id === scopedInstructorId &&
-        Date.parse(administration.closes_at) < nowMs &&
-        studentSection === administration.section,
+        Date.parse(administration.closes_at) < nowMs,
     ).length;
     const avgBestScore = computeAvgBestScore(attempts);
     const avgFirstScore = computeAvgFirstScore(attempts);
@@ -516,7 +496,6 @@ export async function loadClassRoster(
       userId: id,
       instructorId: scopedInstructorId,
       name: registrarNameById.get(id) ?? nameById.get(id) ?? null,
-      section: sectionById.get(id) ?? null,
       email: emailById?.get(id) ?? null,
       lessonsCompleted: lessons.completed,
       lessonsTotal,
@@ -526,8 +505,7 @@ export async function loadClassRoster(
       avgFirstScore,
       avgBestScore,
       attendanceCount,
-      weeklyCells:
-        weekly.cellsByUser.get(id) ?? weekly.weeks.map(() => 'ineligible'),
+      weeklyCells: weekly.cellsByUser.get(id) ?? [],
       risk,
     };
   });

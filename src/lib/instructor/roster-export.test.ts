@@ -12,7 +12,6 @@ import {
 const student: RosterExportStudent = {
   name: 'Ada, L.',
   email: 'ada@baruchmail.cuny.edu',
-  section: 'CML',
   lessonsCompleted: 3,
   lessonsTotal: 11,
   quizzesTaken: 2,
@@ -32,7 +31,6 @@ test('header lists attempts, first-try and best averages, then the weeks', () =>
   assert.deepEqual(rosterExportHeader(['2026-09-28', '2026-10-05']), [
     'name',
     'email',
-    'section',
     'lessons_completed',
     'lessons_total',
     'quizzes_taken',
@@ -51,7 +49,7 @@ test('header lists attempts, first-try and best averages, then the weeks', () =>
 test('row rounds scores to two decimals and quotes cells that need it', () => {
   assert.equal(
     rosterExportRow(student, (c) => (c === 'attended' ? '1' : '0')),
-    '"Ada, L.",ada@baruchmail.cuny.edu,CML,3,11,2,5,0.46,1,1,1,0,' +
+    '"Ada, L.",ada@baruchmail.cuny.edu,3,11,2,5,0.46,1,1,1,0,' +
       '2026-10-01T12:00:00Z,yes,Low first-try quiz avg (46%); No workshop attendance',
   );
 });

@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data: administration, error: lookupError } = await admin
     .from('workshop_administrations')
     .select(
-      'id, workshop_slug, course_slug, semester, section, instructor_id, opens_at, cancelled_at',
+      'id, workshop_slug, course_slug, semester, instructor_id, opens_at, cancelled_at',
     )
     .eq('id', administrationId)
     .maybeSingle();
@@ -112,7 +112,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
           course: administration.course_slug,
           semester: administration.semester,
           workshop: administration.workshop_slug,
-          section: administration.section,
           original_stamped_at: attendance.stamped_at,
           original_recorded_by: attendance.recorded_by,
           original_reason: attendance.correction_reason,
@@ -169,7 +168,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const { data: enrollment, error: enrollmentError } = await admin
     .from('enrollments')
-    .select('course_slug, semester, section, instructor_id')
+    .select('course_slug, semester, instructor_id')
     .eq('user_id', targetUserId)
     .eq('course_slug', administration.course_slug)
     .eq('semester', administration.semester)
@@ -187,14 +186,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ? {
           courseSlug: enrollment.course_slug,
           semester: enrollment.semester,
-          section: enrollment.section,
           instructorId: enrollment.instructor_id,
         }
       : null,
     {
       courseSlug: administration.course_slug,
       semester: administration.semester,
-      section: administration.section,
       instructorId: administration.instructor_id,
     },
   );
@@ -240,7 +237,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       course: administration.course_slug,
       semester: administration.semester,
       workshop: administration.workshop_slug,
-      section: administration.section,
       reason,
     },
     request,

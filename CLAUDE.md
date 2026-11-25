@@ -30,15 +30,15 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
-- Workshops (both courses): content `src/content/workshops/<slug>.json`,
+- Workshops: content `src/content/workshops/<slug>.json`,
   schema gated by `courseEnum`; React island
   `src/components/workshop/StampInButton.tsx`; student page
   `src/pages/workshops/[slug].astro`; per-course indexes
-  `src/pages/{eco-1002,fin-3610}/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
+  `src/pages/fin-3610/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
 - Workshop visibility tiers (set by PR #69): course pages + per-course
   workshop list (`/{course}/workshops`) are public — titles, summaries,
   lesson links, question counts visible to guests. Open-window status
-  (section / week / open|upcoming|closed) renders only for enrolled
+  (week / open|upcoming|closed) renders only for enrolled
   students + admins. Per-workshop detail (`/workshops/<slug>`) is still
   gated to signed-in users; stamp-in additionally requires enrolled +
   within geofence.
@@ -65,25 +65,29 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   course and semester); pure unit-tested classifier
   `src/lib/instructor/enroll-classify.ts`. Add matches by email; drop/update
   take a hidden `user_id`. Existing rows keep their `instructor_id` (only new
-  inserts set it). Sections `{CML,CTL,CWL,CRL}` validated, eco-1002 only.
-  RosterTable has a staff-only "Manage" column
+  inserts set it). RosterTable has a staff-only "Manage" column
 - Course archive (PRs #90–100): per-course `/{course}/archive` of prior-term
   materials (faceted browse + keyword search), gated to enrolled students +
   staff. Pure alias-free core `src/lib/archive/{types,build}.ts`
   (unit-tested); git+DB loader `load.ts`; access gates `access.ts`;
   service-role reads `db.ts`. Content is hybrid: git (lesson notes, quiz
-  JSON) + DB tables `archive_videos`/`archive_papers`/`archive_quizzes`
+  JSON) + DB tables `archive_papers`/`archive_quizzes`
   (RLS-locked, convention #6 service-role pattern). Instructor management UI
-  under `src/pages/instructor/archive/{index,video,paper,quiz}`; file uploads
+  under `src/pages/instructor/archive/{index,paper,quiz}`; file uploads
   land in the private `archive-papers` Supabase Storage bucket via gated
   signed URLs. Authored quizzes are server-graded through the git-or-DB
-  resolver `src/lib/quiz/resolve.ts` (`loadGradableQuiz`). **Videos are
-  ECO-1002 only.** Lessons render a "Lecture videos" section to
-  enrolled+staff
+  resolver `src/lib/quiz/resolve.ts` (`loadGradableQuiz`)
 - Course primitives: `src/lib/courses.ts` (slug tuple),
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
-  `src/components/course/CourseSwitcher.tsx` (global header dropdown)
+  `src/components/course/CourseSwitcher.tsx` (global header dropdown, shown
+  only when the catalog has more than one course; with one course the
+  dashboard opens it in browse mode). FIN 3610 is the only course: ECO 1002
+  (Introduction to Macroeconomics), its per-day workshop sections and its
+  lecture videos were removed from the app on 2026-11-25. Until the matching
+  database change lands, the database still has the `section` columns and
+  the `archive_videos` table, and `mutate_enrollment` /
+  `transfer_enrollment_scope` still take `p_section` (the app passes null)
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
@@ -105,15 +109,15 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   credit), `BarFigure` (Recharts wrapper for hand-curated tabular data)
 - Lesson figures: `public/figures/<course>/<lesson-slug>/<name>.png`
   for committed images; `BarFigure` data lives inline in MDX
-- Per-chart presets + URL state: `src/lib/{islm,adas,bonds}/{presets,url-state}.ts`
+- Bond chart presets + URL state: `src/lib/bonds/{presets,url-state}.ts`
 - Weekly attendance (PR #113): pure alias-free `src/lib/attendance-weekly.ts`
-  builds a week-by-week matrix (`attended` / `missed` / `pending` /
-  `ineligible`) from the distinct `week_of` Mondays of non-cancelled
+  builds a week-by-week matrix (`attended` / `missed` / `pending`)
+  from the distinct `week_of` Mondays of non-cancelled
   `workshop_administrations`. There is no semester calendar; weeks exist only
   as those Mondays. Instructor side: per-week ✓/✗ columns in
   `RosterTable.astro` plus `week_<monday>` CSV columns. Student side: a
   "Workshop attendance" card on `/dashboard` (weekly chips + a stamp-in link
-  when a window for their section is open now), loaded in `dashboard.ts` via
+  when a window for their class is open now), loaded in `dashboard.ts` via
   the student's own RLS reads
 - Signup roles + student ID (PR #120): the signup form asks student or
   lecturer and collects an 8-digit EMPLID from students. Choosing lecturer
@@ -163,7 +167,7 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   drifts from Baruch's official colors. Fonts are self-hosted Figtree and
   JetBrains Mono (Fontsource). Design: `docs/superpowers/specs/2026-09-27-baruch-blue-theme-design.md`
   Charts use `var(--chart-1)`…`var(--chart-4)` (Midtown Blue, Tangerine,
-  Okabe-Ito green and purple), `--chart-1-soft`, `--chart-3-soft`,
+  Okabe-Ito green and purple), `--chart-3-soft`,
   `--chart-grid`, `--chart-ref`, and `--chart-ink`. Chart text is ink, never
   a series color: `global.css` sets Recharts legend, tooltip, and label text
   to ink (axis ticks keep Recharts' `#666`, 5.74:1).
@@ -172,8 +176,7 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/components`.
 - Lesson tutor (2026-10-05): coach-mode chat on lesson pages for enrolled
   students + staff of courses with `tutor: true` in
-  `src/content/courses/<slug>.json` (ECO 1002 and FIN 3610, one shared daily
-  cap). Island
+  `src/content/courses/<slug>.json` (FIN 3610). Island
   `src/components/tutor/TutorPanel.tsx` (mounted in `LessonLayout.astro`);
   endpoint `src/pages/api/tutor/chat.ts` (AI SDK 7 via Vercel AI Gateway,
   key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
@@ -619,8 +622,8 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
 
 ## Common tasks
 
-- **New macro lesson**: copy `src/content/lessons/eco-1002/is-lm-intro.mdx`
-  as a template; pick a unique `order:` within the unit.
+- **New lesson**: copy `src/content/lessons/fin-3610/credit-risk-and-spreads.mdx`
+  as a template; pick a unique `order:` within the course.
 - **New quiz**: add JSON under `src/content/quizzes/`. The slug must match
   `quizSlug:` in the lesson frontmatter to link them.
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
@@ -652,11 +655,11 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   checklist.
 - **New workshop**: drop a JSON under `src/content/workshops/` matching
   the `workshops` collection schema in `config.ts` (5–7 questions, course
-  must be one of `eco-1002` / `fin-3610`). Visible at `/workshops/<slug>`
+  must be a slug in `COURSE_SLUGS`). Visible at `/workshops/<slug>`
   and the per-course index `/{course}/workshops` to enrolled students
   (staff see a preview).
 - **Open a workshop window**: as a staff user, visit
-  `/instructor/workshops/<slug>` and use the section/time/geofence form.
+  `/instructor/workshops/<slug>` and use the class/time/geofence form.
   Also supports SQL inserts; see `CONTRIBUTING.md`.
 - **Promote a user**: in Supabase SQL Editor,
   ```sql
@@ -699,7 +702,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 264 tests as of 2026-10-07.
+   when adding testable logic. 261 tests as of 2026-11-25.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

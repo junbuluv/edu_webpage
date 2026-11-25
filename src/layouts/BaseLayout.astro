@@ -78,13 +78,12 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
           class="hidden items-center gap-3 text-sm xl:flex"
           aria-label="Primary navigation"
         >
-          <a href="/eco-1002" class={navLink}>ECO 1002</a>
           <a href="/fin-3610" class={navLink}>FIN 3610</a>
           <a href="/practice" class={navLink}>Practice</a>
           {
             user ? (
               <>
-                {switcherProps.length > 0 && (
+                {switcherProps.length > 1 && (
                   <CourseSwitcher
                     client:media="(min-width: 1280px)"
                     courses={switcherProps}
@@ -132,9 +131,6 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
             class="absolute right-4 top-[calc(100%-0.25rem)] z-50 mt-2 flex min-w-52 flex-col gap-1 rounded-lg border border-slate-200 bg-white p-2 text-sm shadow-lg"
             aria-label="Mobile navigation"
           >
-            <a class="rounded px-3 py-2 hover:bg-slate-50" href="/eco-1002"
-              >ECO 1002</a
-            >
             <a class="rounded px-3 py-2 hover:bg-slate-50" href="/fin-3610"
               >FIN 3610</a
             >
@@ -144,7 +140,7 @@ const navLink = `text-brand-sky-soft hover:text-white ${onBlueFocus}`;
             {
               user ? (
                 <>
-                  {switcherProps.length > 0 && (
+                  {switcherProps.length > 1 && (
                     <div class="px-3 py-2">
                       <CourseSwitcher
                         client:media="(max-width: 1279px)"

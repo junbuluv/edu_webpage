@@ -9,9 +9,6 @@ import {
 import { logDisclosureSafe } from '@lib/audit';
 import { isUuid } from '@lib/workshop-policy';
 
-const SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
-const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
-
 function redirect(
   course: string,
   semester: string,
@@ -43,7 +40,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const semester = String(form.get('semester') ?? '');
   const userId = String(form.get('user_id') ?? '');
   const studentName = String(form.get('student_name') ?? '').trim() || null;
-  const rawSection = String(form.get('section') ?? '').trim();
   const requestedInstructorId = String(form.get('instructor_id') ?? '');
   const currentInstructorId = isAdmin(role) ? requestedInstructorId : user.id;
   const requestedNewInstructorId = String(form.get('new_instructor_id') ?? '');
@@ -83,12 +79,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   )
     return fail('invalid_instructor');
 
-  let section: string | null = null;
-  if (COURSES_WITH_SECTIONS.has(course)) {
-    if (!SECTIONS.has(rawSection)) return fail('invalid_section');
-    section = rawSection;
-  }
-
   const admin = getAdminClient();
   if (newInstructorId !== currentInstructorId) {
     const { data: transferred, error } = await admin.rpc(
@@ -101,7 +91,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         p_current_instructor_id: currentInstructorId,
         p_new_instructor_id: newInstructorId,
         p_student_name: studentName,
-        p_section: section,
+        p_section: null,
       },
     );
     if (error) return fail('update_failed');
@@ -114,7 +104,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       p_semester: semester,
       p_instructor_id: currentInstructorId,
       p_student_name: studentName,
-      p_section: section,
+      p_section: null,
       p_operation: 'update',
     });
     if (error) return fail('update_failed');

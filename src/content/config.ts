@@ -174,33 +174,11 @@ const workshops = defineCollection({
   }),
 });
 
-const videos = defineCollection({
-  type: 'data',
-  schema: z
-    .object({
-      slug: z.string(),
-      title: z.string(),
-      course: courseEnum,
-      lessonSlug: z.string().min(1),
-      semester: semesterSchema,
-      provider: z.enum(['youtube', 'vimeo']),
-      videoId: z.string().min(1),
-      description: z.string().optional(),
-      durationMinutes: z.number().positive().optional(),
-      draft: z.boolean().default(false),
-    })
-    .refine((d) => d.course === 'eco-1002', {
-      message: 'videos are only supported for eco-1002',
-      path: ['course'],
-    }),
-});
-
 export const collections = {
   lessons,
   quizzes,
   instructors,
   courses,
   workshops,
-  videos,
 };
 export type QuestionT = z.infer<typeof QuestionSchema>;

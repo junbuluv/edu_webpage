@@ -1,11 +1,7 @@
 import { getCollection } from 'astro:content';
 import type { CourseSlug } from '@lib/courses';
 import { buildArchiveItems, deriveFacets, normalizeLessonSlug } from './build';
-import {
-  fetchArchiveVideos,
-  fetchArchivePapers,
-  fetchArchiveQuizzes,
-} from './db';
+import { fetchArchivePapers, fetchArchiveQuizzes } from './db';
 import type {
   ArchiveItem,
   Facets,
@@ -13,16 +9,14 @@ import type {
   LessonRef,
   PaperInput,
   QuizInput,
-  VideoInput,
 } from './types';
 
 export async function loadArchiveForCourse(
   course: CourseSlug,
 ): Promise<{ items: ArchiveItem[]; facets: Facets }> {
-  const [lessonEntries, quizEntries, videoEntries] = await Promise.all([
+  const [lessonEntries, quizEntries] = await Promise.all([
     getCollection('lessons', (l) => l.data.course === course),
     getCollection('quizzes', (q) => q.data.course === course),
-    getCollection('videos', (v) => v.data.course === course),
   ]);
 
   const lessons: LessonInput[] = lessonEntries.map((l) => ({
@@ -45,9 +39,8 @@ export async function loadArchiveForCourse(
     semester: q.data.semester ?? null,
   }));
 
-  const [dbQuizRows, dbVideoRows, paperRows] = await Promise.all([
+  const [dbQuizRows, paperRows] = await Promise.all([
     fetchArchiveQuizzes(course),
-    fetchArchiveVideos(course),
     fetchArchivePapers(course),
   ]);
   const dbQuizzes: QuizInput[] = dbQuizRows.map((r) => ({
@@ -59,32 +52,6 @@ export async function loadArchiveForCourse(
     semester: { term: r.semester_term, year: r.semester_year },
   }));
   const quizzes: QuizInput[] = [...gitQuizzes, ...dbQuizzes];
-
-  const gitVideos: VideoInput[] = videoEntries
-    .filter((v) => !v.data.draft)
-    .map((v) => ({
-      slug: v.data.slug,
-      course: v.data.course,
-      title: v.data.title,
-      lessonSlug: v.data.lessonSlug,
-      description: v.data.description,
-      provider: v.data.provider,
-      videoId: v.data.videoId,
-      semester: v.data.semester,
-    }));
-
-  const dbVideos: VideoInput[] = dbVideoRows.map((r) => ({
-    slug: r.id,
-    course: r.course_slug,
-    title: r.title,
-    lessonSlug: r.lesson_slug,
-    description: r.description ?? undefined,
-    provider: r.provider,
-    videoId: r.video_id,
-    semester: { term: r.semester_term, year: r.semester_year },
-  }));
-
-  const videos: VideoInput[] = [...gitVideos, ...dbVideos];
 
   const papers: PaperInput[] = paperRows.map((r) => {
     return {
@@ -99,7 +66,7 @@ export async function loadArchiveForCourse(
     };
   });
 
-  const items = buildArchiveItems({ lessons, quizzes, videos, papers, course });
+  const items = buildArchiveItems({ lessons, quizzes, papers, course });
 
   const lessonIndex: LessonRef[] = lessons
     .filter((l) => !l.draft)

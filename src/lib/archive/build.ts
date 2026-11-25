@@ -8,7 +8,6 @@ import type {
   PaperInput,
   QuizInput,
   Semester,
-  VideoInput,
 } from './types.ts';
 
 /** Strip a trailing .md/.mdx so quiz `lessonSlug` and lesson `id` align. */
@@ -28,7 +27,6 @@ function unitsFor(slugs: string[], unitBySlug: Map<string, string>): string[] {
 export function buildArchiveItems(input: {
   lessons: LessonInput[];
   quizzes: QuizInput[];
-  videos: VideoInput[];
   papers?: PaperInput[];
   course: string;
 }): ArchiveItem[] {
@@ -82,28 +80,6 @@ export function buildArchiveItems(input: {
     });
   }
 
-  // Videos
-  for (const v of input.videos) {
-    if (v.course !== course) continue;
-    const slug = normalizeLessonSlug(v.lessonSlug);
-    const units = unitsFor([slug], unitBySlug);
-    items.push({
-      id: `video:${v.slug}`,
-      type: 'video',
-      title: v.title,
-      course,
-      href: '',
-      lessonSlugs: [slug],
-      units,
-      semester: v.semester,
-      provider: v.provider,
-      videoId: v.videoId,
-      searchText: [v.title, v.description ?? '', units.join(' ')]
-        .join(' ')
-        .toLowerCase(),
-    });
-  }
-
   // File papers (uploaded exam/assignment files)
   for (const p of input.papers ?? []) {
     if (p.course !== course) continue;
@@ -127,7 +103,7 @@ export function buildArchiveItems(input: {
   return items;
 }
 
-const TYPE_ORDER: ArchiveItemType[] = ['notes', 'exam', 'assignment', 'video'];
+const TYPE_ORDER: ArchiveItemType[] = ['notes', 'exam', 'assignment'];
 const TERM_RANK: Record<Semester['term'], number> = {
   spring: 0,
   summer: 1,

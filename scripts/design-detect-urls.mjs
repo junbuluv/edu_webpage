@@ -15,7 +15,6 @@ const paths = [
   '/accessibility',
   '/privacy',
   '/terms',
-  '/macro',
   '/practice',
   '/auth/signin',
   '/auth/signup',
