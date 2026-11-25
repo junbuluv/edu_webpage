@@ -115,6 +115,129 @@ begin
   alter table public.profiles alter column role set default 'student';
 end $$;
 
+-- Retire ECO 1002 (2026-11-25): fin-3610 is the only course. A database built
+-- while this script still knew two courses (production was) loses, here:
+--   1. every ECO 1002 row;
+--   2. the two features only that course used: per-day workshop sections
+--      (both `section` columns and the workshop_section type) and lecture
+--      videos (archive_videos);
+--   3. every CHECK that still names 'eco-1002'.
+-- This runs before anything else touches those tables, so the rest of the
+-- script can assume one course and simply (re)create the current rules. Once
+-- the retired objects are gone, and on a fresh database, the block returns at
+-- once. Tables are checked with nested to_regclass calls because PL/pgSQL
+-- plans a whole IF condition at once. audit_log is left alone: audit history
+-- is never rewritten. Stored archive paper files are not touched either;
+-- production had no ECO 1002 papers on 2026-11-25.
+do $$
+declare
+  r record;
+begin
+  if pg_catalog.to_regclass('public.archive_videos') is null
+     and pg_catalog.to_regtype('public.workshop_section') is null
+     and not exists (
+       select 1
+         from pg_catalog.pg_attribute a
+        where a.attrelid in (
+                pg_catalog.to_regclass('public.enrollments'),
+                pg_catalog.to_regclass('public.workshop_administrations')
+              )
+          and a.attname = 'section'
+          and not a.attisdropped
+     ) then
+    return;
+  end if;
+
+  -- 1. Rows, in an order the foreign keys allow. Attendance rows go with
+  -- their workshop window (on delete cascade).
+  if pg_catalog.to_regclass('public.workshop_administrations') is not null then
+    delete from public.workshop_administrations
+     where course_slug = 'eco-1002' or workshop_slug like 'eco-1002-%';
+  end if;
+  if pg_catalog.to_regclass('public.enrollments') is not null then
+    delete from public.enrollments where course_slug = 'eco-1002';
+  end if;
+  if pg_catalog.to_regclass('public.offering_lesson_progress') is not null then
+    delete from public.offering_lesson_progress
+     where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+  end if;
+  if pg_catalog.to_regclass('public.quiz_attempts') is not null then
+    delete from public.quiz_attempts
+     where course_slug = 'eco-1002' or quiz_slug like 'eco-1002-%';
+    -- Attempts on instructor-authored ECO quizzes are stored under the
+    -- quiz's id, not an eco-1002- slug.
+    if pg_catalog.to_regclass('public.archive_quizzes') is not null then
+      delete from public.quiz_attempts q
+       using public.archive_quizzes a
+       where a.course_slug = 'eco-1002' and q.quiz_slug = a.id::text;
+    end if;
+  end if;
+  if pg_catalog.to_regclass('public.lesson_progress') is not null then
+    delete from public.lesson_progress
+     where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+  end if;
+  if pg_catalog.to_regclass('public.tutor_messages') is not null then
+    delete from public.tutor_messages
+     where course_slug = 'eco-1002' or lesson_slug like 'eco-1002/%';
+  end if;
+  if pg_catalog.to_regclass('public.archive_papers') is not null then
+    delete from public.archive_papers where course_slug = 'eco-1002';
+  end if;
+  if pg_catalog.to_regclass('public.archive_paper_upload_intents') is not null then
+    delete from public.archive_paper_upload_intents
+     where course_slug = 'eco-1002';
+  end if;
+  if pg_catalog.to_regclass('public.archive_quizzes') is not null then
+    delete from public.archive_quizzes where course_slug = 'eco-1002';
+  end if;
+  -- Assignments last (the rows above reference them), and inactive first:
+  -- a trigger refuses to delete an active assignment.
+  if pg_catalog.to_regclass('public.teaching_assignments') is not null then
+    update public.teaching_assignments
+       set active = false
+     where course_slug = 'eco-1002' and active;
+    delete from public.teaching_assignments where course_slug = 'eco-1002';
+  end if;
+  if pg_catalog.to_regclass('public.profiles') is not null then
+    update public.profiles
+       set active_course_slug = null
+     where active_course_slug = 'eco-1002';
+  end if;
+
+  -- 2. Per-day sections. The read policy and the scope trigger name the
+  -- column, so they go first; both are recreated further down. Dropping the
+  -- column also drops the two partial unique indexes and the checks built on
+  -- it.
+  if pg_catalog.to_regclass('public.workshop_administrations') is not null then
+    drop policy if exists "workshop_admins_course_read"
+      on public.workshop_administrations;
+    drop trigger if exists workshop_admins_scope_update_reject
+      on public.workshop_administrations;
+    alter table public.workshop_administrations drop column if exists section;
+  end if;
+  if pg_catalog.to_regclass('public.enrollments') is not null then
+    alter table public.enrollments drop column if exists section;
+  end if;
+  drop type if exists public.workshop_section;
+
+  -- Lecture videos (every row was ECO 1002).
+  drop table if exists public.archive_videos;
+
+  -- 3. Checks that still allow 'eco-1002'. Inline ones carry generated
+  -- names, so they are found by definition; the current one-course checks
+  -- are added back, by name, next to each table below.
+  for r in
+    select c.conrelid::regclass as tbl, c.conname as name
+      from pg_catalog.pg_constraint c
+      join pg_catalog.pg_namespace n on n.oid = c.connamespace
+     where n.nspname = 'public'
+       and c.contype = 'c'
+       and pg_catalog.pg_get_constraintdef(c.oid) like '%eco-1002%'
+  loop
+    execute format('alter table %s drop constraint %I', r.tbl, r.name);
+  end loop;
+end $$;
+
 do $$ begin
   create type progress_status as enum ('started', 'completed');
 exception when duplicate_object then null; end $$;
@@ -474,9 +597,16 @@ create table if not exists public.teaching_assignments (
   assigned_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (instructor_id, course_slug, semester),
-  check (course_slug in ('eco-1002', 'fin-3610')),
+  check (course_slug in ('fin-3610')),
   check (char_length(semester) between 1 and 64)
 );
+-- A database that had the two-course check lost it in the ECO 1002 block at
+-- the top; a fresh one already has it under this name from the line above.
+do $$ begin
+  alter table public.teaching_assignments
+    add constraint teaching_assignments_course_slug_check
+    check (course_slug in ('fin-3610'));
+exception when duplicate_object then null; end $$;
 
 create index if not exists teaching_assignments_course_term_idx
   on public.teaching_assignments (course_slug, semester, active);
@@ -570,11 +700,11 @@ alter table public.lesson_progress add column if not exists course_slug text;
 update public.lesson_progress
   set course_slug = split_part(lesson_slug, '/', 1)
   where course_slug is null
-    and split_part(lesson_slug, '/', 1) in ('eco-1002', 'fin-3610');
+    and split_part(lesson_slug, '/', 1) in ('fin-3610');
 do $$ begin
   alter table public.lesson_progress
     add constraint lesson_progress_course_chk
-    check (course_slug in ('eco-1002', 'fin-3610'));
+    check (course_slug in ('fin-3610'));
 exception when duplicate_object then null; end $$;
 create index if not exists lesson_progress_user_course_idx
   on public.lesson_progress (user_id, course_slug, updated_at desc);
@@ -623,14 +753,13 @@ alter table public.quiz_attempts
   add column if not exists instructor_id uuid references public.profiles(id) on delete set null;
 update public.quiz_attempts
   set course_slug = case
-    when quiz_slug like 'eco-1002-%' then 'eco-1002'
     when quiz_slug like 'fin-3610-%' then 'fin-3610'
   end
   where course_slug is null;
 do $$ begin
   alter table public.quiz_attempts
     add constraint quiz_attempts_course_chk
-    check (course_slug in ('eco-1002', 'fin-3610'));
+    check (course_slug in ('fin-3610'));
 exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.quiz_attempts
@@ -680,12 +809,11 @@ create table if not exists public.enrollments (
   primary key (user_id, course_slug, semester)
 );
 
--- Roster identity (Phase 2 bulk import): registrar-provided name + section.
+-- Roster identity (Phase 2 bulk import): registrar-provided name.
 -- Nullable; populated by roster import. student_name is the authoritative
 -- display name for instructor-facing roster views (it falls back to
--- profiles.display_name when null). section is the registrar section, if any.
+-- profiles.display_name when null).
 alter table public.enrollments add column if not exists student_name text;
-alter table public.enrollments add column if not exists section text;
 
 do $$
 declare
@@ -694,12 +822,12 @@ declare
 begin
   select
     count(*) filter (where
-      course_slug not in ('eco-1002', 'fin-3610')
+      course_slug not in ('fin-3610')
       or char_length(semester) not between 1 and 64
       or (student_name is not null and char_length(student_name) not between 1 and 120)
     ),
     jsonb_build_object(
-      'invalid_course', count(*) filter (where course_slug not in ('eco-1002', 'fin-3610')),
+      'invalid_course', count(*) filter (where course_slug not in ('fin-3610')),
       'invalid_semester', count(*) filter (where char_length(semester) not between 1 and 64),
       'invalid_student_name', count(*) filter (where student_name is not null and char_length(student_name) not between 1 and 120)
     )
@@ -762,7 +890,7 @@ select distinct
   p.role = 'instructor'
 from public.enrollments e
 join public.profiles p on p.id = e.instructor_id
-where e.course_slug in ('eco-1002', 'fin-3610')
+where e.course_slug in ('fin-3610')
   and char_length(e.semester) between 1 and 64
 on conflict (instructor_id, course_slug, semester) do nothing;
 
@@ -776,7 +904,7 @@ alter table public.enrollments
 do $$ begin
   alter table public.enrollments
     add constraint enrollments_course_check
-    check (course_slug in ('eco-1002', 'fin-3610'));
+    check (course_slug in ('fin-3610'));
 exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.enrollments
@@ -787,11 +915,6 @@ do $$ begin
   alter table public.enrollments
     add constraint enrollments_student_name_check
     check (student_name is null or char_length(student_name) between 1 and 120);
-exception when duplicate_object then null; end $$;
-do $$ begin
-  alter table public.enrollments
-    add constraint enrollments_eco_section_required_check
-    check (course_slug <> 'eco-1002' or section is not null) not valid;
 exception when duplicate_object then null; end $$;
 
 -- Exact offering progress is separate from lifetime lesson mastery. This
@@ -807,13 +930,18 @@ create table if not exists public.offering_lesson_progress (
   completed_at timestamptz,
   updated_at timestamptz not null default now(),
   primary key (user_id, course_slug, semester, lesson_slug),
-  check (course_slug in ('eco-1002', 'fin-3610')),
+  check (course_slug in ('fin-3610')),
   check (char_length(semester) between 1 and 64),
   foreign key (instructor_id, course_slug, semester)
     references public.teaching_assignments (
       instructor_id, course_slug, semester
     ) on update restrict on delete restrict
 );
+do $$ begin
+  alter table public.offering_lesson_progress
+    add constraint offering_lesson_progress_course_slug_check
+    check (course_slug in ('fin-3610'));
+exception when duplicate_object then null; end $$;
 
 -- Projects that applied the prior scoped-progress schema still have the
 -- legacy semester/instructor columns. Copy those exact rows before removing
@@ -917,6 +1045,11 @@ revoke insert, update, delete on table public.offering_lesson_progress
 drop function if exists public.transfer_enrollment_scope(
   uuid, text, text, uuid, uuid, text, text
 );
+-- The version that also took p_section (per-day sections, retired with
+-- ECO 1002 on 2026-11-25).
+drop function if exists public.transfer_enrollment_scope(
+  uuid, uuid, text, text, uuid, uuid, text, text
+);
 create or replace function public.transfer_enrollment_scope(
   p_actor_id uuid,
   p_user_id uuid,
@@ -924,8 +1057,7 @@ create or replace function public.transfer_enrollment_scope(
   p_semester text,
   p_current_instructor_id uuid,
   p_new_instructor_id uuid,
-  p_student_name text,
-  p_section text
+  p_student_name text
 )
 returns boolean
 language plpgsql
@@ -943,20 +1075,12 @@ begin
      or p_new_instructor_id is null
      or p_course_slug is null
      or p_semester is null
-     or p_course_slug not in ('eco-1002', 'fin-3610')
+     or p_course_slug not in ('fin-3610')
      or char_length(p_semester) not between 1 and 64
      or (
        p_student_name is not null
        and char_length(p_student_name) not between 1 and 120
-     )
-     or (
-       p_course_slug = 'eco-1002'
-       and (
-         p_section is null
-         or not (p_section = any (array['CML', 'CTL', 'CWL', 'CRL']))
-       )
-     )
-     or (p_course_slug = 'fin-3610' and p_section is not null) then
+     ) then
     raise exception 'invalid enrollment transfer input' using errcode = '22023';
   end if;
 
@@ -1032,16 +1156,14 @@ begin
     instructor_id,
     semester,
     enrolled_at,
-    student_name,
-    section
+    student_name
   ) values (
     p_user_id,
     p_course_slug,
     p_new_instructor_id,
     p_semester,
     existing_enrolled_at,
-    p_student_name,
-    p_section
+    p_student_name
   );
 
   update public.offering_lesson_progress
@@ -1063,10 +1185,10 @@ end;
 $$;
 
 revoke all on function public.transfer_enrollment_scope(
-  uuid, uuid, text, text, uuid, uuid, text, text
+  uuid, uuid, text, text, uuid, uuid, text
 ) from public, anon, authenticated;
 grant execute on function public.transfer_enrollment_scope(
-  uuid, uuid, text, text, uuid, uuid, text, text
+  uuid, uuid, text, text, uuid, uuid, text
 ) to service_role;
 
 create or replace function public.resolve_current_enrollment_scope(
@@ -1122,7 +1244,7 @@ begin
      or p_lesson_slug is null
      or p_course_slug is null
      or p_operation is null
-     or p_course_slug not in ('eco-1002', 'fin-3610')
+     or p_course_slug not in ('fin-3610')
      or char_length(p_lesson_slug) not between 1 and 200
      or p_lesson_slug not like p_course_slug || '/%'
      or p_operation not in ('start', 'complete', 'reset') then
@@ -1286,7 +1408,7 @@ begin
      or p_max_score is null
      or p_answers is null
      or p_client_attempt_id is null
-     or p_course_slug not in ('eco-1002', 'fin-3610')
+     or p_course_slug not in ('fin-3610')
      or char_length(p_quiz_slug) not between 1 and 200
      or p_max_score <= 0
      or p_score < 0
@@ -1594,9 +1716,6 @@ begin
           where w.instructor_id = u.id
        )
        and not exists (
-         select 1 from public.archive_videos v where v.created_by = u.id
-       )
-       and not exists (
          select 1 from public.archive_papers p where p.created_by = u.id
        )
        and not exists (
@@ -1708,14 +1827,11 @@ drop table if exists public.exam_administrations cascade;
 -- Workshops: weekly small-group sessions per lesson, with stamp-in
 -- attendance gated by time window + geofence + per-device uniqueness.
 --
--- workshop_administrations: one row per workshop window.
---   ECO 1002 runs four sections per week (CML/CTL/CWL/CRL = Mon/Tue/Wed/Thu),
---   so an ECO row has `section` set and is keyed by
---   (workshop_slug, semester, section, week_of, instructor_id).
---   FIN 3610 runs one workshop session per week (no per-day sections),
---   so a FIN row has `section = null` and is keyed by
---   (workshop_slug, semester, week_of, instructor_id).
---   The two cases are enforced by two partial unique indexes below.
+-- workshop_administrations: one row per workshop window. A class runs one
+--   workshop session per week, so a live (non-cancelled) row is unique on
+--   (workshop_slug, semester, week_of, instructor_id), enforced by the
+--   partial unique index below. Per-day sections (CML/CTL/CWL/CRL) existed
+--   only for ECO 1002 and were removed with that course on 2026-11-25.
 --
 -- workshop_attendance: one row per successful stamp. Two unique
 --   constraints: (administration_id, user_id) blocks self-double-stamp
@@ -1723,16 +1839,11 @@ drop table if exists public.exam_administrations cascade;
 --   pattern on the same browser without retaining a raw device identifier.
 -- =========================================================================
 
-do $$ begin
-  create type workshop_section as enum ('CML', 'CTL', 'CWL', 'CRL');
-exception when duplicate_object then null; end $$;
-
 create table if not exists public.workshop_administrations (
   id uuid primary key default gen_random_uuid(),
   workshop_slug text not null,
   course_slug text not null,
   semester text not null,
-  section workshop_section,
   week_of date not null,
   schedule_version smallint not null default 2,
   instructor_id uuid not null references public.profiles(id) on delete restrict,
@@ -1797,7 +1908,7 @@ begin
   select
     count(*) filter (where
       char_length(semester) not between 1 and 64
-      or course_slug not in ('eco-1002', 'fin-3610')
+      or course_slug not in ('fin-3610')
       or (required_lat is null) <> (required_lng is null)
       or (required_lat is not null and required_lat not between -90 and 90)
       or (required_lng is not null and required_lng not between -180 and 180)
@@ -1809,7 +1920,7 @@ begin
     ),
     jsonb_build_object(
       'invalid_semester', count(*) filter (where char_length(semester) not between 1 and 64),
-      'invalid_course', count(*) filter (where course_slug not in ('eco-1002', 'fin-3610')),
+      'invalid_course', count(*) filter (where course_slug not in ('fin-3610')),
       'invalid_coordinate_pair', count(*) filter (where (required_lat is null) <> (required_lng is null)),
       'invalid_coordinate_range', count(*) filter (where
         (required_lat is not null and required_lat not between -90 and 90)
@@ -1837,49 +1948,18 @@ alter table public.workshop_administrations
   alter column location_label set default '55 Lexington Ave',
   alter column location_label set not null;
 
--- Migration: section was originally `not null` (ECO-only model). Make it
--- nullable so FIN 3610 rows can omit it. PostgreSQL treats a repeated drop as
--- a no-op, while real catalog or permission errors must remain visible.
-alter table public.workshop_administrations
-  alter column section drop not null;
-
--- Migration: drop the legacy table-level unique that required all three
--- columns set. The two partial indexes below replace it.
-do $$
-declare con_name text;
-begin
-  for con_name in
-    select conname from pg_constraint
-     where conrelid = 'public.workshop_administrations'::regclass
-       and contype = 'u'
-       and pg_get_constraintdef(oid)
-           = 'UNIQUE (workshop_slug, section, week_of)'
-  loop
-    execute format(
-      'alter table public.workshop_administrations drop constraint %I',
-      con_name
-    );
-  end loop;
-end $$;
-
--- ECO 1002 partial unique: one row per instructor's (workshop, section,
--- week) when section is set.
+-- One live row per instructor's (workshop, week). This prevents an instructor
+-- from accidentally opening the same workshop twice in the same week while
+-- allowing another class's window. The two older index names date from the
+-- per-day sections that ECO 1002 used.
 drop index if exists public.workshop_admins_section_week_unique;
-create unique index workshop_admins_section_week_unique
-  on public.workshop_administrations (
-    workshop_slug, semester, section, week_of, instructor_id
-  )
-  where section is not null and cancelled_at is null;
-
--- FIN 3610 partial unique: one row per instructor's (workshop, week) when
--- section is null. This prevents an instructor from accidentally opening the
--- same workshop twice in the same week while allowing another class's window.
 drop index if exists public.workshop_admins_nosection_week_unique;
-create unique index workshop_admins_nosection_week_unique
+drop index if exists public.workshop_admins_week_unique;
+create unique index workshop_admins_week_unique
   on public.workshop_administrations (
     workshop_slug, semester, week_of, instructor_id
   )
-  where section is null and cancelled_at is null;
+  where cancelled_at is null;
 
 drop index if exists public.workshop_admins_course_window_idx;
 create index workshop_admins_course_window_idx
@@ -1892,6 +1972,7 @@ alter table public.workshop_administrations
   drop constraint if exists workshop_admins_schedule_version_check,
   drop constraint if exists workshop_admins_schedule_check,
   drop constraint if exists workshop_admins_course_section_day_check,
+  drop constraint if exists workshop_admins_course_check,
   drop constraint if exists workshop_admins_location_check,
   drop constraint if exists workshop_admins_radius_check,
   drop constraint if exists workshop_admins_duration_check,
@@ -1909,22 +1990,8 @@ alter table public.workshop_administrations
         'week', opens_at at time zone 'America/New_York'
       )::date
     ),
-  add constraint workshop_admins_course_section_day_check
-    check (
-      schedule_version = 1
-      or (
-        course_slug = 'eco-1002'
-        and section is not null
-        and extract(isodow from opens_at at time zone 'America/New_York') =
-          case section::text
-            when 'CML' then 1
-            when 'CTL' then 2
-            when 'CWL' then 3
-            when 'CRL' then 4
-          end
-      )
-      or (course_slug = 'fin-3610' and section is null)
-    ),
+  add constraint workshop_admins_course_check
+    check (course_slug in ('fin-3610')),
   add constraint workshop_admins_location_check
     check (
       (required_lat is null) = (required_lng is null)
@@ -1958,7 +2025,7 @@ select distinct
   p.role = 'instructor'
 from public.workshop_administrations a
 join public.profiles p on p.id = a.instructor_id
-where a.course_slug in ('eco-1002', 'fin-3610')
+where a.course_slug in ('fin-3610')
   and char_length(a.semester) between 1 and 64
 on conflict (instructor_id, course_slug, semester) do nothing;
 
@@ -1996,10 +2063,6 @@ create policy "workshop_admins_course_read"
         and e.course_slug = workshop_administrations.course_slug
         and e.semester = workshop_administrations.semester
         and e.instructor_id = workshop_administrations.instructor_id
-        and (
-          workshop_administrations.section is null
-          or e.section = workshop_administrations.section::text
-        )
     )
     or exists (
       select 1 from public.profiles p
@@ -2014,7 +2077,7 @@ revoke select on table public.workshop_administrations from anon, authenticated;
 revoke select (required_lat, required_lng, required_radius_meters, notes)
   on public.workshop_administrations from anon, authenticated;
 grant select (
-  id, workshop_slug, course_slug, semester, section, week_of,
+  id, workshop_slug, course_slug, semester, week_of,
   schedule_version, instructor_id, opens_at, closes_at, geofence_required,
   location_label, questions_revealed_at, cancelled_at, created_at
 ) on public.workshop_administrations to authenticated;
@@ -2380,8 +2443,6 @@ begin
       select 1 from public.workshop_administrations w
        where w.instructor_id = new.id
     ) or exists (
-      select 1 from public.archive_videos v where v.created_by = new.id
-    ) or exists (
       select 1 from public.archive_papers p where p.created_by = new.id
     ) or exists (
       select 1 from public.archive_quizzes q where q.created_by = new.id
@@ -2464,15 +2525,12 @@ begin
       if old.workshop_slug = new.workshop_slug
          and old.course_slug = new.course_slug
          and old.semester = new.semester
-         and old.section is not distinct from new.section
          and old.week_of = new.week_of
          and old.instructor_id = v_target
          and new.instructor_id = v_successor then
         return new;
       end if;
-    elsif tg_table_name in (
-      'archive_videos', 'archive_papers', 'archive_quizzes'
-    ) then
+    elsif tg_table_name in ('archive_papers', 'archive_quizzes') then
       if old.course_slug = new.course_slug
          and old.created_by = v_target
          and new.created_by = v_successor then
@@ -2576,7 +2634,7 @@ drop trigger if exists workshop_admins_scope_update_reject
   on public.workshop_administrations;
 create trigger workshop_admins_scope_update_reject
   before update of workshop_slug, instructor_id, course_slug, semester,
-    section, week_of
+    week_of
   on public.workshop_administrations
   for each row execute function public.reject_immutable_scope_update();
 
@@ -2586,45 +2644,6 @@ revoke insert, update, delete on table public.workshop_attendance
 -- Inserts via service-role client through /api/workshops/stamp. The two
 -- unique constraints above are the substantive anti-cheating barrier;
 -- RLS is just a read-scoping layer.
-
--- =========================================================================
--- archive_videos --- instructor-managed ECO 1002 lecture videos surfaced in
--- the course archive. RLS-locked: no anon/authenticated policies; all access
--- goes through the service-role admin client, gated in app code (the
--- instructor-data pattern, CLAUDE.md convention #6). No PII here.
--- =========================================================================
-create table if not exists public.archive_videos (
-  id uuid primary key default gen_random_uuid(),
-  course_slug text not null,
-  lesson_slug text not null,
-  semester_term text not null,
-  semester_year integer not null,
-  title text not null,
-  provider text not null,
-  video_id text not null,
-  description text,
-  duration_minutes integer,
-  created_by uuid not null references public.profiles(id) on delete restrict,
-  published boolean not null default false,
-  deleted_at timestamptz,
-  created_at timestamptz not null default now(),
-  -- updated_at is maintained by the mutation API (set to now() on update);
-  -- no trigger, consistent with the rest of this schema.
-  updated_at timestamptz not null default now(),
-  check (course_slug = 'eco-1002'),
-  check (semester_term in ('spring', 'summer', 'fall')),
-  check (semester_year between 2020 and 2100),
-  check (provider in ('youtube', 'vimeo'))
-);
-
-create index if not exists archive_videos_live_idx
-  on public.archive_videos (course_slug)
-  where deleted_at is null and published;
-
-alter table public.archive_videos enable row level security;
--- Intentionally NO policies: PostgREST/anon/authenticated cannot read or
--- write. The service-role admin client (which bypasses RLS) is the only
--- accessor, used server-side behind isContentManager + ownership checks.
 
 -- =========================================================================
 -- archive_paper_upload_intents --- durable authorization for direct uploads.
@@ -2650,7 +2669,7 @@ create table if not exists public.archive_paper_upload_intents (
   expires_at timestamptz not null,
   created_at timestamptz not null default now(),
   finalized_at timestamptz,
-  check (course_slug in ('eco-1002', 'fin-3610')),
+  check (course_slug in ('fin-3610')),
   check (kind in ('exam', 'assignment')),
   check (char_length(title) between 1 and 200),
   check (semester_term in ('spring', 'summer', 'fall')),
@@ -2667,6 +2686,11 @@ create table if not exists public.archive_paper_upload_intents (
   check (expires_at > created_at),
   check ((state = 'finalized') = (finalized_at is not null))
 );
+do $$ begin
+  alter table public.archive_paper_upload_intents
+    add constraint archive_paper_upload_intents_course_slug_check
+    check (course_slug in ('fin-3610'));
+exception when duplicate_object then null; end $$;
 
 create index if not exists archive_paper_upload_intents_expiry_idx
   on public.archive_paper_upload_intents (state, expires_at);
@@ -3029,7 +3053,6 @@ create table if not exists public.archive_quizzes (
   check (passing_score >= 0 and passing_score <= 1)
 );
 
-alter table public.archive_videos alter column published set default false;
 alter table public.archive_paper_upload_intents
   alter column published set default false;
 alter table public.archive_papers alter column published set default false;
@@ -3046,25 +3069,12 @@ alter table public.archive_quizzes enable row level security;
 -- the create routes also validate). Idempotent.
 do $$ begin
   alter table public.archive_papers
-    add constraint archive_papers_course_chk check (course_slug in ('eco-1002', 'fin-3610'));
+    add constraint archive_papers_course_chk check (course_slug in ('fin-3610'));
 exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.archive_quizzes
-    add constraint archive_quizzes_course_chk check (course_slug in ('eco-1002', 'fin-3610'));
+    add constraint archive_quizzes_course_chk check (course_slug in ('fin-3610'));
 exception when duplicate_object then null; end $$;
-
-alter table public.archive_videos
-  drop constraint if exists archive_videos_input_check;
-alter table public.archive_videos
-  add constraint archive_videos_input_check check (
-    char_length(title) between 1 and 200
-    and char_length(lesson_slug) between 1 and 200
-    and char_length(video_id) between 1 and 64
-    and (description is null or char_length(description) <= 2000)
-    and (duration_minutes is null or duration_minutes between 1 and 1440)
-  ) not valid;
-alter table public.archive_videos
-  validate constraint archive_videos_input_check;
 
 alter table public.archive_papers
   drop constraint if exists archive_papers_input_check;
@@ -3094,19 +3104,6 @@ alter table public.archive_quizzes
   ) not valid;
 alter table public.archive_quizzes
   validate constraint archive_quizzes_input_check;
-
-drop trigger if exists archive_videos_creator_course_insert
-  on public.archive_videos;
-create trigger archive_videos_creator_course_insert
-  before insert on public.archive_videos
-  for each row execute function public.guard_archive_creator_course();
-drop trigger if exists archive_videos_creator_course_update
-  on public.archive_videos;
-drop trigger if exists archive_videos_scope_update_reject
-  on public.archive_videos;
-create trigger archive_videos_scope_update_reject
-  before update of created_by, course_slug on public.archive_videos
-  for each row execute function public.reject_immutable_scope_update();
 
 drop trigger if exists archive_papers_creator_course_insert
   on public.archive_papers;
@@ -3158,7 +3155,7 @@ begin
      or p_instructor_id is null
      or p_course_slug is null
      or p_semester is null
-     or p_course_slug not in ('eco-1002', 'fin-3610')
+     or p_course_slug not in ('fin-3610')
      or char_length(p_semester) not between 1 and 64
      or jsonb_typeof(p_rows) is distinct from 'array'
      or jsonb_array_length(p_rows) not between 1 and 5000 then
@@ -3210,7 +3207,6 @@ begin
       from jsonb_to_recordset(p_rows) as r(
         user_id uuid,
         student_name text,
-        section text,
         expected_existing boolean
       )
      where r.user_id is null
@@ -3219,14 +3215,6 @@ begin
           r.student_name is not null
           and char_length(r.student_name) not between 1 and 120
         )
-        or (
-          p_course_slug = 'eco-1002'
-          and (
-            r.section is null
-            or not (r.section = any (array['CML', 'CTL', 'CWL', 'CRL']))
-          )
-        )
-        or (p_course_slug = 'fin-3610' and r.section is not null)
   ) then
     raise exception 'invalid roster row' using errcode = '22023';
   end if;
@@ -3282,13 +3270,11 @@ begin
       from jsonb_to_recordset(p_rows) as r(
         user_id uuid,
         student_name text,
-        section text,
         expected_existing boolean
       )
   )
   update public.enrollments e
-     set student_name = r.student_name,
-         section = r.section
+     set student_name = r.student_name
     from input_rows r
    where r.expected_existing
      and e.user_id = r.user_id
@@ -3308,20 +3294,17 @@ begin
     course_slug,
     instructor_id,
     semester,
-    student_name,
-    section
+    student_name
   )
   select
     r.user_id,
     p_course_slug,
     p_instructor_id,
     p_semester,
-    r.student_name,
-    r.section
+    r.student_name
   from jsonb_to_recordset(p_rows) as r(
     user_id uuid,
     student_name text,
-    section text,
     expected_existing boolean
   )
   where not r.expected_existing;
@@ -3336,6 +3319,11 @@ grant execute on function public.apply_roster_import(
   uuid, uuid, text, text, jsonb
 ) to service_role;
 
+-- The version that also took p_section (per-day sections, retired with
+-- ECO 1002 on 2026-11-25).
+drop function if exists public.mutate_enrollment(
+  uuid, uuid, text, text, uuid, text, text, text
+);
 create or replace function public.mutate_enrollment(
   p_actor_id uuid,
   p_user_id uuid,
@@ -3343,7 +3331,6 @@ create or replace function public.mutate_enrollment(
   p_semester text,
   p_instructor_id uuid,
   p_student_name text,
-  p_section text,
   p_operation text
 )
 returns boolean
@@ -3360,22 +3347,14 @@ begin
      or p_course_slug is null
      or p_semester is null
      or p_operation is null
-     or p_course_slug not in ('eco-1002', 'fin-3610')
+     or p_course_slug not in ('fin-3610')
      or char_length(p_semester) not between 1 and 64
      or p_operation not in ('insert', 'update', 'delete') then
     raise exception 'invalid enrollment mutation input' using errcode = '22023';
   end if;
-  if p_operation in ('insert', 'update') and (
-    (p_student_name is not null and char_length(p_student_name) not between 1 and 120)
-    or (
-      p_course_slug = 'eco-1002'
-      and (
-        p_section is null
-        or not (p_section = any (array['CML', 'CTL', 'CWL', 'CRL']))
-      )
-    )
-    or (p_course_slug = 'fin-3610' and p_section is not null)
-  ) then
+  if p_operation in ('insert', 'update')
+     and p_student_name is not null
+     and char_length(p_student_name) not between 1 and 120 then
     raise exception 'invalid enrollment update' using errcode = '22023';
   end if;
 
@@ -3445,20 +3424,17 @@ begin
       course_slug,
       instructor_id,
       semester,
-      student_name,
-      section
+      student_name
     ) values (
       p_user_id,
       p_course_slug,
       p_instructor_id,
       p_semester,
-      p_student_name,
-      p_section
+      p_student_name
     );
   elsif p_operation = 'update' then
     update public.enrollments
-       set student_name = p_student_name,
-           section = p_section
+       set student_name = p_student_name
      where user_id = p_user_id
        and course_slug = p_course_slug
        and semester = p_semester
@@ -3475,10 +3451,10 @@ begin
 end;
 $$;
 revoke all on function public.mutate_enrollment(
-  uuid, uuid, text, text, uuid, text, text, text
+  uuid, uuid, text, text, uuid, text, text
 ) from public, anon, authenticated;
 grant execute on function public.mutate_enrollment(
-  uuid, uuid, text, text, uuid, text, text, text
+  uuid, uuid, text, text, uuid, text, text
 ) to service_role;
 
 create or replace function public.mutate_archive_item(
@@ -3501,7 +3477,7 @@ begin
      or p_id is null
      or p_resource is null
      or p_operation is null
-     or p_resource not in ('video', 'paper', 'quiz')
+     or p_resource not in ('paper', 'quiz')
      or p_operation not in ('update', 'delete') then
     raise exception 'invalid archive mutation input' using errcode = '22023';
   end if;
@@ -3512,13 +3488,7 @@ begin
     from public.profiles p
    where p.id = p_actor_id;
 
-  if p_resource = 'video' then
-    select v.course_slug, v.created_by
-      into item_course, item_creator
-      from public.archive_videos v
-     where v.id = p_id and v.deleted_at is null
-     for update;
-  elsif p_resource = 'paper' then
+  if p_resource = 'paper' then
     select p.course_slug, p.created_by
       into item_course, item_creator
       from public.archive_papers p
@@ -3552,12 +3522,7 @@ begin
   end if;
 
   if p_operation = 'delete' then
-    if p_resource = 'video' then
-      update public.archive_videos
-         set deleted_at = pg_catalog.clock_timestamp(),
-             updated_at = pg_catalog.clock_timestamp()
-       where id = p_id and deleted_at is null;
-    elsif p_resource = 'paper' then
+    if p_resource = 'paper' then
       update public.archive_papers
          set deleted_at = pg_catalog.clock_timestamp(),
              updated_at = pg_catalog.clock_timestamp()
@@ -3574,29 +3539,7 @@ begin
   if jsonb_typeof(p_patch) is distinct from 'object' then
     raise exception 'invalid archive patch' using errcode = '22023';
   end if;
-  if p_resource = 'video' then
-    if not (p_patch ?& array[
-      'lesson_slug', 'semester_term', 'semester_year', 'title', 'provider',
-      'video_id', 'description', 'duration_minutes', 'published'
-    ]) or p_patch - array[
-      'lesson_slug', 'semester_term', 'semester_year', 'title', 'provider',
-      'video_id', 'description', 'duration_minutes', 'published'
-    ] <> '{}'::jsonb then
-      raise exception 'invalid video patch' using errcode = '22023';
-    end if;
-    update public.archive_videos
-       set lesson_slug = p_patch->>'lesson_slug',
-           semester_term = p_patch->>'semester_term',
-           semester_year = (p_patch->>'semester_year')::integer,
-           title = p_patch->>'title',
-           provider = p_patch->>'provider',
-           video_id = p_patch->>'video_id',
-           description = p_patch->>'description',
-           duration_minutes = (p_patch->>'duration_minutes')::integer,
-           published = (p_patch->>'published')::boolean,
-           updated_at = pg_catalog.clock_timestamp()
-     where id = p_id and deleted_at is null;
-  elsif p_resource = 'paper' then
+  if p_resource = 'paper' then
     if not (p_patch ?& array[
       'kind', 'title', 'semester_term', 'semester_year', 'covers', 'published'
     ]) or p_patch - array[
@@ -3777,7 +3720,6 @@ begin
          and e.course_slug = administration.course_slug
          and e.semester = administration.semester
          and e.instructor_id = administration.instructor_id
-         and e.section is not distinct from administration.section::text
     ) then
       return false;
     end if;
@@ -3869,7 +3811,6 @@ begin
        and e.course_slug = administration.course_slug
        and e.semester = administration.semester
        and e.instructor_id = administration.instructor_id
-       and e.section is not distinct from administration.section::text
   ) then
     return false;
   end if;
@@ -3969,7 +3910,6 @@ begin
         on new_w.instructor_id = p_successor_id
        and new_w.workshop_slug = old_w.workshop_slug
        and new_w.semester = old_w.semester
-       and new_w.section is not distinct from old_w.section
        and new_w.week_of = old_w.week_of
        and new_w.cancelled_at is null
      where old_w.instructor_id = p_target_id
@@ -4049,10 +3989,6 @@ begin
   update public.workshop_administrations
      set instructor_id = p_successor_id
    where instructor_id = p_target_id;
-  update public.archive_videos
-     set created_by = p_successor_id,
-         updated_at = pg_catalog.clock_timestamp()
-   where created_by = p_target_id;
   update public.archive_papers
      set created_by = p_successor_id,
          updated_at = pg_catalog.clock_timestamp()
@@ -4108,7 +4044,7 @@ grant execute on function public.offboard_staff(uuid, uuid, uuid)
 create table if not exists public.tutor_messages (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
-  course_slug text not null check (course_slug in ('eco-1002', 'fin-3610')),
+  course_slug text not null check (course_slug in ('fin-3610')),
   lesson_slug text not null check (length(lesson_slug) <= 200),
   model text check (length(model) <= 200),
   input_tokens integer check (input_tokens >= 0),
@@ -4116,6 +4052,11 @@ create table if not exists public.tutor_messages (
   reasoning_tokens integer check (reasoning_tokens >= 0),
   created_at timestamptz not null default now()
 );
+do $$ begin
+  alter table public.tutor_messages
+    add constraint tutor_messages_course_slug_check
+    check (course_slug in ('fin-3610'));
+exception when duplicate_object then null; end $$;
 
 create index if not exists tutor_messages_user_created_idx
   on public.tutor_messages (user_id, created_at desc);
@@ -4231,7 +4172,6 @@ revoke all privileges on table
   public.audit_log,
   public.workshop_administrations,
   public.workshop_attendance,
-  public.archive_videos,
   public.archive_paper_upload_intents,
   public.archive_papers,
   public.archive_quizzes,
@@ -4250,7 +4190,6 @@ grant select, insert, update, delete on table
   public.audit_log,
   public.workshop_administrations,
   public.workshop_attendance,
-  public.archive_videos,
   public.archive_paper_upload_intents,
   public.archive_papers,
   public.archive_quizzes,
@@ -4279,7 +4218,7 @@ grant select (
   target_resource, metadata
 ) on public.audit_log to authenticated;
 grant select (
-  id, workshop_slug, course_slug, semester, section, week_of,
+  id, workshop_slug, course_slug, semester, week_of,
   schedule_version, instructor_id, opens_at, closes_at, geofence_required,
   location_label, questions_revealed_at, cancelled_at, created_at
 ) on public.workshop_administrations to authenticated;

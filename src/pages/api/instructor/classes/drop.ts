@@ -71,7 +71,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     p_semester: semester,
     p_instructor_id: targetInstructorId,
     p_student_name: null,
-    p_section: null,
     p_operation: 'delete',
   });
   if (error) return fail('delete_failed');

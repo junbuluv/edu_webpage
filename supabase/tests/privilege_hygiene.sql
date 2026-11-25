@@ -46,6 +46,24 @@ begin
     v_bad := v_bad || E'\n  public.log_disclosure still exists (the app logs through src/lib/audit.ts)';
   end if;
 
+  -- Retired with ECO 1002 on 2026-11-25: per-day sections and lecture videos.
+  if pg_catalog.to_regprocedure(
+    'public.mutate_enrollment(uuid, uuid, text, text, uuid, text, text, text)'
+  ) is not null or pg_catalog.to_regprocedure(
+    'public.transfer_enrollment_scope(uuid, uuid, text, text, uuid, uuid, text, text)'
+  ) is not null then
+    v_bad := v_bad || E'\n  an enrollment function that takes p_section still exists';
+  end if;
+  if pg_catalog.to_regclass('public.archive_videos') is not null then
+    v_bad := v_bad || E'\n  public.archive_videos still exists';
+  end if;
+  if pg_catalog.to_regtype('public.workshop_section') is not null or exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public' and column_name = 'section'
+  ) then
+    v_bad := v_bad || E'\n  per-day workshop sections still exist (a section column or the workshop_section type)';
+  end if;
+
   if v_bad <> '' then
     raise exception 'privilege hygiene failed:%', v_bad;
   end if;

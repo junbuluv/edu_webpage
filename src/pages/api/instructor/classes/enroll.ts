@@ -116,9 +116,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     p_semester: semester,
     p_instructor_id: targetInstructorId,
     p_student_name: studentName,
-    // The database function still takes a section until the schema change
-    // that drops it; it must be null.
-    p_section: null,
     p_operation: 'insert',
   });
   if (error?.code === '23505')
