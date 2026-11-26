@@ -1,19 +1,7 @@
 import { getCollection } from 'astro:content';
 import { getAdminClient, selectAllRows } from '@lib/supabase/admin';
+import { isCourseSlug } from '@lib/courses';
 import { isAdmin, type UserRole } from '@lib/roles';
-
-export interface ManageVideo {
-  id: string;
-  courseSlug: string;
-  title: string;
-  lessonSlug: string;
-  semesterTerm: string;
-  semesterYear: number;
-  provider: string;
-  videoId: string;
-  published: boolean;
-  createdBy: string;
-}
 
 export interface ManagePaper {
   id: string;
@@ -39,7 +27,7 @@ export interface ManageQuiz {
 }
 
 /**
- * Courses visible in the staff archive plus non-deleted video/paper/quiz rows.
+ * Courses visible in the staff archive plus non-deleted paper/quiz rows.
  * Admins see the full catalog; instructors see courses with an active
  * assignment. Includes hidden rows for authorized managers.
  */
@@ -48,7 +36,6 @@ export async function loadInstructorArchive(
   role: UserRole | null | undefined,
 ): Promise<{
   courses: string[];
-  videos: ManageVideo[];
   papers: ManagePaper[];
   quizzes: ManageQuiz[];
 }> {
@@ -71,49 +58,13 @@ export async function loadInstructorArchive(
           .range(from, to),
     );
     if (assignments.error) throw new Error(assignments.error);
-    courses = [...new Set(assignments.rows.map((row) => row.course_slug))];
+    // Assignments for a course no longer in the catalog are skipped.
+    courses = [
+      ...new Set(assignments.rows.map((row) => row.course_slug)),
+    ].filter(isCourseSlug);
   }
 
-  if (courses.length === 0)
-    return { courses, videos: [], papers: [], quizzes: [] };
-
-  const vids = await selectAllRows<{
-    id: string;
-    course_slug: string;
-    title: string;
-    lesson_slug: string;
-    semester_term: string;
-    semester_year: number;
-    provider: string;
-    video_id: string;
-    published: boolean;
-    created_by: string;
-  }>((from, to) =>
-    admin
-      .from('archive_videos')
-      .select(
-        'id, course_slug, title, lesson_slug, semester_term, semester_year, provider, video_id, published, created_by',
-      )
-      .in('course_slug', courses)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .range(from, to),
-  );
-  if (vids.error) throw new Error(vids.error);
-
-  const videos: ManageVideo[] = vids.rows.map((v) => ({
-    id: v.id,
-    courseSlug: v.course_slug,
-    title: v.title,
-    lessonSlug: v.lesson_slug,
-    semesterTerm: v.semester_term,
-    semesterYear: v.semester_year,
-    provider: v.provider,
-    videoId: v.video_id,
-    published: v.published,
-    createdBy: v.created_by,
-  }));
+  if (courses.length === 0) return { courses, papers: [], quizzes: [] };
 
   const paperRows = await selectAllRows<{
     id: string;
@@ -185,5 +136,5 @@ export async function loadInstructorArchive(
     createdBy: q.created_by,
   }));
 
-  return { courses, videos, papers, quizzes };
+  return { courses, papers, quizzes };
 }

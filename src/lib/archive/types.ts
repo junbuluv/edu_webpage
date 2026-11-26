@@ -1,4 +1,4 @@
-export type ArchiveItemType = 'notes' | 'exam' | 'assignment' | 'video';
+export type ArchiveItemType = 'notes' | 'exam' | 'assignment';
 
 export interface Semester {
   term: 'spring' | 'summer' | 'fall';
@@ -10,20 +10,18 @@ export interface ArchiveItem {
   type: ArchiveItemType;
   title: string;
   course: string;
-  href: string; // notes/exam/assignment link; '' for inline-embed videos
+  href: string; // notes/exam/assignment link; '' for file-papers
   lessonSlugs: string[]; // normalized 'course/slug' refs
   units: string[]; // unique unit names resolved from lessonSlugs
   semester: Semester | null;
   searchText: string; // lowercased haystack for keyword match
-  provider?: 'youtube' | 'vimeo';
-  videoId?: string;
   fileUrl?: string; // signed download URL for file-papers
   fileName?: string; // original filename for file-papers
 }
 
 // Plain inputs (decoupled from Astro CollectionEntry so build.ts is alias-free).
 export interface LessonInput {
-  id: string; // e.g. 'eco-1002/solow' or 'eco-1002/solow.mdx'
+  id: string; // e.g. 'fin-3610/valuing-stocks' or 'fin-3610/valuing-stocks.mdx'
   course: string;
   title: string;
   unit: string;
@@ -40,17 +38,6 @@ export interface QuizInput {
   lessonSlug?: string;
   covers: string[];
   semester?: Semester | null;
-}
-
-export interface VideoInput {
-  slug: string;
-  course: string;
-  title: string;
-  lessonSlug: string;
-  description?: string;
-  provider: 'youtube' | 'vimeo';
-  videoId: string;
-  semester: Semester;
 }
 
 export interface PaperInput {

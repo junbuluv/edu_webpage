@@ -1,10 +1,10 @@
 // Pure helpers for scripts/tutor-eval.ts, which picks the tutor model before
-// launch. Pass bar from the 2026-10-05 interview: >= 90% of ECO quiz points
-// and >= 8 of 10 FIN numeric questions. The coach-behavior check (>= 8 of 10
-// transcripts) is read by a person. Alias-free.
+// launch. Pass bar: >= 90% of the points on multiple-choice and multi-select
+// quiz questions and >= 8 of 10 numeric questions. The coach-behavior check
+// (>= 8 of 10 transcripts) is read by a person. Alias-free.
 import type { AnswerValue, GradableQuestion } from '../quiz/grade.ts';
 
-export const ECO_PASS_FRACTION = 0.9;
+export const QUIZ_PASS_FRACTION = 0.9;
 export const FIN_NUMERIC_SAMPLE = 10;
 export const FIN_NUMERIC_PASS = 8;
 
@@ -58,14 +58,14 @@ export function parseEvalAnswer(
 }
 
 export function accuracyPasses(
-  ecoScore: number,
-  ecoMax: number,
-  finCorrect: number,
+  quizScore: number,
+  quizMax: number,
+  numericCorrect: number,
 ): boolean {
   return (
-    ecoMax > 0 &&
-    ecoScore / ecoMax >= ECO_PASS_FRACTION &&
-    finCorrect >= FIN_NUMERIC_PASS
+    quizMax > 0 &&
+    quizScore / quizMax >= QUIZ_PASS_FRACTION &&
+    numericCorrect >= FIN_NUMERIC_PASS
   );
 }
 

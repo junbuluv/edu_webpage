@@ -40,23 +40,19 @@ test('the instructor hub pluralizes and keeps developer docs off the page', () =
   assert.match(hub, /pluralize\(\s*workshops\.length,\s*'workshop'\s*\)/);
 });
 
-test('the course card names its list and shows the enrolled section', () => {
+test('the course card names its instructor list', () => {
   const card = read('components/course/CourseHeaderCard.astro');
   assert.match(
     card,
     /Course \$\{pluralize\(instructors\.length, 'instructor'\)\}/,
   );
-  assert.match(card, /Section \$\{enrolledSection\}/);
 });
 
 test('a denied course archive answers 403', () => {
-  for (const course of ['eco-1002', 'fin-3610']) {
-    assert.match(
-      read(`pages/${course}/archive.astro`),
-      /if \(!canView && !archiveUnavailable\) Astro\.response\.status = 403;/,
-      `${course} archive denial is not a 403`,
-    );
-  }
+  assert.match(
+    read('pages/fin-3610/archive.astro'),
+    /if \(!canView && !archiveUnavailable\) Astro\.response\.status = 403;/,
+  );
 });
 
 test('nothing outside tests names the retired ta role', () => {

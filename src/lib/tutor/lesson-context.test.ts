@@ -5,23 +5,23 @@ import assert from 'node:assert/strict';
 import { lessonToContext, TUTOR_MAX_CONTEXT_CHARS } from './lesson-context.ts';
 
 const meta = {
-  title: 'IS-LM',
-  summary: 'Goods and money markets.',
-  learningObjectives: ['Derive IS', 'Derive LM'],
+  title: 'NPV',
+  summary: 'Accept projects with positive NPV.',
+  learningObjectives: ['Compute NPV', 'Apply the rule'],
   prerequisites: [],
 };
 
 test('drops imports, keeps prose and math, adds a header', () => {
   const body =
-    "import ISLMChart from '@components/viz/ISLMChart';\n\n## IS curve\n\nLower $r$ raises $Y$.\n";
+    "import TVMNPV from '@components/viz/TVMNPV';\n\n## The rule\n\nA higher $r$ lowers $NPV$.\n";
   const out = lessonToContext(body, meta);
   assert.ok(
     out.startsWith(
-      'Lesson: IS-LM\nSummary: Goods and money markets.\nLearning objectives:\n- Derive IS\n- Derive LM',
+      'Lesson: NPV\nSummary: Accept projects with positive NPV.\nLearning objectives:\n- Compute NPV\n- Apply the rule',
     ),
   );
-  assert.ok(out.includes('## IS curve'));
-  assert.ok(out.includes('Lower $r$ raises $Y$.'));
+  assert.ok(out.includes('## The rule'));
+  assert.ok(out.includes('A higher $r$ lowers $NPV$.'));
   assert.ok(!out.includes('import '));
   assert.ok(!out.includes('Prerequisites:'));
 });
@@ -29,50 +29,48 @@ test('drops imports, keeps prose and math, adds a header', () => {
 test('lists prerequisites when present', () => {
   const out = lessonToContext('Text.', {
     ...meta,
-    prerequisites: ['Supply and demand'],
+    prerequisites: ['Time value of money'],
   });
-  assert.ok(out.includes('Prerequisites:\n- Supply and demand'));
+  assert.ok(out.includes('Prerequisites:\n- Time value of money'));
 });
 
 test('replaces a multi-line Figure with its caption', () => {
   const body =
-    '<Figure\n  src="/figures/eco-1002/x.png"\n  alt="Alt text"\n  caption="GDP growth and the funds rate move together."\n  credit="FRED"\n/>\n\nAfter.';
+    '<Figure\n  src="/figures/fin-3610/x.png"\n  alt="Alt text"\n  caption="Mortgage rates rose sharply in 2022."\n  credit="FRED"\n/>\n\nAfter.';
   const out = lessonToContext(body, meta);
-  assert.ok(
-    out.includes('[Figure: GDP growth and the funds rate move together.]'),
-  );
+  assert.ok(out.includes('[Figure: Mortgage rates rose sharply in 2022.]'));
   assert.ok(!out.includes('src='));
   assert.ok(out.includes('After.'));
 });
 
 test('summarizes interactive components without leaking props', () => {
-  const out = lessonToContext('<ISLMChart client:load />\n\nText after.', meta);
-  assert.ok(out.includes('[Interactive: ISLMChart]'));
+  const out = lessonToContext('<TVMNPV client:load />\n\nText after.', meta);
+  assert.ok(out.includes('[Interactive: TVMNPV]'));
   assert.ok(!out.includes('client:load'));
   assert.ok(out.includes('Text after.'));
 });
 
 test('keeps prose from string props even when strings contain /> and >', () => {
   const body = [
-    '<GuidedReader',
+    '<StepThrough',
     '  client:load',
-    '  lessonSlug="eco-1002/is-lm-guided"',
+    '  lessonSlug="fin-3610/npv-decision-rule"',
     '  steps={[',
-    "    { heading: 'Where we are headed', bodyHtml: `<p>The IS-LM model gives equilibrium output and the interest rate.<br/></p>` },",
+    "    { heading: 'Where we are headed', bodyHtml: `<p>The NPV rule accepts a project when its present value exceeds its cost.<br/></p>` },",
     '  ]}',
     '/>',
     '',
     'Closing paragraph.',
   ].join('\n');
   const out = lessonToContext(body, meta);
-  assert.ok(out.includes('[Interactive: GuidedReader]'));
+  assert.ok(out.includes('[Interactive: StepThrough]'));
   assert.ok(
     out.includes(
-      'The IS-LM model gives equilibrium output and the interest rate.',
+      'The NPV rule accepts a project when its present value exceeds its cost.',
     ),
   );
   assert.ok(!out.includes('<p>'));
-  assert.ok(!out.includes('eco-1002/is-lm-guided'));
+  assert.ok(!out.includes('fin-3610/npv-decision-rule'));
   assert.ok(out.includes('Closing paragraph.'));
 });
 
@@ -100,17 +98,17 @@ test('caps very long lessons', () => {
 
 test('drops self-check answer explanations from component props', () => {
   const body = [
-    '<GuidedReader',
+    '<StepThrough',
     '  steps={[',
     '    {',
-    "      heading: 'IS curve',",
-    '      bodyHtml: `<p>The IS curve slopes downward because investment falls as r rises.</p>`,',
+    "      heading: 'Discount rate',",
+    '      bodyHtml: `<p>NPV falls as the discount rate rises because later cash flows shrink.</p>`,',
     '      check: {',
-    "        prompt: 'A tax cut shifts which curve, and in which direction?',",
-    "        choices: ['IS shifts right', 'LM shifts left'],",
+    "        prompt: 'A higher discount rate moves NPV in which direction?',",
+    "        choices: ['NPV falls', 'NPV rises'],",
     '        correctIndex: 0,',
     '        explanation:',
-    "          'A tax cut raises spending at every r, shifting IS rightward.',",
+    "          'A higher rate discounts every future cash flow more, so NPV falls.',",
     '      },',
     '    },',
     '  ]}',
@@ -118,14 +116,14 @@ test('drops self-check answer explanations from component props', () => {
   ].join('\n');
   const out = lessonToContext(body, meta);
   assert.ok(
-    out.includes('A tax cut shifts which curve, and in which direction?'),
+    out.includes('A higher discount rate moves NPV in which direction?'),
   );
   assert.ok(
     out.includes(
-      'The IS curve slopes downward because investment falls as r rises.',
+      'NPV falls as the discount rate rises because later cash flows shrink.',
     ),
   );
-  assert.ok(!out.includes('A tax cut raises spending at every r'));
+  assert.ok(!out.includes('A higher rate discounts every future cash flow'));
 });
 
 test('renders BarFigure data as a compact table the tutor can read', () => {

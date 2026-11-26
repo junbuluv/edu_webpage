@@ -1,6 +1,6 @@
 ---
 name: Baruch Econ & Finance Studio
-description: Interactive macroeconomics and corporate finance lessons for Baruch College undergraduates.
+description: Interactive corporate finance lessons for Baruch College undergraduates.
 colors:
   ink: '#383838'
   ink-muted: '#56657A'
@@ -18,13 +18,11 @@ colors:
   neutral-200: '#E6E4DF'
   neutral-300: '#D8D7D6'
   neutral-400: '#A19E98'
-  course-eco-1002: '#0033A1'
   course-fin-3610: '#510C76'
   chart-1: '#2869AF'
   chart-2: '#E65F24'
   chart-3: '#009E73'
   chart-4: '#CC79A7'
-  chart-1-soft: '#DCE8F5'
   chart-3-soft: '#56BA96'
   chart-grid: '#E6E4DF'
   chart-ref: '#8C8A84'
@@ -166,9 +164,9 @@ The palette is Baruch's official blues over warm Pearl and Dove neutrals, with a
 ### Tertiary
 
 - **Midtown Blue, Tangerine, Bluish Green, Reddish Purple** (`chart-1` to `chart-4`): data marks only, in that order. Slots 1 and 2 are Baruch colors; slots 3 and 4 are Okabe-Ito because Baruch's Grape and Ochre collide with slots 1 and 2 for colorblind readers.
-- **Midtown Tint and Light Green** (`chart-1-soft`, `chart-3-soft`): area fills and the light step of an ordinal pair.
+- **Light Green** (`chart-3-soft`): the light step of an ordinal pair.
 - **Grid and Reference Gray** (`chart-grid`, `chart-ref`): gridlines, zero lines, and reference curves.
-- **Course identity**: ECO 1002 is CUNY Blue (`course-eco-1002`) and FIN 3610 is Grape (`course-fin-3610`), set in `src/content/courses/<slug>.json` and used as course-name text and chip fills.
+- **Course identity**: FIN 3610 is Grape (`course-fin-3610`), set in `src/content/courses/<slug>.json` and used as course-name text and chip fills.
 
 ### Neutral
 

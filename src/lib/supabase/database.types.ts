@@ -264,60 +264,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      archive_videos: {
-        Row: {
-          id: string;
-          course_slug: string;
-          lesson_slug: string;
-          semester_term: 'spring' | 'summer' | 'fall';
-          semester_year: number;
-          title: string;
-          provider: 'youtube' | 'vimeo';
-          video_id: string;
-          description: string | null;
-          duration_minutes: number | null;
-          created_by: string;
-          published: boolean;
-          deleted_at: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          course_slug: string;
-          lesson_slug: string;
-          semester_term: 'spring' | 'summer' | 'fall';
-          semester_year: number;
-          title: string;
-          provider: 'youtube' | 'vimeo';
-          video_id: string;
-          description?: string | null;
-          duration_minutes?: number | null;
-          created_by: string;
-          published?: boolean;
-          deleted_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          course_slug?: string;
-          lesson_slug?: string;
-          semester_term?: 'spring' | 'summer' | 'fall';
-          semester_year?: number;
-          title?: string;
-          provider?: 'youtube' | 'vimeo';
-          video_id?: string;
-          description?: string | null;
-          duration_minutes?: number | null;
-          created_by?: string;
-          published?: boolean;
-          deleted_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       archive_quizzes: {
         Row: {
           id: string;
@@ -497,7 +443,6 @@ export type Database = {
           semester: string;
           enrolled_at: string;
           student_name: string | null;
-          section: string | null;
         };
         Insert: {
           user_id: string;
@@ -506,7 +451,6 @@ export type Database = {
           semester: string;
           enrolled_at?: string;
           student_name?: string | null;
-          section?: string | null;
         };
         Update: {
           user_id?: string;
@@ -515,7 +459,6 @@ export type Database = {
           semester?: string;
           enrolled_at?: string;
           student_name?: string | null;
-          section?: string | null;
         };
         Relationships: [];
       };
@@ -525,7 +468,6 @@ export type Database = {
           workshop_slug: string;
           course_slug: string;
           semester: string;
-          section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of: string;
           schedule_version: number;
           instructor_id: string;
@@ -546,7 +488,6 @@ export type Database = {
           workshop_slug: string;
           course_slug: string;
           semester: string;
-          section?: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of: string;
           schedule_version?: number;
           instructor_id: string;
@@ -566,7 +507,6 @@ export type Database = {
           workshop_slug?: string;
           course_slug?: string;
           semester?: string;
-          section?: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
           week_of?: string;
           schedule_version?: number;
           instructor_id?: string;
@@ -773,7 +713,6 @@ export type Database = {
           p_semester: string;
           p_instructor_id: string;
           p_student_name: string | null;
-          p_section: string | null;
           p_operation: string;
         };
         Returns: boolean;
@@ -807,7 +746,6 @@ export type Database = {
           p_current_instructor_id: string;
           p_new_instructor_id: string;
           p_student_name: string | null;
-          p_section: string | null;
         };
         Returns: boolean;
       };
@@ -815,7 +753,6 @@ export type Database = {
     Enums: {
       user_role: 'student' | 'instructor' | 'admin';
       progress_status: 'started' | 'completed';
-      workshop_section: 'CML' | 'CTL' | 'CWL' | 'CRL';
     };
     CompositeTypes: Record<string, never>;
   };

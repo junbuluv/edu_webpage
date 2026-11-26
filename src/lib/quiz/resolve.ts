@@ -3,6 +3,7 @@ import { getAdminClient } from '@lib/supabase/admin';
 import type { QuestionT } from '@/content/config';
 import { quizQuestionsSchema } from './question-schema';
 import { QuizInvalidError, QuizUnavailableError } from '@lib/archive/errors';
+import { isUuid } from '@lib/workshop-policy';
 
 export interface GradableQuiz {
   slug: string;
@@ -12,6 +13,7 @@ export interface GradableQuiz {
   questions: QuestionT[];
   passingScore: number;
   lessonSlug?: string;
+  caseSlug?: string;
   furtherReading?: {
     title: string;
     url: string;
@@ -41,9 +43,14 @@ export async function loadGradableQuiz(
       questions: d.questions,
       passingScore: d.passingScore,
       lessonSlug: d.lessonSlug,
+      caseSlug: d.caseSlug,
       furtherReading: d.furtherReading,
     };
   }
+  // Instructor-authored quizzes are keyed by a uuid. Any other slug (a typo,
+  // a retired quiz) is simply unknown; asking Postgres to compare it with a
+  // uuid column errors, which used to surface as a 503.
+  if (!isUuid(slug)) return null;
   try {
     const admin = getAdminClient();
     const { data, error } = await admin
