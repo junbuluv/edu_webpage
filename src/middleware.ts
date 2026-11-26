@@ -5,6 +5,7 @@ import { isAdmin as isAdminRole, isStaff as isStaffRole } from '@lib/roles';
 import { mutationRequestVerdict } from '@lib/security/mutation-request';
 import { hasAcceptedCurrentTerms } from '@lib/auth/terms';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
+import { retiredCourseRedirect } from '@lib/retired-routes';
 
 // '/exams' is reserved for the upcoming proctored-exams feature (see the
 // feat/proctored-exams branch). No route exists under it yet, so it only
@@ -57,6 +58,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       },
     );
   }
+  // Old ECO 1002 addresses (the course was removed) go to the home page.
+  const retiredTarget = ['GET', 'HEAD'].includes(context.request.method)
+    ? retiredCourseRedirect(url.pathname)
+    : null;
+  if (retiredTarget) return context.redirect(retiredTarget, 301);
   const headers = new Headers();
   const supabase = createSupabaseServerClient(
     context.cookies,
