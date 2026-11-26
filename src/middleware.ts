@@ -99,6 +99,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     ensureDeviceId(context.cookies, import.meta.env.PROD);
   }
 
+  // On Vercel every address with no page renders the 404 page through a route
+  // that forces status 404, so a gate's redirect there reaches the browser as a
+  // blank 404. The 404 page needs no gate: render it.
+  if (context.routePattern === '/404') {
+    const response = await next();
+    headers.forEach((value, key) => response.headers.append(key, value));
+    return response;
+  }
+
   const role = context.locals.profile?.role ?? 'student';
   const isAdmin = isAdminRole(role);
   const isStaff = isStaffRole(role);
