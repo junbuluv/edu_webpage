@@ -29,7 +29,7 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   live in `src/lib/cases/` (pure, alias-free, unit-tested); data files are
   built by `scripts/cases/*.ts` from downloads that are not committed.
   `src/lib/cases/content.test.ts` fails on a case whose lesson or quiz slug
-  names no file
+  names no file, or whose optional `extensionOf` names no case
 - Quizzes: `src/content/quizzes/<slug>.json`
 - Content schemas (frontmatter + quiz shape): `src/content/config.ts`
 - Visualizations: `src/components/viz/`
@@ -732,9 +732,9 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts` /
-   `cases/{yield-curve,wacc,union-pacific,dcf,random}.ts`,
+   `cases/{yield-curve,wacc,union-pacific,dcf,random,pme}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 317 tests as of 2026-11-25.
+   when adding testable logic. 330 tests as of 2026-11-25.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

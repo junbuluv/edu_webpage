@@ -24,6 +24,7 @@ const cases = readdirSync(join(CONTENT, 'cases'), { recursive: true })
       slug: f.replace(/\.mdx$/, '').replaceAll('\\', '/'),
       course: value('course'),
       quizSlug: value('quizSlug'),
+      extensionOf: value('extensionOf'),
       relatedLessons: [...list.matchAll(/-\s*'?([^'\n]+)'?/g)].map((m) => m[1]),
     };
   });
@@ -54,5 +55,15 @@ test('every case has a practice quiz that links back to it', () => {
     assert.equal(quiz.slug, c.quizSlug);
     assert.equal(quiz.caseSlug, c.slug);
     assert.equal(quiz.course, c.course);
+  }
+});
+
+test('a case marked as an extension names another case in the same course', () => {
+  const slugs = new Set(cases.map((c) => c.slug));
+  for (const c of cases) {
+    if (!c.extensionOf) continue;
+    assert.notEqual(c.extensionOf, c.slug, `${c.slug} extends itself`);
+    assert.ok(slugs.has(c.extensionOf), `${c.slug}: no case ${c.extensionOf}`);
+    assert.equal(c.extensionOf.split('/')[0], c.course, c.slug);
   }
 });

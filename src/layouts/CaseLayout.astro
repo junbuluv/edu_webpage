@@ -29,6 +29,10 @@ const next =
 const readFirst = data.relatedLessons.flatMap(
   (slug) => lessons.find((l) => l.slug === slug) ?? [],
 );
+// content.test.ts fails on an extensionOf that names no case.
+const extended = data.extensionOf
+  ? courseCases.find((c) => c.slug === data.extensionOf)
+  : undefined;
 const courseCode = data.course.toUpperCase().replace('-', ' ');
 ---
 
@@ -37,7 +41,7 @@ const courseCode = data.course.toUpperCase().replace('-', ' ');
     <p class="text-sm font-medium uppercase tracking-wide text-accent">
       <a href={`/${data.course}#case-studies`} class="hover:underline"
         >{courseCode} case study</a
-      > · {data.topic}
+      > · {data.topic}{extended && ' · extension'}
     </p>
     <h1 class="mt-2 text-3xl font-extrabold tracking-tight">{data.title}</h1>
     <p class="mt-3 max-w-measure text-ink-muted">{data.summary}</p>
@@ -48,12 +52,23 @@ const courseCode = data.course.toUpperCase().replace('-', ' ');
     </div>
 
     {
-      readFirst.length > 0 && (
+      (extended || readFirst.length > 0) && (
         <section class="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
             Read first
           </h2>
           <ul class="mt-2 list-disc space-y-1 pl-5">
+            {extended && (
+              <li>
+                <a
+                  href={`/cases/${extended.slug}`}
+                  class="text-accent underline"
+                >
+                  {extended.data.title}
+                </a>{' '}
+                (the case this one extends)
+              </li>
+            )}
             {readFirst.map((l) => (
               <li>
                 <a href={`/lessons/${l.slug}`} class="text-accent underline">
@@ -74,7 +89,7 @@ const courseCode = data.course.toUpperCase().replace('-', ' ');
       <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">
         Sources
       </h2>
-      <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+      <ul class="mt-2 max-w-measure list-disc space-y-1 pl-5 text-sm">
         {
           data.sources.map((s) => (
             <li>
