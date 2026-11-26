@@ -101,7 +101,11 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `workshop_section` type and `archive_videos`; course CHECKs allow only
   `fin-3610`). To add a course: append its slug to `COURSE_SLUGS`, add the
   JSON file, and add the slug to every `course_slug in ('fin-3610')` list in
-  `schema.sql`
+  `schema.sql`. Old public ECO addresses (`/eco-1002/…`, `/macro`,
+  `/lessons/eco-1002/…`, `/practice/eco-1002-…`, `/workshops/eco-1002-…`)
+  answer 301 to `/?from=eco-1002`, where the home page says the course is
+  gone: the pure, unit-tested `src/lib/retired-routes.ts`, called near the top
+  of `src/middleware.ts`
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
