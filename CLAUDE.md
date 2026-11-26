@@ -105,10 +105,13 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `/lessons/eco-1002/…`, `/practice/eco-1002-…`, `/workshops/eco-1002-…`)
   answer 301 to `/?from=eco-1002`, where the home page says the course is
   gone: the pure, unit-tested `src/lib/retired-routes.ts`, called near the top
-  of `src/middleware.ts`. On Vercel the middleware runs only for addresses
-  that match a page, so `src/pages/eco-1002/[...path].astro` and
-  `src/pages/macro.astro` exist only to give those addresses a route (the dev
-  server runs middleware on every address, so a dev-only check misses this)
+  of `src/middleware.ts`. `src/pages/eco-1002/[...path].astro` and
+  `src/pages/macro.astro` give those addresses a page of their own: on Vercel
+  an address with no page reaches the server only through the build's
+  catch-all route, which answers with status 404 and renders
+  `src/pages/404.astro` (on request, so the header shows who is signed in), and
+  a middleware redirect is not known to survive that route. The dev server runs
+  middleware on every address, so a dev-only check misses this
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
@@ -742,7 +745,7 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `cases/{yield-curve,beta-sampling,wacc,union-pacific,dcf,random,pme}.ts` /
    `bonds/callable.ts` / `factors/ols.ts` / `clo/waterfall.ts` / `lbo/model.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 381 tests as of 2026-11-25.
+   when adding testable logic. 383 tests as of 2026-11-26.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

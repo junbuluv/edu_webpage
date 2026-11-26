@@ -20,7 +20,11 @@ project** — do NOT flag a credit just because it names one of these.
 ## Free for education with attribution (fine; keep attribution + creditHref)
 
 - **NYU Stern / Aswath Damodaran data library** (`pages.stern.nyu.edu/~adamodar`).
-- **Ken French Data Library**, Tuck School of Business (Fama-French factors).
+- **Ken French Data Library**, Tuck School of Business (Fama-French factors,
+  industry and other portfolio returns). Owner-confirmed 2026-11-25: monthly
+  series derived from the library may be stored in the repo (for example
+  `src/lib/factors/regressions.json`) when the data file and the chart or case
+  that uses it carry the library's credit, link and copyright line.
 
 ## Owner-confirmed acceptable for this project (do NOT re-flag) — 2026-05-31
 
