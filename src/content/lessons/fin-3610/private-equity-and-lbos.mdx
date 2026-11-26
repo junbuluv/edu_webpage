@@ -1,0 +1,330 @@
+---
+title: 'Private Equity and Leveraged Buyouts'
+course: fin-3610
+unit: 'Credit markets and private equity'
+order: 30
+summary: 'How a buyout fund pays for a company largely with borrowed money, how its return splits into earnings growth, a change in the valuation multiple and debt paydown, why the debt raises both the expected return and the risk, and how fees divide the result between the fund manager and its investors.'
+learningObjectives:
+  - 'Build the sources and uses of funds for a buyout and find the equity invested.'
+  - 'Compute the multiple of invested capital and the IRR of a buyout.'
+  - 'Split the gain in equity value into EBITDA growth, multiple change, and debt paydown.'
+  - 'Explain why leverage raises both the expected return and the risk of the equity.'
+  - 'Compute a management fee and carried interest above a hurdle.'
+prerequisites:
+  - 'Multiples and comparables (EV/EBITDA).'
+  - 'Capital structure in a perfect market (MM I and II).'
+  - 'Financial distress and the trade-off theory.'
+estimatedMinutes: 30
+tags: ['fin-3610', 'private equity', 'LBO', 'leverage']
+quizSlug: 'fin-3610-private-equity-and-lbos'
+draft: false
+---
+
+import LBOReturns from '@components/viz/LBOReturns';
+
+## The return on a buyout
+
+A **leveraged buyout (LBO)** is the purchase of a whole company paid
+for largely with borrowed money. The buyer is usually a **private
+equity fund**: a pool of investors' money run by a specialist firm.
+The fund puts in equity $E_0$, the company borrows the rest, and
+the fund sells after $T$ years for equity worth $E_T$. Two numbers
+summarize the result:
+
+$$
+\text{MOIC} = \frac{E_T}{E_0},
+\qquad
+\text{IRR} = \left(\frac{E_T}{E_0}\right)^{1/T} - 1.
+$$
+
+The **multiple of invested capital (MOIC)** says how many dollars
+came back per dollar put in. The **internal rate of return (IRR)**
+turns that into a yearly rate. This short formula works when there
+is one payment in and one payment out. With payments along the way,
+solve for the rate that sets NPV to zero, as in
+[Investment Decision Rules](/lessons/fin-3610/investment-decision-rules).
+
+MOIC ignores time and IRR does not. Doubling the money is 2.0x
+whether it takes three years or seven, but the IRR is 26.0% over
+three years, 14.9% over five, and 10.4% over seven.
+
+Equity is what is left of the company's value after its debt:
+
+$$
+E = \text{EV} - D,
+\qquad
+\text{EV} = m \times \text{EBITDA}.
+$$
+
+EV is enterprise value, $D$ is debt net of cash, and $m$ is the
+EV/EBITDA multiple from
+[Multiples and Comparables](/lessons/fin-3610/multiples-and-comparables).
+Buyers usually quote the price of a whole company as a multiple of
+its EBITDA, so a buyout has an **entry multiple** $m_0$ and an
+**exit multiple** $m_T$.
+
+## Three sources of return
+
+Write equity at exit and at entry with those two identities and
+subtract. The gain splits into three parts:
+
+$$
+E_T - E_0 =
+\underbrace{m_0\,(\text{EBITDA}_T - \text{EBITDA}_0)}_{\text{earnings growth}}
++ \underbrace{(m_T - m_0)\,\text{EBITDA}_T}_{\text{multiple change}}
++ \underbrace{(D_0 - D_T)}_{\text{debt paydown}}.
+$$
+
+- **Earnings growth.** The company earns more, and each extra dollar
+  of EBITDA is worth $m_0$ dollars of value. This is the part the
+  owners can work on directly.
+- **Multiple change.** Buyers at exit pay a different price per
+  dollar of EBITDA than the fund paid at entry. This depends mostly
+  on market conditions at the two dates, and it is negative when
+  multiples fall.
+- **Debt paydown.** The company's own cash flow repays debt. Each
+  dollar repaid is a dollar of company value that now belongs to the
+  owners instead of the lenders. This part is not a gain from
+  borrowing: with no debt the same cash would go straight to the
+  owners, and more of it, because no interest is paid. Borrowing
+  raises the percentage return by making $E_0$ smaller.
+
+This split is called a **value bridge**.
+
+## A worked example
+
+These numbers are stylized, not a real deal. A fund buys a firm at
+10 times its EBITDA of \$100M, so the price is \$1,000M. Ignore
+fees. The company borrows \$500M at 8% and the fund puts in \$500M
+of equity. EBITDA grows 5% a year. Half of each year's EBITDA is
+cash left after taxes and investment. Interest on the year's opening
+debt is paid first and the rest repays debt (\$ millions, rounded):
+
+| Year | EBITDA | Cash flow | Interest | Debt repaid | Debt at year end |
+| ---: | -----: | --------: | -------: | ----------: | ---------------: |
+|    1 |  105.0 |      52.5 |     40.0 |        12.5 |            487.5 |
+|    2 |  110.3 |      55.1 |     39.0 |        16.1 |            471.4 |
+|    3 |  115.8 |      57.9 |     37.7 |        20.2 |            451.2 |
+|    4 |  121.6 |      60.8 |     36.1 |        24.7 |            426.5 |
+|    5 |  127.6 |      63.8 |     34.1 |        29.7 |            396.8 |
+
+The fund sells at the end of year 5 for 10 times \$127.6M, which is
+\$1,276M. After repaying the \$397M of debt still owed, equity is
+\$879M.
+
+$$
+\text{MOIC} = \frac{879}{500} = 1.76,
+\qquad
+\text{IRR} = 1.76^{1/5} - 1 = 12.0\%.
+$$
+
+The value bridge: earnings growth is $10 \times (127.6 - 100) = 276$,
+the multiple did not change, and debt fell by $500 - 397 = 103$.
+The total, 379, is the gain in equity from 500 to 879. About
+three quarters of it came from growth.
+
+The chart starts from this deal. Its readout also shows the
+**unlevered IRR**, the return on the same purchase made with no
+debt, which the next section explains.
+
+<LBOReturns client:load />
+
+_Try it: the baseline earns 12.0% a year with no help from the
+multiple. Raise EBITDA growth to 10% and the IRR passes 20%, a round
+target used here for illustration. Then try to reach 20% with debt
+alone and watch for the warning._
+
+## Why leverage raises both the expected return and the risk
+
+Run the same purchase with no debt. The fund puts in the whole
+\$1,000M, takes each year's cash flow as it is earned (\$290M in
+total) and sells for \$1,276M. That is 1.57x. With payments along
+the way the short IRR formula does not apply. Each year the company
+pays out 5.25% of its opening value and its value grows 5%, so the
+fund earns 10.25% a year. Now compare the two versions across
+outcomes:
+
+| Outcome                                | No debt | Debt of 5x EBITDA at 8% |
+| -------------------------------------- | ------: | ----------------------: |
+| EBITDA grows 10% a year, exit at 12x   |   19.2% |                   26.0% |
+| Baseline: grows 5% a year, exit at 10x |   10.3% |                   12.0% |
+| No growth, exit at 10x                 |    5.0% |                    2.2% |
+| EBITDA falls 5% a year, exit at 8x     |   −4.0% |                  −22.6% |
+
+The lenders are owed a fixed 8% whatever happens. When the company
+earns more than 8% on its value, the extra goes to the owners, and
+it is spread over a smaller equity stake. When the company earns
+less, the gap comes out of the owners too. So debt widens the range
+of equity returns in both directions. Averaged over outcomes, the
+levered return is higher only if the company is expected to earn
+more than its debt costs. This is Proposition II from
+[Capital Structure in a Perfect Market](/lessons/fin-3610/mm-perfect-market):
+
+$$
+r_E = r_U + \frac{D}{E}\,(r_U - r_D).
+$$
+
+Year 1 of the baseline: $10.25\% + \frac{500}{500}\,(10.25\% - 8\%) = 12.5\%$.
+The worked example agrees: equity goes from 500 to
+$10 \times 105 - 487.5 = 562.5$. As debt is repaid, $D/E$ falls and
+each later year earns a little less. The five years average 12.0%.
+
+The same lesson carries a warning. In a perfect market the higher
+expected return on levered equity is exactly the pay for its higher
+risk, so leverage alone creates no value. Real markets depart from
+that in ways that matter for a buyout:
+
+- **Taxes add value.** Interest is deductible, so debt shields
+  income from tax. See
+  [Debt and Taxes](/lessons/fin-3610/debt-and-taxes). The chart
+  leaves this out: its cash flow is the same share of EBITDA at any
+  level of debt.
+- **Distress destroys value.** A company with heavy debt has little
+  room for a bad year. If cash flow cannot cover interest it
+  defaults, and default is costly. See
+  [Financial Distress and Trade-Off Theory](/lessons/fin-3610/financial-distress).
+  In the chart, push debt to 7x at a 10% rate: the warning appears
+  in year 1 and the IRR drops below the baseline.
+- **Control can add value.** A single owner with control can replace
+  managers and change strategy. Any gain shows up in the earnings
+  growth bar, not the debt bar.
+
+## Sources and uses of funds
+
+Every buyout starts from a table that must balance. **Uses** are
+what the money pays for. **Sources** are where it comes from. Here
+is a real one. Investors led by KKR bought Dollar General in July
+2007, paying shareholders \$22.00 a share.
+
+| Sources of funds              | \$ millions | Uses of funds           | \$ millions |
+| ----------------------------- | ----------: | ----------------------- | ----------: |
+| Revolving credit facility     |       432.3 | Purchase price          |     7,024.9 |
+| Term loan                     |     2,300.0 | Rollover equity         |         3.2 |
+| Senior notes, net of discount |     1,151.8 | Refinance existing debt |       215.6 |
+| Senior subordinated notes     |       725.0 | Other retained debt     |        66.7 |
+| Other retained debt           |        66.7 | Fees and expenses       |       287.0 |
+| Equity contribution           |     2,767.0 |                         |             |
+| Rollover equity (management)  |         3.2 |                         |             |
+| Excess cash on hand           |       151.4 |                         |             |
+| **Total sources**             | **7,597.4** | **Total uses**          | **7,597.4** |
+
+_Source: Dollar General Corporation, Amendment No. 1 to Form S-4,
+filed with the SEC on January 25, 2008, section "The Transactions"
+([SEC EDGAR](https://www.sec.gov/Archives/edgar/data/29534/000104746908000524/a2181974zs-4a.htm)).
+Row labels are shortened. The facts below are from the same filing._
+
+How to read it:
+
+- **Debt is 61.5% of the money.** The five debt lines add to
+  \$4,675.8 million. Equity is \$2,770.2 million, or 36.5%, and the
+  company's own cash covers the last 2.0%. That is \$1.69 of debt
+  for each dollar of equity.
+- **The company owes the debt, not the fund.** Dollar General's
+  stores repay the lenders out of their cash flow. If the company
+  fails, the fund loses its equity and owes nothing more.
+- **Debt comes in layers.** The revolving facility (a credit line
+  the company draws on and repays as needed) and the term loan
+  (borrowed in full on day one, due in seven years) are secured and
+  are repaid first. The senior notes are bonds paying 10.625%. Their
+  face value is \$1,175 million and they brought in \$1,151.8
+  million, which is what "net of discount" means. The senior
+  subordinated notes are last in line among the lenders. They pay
+  11.875% in cash, or 12.625% if the company chooses to pay with
+  more notes instead. A place further back in line recovers less in
+  a default, so it earns a higher rate. That is the recovery term in
+  the spread formula of
+  [Credit Risk and Spreads](/lessons/fin-3610/credit-risk-and-spreads).
+- **Two lines sit on both sides.** Senior managers invested \$3.2
+  million, by keeping shares they already held (a rollover) or by
+  paying cash, and \$66.7 million of old debt stayed in place. Each
+  appears as a source and as a use.
+- **Fees are a use of funds.** The \$287.0 million of fees and
+  expenses, 3.8% of the total, paid banks, lawyers and advisers,
+  including firms tied to the buyers.
+
+## Who gets the return: fund structure and fees
+
+A buyout fund is a limited partnership with two kinds of partner.
+
+- **Limited partners (LPs)** supply most of the money: pension
+  funds, university endowments, insurers and wealthy individuals.
+  They make no investment decisions and can lose no more than they
+  commit. Funds typically invest over a horizon of 10 or more years
+  and limit withdrawals along the way, according to the
+  [SEC's investor guide](https://www.investor.gov/introduction-investing/investing-basics/investment-products/private-investment-funds/private-equity).
+- **The general partner (GP)** is the private equity firm. It picks
+  the companies, arranges the debt, sits on the boards and decides
+  when to sell.
+
+The GP is paid in two ways. With fee rate $f$ and carry rate $c$:
+
+$$
+\text{fee per year} = f \times \text{committed capital},
+\qquad
+\text{carry} = c \times (\text{proceeds} - \text{capital paid in}).
+$$
+
+Committed capital is the total the LPs have promised. Capital paid
+in is what they have handed over so far, fees included.
+
+The **management fee** is paid whatever the results. **Carried
+interest** is a share of the profit with a condition attached: after
+the carry is paid, the LPs must still hold their capital plus a
+**hurdle** return of $h$ a year, which is
+$\text{capital paid in} \times (1 + h)^T$ after $T$ years. If
+proceeds are below that amount there is no carry. Above it, the GP
+takes the smaller of two amounts: its share $c$ of the profit, or
+whatever the proceeds exceed the hurdle amount by. This rule is
+called a full catch-up.
+
+Terms differ from fund to fund. A common shorthand is "2 and 20",
+meaning $f = 2\%$ and $c = 20\%$. The example below uses those
+rates and assumes a hurdle of $h = 8\%$, with made-up fund numbers.
+
+LPs commit \$1,000M to a fund that lasts five years (shorter than a
+real fund, to keep the arithmetic small).
+
+1. **Fees.** $2\% \times 1{,}000 = 20$ a year, or \$100M over five
+   years. That leaves \$900M to invest in companies.
+2. **Proceeds.** The companies are sold at the end of year 5 for
+   \$2,000M.
+3. **Carry.** The LPs paid in \$1,000M, fees included, so the profit
+   is 1,000 and $20\% \times 1{,}000 = 200$. The GP would take
+   \$200M and the LPs \$1,800M.
+4. **Hurdle.** The LPs need $1{,}000 \times 1.08^5 = 1{,}469$. They
+   hold 1,800 after the carry, so the full \$200M is paid.
+
+The LPs earn 1.8x, an IRR of 12.5% if we treat the \$1,000M as paid
+in on day one. The companies themselves turned \$900M into \$2,000M,
+which is 2.22x and 17.3% a year. Fees and carry cost the LPs almost
+5 percentage points a year, and the GP collects \$300M. The chart's
+IRR is the company-level kind, before fund fees and carry.
+
+Two other outcomes show the hurdle at work. Had the companies sold
+for \$1,400M, below the \$1,469M hurdle, there would be no carry.
+At \$1,500M, 20% of the \$500M profit is \$100M, but paying it would
+leave the LPs \$1,400M, below the hurdle, so the GP takes only
+$1{,}500 - 1{,}469 = 31$. In both cases the GP keeps the \$100M of
+fees.
+
+The company that was bought can pay fees as well. Dollar General
+agreed to pay firms tied to its buyers \$5 million a year, rising 5%
+annually, under a monitoring agreement.
+
+## Buyouts and mergers
+
+A buyout is an acquisition, so the logic of
+[Mergers and Acquisitions](/lessons/fin-3610/mergers-and-acquisitions)
+applies: the buyer pays a premium over the market price, and the
+deal creates value for the buyer only if the company is worth more
+in its hands than the price paid. The difference is the kind of
+buyer. A company buying a rival can hope for synergies with its own
+business. A fund usually has no business to combine with the target,
+so it must earn its return from the three sources above: growing
+EBITDA, selling at a better multiple than it paid, and using the
+company's cash flow to repay debt.
+
+That is why the entry multiple matters so much. In the chart, raise
+the entry multiple from 10x to 12x and leave the rest alone: the
+IRR falls from 12.0% to 4.7%. The company and the sale are the same.
+Only the price changed.
