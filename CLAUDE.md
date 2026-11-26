@@ -108,10 +108,12 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   of `src/middleware.ts`. `src/pages/eco-1002/[...path].astro` and
   `src/pages/macro.astro` give those addresses a page of their own: on Vercel
   an address with no page reaches the server only through the build's
-  catch-all route, which answers with status 404 and renders
-  `src/pages/404.astro` (on request, so the header shows who is signed in), and
-  a middleware redirect is not known to survive that route. The dev server runs
-  middleware on every address, so a dev-only check misses this
+  catch-all route, which renders `src/pages/404.astro` (on request, so the
+  header shows who is signed in) and forces status 404. The middleware runs
+  there, but a redirect it returns reaches the browser as a blank 404 (seen
+  live on `/exams`, 2026-11-26), so the middleware skips its sign-in and terms
+  gates when `context.routePattern` is `/404`. The dev server runs middleware
+  normally on every address, so a dev-only check misses this
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
