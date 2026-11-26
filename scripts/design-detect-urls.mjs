@@ -1,6 +1,6 @@
 // Prints the public page URLs the design-detect CI job scans with
-// `npx impeccable detect`: fixed public routes, every published lesson,
-// every practice quiz, and each instructor's course page.
+// `npx impeccable detect`: fixed public routes, every published lesson and
+// case study, every practice quiz, and each instructor's course page.
 // Usage: npx impeccable detect $(node scripts/design-detect-urls.mjs [origin])
 import { readdirSync, readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
@@ -15,7 +15,6 @@ const paths = [
   '/accessibility',
   '/privacy',
   '/terms',
-  '/macro',
   '/practice',
   '/auth/signin',
   '/auth/signup',
@@ -27,6 +26,11 @@ for (const course of list('courses').map((f) => f.replace(/\.json$/, ''))) {
   for (const f of list(`lessons/${course}/`)) {
     if (!/^draft:\s*true\b/m.test(read(`lessons/${course}/${f}`))) {
       paths.push(`/lessons/${course}/${f.replace(/\.mdx$/, '')}`);
+    }
+  }
+  for (const f of list(`cases/${course}/`)) {
+    if (!/^draft:\s*true\b/m.test(read(`cases/${course}/${f}`))) {
+      paths.push(`/cases/${course}/${f.replace(/\.mdx$/, '')}`);
     }
   }
 }

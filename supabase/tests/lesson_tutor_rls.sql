@@ -65,11 +65,11 @@ declare
   r record;
 begin
   insert into public.tutor_messages (user_id, course_slug, lesson_slug)
-  select '00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/is-lm-intro'
+  select '00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/npv-decision-rule'
     from generate_series(1, 39);
 
   select * into r from public.consume_tutor_quota(
-    '00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/is-lm-intro', 40
+    '00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/npv-decision-rule', 40
   );
   if r.status <> 'ok' or r.message_id is null or r.remaining <> 0 then
     raise exception 'tutor quota: 40th message returned %/%/%',
@@ -77,7 +77,7 @@ begin
   end if;
 
   select * into r from public.consume_tutor_quota(
-    '00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/is-lm-intro', 40
+    '00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/npv-decision-rule', 40
   );
   if r.status <> 'rate_limited' then
     raise exception 'tutor quota: 41st message returned %', r.status;
@@ -87,7 +87,7 @@ begin
      set created_at = now() - interval '25 hours'
    where user_id = '00000000-0000-0000-0000-000000000901';
   select * into r from public.consume_tutor_quota(
-    '00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/is-lm-intro', 40
+    '00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/npv-decision-rule', 40
   );
   if r.status <> 'ok' or r.remaining <> 39 then
     raise exception 'tutor quota counted messages older than 24 hours (%/%)',
@@ -95,7 +95,7 @@ begin
   end if;
 
   insert into public.tutor_messages (user_id, course_slug, lesson_slug)
-  values ('00000000-0000-0000-0000-000000000902', 'eco-1002', 'eco-1002/is-lm-intro');
+  values ('00000000-0000-0000-0000-000000000902', 'fin-3610', 'fin-3610/npv-decision-rule');
 end $$;
 
 -- A student reads only their own rows and can neither write nor call the RPC.
@@ -117,13 +117,13 @@ begin
   end if;
   begin
     insert into public.tutor_messages (user_id, course_slug, lesson_slug)
-    values ('00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/forged');
+    values ('00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/forged');
     raise exception 'student inserted a tutor usage row directly';
   exception when insufficient_privilege then null;
   end;
   begin
     perform public.consume_tutor_quota(
-      '00000000-0000-0000-0000-000000000901', 'eco-1002', 'eco-1002/forged', 40
+      '00000000-0000-0000-0000-000000000901', 'fin-3610', 'fin-3610/forged', 40
     );
     raise exception 'student executed consume_tutor_quota';
   exception when insufficient_privilege then null;

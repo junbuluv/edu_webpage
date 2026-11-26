@@ -1,11 +1,9 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PaperUploadForm from '@components/archive/PaperUploadForm';
-import { getCollection } from 'astro:content';
 import { isStaff, isAdmin } from '@lib/roles';
 import { loadInstructorArchive } from '@lib/instructor/archive-manage';
 import { partitionByOwnership } from '@lib/instructor/archive-ownership';
-import { normalizeLessonSlug } from '@lib/archive/build';
 
 const user = Astro.locals.user;
 const role = Astro.locals.profile?.role ?? 'student';
@@ -28,11 +26,7 @@ try {
     { status: 503 },
   );
 }
-const { courses, videos, papers, quizzes } = archive;
-const editableVideos = partitionByOwnership(videos, {
-  userId: user.id,
-  canEditAll: isAdmin(role),
-});
+const { courses, papers, quizzes } = archive;
 const editablePapers = partitionByOwnership(papers, {
   userId: user.id,
   canEditAll: isAdmin(role),
@@ -42,25 +36,12 @@ const editableQuizzes = partitionByOwnership(quizzes, {
   canEditAll: isAdmin(role),
 });
 const prefillCourse = Astro.url.searchParams.get('course') ?? '';
-const prefillLesson = Astro.url.searchParams.get('lesson') ?? '';
 const manageCourses = courses; // courses the viewer manages
-
-// Only ECO 1002 supports videos; show the add form only if the viewer
-// manages eco-1002.
-const canAddVideo = courses.includes('eco-1002');
-const ecoLessons = canAddVideo
-  ? (await getCollection('lessons', (l) => l.data.course === 'eco-1002'))
-      .map((l) => ({ slug: normalizeLessonSlug(l.id), title: l.data.title }))
-      .sort((a, b) => a.title.localeCompare(b.title))
-  : [];
 
 const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 
 const OK_MESSAGES: Record<string, string> = {
-  created: 'Video added as hidden. Review and publish it when ready.',
-  updated: 'Video updated.',
-  deleted: 'Video removed.',
   paper_created: 'File uploaded as hidden. Review and publish it when ready.',
   paper_updated: 'Exam/assignment updated.',
   paper_deleted: 'Exam/assignment removed.',
@@ -76,7 +57,6 @@ const ERROR_MESSAGES: Record<string, string> = {
   invalid_input: 'Some fields were missing or invalid.',
   invalid_course: 'Unknown course.',
   invalid_lesson: 'One of the selected lessons is not valid for that course.',
-  invalid_video_id: 'The video ID is not valid for the selected provider.',
   missing_file: 'Please choose a file to upload.',
   bad_file_type: 'Only PDF or Word (.docx) files are allowed.',
   file_too_large: 'The file is too large (max 25 MB).',
@@ -102,10 +82,9 @@ const currentYear = new Date().getFullYear();
     </p>
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">Archive content</h1>
     <p class="mt-3 text-ink-muted">
-      Add lecture videos (ECO 1002) and past exams/assignments to the course
-      archive. Enrolled students see published items; you can edit, hide, or
-      remove what you created. Every new item starts hidden so it can be
-      reviewed before students see it.
+      Add past exams and assignments to the course archive. Enrolled students
+      see published items; you can edit, hide, or remove what you created. Every
+      new item starts hidden so it can be reviewed before students see it.
     </p>
 
     {
@@ -128,181 +107,6 @@ const currentYear = new Date().getFullYear();
         </p>
       )
     }
-
-    {
-      canAddVideo && (
-        <section class="mt-8 rounded-lg border border-slate-200 p-5">
-          <h2 class="text-lg font-semibold">Add a video</h2>
-          <p class="mt-1 text-sm text-ink-muted">
-            Videos link to YouTube or Vimeo. Paste the video's ID, not a file.
-            New videos start hidden. To upload an exam or assignment file, use
-            the section below.
-          </p>
-          <form
-            method="POST"
-            action="/api/instructor/archive/video/create"
-            class="mt-4 space-y-3 text-sm"
-          >
-            <input type="hidden" name="course_slug" value="eco-1002" />
-            <label class="block">
-              <span class="text-ink-muted">Title</span>
-              <input
-                name="title"
-                required
-                maxlength="200"
-                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-              />
-            </label>
-            <label class="block">
-              <span class="text-ink-muted">Lesson</span>
-              <select
-                name="lesson_slug"
-                required
-                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-              >
-                {ecoLessons.map((l) => (
-                  <option value={l.slug} selected={l.slug === prefillLesson}>
-                    {l.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div class="flex gap-3">
-              <label class="block">
-                <span class="text-ink-muted">Term</span>
-                <select
-                  name="semester_term"
-                  required
-                  class="mt-1 rounded border border-slate-300 px-2 py-1"
-                >
-                  <option value="spring">Spring</option>
-                  <option value="summer">Summer</option>
-                  <option value="fall">Fall</option>
-                </select>
-              </label>
-              <label class="block">
-                <span class="text-ink-muted">Year</span>
-                <input
-                  name="semester_year"
-                  type="number"
-                  min="2020"
-                  max="2100"
-                  required
-                  class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
-                />
-              </label>
-            </div>
-            <div class="flex gap-3">
-              <label class="block">
-                <span class="text-ink-muted">Provider</span>
-                <select
-                  name="provider"
-                  required
-                  class="mt-1 rounded border border-slate-300 px-2 py-1"
-                >
-                  <option value="youtube">YouTube</option>
-                  <option value="vimeo">Vimeo</option>
-                </select>
-              </label>
-              <label class="block flex-1">
-                <span class="text-ink-muted">Video ID</span>
-                <input
-                  name="video_id"
-                  required
-                  placeholder="e.g. dQw4w9WgXcQ"
-                  class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-                />
-                <span class="mt-1 block text-xs text-ink-muted">
-                  The ID only, not the full URL. YouTube
-                  <code>watch?v=dQw4w9WgXcQ</code> → <code>dQw4w9WgXcQ</code>;
-                  Vimeo <code>vimeo.com/123456789</code> →{' '}
-                  <code>123456789</code>.
-                </span>
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-ink-muted">Description (optional)</span>
-              <input
-                name="description"
-                maxlength="2000"
-                class="mt-1 w-full rounded border border-slate-300 px-2 py-1"
-              />
-            </label>
-            <label class="block">
-              <span class="text-ink-muted">Duration minutes (optional)</span>
-              <input
-                name="duration_minutes"
-                type="number"
-                min="1"
-                max="1440"
-                class="mt-1 w-28 rounded border border-slate-300 px-2 py-1"
-              />
-            </label>
-            <button
-              type="submit"
-              class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-strong"
-            >
-              Add video
-            </button>
-          </form>
-        </section>
-      )
-    }
-
-    <section class="mt-8">
-      <h2 class="text-lg font-semibold">Videos</h2>
-      {
-        videos.length === 0 && (
-          <p class="mt-2 text-sm text-ink-muted">No videos yet.</p>
-        )
-      }
-      <ul class="mt-3 space-y-2">
-        {
-          editableVideos.editable.map((v) => (
-            <li class="rounded border border-slate-200 p-3 text-sm">
-              <div class="flex items-baseline justify-between gap-3">
-                <span class="font-medium">{v.title}</span>
-                <span class="text-xs text-ink-muted">
-                  {v.semesterTerm} {v.semesterYear} ·{' '}
-                  {v.published ? 'published' : 'hidden'}
-                </span>
-              </div>
-              <div class="mt-2 flex gap-3">
-                <a
-                  href={`/instructor/archive/video/${v.id}`}
-                  class="text-accent underline"
-                >
-                  Edit
-                </a>
-                <form
-                  method="POST"
-                  action="/api/instructor/archive/video/delete"
-                  data-confirm={`Delete “${v.title}”? This hides it from students.`}
-                >
-                  <input type="hidden" name="id" value={v.id} />
-                  <button type="submit" class="text-red-600 underline">
-                    Delete
-                  </button>
-                </form>
-              </div>
-            </li>
-          ))
-        }
-        {
-          editableVideos.readOnly.map((v) => (
-            <li class="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
-              <div class="flex items-baseline justify-between gap-3">
-                <span class="font-medium">{v.title}</span>
-                <span class="text-xs text-ink-muted">
-                  {v.semesterTerm} {v.semesterYear} · added by another
-                  instructor
-                </span>
-              </div>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
 
     <section class="mt-10">
       <h2 class="text-lg font-semibold">Exams &amp; assignments</h2>

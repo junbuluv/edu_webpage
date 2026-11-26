@@ -1,0 +1,19 @@
+---
+import { getEntry } from 'astro:content';
+import CaseLayout from '@layouts/CaseLayout.astro';
+
+// SSR like lesson pages, so the header shows the signed-in state.
+const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404 });
+}
+const entry = await getEntry('cases', slug);
+if (!entry || entry.data.draft) {
+  return new Response(null, { status: 404 });
+}
+const { Content } = await entry.render();
+---
+
+<CaseLayout entry={entry}>
+  <Content />
+</CaseLayout>

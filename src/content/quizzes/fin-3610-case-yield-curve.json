@@ -1,0 +1,85 @@
+{
+  "slug": "fin-3610-case-yield-curve",
+  "title": "Case study: Reading the yield curve",
+  "course": "fin-3610",
+  "caseSlug": "fin-3610/yield-curve",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "Lenders ask for a term premium for holding a 2-year note instead of rolling over 1-year bills. Compared with the 1-year rate they expect a year from now, the implied rate f is:",
+      "choices": [
+        "Lower, because the premium is subtracted from the 2-year yield",
+        "The same, because the premium cancels out",
+        "Higher, because the premium raises the 2-year yield and f with it",
+        "Unrelated, because f depends only on the 1-year yield"
+      ],
+      "correctIndex": 2,
+      "explanation": "f = (1 + y2)^2 / (1 + y1) − 1 rises with y2. A term premium lifts y2 above what expected short rates alone would give, so f sits above the rate lenders expect.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Yields in this quiz are month-end figures from FRED, as in the case. At the end of June 2004 the 1-year Treasury yield was 2.09% and the 2-year yield was 2.70%. What 1-year rate, one year ahead, did the curve imply? Answer as a percent to two decimals.",
+      "answer": 3.31,
+      "tolerance": 0.03,
+      "unit": "%",
+      "explanation": "f = (1 + y2)^2 / (1 + y1) − 1 = 1.0270^2 / 1.0209 − 1 = 1.054729 / 1.0209 − 1 = 0.0331, or 3.31%. The 1-year yield a year later was 3.45%.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "At the end of February 2007 the 3-month yield was 5.16%, the 2-year yield 4.65% and the 10-year yield 4.56%. Which statement is correct?",
+      "choices": [
+        "The curve was not inverted by either gap",
+        "The curve was inverted by the 10-year minus 3-month gap only",
+        "The curve was inverted by the 10-year minus 2-year gap only",
+        "The curve was inverted by both gaps"
+      ],
+      "correctIndex": 3,
+      "explanation": "10-year minus 2-year = 4.56 − 4.65 = −0.09 points. 10-year minus 3-month = 4.56 − 5.16 = −0.60 points. Both are negative, so the curve was inverted by both measures.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "In July 2023 the 1-year yield was 5.37% and the curve implied a 1-year rate of 4.39% a year ahead. In July 2024 the 1-year yield was 4.73%. How did the implied rate do?",
+      "choices": [
+        "It had the direction right, and the fall was larger than implied",
+        "It had the direction right, but the fall was smaller than implied",
+        "It had the direction wrong: the 1-year yield rose",
+        "It matched the actual yield to within 0.05 points"
+      ],
+      "correctIndex": 1,
+      "explanation": "The 1-year yield fell from 5.37% to 4.73%, a fall of 0.64 points. The curve had implied a fall of 0.98 points, to 4.39%. Right direction, smaller move.",
+      "points": 1
+    },
+    {
+      "type": "multi_select",
+      "id": "q5",
+      "prompt": "Which statements does the record from January 2000 to October 2026 support? Select all that apply.",
+      "choices": [
+        "The inversions that began in 2000 and in 2005 were each followed by a recession that started more than a year after the first inverted month",
+        "Every inversion in the data was followed by a recession within 12 months",
+        "The inversion from July 2022 to July 2024 was the longest in the data, and no recession had been dated through October 2026",
+        "In the four months the case checks, the implied 1-year rate was always within a quarter point of the actual yield"
+      ],
+      "correctIndices": [0, 2],
+      "explanation": "The 2001 recession started 14 months after the first inverted month and the 2008 recession 25 months after. The 2022 to 2024 inversion ran 25 months with no recession dated since. The implied rate was within a quarter point only once (June 2004: 3.31% implied, 3.45% actual); in February 2007 and December 2021 it missed by more than 2.5 points.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q6",
+      "prompt": "At the end of July 2023 the 10-year Treasury yield was 3.97%. What was the present value of $100 due in ten years, discounted at that yield? Answer in dollars to two decimals.",
+      "answer": 67.75,
+      "tolerance": 0.05,
+      "unit": "dollars",
+      "explanation": "PV = 100 / 1.0397^10 = 100 / 1.4760 = $67.75. At the 3-month yield of 5.55% the same cash flow would be worth only $58.27, which is why the discount rate should match the horizon of the cash flow.",
+      "points": 1
+    }
+  ]
+}

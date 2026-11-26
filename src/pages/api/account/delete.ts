@@ -48,10 +48,6 @@ export const POST: APIRoute = async ({
       .select('id', { count: 'exact', head: true })
       .eq('instructor_id', userId),
     admin
-      .from('archive_videos')
-      .select('id', { count: 'exact', head: true })
-      .eq('created_by', userId),
-    admin
       .from('archive_papers')
       .select('id', { count: 'exact', head: true })
       .eq('created_by', userId),

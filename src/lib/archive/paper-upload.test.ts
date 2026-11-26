@@ -19,12 +19,12 @@ const paperId = '82adca7a-f0c4-43dc-ab78-c241fc1ce95f';
 
 function validMetadata() {
   return {
-    course_slug: 'eco-1002',
+    course_slug: 'fin-3610',
     kind: 'exam',
     title: 'Midterm review',
     semester_term: 'fall',
     semester_year: 2026,
-    covers: ['eco-1002/solow'],
+    covers: ['fin-3610/valuing-stocks'],
     file_name: 'Midterm Review.pdf',
     content_type: PAPER_CONTENT_TYPES.pdf,
     size_bytes: 1024,
@@ -74,14 +74,14 @@ test('rejects extension/MIME mismatches, traversal names, and oversized files', 
 test('builds and parses a unique actor-scoped storage path', () => {
   const path = buildPaperStoragePath(
     actorId,
-    'eco-1002',
+    'fin-3610',
     paperId,
     'Midterm Review.pdf',
   );
-  assert.equal(path, `${actorId}/eco-1002/${paperId}/Midterm_Review.pdf`);
+  assert.equal(path, `${actorId}/fin-3610/${paperId}/Midterm_Review.pdf`);
   const parsed = parseActorScopedPaperPath(path, actorId);
   assert.deepEqual(parsed, {
-    courseSlug: 'eco-1002',
+    courseSlug: 'fin-3610',
     paperId,
     fileName: 'Midterm_Review.pdf',
   });
@@ -97,13 +97,13 @@ test('binds a prepared path to the finalized metadata', () => {
   assert.equal(result.ok, true);
   if (!result.ok) return;
   const path = parseActorScopedPaperPath(
-    buildPaperStoragePath(actorId, 'eco-1002', paperId, result.value.fileName),
+    buildPaperStoragePath(actorId, 'fin-3610', paperId, result.value.fileName),
     actorId,
   );
   assert.ok(path);
   assert.equal(pathMatchesPaperMetadata(path, result.value), true);
   assert.equal(
-    pathMatchesPaperMetadata(path, { ...result.value, courseSlug: 'fin-3610' }),
+    pathMatchesPaperMetadata(path, { ...result.value, fileName: 'Other.pdf' }),
     false,
   );
 });

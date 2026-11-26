@@ -7,7 +7,7 @@
 // that are unambiguous enough to block a PR.
 //
 // Usage:
-//   node scripts/check-copyright.mjs            # scan all lesson MDX + quiz JSON
+//   node scripts/check-copyright.mjs            # scan all lesson and case MDX + quiz JSON
 //   node scripts/check-copyright.mjs <files...> # scan only the given files
 //
 // Exit code: 1 if any BLOCKER is found, else 0. Warnings never fail the run.
@@ -141,8 +141,9 @@ function walk(dir, out = []) {
 
 function defaultTargets() {
   const lessons = walk(join(ROOT, 'src/content/lessons')).filter((f) => f.endsWith('.mdx'));
+  const cases = walk(join(ROOT, 'src/content/cases')).filter((f) => f.endsWith('.mdx'));
   const quizzes = walk(join(ROOT, 'src/content/quizzes')).filter((f) => f.endsWith('.json'));
-  return [...lessons, ...quizzes];
+  return [...lessons, ...cases, ...quizzes];
 }
 
 // --- run ---------------------------------------------------------------

@@ -1,8 +1,8 @@
 # Contributing
 
 Thanks for working on Baruch Econ & Finance Studio. This document is the short version of "how
-to add things without breaking other things." For the _why_, see
-`ARCHITECTURE.md`. For agent collaborators, see `AGENTS.md`.
+to add things without breaking other things." For the conventions and the
+reasons behind them, see `CLAUDE.md`.
 
 ## Local setup
 
@@ -96,7 +96,8 @@ Email this verbatim to a new collaborator:
 ## Adding a lesson
 
 1. Pick the course folder under `src/content/lessons/`.
-2. Copy an existing lesson (e.g. `macro/is-lm-intro.mdx`) and rename.
+2. Copy an existing lesson (e.g. `fin-3610/credit-risk-and-spreads.mdx`) and
+   rename.
 3. Edit the frontmatter:
    - Unique `slug` (the filename without `.mdx`).
    - `order:` should be unique within its `unit`.
@@ -105,7 +106,8 @@ Email this verbatim to a new collaborator:
 4. Body conventions:
    - Equation first, intuition second, simulation last.
    - Use `$inline$` and `$$display$$` for math.
-   - Import visualizations: `import ISLMChart from '@components/viz/ISLMChart';`
+   - Import visualizations:
+     `import CreditSpreadExplorer from '@components/viz/CreditSpreadExplorer';`
    - Mark interactive components `client:load` (or `client:visible` if below
      the fold).
 5. If the lesson has a quiz, add the JSON under `src/content/quizzes/` and
@@ -134,8 +136,8 @@ If you need a new question type, **extend the union and the renderer in
    baseline.
 3. Include a "Reset" affordance if there are sliders.
 4. Caption parameters used (so a reader can reproduce the chart by hand).
-5. Avoid pulling in a new charting library. Recharts handles most cases;
-   Plotly is already wired for the heavy ones.
+5. Avoid pulling in a new charting library; Recharts draws every chart
+   here.
 
 ## Adding a lesson figure
 
@@ -199,28 +201,23 @@ git** and don't suggest removing the `.gitignore` entry. If you need
 version control for course materials, set up a separate private
 sibling repo or use Git LFS on a private branch.
 
-## Opening a workshop section
+## Opening a workshop window
 
-Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is scoped to a course, semester, and (for ECO) section, then checked against the open window, geofence, and protected per-device token.
-
-**Two course models:**
-
-- **ECO 1002** runs four per-day sections — `CML` (Mon), `CTL` (Tue), `CWL` (Wed), `CRL` (Thu). The instructor opens one administration per section per week (four per workshop per week).
-- **FIN 3610** runs one workshop window per week, no per-day sections. The `section` column is `NULL` for FIN administrations.
+Workshops are weekly small-group sessions tied to a lesson. Content lives in `src/content/workshops/<slug>.json` (5–7 discussion questions per workshop). Attendance is scoped to a course, semester and instructor, then checked against the open window, geofence, and protected per-device token. A class runs one workshop window per week.
 
 **From the instructor UI** (recommended):
-`/instructor/workshops/<slug>` — choose the semester, set New York-local opening and closing times, verify the meeting coordinates, then open the window. The app derives the Monday `week_of`, rejects daylight-saving ambiguities, and shows a section picker only for ECO. Use the same page to reveal discussion prompts and record a manual attendance correction. Cancelled windows are retained for audit continuity and no longer block opening a replacement in the same week.
+`/instructor/workshops/<slug>` — choose the class, set New York-local opening and closing times, verify the meeting coordinates, then open the window. The app derives the Monday `week_of` and rejects daylight-saving ambiguities. Use the same page to reveal discussion prompts and record a manual attendance correction. Cancelled windows are retained for audit continuity and no longer block opening a replacement in the same week.
 
-**Or via SQL (ECO 1002 with section):**
+**Or via SQL:**
 
 ```sql
 insert into public.workshop_administrations (
-  workshop_slug, course_slug, semester, section, week_of, instructor_id,
+  workshop_slug, course_slug, semester, week_of, instructor_id,
   opens_at, closes_at,
   required_lat, required_lng, required_radius_meters, location_label,
   notes
 ) values (
-  'eco-1002-is-lm-intro', 'eco-1002', 'spring-2027', 'CML', '2027-03-15',
+  'fin-3610-unit-2-time-money', 'fin-3610', 'spring-2027', '2027-03-15',
   (select id from auth.users where email = 'you@baruch.cuny.edu'),
   '2027-03-15 14:00:00-04', '2027-03-15 15:30:00-04',
   40.7411, -73.9837, 200, '55 Lexington Ave',
@@ -228,102 +225,39 @@ insert into public.workshop_administrations (
 );
 ```
 
-**Or via SQL (FIN 3610, no section):**
+A partial unique index on `(workshop_slug, semester, week_of, instructor_id)` allows one live window per class per week; cancelled rows are excluded. Student database access is column-scoped: schedules expose only the location label and `geofence_required` flag, never target coordinates, radius, instructor notes, protected device tokens, or correction metadata.
+
+### Workshop rows that fail the schema's checks
+
+`schema.sql` stops with "workshop administration row(s) violate the hardened schedule constraints" when an existing row breaks a rule it is about to enforce. This query reports identifiers and violation names without returning stored coordinates; correct each row it lists, then run `schema.sql` again:
 
 ```sql
-insert into public.workshop_administrations (
-  workshop_slug, course_slug, semester, section, week_of, instructor_id,
-  opens_at, closes_at,
-  required_lat, required_lng, required_radius_meters, location_label,
-  notes
-) values (
-  'fin-3610-unit-2-time-money', 'fin-3610', 'spring-2027', null, '2027-03-15',
-  (select id from auth.users where email = 'you@baruch.cuny.edu'),
-  '2027-03-15 14:00:00-04', '2027-03-15 15:30:00-04',
-  40.7411, -73.9837, 200, '55 Lexington Ave',
-  'Bring laptops. Form groups of 3-4.'
-);
+select id, workshop_slug,
+  array_remove(array[
+    case when char_length(semester) not between 1 and 64 then 'semester_length' end,
+    case when course_slug not in ('fin-3610') then 'course_slug' end,
+    case when (required_lat is null) <> (required_lng is null) then 'coordinate_pair' end,
+    case when required_lat is not null and required_lat not between -90 and 90 then 'latitude_range' end,
+    case when required_lng is not null and required_lng not between -180 and 180 then 'longitude_range' end,
+    case when required_radius_meters not between 10 and 50000 then 'radius' end,
+    case when closes_at <= opens_at then 'window_order' end,
+    case when cancelled_at is not null and cancelled_at > opens_at then 'cancellation_time' end,
+    case when char_length(location_label) not between 1 and 120 then 'location_label_length' end,
+    case when notes is not null and char_length(notes) > 200 then 'notes_length' end
+  ], null) as violations
+from public.workshop_administrations
+where char_length(semester) not between 1 and 64
+   or course_slug not in ('fin-3610')
+   or (required_lat is null) <> (required_lng is null)
+   or (required_lat is not null and required_lat not between -90 and 90)
+   or (required_lng is not null and required_lng not between -180 and 180)
+   or required_radius_meters not between 10 and 50000
+   or closes_at <= opens_at
+   or (cancelled_at is not null and cancelled_at > opens_at)
+   or char_length(location_label) not between 1 and 120
+   or (notes is not null and char_length(notes) > 200)
+order by opens_at, id;
 ```
-
-Two partial unique indexes enforce no-duplicates per mode:
-
-- `(workshop_slug, semester, section, week_of, instructor_id)` for current ECO rows.
-- `(workshop_slug, semester, week_of, instructor_id)` for current FIN rows.
-
-Cancelled rows are excluded from both indexes. Student database access is column-scoped: schedules expose only the location label and `geofence_required` flag, never target coordinates, radius, instructor notes, protected device tokens, or correction metadata.
-
-### Mapping legacy workshop semesters before migration
-
-The workshop-integrity migration never infers academic terms from a date, slug, or course. Before `supabase db push`, the project owner must map every existing administration to its confirmed term.
-
-1. Inspect the existing rows:
-
-   ```sql
-   select id, workshop_slug, course_slug, section, instructor_id, week_of, opens_at, closes_at
-   from public.workshop_administrations
-   order by opens_at, id;
-   ```
-
-2. Add the pending column if it is absent, then update **each ID explicitly** using the owner-confirmed term:
-
-   ```sql
-   alter table public.workshop_administrations
-     add column if not exists semester text,
-     add column if not exists location_label text,
-     add column if not exists cancelled_at timestamptz;
-
-   update public.workshop_administrations
-      set location_label = '55 Lexington Ave'
-    where location_label is null;
-
-   update public.workshop_administrations
-      set semester = 'fall-2026'
-    where id = '<confirmed-administration-uuid>';
-   ```
-
-3. Verify that no administration remains unmapped:
-
-   ```sql
-   select id, workshop_slug, opens_at
-   from public.workshop_administrations
-   where semester is null;
-   ```
-
-4. Check every legacy row against the other hardened constraints. This query
-   reports identifiers and violation names without returning stored
-   coordinates:
-
-   ```sql
-   select id, workshop_slug,
-     array_remove(array[
-       case when char_length(semester) not between 1 and 64 then 'semester_length' end,
-       case when course_slug not in ('eco-1002', 'fin-3610') then 'course_slug' end,
-       case when (required_lat is null) <> (required_lng is null) then 'coordinate_pair' end,
-       case when required_lat is not null and required_lat not between -90 and 90 then 'latitude_range' end,
-       case when required_lng is not null and required_lng not between -180 and 180 then 'longitude_range' end,
-       case when required_radius_meters not between 10 and 50000 then 'radius' end,
-       case when closes_at <= opens_at then 'window_order' end,
-       case when cancelled_at is not null and cancelled_at > opens_at then 'cancellation_time' end,
-       case when char_length(location_label) not between 1 and 120 then 'location_label_length' end,
-       case when notes is not null and char_length(notes) > 200 then 'notes_length' end
-     ], null) as violations
-   from public.workshop_administrations
-   where char_length(semester) not between 1 and 64
-      or course_slug not in ('eco-1002', 'fin-3610')
-      or (required_lat is null) <> (required_lng is null)
-      or (required_lat is not null and required_lat not between -90 and 90)
-      or (required_lng is not null and required_lng not between -180 and 180)
-      or required_radius_meters not between 10 and 50000
-      or closes_at <= opens_at
-      or (cancelled_at is not null and cancelled_at > opens_at)
-      or char_length(location_label) not between 1 and 120
-      or (notes is not null and char_length(notes) > 200)
-   order by opens_at, id;
-   ```
-
-5. Only after both verification queries return zero rows, run
-   `supabase db push` from the repository root. Do not use a bulk guessed term
-   or infer a term from the workshop date.
 
 ### Querying who stamped in
 
@@ -397,11 +331,11 @@ class, and content management has in-app surfaces:
 
 - **Roster CRUD** — `/instructor/classes/<course>` lets an instructor/admin
   add, drop, and edit individual students (add by email, edit display
-  name/section, drop). Bulk enrollment is still the CSV importer at
+  name, drop). Bulk enrollment is still the CSV importer at
   `/instructor/classes/import`. No SQL needed for either.
 - **Course archive** — `/instructor/archive` (staff only) manages
-  prior-term videos, exam/assignment file uploads, and authored quizzes;
-  students/staff browse at `/{course}/archive`. Videos are ECO-1002 only. Files
+  prior-term exam/assignment file uploads and authored quizzes;
+  students/staff browse at `/{course}/archive`. Files
   up to 25 MB upload browser-to-Supabase through a durable, expiring upload
   intent; finalization verifies size, MIME, and PDF/DOCX structure.
 
@@ -540,20 +474,26 @@ chokepoint is enforced by RLS denying all writes from anon/student clients.
 
 The Supabase schema is high-blast-radius. To change it:
 
-1. Add an idempotent, timestamped file under `supabase/migrations/` and mirror
-   the resulting current state in `supabase/schema.sql`.
-2. Link only an isolated scratch project. Apply the migration twice with
-   `supabase db query --linked --file ...`, then apply `supabase/schema.sql`
-   twice.
-3. Run `supabase/tests/security_hardening_rls.sql` against that scratch
-   project and check `supabase db advisors --linked --type all`.
-4. Regenerate types: `npm run supabase:types`.
-5. Commit the migration, schema snapshot, RLS fixture, and regenerated
-   `database.types.ts` together.
+1. Edit `supabase/schema.sql`. It is the single source of truth, it is
+   idempotent, and it is pasted end to end into the Supabase SQL editor, so
+   it must upgrade the current production schema as well as build a fresh
+   database. A one-off destructive change goes in a guarded block near the
+   top (see "Retire ECO 1002").
+2. Run it twice against a throwaway Postgres with the files CI's
+   `schema-roundtrip` job uses (`supabase/tests/auth_stub.sql` first), then
+   the test suites under `supabase/tests/`. Never use the production
+   database for this.
+3. Add or update the SQL tests for what changed, and add new tables to the
+   "Client privileges" block at the end of `schema.sql`.
+4. Update `src/lib/supabase/database.types.ts` by hand to match (it is a
+   hand-kept file, not generator output).
+5. Commit the schema, tests and types together.
 6. Tag the schema PR with `db:` in the title so reviewers know to check RLS.
 
-Never use the production link for scratch verification. For a release, apply
-the reviewed migrations before deploying app code that calls their new RPCs.
+For a release, decide the order of the app deploy and the `schema.sql` paste
+from which side breaks the other: an app that no longer reads a column can
+ship before the column is dropped; an app that calls a new function
+signature must ship together with the paste.
 
 ## Before requesting review
 
@@ -580,14 +520,14 @@ If yes-no-yes, it's probably fine. Otherwise expect pushback.
 - Path aliases: `@components/*`, `@layouts/*`, `@lib/*`, `@content/*`, `@/*`.
 - No comments explaining what the code says. Reserve comments for non-obvious
   _why_ (parameter calibration rationale, RLS subtleties).
-- React: per-component `useState` is fine; reach for Zustand only when 3+
-  components share state on a page.
+- React: per-component `useState`. No shared-state library is installed;
+  ask before adding one.
 - Tailwind utility classes; no shadcn-ui unless we commit to it across the
   app.
 
 ## CI
 
-GitHub Actions runs three verification jobs on every PR (see
+GitHub Actions runs four jobs on every PR (see
 `.github/workflows/ci.yml`):
 
 **`verify`** (required by branch protection):
@@ -604,13 +544,17 @@ GitHub Actions runs three verification jobs on every PR (see
   table, `auth.uid()` function).
 - Applies `supabase/schema.sql` twice via `psql -v ON_ERROR_STOP=1`.
 - Exercises synthetic student, instructor, admin, and cross-user RLS cases.
-- Replays the pre-audit upgrade path and applies each new migration twice.
+- Rehearses the ECO 1002 removal on a database shaped like production was
+  before it, then reruns every suite.
 - The second apply is what catches idempotency regressions —
   drop/create policy name mismatches, ALTER TYPE + use-in-same-txn
   errors, and similar bugs that only surface on a re-paste.
 
-**`copyright-gate`** scans lesson and quiz content for missing provenance,
-hotlinked assets, and disallowed source patterns.
+**`copyright-gate`** (advisory) scans lesson and quiz content for missing
+provenance, hotlinked assets, and disallowed source patterns.
+
+**`design-detect`** (required) runs the impeccable design detector over
+`src/` and over every public page rendered by the dev server.
 
 A red `verify` blocks merge. A red `schema-roundtrip` is a strong
 signal that re-running `schema.sql` against an existing project
@@ -669,8 +613,8 @@ canonical place for Astro build-time settings.
 5. Supabase Authentication → **Attack Protection** → enable leaked-password
    protection. The database advisor reports a warning while this is disabled.
 
-6. Apply all reviewed Supabase migrations to the target project and confirm
-   `supabase migration list` shows matching local and remote versions.
+6. Paste the reviewed `supabase/schema.sql` end to end into the target
+   project's SQL editor (see "Database changes").
 
 7. Push to `main` (or trigger a manual deploy) → Vercel builds and
    deploys ~30–90 s.
@@ -777,7 +721,7 @@ Three sub-cases:
 ### Setup via Resend (recommended provider)
 
 Resend's free tier is 100 emails/day, 3,000/month — comfortable for
-ECO 1002 + FIN 3610 combined. Has explicit Supabase Auth integration
+one course. Has explicit Supabase Auth integration
 guides.
 
 1. **Sign up at <https://resend.com>** (no credit card required).

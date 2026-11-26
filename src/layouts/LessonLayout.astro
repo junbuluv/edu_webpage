@@ -1,6 +1,6 @@
 ---
-// Math styles only where math renders: lesson MDX, the guided reader and
-// the tutor all live on lesson pages.
+// Math styles only where math renders: lesson MDX and the tutor both live
+// on lesson pages.
 import 'katex/dist/katex.min.css';
 import BaseLayout from './BaseLayout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
@@ -9,10 +9,7 @@ import FurtherReadingCard from '@components/lesson/FurtherReadingCard.astro';
 import LessonSidebar from '@components/lesson/LessonSidebar';
 import { compareLessons, findPrevNext } from '@lib/lesson/sequence';
 import { canViewCourse } from '@lib/archive/access';
-import { fetchArchiveVideosForLesson } from '@lib/archive/db';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
-import { normalizeLessonSlug } from '@lib/archive/build';
-import { isStaff } from '@lib/roles';
 import TutorPanel from '@components/tutor/TutorPanel';
 import { getTutorCourse } from '@lib/tutor/access';
 import { TUTOR_DAILY_LIMIT } from '@lib/tutor/limits';
@@ -68,30 +65,21 @@ if (Astro.locals.supabase && Astro.locals.user) {
     .filter((s) => s.startsWith(`${data.course}/`));
 }
 
-const lessonSlug = normalizeLessonSlug(lesson.id);
-const role = Astro.locals.profile?.role ?? 'student';
-let canSeeVideos = false;
-let lessonVideos: Awaited<ReturnType<typeof fetchArchiveVideosForLesson>> = [];
-let videosUnavailable = false;
+// Lesson tutor (2026-10-05): shown to enrolled students and staff of this
+// course. The access check answers false on any error and the remaining
+// count is display-only: a failure hides the panel and must never take the
+// lesson page down.
+let enrolledOrStaff = false;
 try {
-  canSeeVideos = await canViewCourse(Astro.locals, data.course);
-  lessonVideos = canSeeVideos
-    ? await fetchArchiveVideosForLesson(data.course, lessonSlug)
-    : [];
+  enrolledOrStaff = await canViewCourse(Astro.locals, data.course);
 } catch (error) {
   if (!(error instanceof ArchiveServiceUnavailableError)) {
-    console.error('[lesson] video_load_failed', error);
+    console.error('[lesson] course_access_check_failed', error);
   }
-  videosUnavailable = true;
 }
-
-// Lesson tutor (2026-10-05): canSeeVideos is canViewCourse's enrolled-or-staff
-// answer for this course (false on error), so the tutor reuses it instead of
-// querying enrollments twice. The remaining count is display-only. Any
-// failure hides the panel; it must never take the lesson page down.
 let showTutor = false;
 let tutorRemaining = TUTOR_DAILY_LIMIT;
-if (canSeeVideos && Astro.locals.user && Astro.locals.supabase) {
+if (enrolledOrStaff && Astro.locals.user && Astro.locals.supabase) {
   try {
     showTutor = Boolean(await getTutorCourse(data.course));
     if (showTutor) {
@@ -164,63 +152,6 @@ if (Astro.locals.user && Astro.locals.supabase) {
       <div class="prose mt-10">
         <slot />
       </div>
-
-      {
-        videosUnavailable && (
-          <div
-            role="status"
-            class="mt-10 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-          >
-            Lecture videos are temporarily unavailable. The lesson and practice
-            activities still work; refresh later to retry the video library.
-          </div>
-        )
-      }
-
-      {
-        canSeeVideos && (
-          <section class="mt-10">
-            <h2 class="text-lg font-semibold">Lecture videos</h2>
-            {lessonVideos.length === 0 ? (
-              <p class="mt-2 text-sm text-ink-muted">
-                No videos for this lesson yet.
-              </p>
-            ) : (
-              <ul class="mt-3 space-y-4">
-                {lessonVideos.map((v) => (
-                  <li>
-                    <p class="text-sm font-medium">{v.title}</p>
-                    <div class="mt-2 aspect-video w-full">
-                      <iframe
-                        class="h-full w-full rounded"
-                        src={
-                          v.provider === 'youtube'
-                            ? `https://www.youtube-nocookie.com/embed/${v.video_id}?rel=0`
-                            : `https://player.vimeo.com/video/${v.video_id}`
-                        }
-                        title={v.title}
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {isStaff(role) && (
-              <p class="mt-3 text-sm">
-                <a
-                  href={`/instructor/archive?course=${data.course}&lesson=${lessonSlug}`}
-                  class="text-accent underline"
-                >
-                  ＋ Add a video for this lesson →
-                </a>
-              </p>
-            )}
-          </section>
-        )
-      }
 
       {article && <FurtherReadingCard article={article} variant="lesson" />}
 

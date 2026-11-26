@@ -3,15 +3,15 @@ begin;
 insert into auth.users (
   id, email, email_confirmed_at, aud, role, created_at, updated_at
 ) values
-  ('00000000-0000-0000-0000-000000000101', 'rls-student-eco@example.test', now(), 'authenticated', 'authenticated', now(), now()),
-  ('00000000-0000-0000-0000-000000000102', 'rls-student-fin@example.test', now(), 'authenticated', 'authenticated', now(), now()),
-  ('00000000-0000-0000-0000-000000000103', 'rls-student-wrong-section@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000101', 'rls-student-a@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000102', 'rls-student-b@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000103', 'rls-student-classmate@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000104', 'rls-student-wrong-term@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000105', 'rls-student-wrong-instructor@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000106', 'rls-inactive-student@example.test', now(), 'authenticated', 'authenticated', '1970-01-01', '1970-01-01'),
   ('00000000-0000-0000-0000-000000000107', 'rls-student-demoted-owner@example.test', now(), 'authenticated', 'authenticated', now(), now()),
-  ('00000000-0000-0000-0000-000000000201', 'rls-instructor-eco@example.test', now(), 'authenticated', 'authenticated', now(), now()),
-  ('00000000-0000-0000-0000-000000000202', 'rls-instructor-fin@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000201', 'rls-instructor-a@example.test', now(), 'authenticated', 'authenticated', now(), now()),
+  ('00000000-0000-0000-0000-000000000202', 'rls-instructor-b@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000203', 'rls-unassigned-instructor@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000204', 'rls-admin@example.test', now(), 'authenticated', 'authenticated', now(), now()),
   ('00000000-0000-0000-0000-000000000205', 'rls-inactive-owner@example.test', now(), 'authenticated', 'authenticated', '1970-01-01', '1970-01-01'),
@@ -43,10 +43,10 @@ insert into public.teaching_assignments (
   instructor_id, course_slug, semester, active, assigned_by
 )
 values
-  ('00000000-0000-0000-0000-000000000201', 'eco-1002', 'fall-2026', true, '00000000-0000-0000-0000-000000000204'),
-  ('00000000-0000-0000-0000-000000000201', 'eco-1002', 'spring-2026', true, '00000000-0000-0000-0000-000000000204'),
-  ('00000000-0000-0000-0000-000000000202', 'eco-1002', 'fall-2026', true, '00000000-0000-0000-0000-000000000204'),
+  ('00000000-0000-0000-0000-000000000201', 'fin-3610', 'fall-2026', true, '00000000-0000-0000-0000-000000000204'),
+  ('00000000-0000-0000-0000-000000000201', 'fin-3610', 'spring-2026', true, '00000000-0000-0000-0000-000000000204'),
   ('00000000-0000-0000-0000-000000000202', 'fin-3610', 'fall-2026', true, '00000000-0000-0000-0000-000000000204'),
+  ('00000000-0000-0000-0000-000000000202', 'fin-3610', 'fall-2025', true, '00000000-0000-0000-0000-000000000204'),
   ('00000000-0000-0000-0000-000000000205', 'fin-3610', 'fall-1970', true, '00000000-0000-0000-0000-000000000204')
 on conflict (instructor_id, course_slug, semester) do update
   set active = excluded.active,
@@ -54,18 +54,17 @@ on conflict (instructor_id, course_slug, semester) do update
       updated_at = now();
 
 insert into public.enrollments (
-  user_id, course_slug, instructor_id, semester, section
+  user_id, course_slug, instructor_id, semester
 )
 values
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002', '00000000-0000-0000-0000-000000000201', 'fall-2026', 'CML'),
-  ('00000000-0000-0000-0000-000000000102', 'fin-3610', '00000000-0000-0000-0000-000000000202', 'fall-2026', null),
-  ('00000000-0000-0000-0000-000000000103', 'eco-1002', '00000000-0000-0000-0000-000000000201', 'fall-2026', 'CTL'),
-  ('00000000-0000-0000-0000-000000000104', 'eco-1002', '00000000-0000-0000-0000-000000000201', 'spring-2026', 'CML'),
-  ('00000000-0000-0000-0000-000000000105', 'eco-1002', '00000000-0000-0000-0000-000000000202', 'fall-2026', 'CML'),
-  ('00000000-0000-0000-0000-000000000107', 'fin-3610', '00000000-0000-0000-0000-000000000205', 'fall-1970', null)
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610', '00000000-0000-0000-0000-000000000201', 'fall-2026'),
+  ('00000000-0000-0000-0000-000000000102', 'fin-3610', '00000000-0000-0000-0000-000000000202', 'fall-2025'),
+  ('00000000-0000-0000-0000-000000000103', 'fin-3610', '00000000-0000-0000-0000-000000000201', 'fall-2026'),
+  ('00000000-0000-0000-0000-000000000104', 'fin-3610', '00000000-0000-0000-0000-000000000201', 'spring-2026'),
+  ('00000000-0000-0000-0000-000000000105', 'fin-3610', '00000000-0000-0000-0000-000000000202', 'fall-2026'),
+  ('00000000-0000-0000-0000-000000000107', 'fin-3610', '00000000-0000-0000-0000-000000000205', 'fall-1970')
 on conflict (user_id, course_slug, semester) do update
-  set instructor_id = excluded.instructor_id,
-      section = excluded.section;
+  set instructor_id = excluded.instructor_id;
 
 do $$
 declare
@@ -99,11 +98,11 @@ insert into public.lesson_progress (
   user_id, lesson_slug, course_slug, status
 )
 values
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002/islm-intro', 'eco-1002', 'started'),
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002/cross-term-fixture', 'eco-1002', 'started'),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610/a-islm-intro', 'fin-3610', 'started'),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610/a-cross-term-fixture', 'fin-3610', 'started'),
   ('00000000-0000-0000-0000-000000000102', 'fin-3610/financial-statements-and-ratios', 'fin-3610', 'started'),
-  ('00000000-0000-0000-0000-000000000104', 'eco-1002/spring-fixture', 'eco-1002', 'started'),
-  ('00000000-0000-0000-0000-000000000105', 'eco-1002/other-instructor-fixture', 'eco-1002', 'started'),
+  ('00000000-0000-0000-0000-000000000104', 'fin-3610/a-spring-fixture', 'fin-3610', 'started'),
+  ('00000000-0000-0000-0000-000000000105', 'fin-3610/a-other-instructor-fixture', 'fin-3610', 'started'),
   ('00000000-0000-0000-0000-000000000107', 'fin-3610/demoted-owner-fixture', 'fin-3610', 'started')
 on conflict (user_id, lesson_slug) do update
   set course_slug = excluded.course_slug,
@@ -114,11 +113,11 @@ insert into public.offering_lesson_progress (
   user_id, lesson_slug, course_slug, semester, instructor_id, status
 )
 values
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002/islm-intro', 'eco-1002', 'fall-2026', '00000000-0000-0000-0000-000000000201', 'started'),
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002/cross-term-fixture', 'eco-1002', 'spring-2026', '00000000-0000-0000-0000-000000000201', 'started'),
-  ('00000000-0000-0000-0000-000000000102', 'fin-3610/financial-statements-and-ratios', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000202', 'started'),
-  ('00000000-0000-0000-0000-000000000104', 'eco-1002/spring-fixture', 'eco-1002', 'spring-2026', '00000000-0000-0000-0000-000000000201', 'started'),
-  ('00000000-0000-0000-0000-000000000105', 'eco-1002/other-instructor-fixture', 'eco-1002', 'fall-2026', '00000000-0000-0000-0000-000000000202', 'started'),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610/a-islm-intro', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000201', 'started'),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610/a-cross-term-fixture', 'fin-3610', 'spring-2026', '00000000-0000-0000-0000-000000000201', 'started'),
+  ('00000000-0000-0000-0000-000000000102', 'fin-3610/financial-statements-and-ratios', 'fin-3610', 'fall-2025', '00000000-0000-0000-0000-000000000202', 'started'),
+  ('00000000-0000-0000-0000-000000000104', 'fin-3610/a-spring-fixture', 'fin-3610', 'spring-2026', '00000000-0000-0000-0000-000000000201', 'started'),
+  ('00000000-0000-0000-0000-000000000105', 'fin-3610/a-other-instructor-fixture', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000202', 'started'),
   ('00000000-0000-0000-0000-000000000107', 'fin-3610/demoted-owner-fixture', 'fin-3610', 'fall-1970', '00000000-0000-0000-0000-000000000205', 'started')
 on conflict (user_id, course_slug, semester, lesson_slug) do update
   set instructor_id = excluded.instructor_id,
@@ -127,10 +126,10 @@ on conflict (user_id, course_slug, semester, lesson_slug) do update
 
 delete from public.quiz_attempts
 where quiz_slug in (
-  'eco-1002-rls-fixture',
-  'eco-1002-cross-term-fixture',
-  'eco-1002-spring-fixture',
-  'eco-1002-other-instructor-fixture',
+  'fin-3610-a-rls-fixture',
+  'fin-3610-a-cross-term-fixture',
+  'fin-3610-a-spring-fixture',
+  'fin-3610-a-other-instructor-fixture',
   'fin-3610-rls-fixture',
   'fin-3610-demoted-owner-fixture'
 );
@@ -140,11 +139,11 @@ insert into public.quiz_attempts (
   score, max_score, answers
 )
 values
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002-rls-fixture', 'eco-1002', 'fall-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
-  ('00000000-0000-0000-0000-000000000101', 'eco-1002-cross-term-fixture', 'eco-1002', 'spring-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
-  ('00000000-0000-0000-0000-000000000102', 'fin-3610-rls-fixture', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000202', 1, 1, '{}'::jsonb),
-  ('00000000-0000-0000-0000-000000000104', 'eco-1002-spring-fixture', 'eco-1002', 'spring-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
-  ('00000000-0000-0000-0000-000000000105', 'eco-1002-other-instructor-fixture', 'eco-1002', 'fall-2026', '00000000-0000-0000-0000-000000000202', 1, 1, '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610-a-rls-fixture', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000101', 'fin-3610-a-cross-term-fixture', 'fin-3610', 'spring-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000102', 'fin-3610-rls-fixture', 'fin-3610', 'fall-2025', '00000000-0000-0000-0000-000000000202', 1, 1, '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000104', 'fin-3610-a-spring-fixture', 'fin-3610', 'spring-2026', '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000105', 'fin-3610-a-other-instructor-fixture', 'fin-3610', 'fall-2026', '00000000-0000-0000-0000-000000000202', 1, 1, '{}'::jsonb),
   ('00000000-0000-0000-0000-000000000107', 'fin-3610-demoted-owner-fixture', 'fin-3610', 'fall-1970', '00000000-0000-0000-0000-000000000205', 1, 1, '{}'::jsonb);
 
 do $$
@@ -153,43 +152,43 @@ declare
 begin
   outcome := public.record_lesson_progress(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002/islm-intro', 'eco-1002', 'complete'
+    'fin-3610/a-islm-intro', 'fin-3610', 'complete'
   );
   if outcome <> 'completed' then
     raise exception 'lesson completion RPC returned %', outcome;
   end if;
   outcome := public.record_lesson_progress(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002/islm-intro', 'eco-1002', 'start'
+    'fin-3610/a-islm-intro', 'fin-3610', 'start'
   );
   if outcome <> 'completed' then
     raise exception 'start downgraded an existing completion';
   end if;
 
   insert into public.enrollments (
-    user_id, course_slug, instructor_id, semester, section
+    user_id, course_slug, instructor_id, semester
   ) values (
-    '00000000-0000-0000-0000-000000000101', 'eco-1002',
-    '00000000-0000-0000-0000-000000000201', 'spring-2026', 'CML'
+    '00000000-0000-0000-0000-000000000101', 'fin-3610',
+    '00000000-0000-0000-0000-000000000201', 'spring-2026'
   );
   outcome := public.record_lesson_progress(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002/ambiguous-rpc-fixture', 'eco-1002', 'start'
+    'fin-3610/a-ambiguous-rpc-fixture', 'fin-3610', 'start'
   );
   if outcome <> 'ambiguous' or exists (
     select 1 from public.lesson_progress
      where user_id = '00000000-0000-0000-0000-000000000101'
-       and lesson_slug = 'eco-1002/ambiguous-rpc-fixture'
+       and lesson_slug = 'fin-3610/a-ambiguous-rpc-fixture'
   ) then
     raise exception 'ambiguous lesson scope was not rejected atomically';
   end if;
   delete from public.enrollments
    where user_id = '00000000-0000-0000-0000-000000000101'
-     and course_slug = 'eco-1002' and semester = 'spring-2026';
+     and course_slug = 'fin-3610' and semester = 'spring-2026';
 
   outcome := public.record_quiz_attempt(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002-rpc-idempotency', 'eco-1002', 1, 1, '{}'::jsonb,
+    'fin-3610-a-rpc-idempotency', 'fin-3610', 1, 1, '{}'::jsonb,
     '00000000-0000-0000-0000-000000009901'
   );
   if outcome <> 'recorded' then
@@ -197,21 +196,21 @@ begin
   end if;
   outcome := public.record_quiz_attempt(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002-rpc-idempotency', 'eco-1002', 1, 1, '{}'::jsonb,
+    'fin-3610-a-rpc-idempotency', 'fin-3610', 1, 1, '{}'::jsonb,
     '00000000-0000-0000-0000-000000009901'
   );
   if outcome <> 'duplicate' then
     raise exception 'quiz attempt retry was not idempotent';
   end if;
   delete from public.quiz_attempts
-   where quiz_slug = 'eco-1002-rpc-idempotency';
+   where quiz_slug = 'fin-3610-a-rpc-idempotency';
 
   begin
     insert into public.quiz_attempts (
       user_id, quiz_slug, course_slug, score, max_score, answers
     ) values (
       '00000000-0000-0000-0000-000000000101',
-      'eco-1002-oversized-fixture', 'eco-1002', 1, 1,
+      'fin-3610-a-oversized-fixture', 'fin-3610', 1, 1,
       jsonb_build_object('answer', repeat('x', 32768))
     );
     raise exception 'oversized quiz answers bypassed the database check';
@@ -224,18 +223,18 @@ begin
   )
   select
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002-rate-fixture', 'eco-1002', 'fall-2026',
+    'fin-3610-a-rate-fixture', 'fin-3610', 'fall-2026',
     '00000000-0000-0000-0000-000000000201', 1, 1, '{}'::jsonb
   from generate_series(1, 20);
   outcome := public.record_quiz_attempt(
     '00000000-0000-0000-0000-000000000101',
-    'eco-1002-rate-fixture', 'eco-1002', 1, 1, '{}'::jsonb,
+    'fin-3610-a-rate-fixture', 'fin-3610', 1, 1, '{}'::jsonb,
     '00000000-0000-0000-0000-000000009902'
   );
   if outcome <> 'rate_limited' then
     raise exception 'quiz rate limit returned %', outcome;
   end if;
-  delete from public.quiz_attempts where quiz_slug = 'eco-1002-rate-fixture';
+  delete from public.quiz_attempts where quiz_slug = 'fin-3610-a-rate-fixture';
 
   outcome := public.accept_terms(
     '00000000-0000-0000-0000-000000000101', '2026-07-14', 'signup'
@@ -251,29 +250,29 @@ end $$;
 
 delete from public.workshop_administrations
 where workshop_slug in (
-  'eco-1002-rls-fixture',
-  'eco-1002-spring-rls-fixture',
+  'fin-3610-a-rls-fixture',
+  'fin-3610-a-spring-rls-fixture',
   'fin-3610-rls-fixture',
   'fin-3610-demoted-owner-rls-fixture'
 );
 
 insert into public.workshop_administrations (
-  workshop_slug, course_slug, semester, section, week_of,
+  workshop_slug, course_slug, semester, week_of,
   instructor_id, opens_at, closes_at, cancelled_at
 ) values
-  ('eco-1002-rls-fixture', 'eco-1002', 'fall-2026', 'CML', '2026-07-13', '00000000-0000-0000-0000-000000000201', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
-  ('eco-1002-rls-fixture', 'eco-1002', 'fall-2026', 'CML', '2026-07-13', '00000000-0000-0000-0000-000000000201', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', '2026-07-13 11:00:00+00'),
-  ('eco-1002-rls-fixture', 'eco-1002', 'fall-2026', 'CML', '2026-07-13', '00000000-0000-0000-0000-000000000202', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
-  ('eco-1002-spring-rls-fixture', 'eco-1002', 'spring-2026', 'CML', '2026-01-12', '00000000-0000-0000-0000-000000000201', '2026-01-12 12:00:00+00', '2026-01-12 14:00:00+00', null),
-  ('fin-3610-rls-fixture', 'fin-3610', 'fall-2026', null, '2026-07-13', '00000000-0000-0000-0000-000000000202', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
-  ('fin-3610-demoted-owner-rls-fixture', 'fin-3610', 'fall-1970', null, '1970-10-05', '00000000-0000-0000-0000-000000000205', '1970-10-05 12:00:00+00', '1970-10-05 14:00:00+00', null);
+  ('fin-3610-a-rls-fixture', 'fin-3610', 'fall-2026', '2026-07-13', '00000000-0000-0000-0000-000000000201', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
+  ('fin-3610-a-rls-fixture', 'fin-3610', 'fall-2026', '2026-07-13', '00000000-0000-0000-0000-000000000201', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', '2026-07-13 11:00:00+00'),
+  ('fin-3610-a-rls-fixture', 'fin-3610', 'fall-2026', '2026-07-13', '00000000-0000-0000-0000-000000000202', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
+  ('fin-3610-a-spring-rls-fixture', 'fin-3610', 'spring-2026', '2026-01-12', '00000000-0000-0000-0000-000000000201', '2026-01-12 12:00:00+00', '2026-01-12 14:00:00+00', null),
+  ('fin-3610-rls-fixture', 'fin-3610', 'fall-2025', '2026-07-13', '00000000-0000-0000-0000-000000000202', '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00', null),
+  ('fin-3610-demoted-owner-rls-fixture', 'fin-3610', 'fall-1970', '1970-10-05', '00000000-0000-0000-0000-000000000205', '1970-10-05 12:00:00+00', '1970-10-05 14:00:00+00', null);
 
 do $$ begin
   insert into public.workshop_administrations (
-    workshop_slug, course_slug, semester, section, week_of,
+    workshop_slug, course_slug, semester, week_of,
     schedule_version, instructor_id, opens_at, closes_at
   ) values (
-    'eco-1002-rls-fixture', 'eco-1002', 'fall-2026', 'CML', '2026-07-13',
+    'fin-3610-a-rls-fixture', 'fin-3610', 'fall-2026', '2026-07-13',
     1, '00000000-0000-0000-0000-000000000201',
     '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00'
   );
@@ -287,7 +286,7 @@ insert into public.workshop_attendance (
 select id, '00000000-0000-0000-0000-000000000101'::uuid,
        'window', repeat('a', 64)
 from public.workshop_administrations
-where workshop_slug = 'eco-1002-rls-fixture'
+where workshop_slug = 'fin-3610-a-rls-fixture'
   and instructor_id = '00000000-0000-0000-0000-000000000201'
   and cancelled_at is null
 union all
@@ -299,7 +298,7 @@ union all
 select id, '00000000-0000-0000-0000-000000000104'::uuid,
        'window', repeat('c', 64)
 from public.workshop_administrations
-where workshop_slug = 'eco-1002-spring-rls-fixture'
+where workshop_slug = 'fin-3610-a-spring-rls-fixture'
 union all
 select id, '00000000-0000-0000-0000-000000000107'::uuid,
        'window', repeat('d', 64)
@@ -312,7 +311,7 @@ declare
 begin
   select id into owned_administration
     from public.workshop_administrations
-   where workshop_slug = 'eco-1002-rls-fixture'
+   where workshop_slug = 'fin-3610-a-rls-fixture'
      and instructor_id = '00000000-0000-0000-0000-000000000201'
      and cancelled_at is not null
    limit 1;
@@ -402,12 +401,13 @@ do $$ begin
   end;
 
   begin
-    insert into public.archive_videos (
-      course_slug, title, lesson_slug, semester_term, semester_year,
-      provider, video_id, created_by
+    insert into public.archive_quizzes (
+      course_slug, kind, title, semester_term, semester_year, questions,
+      created_by
     ) values (
-      'eco-1002', 'Unauthorized fixture', 'eco-1002/fixture', 'fall', 2026,
-      'youtube', 'abcdefghijk', '00000000-0000-0000-0000-000000000103'
+      'fin-3610', 'exam', 'Unauthorized fixture', 'fall', 2026,
+      '[{"type":"numeric","id":"q1","prompt":"1+1","answer":2,"explanation":"2"}]'::jsonb,
+      '00000000-0000-0000-0000-000000000103'
     );
     raise exception 'student profile created instructor archive content';
   exception when check_violation then null;
@@ -415,10 +415,10 @@ do $$ begin
 end $$;
 
 insert into public.workshop_administrations (
-  workshop_slug, course_slug, semester, section, week_of, instructor_id,
+  workshop_slug, course_slug, semester, week_of, instructor_id,
   opens_at, closes_at
 ) values (
-  'fin-3610-deactivation-guard-fixture', 'fin-3610', 'fall-2026', null,
+  'fin-3610-deactivation-guard-fixture', 'fin-3610', 'fall-2025',
   date_trunc(
     'week', (now() + interval '1 day') at time zone 'America/New_York'
   )::date,
@@ -431,7 +431,7 @@ do $$ begin
        set active = false
      where instructor_id = '00000000-0000-0000-0000-000000000202'
        and course_slug = 'fin-3610'
-       and semester = 'fall-2026';
+       and semester = 'fall-2025';
     raise exception 'assignment with a future workshop was deactivated';
   exception when check_violation then null;
   end;
@@ -476,7 +476,6 @@ begin
     'public.audit_log',
     'public.workshop_administrations',
     'public.workshop_attendance',
-    'public.archive_videos',
     'public.archive_paper_upload_intents',
     'public.archive_papers',
     'public.archive_quizzes'
@@ -579,8 +578,6 @@ begin
   end if;
 
   if has_any_column_privilege(
-    'authenticated', 'public.archive_videos', 'SELECT'
-  ) or has_any_column_privilege(
     'authenticated', 'public.archive_paper_upload_intents', 'SELECT'
   ) or has_any_column_privilege(
     'authenticated', 'public.archive_papers', 'SELECT'
@@ -690,7 +687,7 @@ begin
 
   begin
     insert into public.lesson_progress (user_id, lesson_slug, course_slug)
-    values (auth.uid(), 'eco-1002/forged-progress', 'eco-1002');
+    values (auth.uid(), 'fin-3610/a-forged-progress', 'fin-3610');
     raise exception 'student progress insert was permitted';
   exception when insufficient_privilege then null;
   end;
@@ -699,9 +696,9 @@ begin
     insert into public.offering_lesson_progress (
       user_id, course_slug, semester, instructor_id, lesson_slug
     ) values (
-      auth.uid(), 'eco-1002', 'fall-2026',
+      auth.uid(), 'fin-3610', 'fall-2026',
       '00000000-0000-0000-0000-000000000201',
-      'eco-1002/forged-offering-progress'
+      'fin-3610/a-forged-offering-progress'
     );
     raise exception 'student offering-progress insert was permitted';
   exception when insufficient_privilege then null;
@@ -709,7 +706,7 @@ begin
 
   begin
     insert into public.quiz_attempts (user_id, quiz_slug, course_slug, score, max_score, answers)
-    values (auth.uid(), 'eco-1002-forged-attempt', 'eco-1002', 1, 1, '{}'::jsonb);
+    values (auth.uid(), 'fin-3610-a-forged-attempt', 'fin-3610', 1, 1, '{}'::jsonb);
     raise exception 'student quiz insert was permitted';
   exception when insufficient_privilege then null;
   end;
@@ -721,6 +718,32 @@ begin
   exception when insufficient_privilege or undefined_function then null;
   end;
 end $$;
+
+-- The read policy also matches on course. One allowed course cannot show
+-- that, so for the next block only, instructor 202 gets a window in another
+-- course for the same semester as student 105's class: without the course
+-- predicate, 105 would see two windows instead of one. The one-course checks
+-- step aside while these two rows exist (the block only reads) and are added
+-- back, validated, as soon as the rows are gone.
+reset role;
+alter table public.teaching_assignments
+  drop constraint teaching_assignments_course_slug_check;
+alter table public.workshop_administrations
+  drop constraint workshop_admins_course_check;
+insert into public.teaching_assignments (
+  instructor_id, course_slug, semester, active, assigned_by
+) values (
+  '00000000-0000-0000-0000-000000000202', 'other-0000', 'fall-2026', true,
+  '00000000-0000-0000-0000-000000000204'
+);
+insert into public.workshop_administrations (
+  workshop_slug, course_slug, semester, week_of,
+  instructor_id, opens_at, closes_at
+) values (
+  'other-0000-rls-fixture', 'other-0000', 'fall-2026', '2026-07-13',
+  '00000000-0000-0000-0000-000000000202',
+  '2026-07-13 12:00:00+00', '2026-07-13 14:00:00+00'
+);
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000105', true);
@@ -765,15 +788,31 @@ begin
   end if;
 end $$;
 
+reset role;
+delete from public.workshop_administrations
+ where workshop_slug = 'other-0000-rls-fixture';
+update public.teaching_assignments
+   set active = false
+ where course_slug = 'other-0000';
+delete from public.teaching_assignments where course_slug = 'other-0000';
+alter table public.teaching_assignments
+  add constraint teaching_assignments_course_slug_check
+  check (course_slug in ('fin-3610'));
+alter table public.workshop_administrations
+  add constraint workshop_admins_course_check
+  check (course_slug in ('fin-3610'));
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000103', true);
 do $$
 declare
   visible_rows integer;
 begin
+  -- A classmate in the same class (same instructor and semester) sees the
+  -- same two windows as student 101: the live one and the cancelled one.
   select count(*) into visible_rows from public.workshop_administrations;
-  if visible_rows <> 0 then
-    raise exception 'wrong-section student workshop read expected 0 rows, got %', visible_rows;
+  if visible_rows <> 2 then
+    raise exception 'classmate workshop read expected 2 rows, got %', visible_rows;
   end if;
 end $$;
 
@@ -891,7 +930,7 @@ update public.teaching_assignments
    set active = false,
        updated_at = now()
  where instructor_id = '00000000-0000-0000-0000-000000000201'
-   and course_slug = 'eco-1002'
+   and course_slug = 'fin-3610'
    and semester = 'fall-2026';
 
 set local role authenticated;
@@ -935,7 +974,7 @@ update public.teaching_assignments
    set active = true,
        updated_at = now()
  where instructor_id = '00000000-0000-0000-0000-000000000201'
-   and course_slug = 'eco-1002'
+   and course_slug = 'fin-3610'
    and semester = 'fall-2026';
 
 set local role authenticated;
@@ -1105,12 +1144,11 @@ begin
   applied := public.apply_roster_import(
     '00000000-0000-0000-0000-000000000999',
     '00000000-0000-0000-0000-000000000201',
-    'eco-1002',
+    'fin-3610',
     'fall-2026',
     jsonb_build_array(jsonb_build_object(
       'user_id', '00000000-0000-0000-0000-000000000103',
       'student_name', 'Missing Actor',
-      'section', 'CTL',
       'expected_existing', true
     ))
   );
@@ -1121,12 +1159,11 @@ begin
   applied := public.apply_roster_import(
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000201',
-    'eco-1002',
+    'fin-3610',
     'fall-2026',
     jsonb_build_array(jsonb_build_object(
       'user_id', '00000000-0000-0000-0000-000000000103',
       'student_name', 'Roster RPC Student',
-      'section', 'CTL',
       'expected_existing', true
     ))
   );
@@ -1136,12 +1173,11 @@ begin
   applied := public.apply_roster_import(
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000201',
-    'eco-1002',
+    'fin-3610',
     'fall-2026',
     jsonb_build_array(jsonb_build_object(
       'user_id', '00000000-0000-0000-0000-000000000103',
       'student_name', 'Stale Preview',
-      'section', 'CTL',
       'expected_existing', false
     ))
   );
@@ -1152,9 +1188,9 @@ begin
   mutated := public.mutate_enrollment(
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000103',
-    'eco-1002', 'fall-2026',
+    'fin-3610', 'fall-2026',
     '00000000-0000-0000-0000-000000000201',
-    'Enrollment RPC Student', 'CTL', 'update'
+    'Enrollment RPC Student', 'update'
   );
   if not mutated then
     raise exception 'valid atomic enrollment update failed';
@@ -1162,9 +1198,9 @@ begin
   mutated := public.mutate_enrollment(
     '00000000-0000-0000-0000-000000000103',
     '00000000-0000-0000-0000-000000000103',
-    'eco-1002', 'fall-2026',
+    'fin-3610', 'fall-2026',
     '00000000-0000-0000-0000-000000000201',
-    'Unauthorized Update', 'CTL', 'update'
+    'Unauthorized Update', 'update'
   );
   if mutated then
     raise exception 'student actor mutated an enrollment';
@@ -1172,9 +1208,9 @@ begin
   mutated := public.mutate_enrollment(
     '00000000-0000-0000-0000-000000000999',
     '00000000-0000-0000-0000-000000000103',
-    'eco-1002', 'fall-2026',
+    'fin-3610', 'fall-2026',
     '00000000-0000-0000-0000-000000000201',
-    'Missing Actor', 'CTL', 'update'
+    'Missing Actor', 'update'
   );
   if mutated then
     raise exception 'missing actor mutated an enrollment';
@@ -1183,9 +1219,9 @@ begin
     perform public.mutate_enrollment(
       '00000000-0000-0000-0000-000000000201',
       '00000000-0000-0000-0000-000000000103',
-      'eco-1002', 'fall-2026',
+      'fin-3610', 'fall-2026',
       '00000000-0000-0000-0000-000000000201',
-      null, null, null
+      null, null
     );
     raise exception 'null enrollment operation was accepted';
   exception when invalid_parameter_value then null;
@@ -1193,9 +1229,9 @@ begin
   mutated := public.mutate_enrollment(
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000102',
-    'eco-1002', 'spring-2026',
+    'fin-3610', 'spring-2026',
     '00000000-0000-0000-0000-000000000201',
-    'Temporary Enrollment', 'CML', 'insert'
+    'Temporary Enrollment', 'insert'
   );
   if not mutated then
     raise exception 'valid atomic enrollment insert failed';
@@ -1203,23 +1239,24 @@ begin
   mutated := public.mutate_enrollment(
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000102',
-    'eco-1002', 'spring-2026',
+    'fin-3610', 'spring-2026',
     '00000000-0000-0000-0000-000000000201',
-    null, null, 'delete'
+    null, 'delete'
   );
   if not mutated then
     raise exception 'atomic enrollment insert cleanup failed';
   end if;
 
-  insert into public.archive_videos (
-    course_slug, lesson_slug, semester_term, semester_year, title,
-    provider, video_id, created_by
+  insert into public.archive_quizzes (
+    course_slug, kind, title, semester_term, semester_year, questions,
+    created_by
   ) values (
-    'eco-1002', 'eco-1002/rpc-fixture', 'fall', 2026, 'RPC Fixture',
-    'youtube', 'rpcfixture1', '00000000-0000-0000-0000-000000000201'
+    'fin-3610', 'exam', 'RPC Fixture', 'fall', 2026,
+    '[{"type":"numeric","id":"q1","prompt":"1+1","answer":2,"explanation":"2"}]'::jsonb,
+    '00000000-0000-0000-0000-000000000201'
   ) returning id into item_id;
   begin
-    update public.archive_videos
+    update public.archive_quizzes
        set created_by = created_by
      where id = item_id;
     raise exception 'same-value archive scope update was permitted';
@@ -1227,7 +1264,7 @@ begin
   end;
   mutated := public.mutate_archive_item(
     '00000000-0000-0000-0000-000000000999',
-    'video', item_id, 'delete', '{}'::jsonb
+    'quiz', item_id, 'delete', '{}'::jsonb
   );
   if mutated then
     raise exception 'missing actor deleted archive content';
@@ -1240,54 +1277,64 @@ begin
     raise exception 'null archive resource was accepted';
   exception when invalid_parameter_value then null;
   end;
+  -- Lecture videos were retired with ECO 1002; the resource name must no
+  -- longer be accepted (it used to fall through to the quiz branch's table).
+  begin
+    perform public.mutate_archive_item(
+      '00000000-0000-0000-0000-000000000201',
+      'video', item_id, 'delete', '{}'::jsonb
+    );
+    raise exception 'retired video archive resource was accepted';
+  exception when invalid_parameter_value then null;
+  end;
   mutated := public.mutate_archive_item(
     '00000000-0000-0000-0000-000000000202',
-    'video', item_id, 'delete', '{}'::jsonb
+    'quiz', item_id, 'delete', '{}'::jsonb
   );
   if mutated then
     raise exception 'non-owner instructor deleted archive content';
   end if;
   mutated := public.mutate_archive_item(
     '00000000-0000-0000-0000-000000000201',
-    'video', item_id, 'update', jsonb_build_object(
-      'lesson_slug', 'eco-1002/rpc-fixture',
+    'quiz', item_id, 'update', jsonb_build_object(
+      'kind', 'exam',
+      'title', 'RPC Fixture Updated',
       'semester_term', 'fall',
       'semester_year', 2026,
-      'title', 'RPC Fixture Updated',
-      'provider', 'youtube',
-      'video_id', 'rpcfixture2',
-      'description', null,
-      'duration_minutes', null,
+      'covers', '[]'::jsonb,
+      'questions', '[{"type":"numeric","id":"q1","prompt":"1+1","answer":2,"explanation":"2"}]'::jsonb,
+      'passing_score', 0.7,
       'published', true
     )
   );
-  if not mutated then
+  if not mutated or not exists (
+    select 1 from public.archive_quizzes
+     where id = item_id and title = 'RPC Fixture Updated' and published
+  ) then
     raise exception 'owning instructor could not update archive content';
   end if;
   mutated := public.mutate_archive_item(
     '00000000-0000-0000-0000-000000000204',
-    'video', item_id, 'delete', '{}'::jsonb
+    'quiz', item_id, 'delete', '{}'::jsonb
   );
   if not mutated then
     raise exception 'admin could not delete archive content';
   end if;
-  delete from public.archive_videos where id = item_id;
+  delete from public.archive_quizzes where id = item_id;
 
-  -- schedule_version 1 on purpose. This fixture needs two things at once: a
-  -- window that is open *right now* (the stamp RPC refuses anything else) and
-  -- a real ECO section (the wrong-section assertion below depends on it).
-  -- Under schedule_version 2 the section/day constraint requires opens_at to
-  -- fall on the section's own weekday, so those two demands could only both
-  -- hold on a Tuesday -- which made this whole block pass on Tuesdays and
-  -- fail every other day of the week. Version 1 is exempt from the
-  -- section/day and week_of derivation checks, and no RPC branches on
-  -- schedule_version, so every assertion here still exercises the same code.
-  -- Do not "modernize" this to version 2 without making the clock injectable.
+  -- schedule_version 1 on purpose. This fixture needs a window that is open
+  -- *right now* (the stamp RPC refuses anything else), so opens_at is an hour
+  -- in the past. Version 2 requires week_of to be the Monday of opens_at's
+  -- New York week, and for the first hour of each Monday that is the previous
+  -- week, which would make this block date-dependent. Version 1 is exempt
+  -- from that check, and no RPC branches on schedule_version, so every
+  -- assertion here still exercises the same code. Do not "modernize" this to
+  -- version 2 without making the clock injectable.
   insert into public.workshop_administrations (
-    workshop_slug, course_slug, semester, section, week_of, schedule_version,
+    workshop_slug, course_slug, semester, week_of, schedule_version,
     instructor_id, opens_at, closes_at
   ) values (
-    'eco-1002-rpc-fixture', 'eco-1002', 'fall-2026', 'CTL',
+    'fin-3610-a-rpc-fixture', 'fin-3610', 'fall-2026',
     date_trunc('week', now() at time zone 'America/New_York')::date,
     1, '00000000-0000-0000-0000-000000000201',
     now() - interval '1 hour', now() + interval '1 hour'
@@ -1338,18 +1385,20 @@ begin
   if not mutated then
     raise exception 'valid manual attendance removal failed';
   end if;
+  -- Student 105 is enrolled in the same course and semester, but in another
+  -- instructor's class.
   mutated := public.record_workshop_stamp(
-    '00000000-0000-0000-0000-000000000101',
+    '00000000-0000-0000-0000-000000000105',
     administration_id, repeat('f', 64), 'window'
   );
   if mutated then
-    raise exception 'wrong-section student recorded a workshop stamp';
+    raise exception 'another class''s student recorded a workshop stamp';
   end if;
   insert into public.enrollments (
-    user_id, course_slug, instructor_id, semester, section
+    user_id, course_slug, instructor_id, semester
   ) values (
-    '00000000-0000-0000-0000-000000000201', 'eco-1002',
-    '00000000-0000-0000-0000-000000000201', 'fall-2026', 'CTL'
+    '00000000-0000-0000-0000-000000000201', 'fin-3610',
+    '00000000-0000-0000-0000-000000000201', 'fall-2026'
   );
   mutated := public.record_workshop_stamp(
     '00000000-0000-0000-0000-000000000201',
@@ -1360,7 +1409,7 @@ begin
   end if;
   delete from public.enrollments
    where user_id = '00000000-0000-0000-0000-000000000201'
-     and course_slug = 'eco-1002' and semester = 'fall-2026';
+     and course_slug = 'fin-3610' and semester = 'fall-2026';
   mutated := public.record_workshop_stamp(
     '00000000-0000-0000-0000-000000000103',
     administration_id, repeat('e', 64), 'window'
@@ -1388,35 +1437,35 @@ declare
 begin
   select count(*) into scope_count
     from public.resolve_current_enrollment_scope(
-      '00000000-0000-0000-0000-000000000101', 'eco-1002'
+      '00000000-0000-0000-0000-000000000101', 'fin-3610'
     );
   if scope_count <> 1 then
     raise exception 'one active enrollment did not resolve to one write scope';
   end if;
 
   insert into public.enrollments (
-    user_id, course_slug, instructor_id, semester, section
+    user_id, course_slug, instructor_id, semester
   ) values (
-    '00000000-0000-0000-0000-000000000101', 'eco-1002',
-    '00000000-0000-0000-0000-000000000201', 'spring-2026', 'CML'
+    '00000000-0000-0000-0000-000000000101', 'fin-3610',
+    '00000000-0000-0000-0000-000000000201', 'spring-2026'
   );
   select count(*) into scope_count
     from public.resolve_current_enrollment_scope(
-      '00000000-0000-0000-0000-000000000101', 'eco-1002'
+      '00000000-0000-0000-0000-000000000101', 'fin-3610'
     );
   if scope_count <> 0 then
     raise exception 'ambiguous active enrollments resolved to a write scope';
   end if;
   delete from public.enrollments
    where user_id = '00000000-0000-0000-0000-000000000101'
-     and course_slug = 'eco-1002'
+     and course_slug = 'fin-3610'
      and semester = 'spring-2026';
 
   begin
     update public.enrollments
        set user_id = user_id
      where user_id = '00000000-0000-0000-0000-000000000101'
-       and course_slug = 'eco-1002'
+       and course_slug = 'fin-3610'
        and semester = 'fall-2026';
     raise exception 'same-value enrollment identity update was permitted';
   exception when check_violation then null;
@@ -1426,7 +1475,7 @@ begin
     update public.enrollments
        set instructor_id = instructor_id
      where user_id = '00000000-0000-0000-0000-000000000101'
-       and course_slug = 'eco-1002'
+       and course_slug = 'fin-3610'
        and semester = 'fall-2026';
     raise exception 'same-value enrollment scope update was permitted';
   exception when check_violation then null;
@@ -1445,14 +1494,14 @@ begin
   select enrolled_at into enrolled_at_before
     from public.enrollments
    where user_id = '00000000-0000-0000-0000-000000000101'
-     and course_slug = 'eco-1002'
+     and course_slug = 'fin-3610'
      and semester = 'fall-2026';
 
   transferred := public.transfer_enrollment_scope(
     '00000000-0000-0000-0000-000000000204',
-    '00000000-0000-0000-0000-000000000101', 'eco-1002', 'fall-2026',
+    '00000000-0000-0000-0000-000000000101', 'fin-3610', 'fall-2026',
     '00000000-0000-0000-0000-000000000201',
-    '00000000-0000-0000-0000-000000000202', null, 'CTL'
+    '00000000-0000-0000-0000-000000000202', null
   );
   if not transferred then
     raise exception 'valid enrollment transfer failed';
@@ -1460,7 +1509,7 @@ begin
   select enrolled_at into enrolled_at_after
     from public.enrollments
    where user_id = '00000000-0000-0000-0000-000000000101'
-     and course_slug = 'eco-1002'
+     and course_slug = 'fin-3610'
      and semester = 'fall-2026';
   if enrolled_at_after is distinct from enrolled_at_before then
     raise exception 'enrollment transfer changed the original enrollment time';
@@ -1511,7 +1560,7 @@ begin
   begin
     delete from public.teaching_assignments
      where instructor_id = '00000000-0000-0000-0000-000000000201'
-       and course_slug = 'eco-1002'
+       and course_slug = 'fin-3610'
        and semester = 'spring-2026';
     raise exception 'active teaching assignment was directly deleted';
   exception when check_violation then null;
@@ -1520,8 +1569,8 @@ begin
     perform public.reserve_archive_paper_upload_intent(
       '00000000-0000-0000-0000-000000000411',
       '00000000-0000-0000-0000-000000000101',
-      'eco-1002', 'exam', 'Unauthorized upload', 'fall', 2026, '{}',
-      '00000000-0000-0000-0000-000000000101/eco-1002/411/file.pdf',
+      'fin-3610', 'exam', 'Unauthorized upload', 'fall', 2026, '{}',
+      '00000000-0000-0000-0000-000000000101/fin-3610/a-411/file.pdf',
       'file.pdf', 'application/pdf', 128, now() + interval '1 hour'
     );
     raise exception 'student reserved an archive upload intent';
@@ -1531,8 +1580,8 @@ begin
   reserved := public.reserve_archive_paper_upload_intent(
     '00000000-0000-0000-0000-000000000412',
     '00000000-0000-0000-0000-000000000201',
-    'eco-1002', 'exam', 'Cleanup race fixture', 'fall', 2026, '{}',
-    '00000000-0000-0000-0000-000000000201/eco-1002/412/file.pdf',
+    'fin-3610', 'exam', 'Cleanup race fixture', 'fall', 2026, '{}',
+    '00000000-0000-0000-0000-000000000201/fin-3610/a-412/file.pdf',
     'file.pdf', 'application/pdf', 128, now() + interval '1 hour'
   );
   if not reserved then raise exception 'authorized upload reservation failed'; end if;
@@ -1551,9 +1600,9 @@ begin
       storage_path, original_filename, content_type, size_bytes, created_by,
       upload_intent_id, published
     ) values (
-      '00000000-0000-0000-0000-000000000412', 'eco-1002', 'exam',
+      '00000000-0000-0000-0000-000000000412', 'fin-3610', 'exam',
       'Cleanup race fixture', 'fall', 2026, '{}',
-      '00000000-0000-0000-0000-000000000201/eco-1002/412/file.pdf',
+      '00000000-0000-0000-0000-000000000201/fin-3610/a-412/file.pdf',
       'file.pdf', 'application/pdf', 128,
       '00000000-0000-0000-0000-000000000201',
       '00000000-0000-0000-0000-000000000412', false
@@ -1567,8 +1616,8 @@ begin
   reserved := public.reserve_archive_paper_upload_intent(
     '00000000-0000-0000-0000-000000000413',
     '00000000-0000-0000-0000-000000000201',
-    'eco-1002', 'exam', 'Finalize race fixture', 'fall', 2026, '{}',
-    '00000000-0000-0000-0000-000000000201/eco-1002/413/file.pdf',
+    'fin-3610', 'exam', 'Finalize race fixture', 'fall', 2026, '{}',
+    '00000000-0000-0000-0000-000000000201/fin-3610/a-413/file.pdf',
     'file.pdf', 'application/pdf', 128, now() + interval '1 hour'
   );
   if not reserved then raise exception 'second upload reservation failed'; end if;
@@ -1577,9 +1626,9 @@ begin
     storage_path, original_filename, content_type, size_bytes, created_by,
     upload_intent_id, published
   ) values (
-    '00000000-0000-0000-0000-000000000413', 'eco-1002', 'exam',
+    '00000000-0000-0000-0000-000000000413', 'fin-3610', 'exam',
     'Finalize race fixture', 'fall', 2026, '{}',
-    '00000000-0000-0000-0000-000000000201/eco-1002/413/file.pdf',
+    '00000000-0000-0000-0000-000000000201/fin-3610/a-413/file.pdf',
     'file.pdf', 'application/pdf', 128,
     '00000000-0000-0000-0000-000000000201',
     '00000000-0000-0000-0000-000000000413', false
@@ -1612,8 +1661,8 @@ begin
     ) values (
       '00000000-0000-0000-0000-000000000414',
       '00000000-0000-0000-0000-000000000201',
-      'eco-1002', 'exam', 'Legacy publish fixture', 'fall', 2026, '{}',
-      '00000000-0000-0000-0000-000000000201/eco-1002/414/file.pdf',
+      'fin-3610', 'exam', 'Legacy publish fixture', 'fall', 2026, '{}',
+      '00000000-0000-0000-0000-000000000201/fin-3610/a-414/file.pdf',
       'file.pdf', 'application/pdf', 128, true, 'pending',
       now() + interval '1 hour'
     );
@@ -1628,8 +1677,8 @@ begin
   ) values (
     '00000000-0000-0000-0000-000000000415',
     '00000000-0000-0000-0000-000000000203',
-    'eco-1002', 'exam', 'Unassigned instructor lifecycle fixture', 'fall', 2026, '{}',
-    '00000000-0000-0000-0000-000000000203/eco-1002/415/file.pdf',
+    'fin-3610', 'exam', 'Unassigned instructor lifecycle fixture', 'fall', 2026, '{}',
+    '00000000-0000-0000-0000-000000000203/fin-3610/a-415/file.pdf',
     'file.pdf', 'application/pdf', 128, false, 'pending',
     now() + interval '1 hour'
   );
@@ -1657,30 +1706,30 @@ insert into public.teaching_assignments (
   instructor_id, course_slug, semester, active, assigned_by
 ) values (
   '00000000-0000-0000-0000-000000000301',
-  'eco-1002', 'fall-2027', true,
+  'fin-3610', 'fall-2027', true,
   '00000000-0000-0000-0000-000000000204'
 );
 insert into public.enrollments (
-  user_id, course_slug, semester, instructor_id, section
+  user_id, course_slug, semester, instructor_id
 ) values (
   '00000000-0000-0000-0000-000000000103',
-  'eco-1002', 'fall-2027',
-  '00000000-0000-0000-0000-000000000301', 'CTL'
+  'fin-3610', 'fall-2027',
+  '00000000-0000-0000-0000-000000000301'
 );
 insert into public.offering_lesson_progress (
   user_id, course_slug, semester, instructor_id, lesson_slug, status
 ) values (
   '00000000-0000-0000-0000-000000000103',
-  'eco-1002', 'fall-2027',
+  'fin-3610', 'fall-2027',
   '00000000-0000-0000-0000-000000000301',
-  'eco-1002/offboard-fixture', 'started'
+  'fin-3610/a-offboard-fixture', 'started'
 );
-insert into public.archive_videos (
-  course_slug, lesson_slug, semester_term, semester_year, title,
-  provider, video_id, created_by
+insert into public.archive_quizzes (
+  course_slug, kind, title, semester_term, semester_year, questions,
+  created_by
 ) values (
-  'eco-1002', 'eco-1002/offboard-fixture', 'fall', 2027,
-  'Offboarding fixture', 'youtube', 'offboard001',
+  'fin-3610', 'exam', 'Offboarding fixture', 'fall', 2027,
+  '[{"type":"numeric","id":"q1","prompt":"1+1","answer":2,"explanation":"2"}]'::jsonb,
   '00000000-0000-0000-0000-000000000301'
 );
 insert into public.archive_paper_upload_intents (
@@ -1691,24 +1740,24 @@ insert into public.archive_paper_upload_intents (
   (
     '00000000-0000-0000-0000-000000000421',
     '00000000-0000-0000-0000-000000000301',
-    'eco-1002', 'exam', 'Offboard pending', 'fall', 2027, '{}',
-    '00000000-0000-0000-0000-000000000301/eco-1002/421/file.pdf',
+    'fin-3610', 'exam', 'Offboard pending', 'fall', 2027, '{}',
+    '00000000-0000-0000-0000-000000000301/fin-3610/a-421/file.pdf',
     'file.pdf', 'application/pdf', 128, false, 'pending',
     now() + interval '1 hour'
   ),
   (
     '00000000-0000-0000-0000-000000000422',
     '00000000-0000-0000-0000-000000000301',
-    'eco-1002', 'exam', 'Offboard expired', 'fall', 2027, '{}',
-    '00000000-0000-0000-0000-000000000301/eco-1002/422/file.pdf',
+    'fin-3610', 'exam', 'Offboard expired', 'fall', 2027, '{}',
+    '00000000-0000-0000-0000-000000000301/fin-3610/a-422/file.pdf',
     'file.pdf', 'application/pdf', 128, false, 'expired',
     now() + interval '1 hour'
   ),
   (
     '00000000-0000-0000-0000-000000000423',
     '00000000-0000-0000-0000-000000000301',
-    'eco-1002', 'exam', 'Offboard finalized', 'fall', 2027, '{}',
-    '00000000-0000-0000-0000-000000000301/eco-1002/423/file.pdf',
+    'fin-3610', 'exam', 'Offboard finalized', 'fall', 2027, '{}',
+    '00000000-0000-0000-0000-000000000301/fin-3610/a-423/file.pdf',
     'file.pdf', 'application/pdf', 128, false, 'pending',
     now() + interval '1 hour'
   );
@@ -1718,8 +1767,8 @@ insert into public.archive_papers (
   upload_intent_id, published
 ) values (
   '00000000-0000-0000-0000-000000000423',
-  'eco-1002', 'exam', 'Offboard finalized', 'fall', 2027, '{}',
-  '00000000-0000-0000-0000-000000000301/eco-1002/423/file.pdf',
+  'fin-3610', 'exam', 'Offboard finalized', 'fall', 2027, '{}',
+  '00000000-0000-0000-0000-000000000301/fin-3610/a-423/file.pdf',
   'file.pdf', 'application/pdf', 128,
   '00000000-0000-0000-0000-000000000301',
   '00000000-0000-0000-0000-000000000423', false
@@ -1747,8 +1796,13 @@ begin
         where instructor_id = '00000000-0000-0000-0000-000000000301'
      )
      or exists (
-       select 1 from public.archive_videos
+       select 1 from public.archive_quizzes
         where created_by = '00000000-0000-0000-0000-000000000301'
+     )
+     or not exists (
+       select 1 from public.archive_quizzes
+        where created_by = '00000000-0000-0000-0000-000000000302'
+          and title = 'Offboarding fixture'
      )
      or not exists (
        select 1 from public.profiles
@@ -1786,8 +1840,8 @@ begin
       upload_intent_id, published
     ) values (
       '00000000-0000-0000-0000-000000000421',
-      'eco-1002', 'exam', 'Offboard pending', 'fall', 2027, '{}',
-      '00000000-0000-0000-0000-000000000301/eco-1002/421/file.pdf',
+      'fin-3610', 'exam', 'Offboard pending', 'fall', 2027, '{}',
+      '00000000-0000-0000-0000-000000000301/fin-3610/a-421/file.pdf',
       'file.pdf', 'application/pdf', 128,
       '00000000-0000-0000-0000-000000000301',
       '00000000-0000-0000-0000-000000000421', false
@@ -1810,12 +1864,12 @@ delete from public.archive_papers
  where id = '00000000-0000-0000-0000-000000000423';
 delete from public.archive_paper_upload_intents
  where id = '00000000-0000-0000-0000-000000000423';
-delete from public.archive_videos
+delete from public.archive_quizzes
  where created_by = '00000000-0000-0000-0000-000000000302'
-   and lesson_slug = 'eco-1002/offboard-fixture';
+   and title = 'Offboarding fixture';
 delete from public.offering_lesson_progress
  where instructor_id = '00000000-0000-0000-0000-000000000302'
-   and lesson_slug = 'eco-1002/offboard-fixture';
+   and lesson_slug = 'fin-3610/a-offboard-fixture';
 delete from public.enrollments
  where instructor_id = '00000000-0000-0000-0000-000000000302'
    and semester = 'fall-2027';
@@ -1840,7 +1894,7 @@ begin
    where p.oid = 'public.apply_roster_import(uuid,uuid,text,text,jsonb)'::regprocedure;
   select p.prosrc into mutation_definition
     from pg_catalog.pg_proc p
-   where p.oid = 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text,text)'::regprocedure;
+   where p.oid = 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text)'::regprocedure;
   if strpos(roster_definition, 'enrollment-scope:') = 0
      or strpos(roster_definition, 'enrollment:') = 0
      or strpos(roster_definition, 'enrollment-scope:')
@@ -1884,12 +1938,12 @@ begin
      or has_function_privilege('authenticated', 'public.reserve_archive_paper_upload_intent(uuid,uuid,text,text,text,text,integer,text[],text,text,text,bigint,timestamptz)', 'execute')
      or has_function_privilege('anon', 'public.claim_archive_paper_upload_intents(uuid,timestamptz,integer)', 'execute')
      or has_function_privilege('authenticated', 'public.claim_archive_paper_upload_intents(uuid,timestamptz,integer)', 'execute')
-     or has_function_privilege('anon', 'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text,text)', 'execute')
-     or has_function_privilege('authenticated', 'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text,text)', 'execute')
+     or has_function_privilege('anon', 'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text)', 'execute')
+     or has_function_privilege('authenticated', 'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text)', 'execute')
      or has_function_privilege('anon', 'public.apply_roster_import(uuid,uuid,text,text,jsonb)', 'execute')
      or has_function_privilege('authenticated', 'public.apply_roster_import(uuid,uuid,text,text,jsonb)', 'execute')
-     or has_function_privilege('anon', 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text,text)', 'execute')
-     or has_function_privilege('authenticated', 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text,text)', 'execute')
+     or has_function_privilege('anon', 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text)', 'execute')
+     or has_function_privilege('authenticated', 'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text)', 'execute')
      or has_function_privilege('anon', 'public.mutate_archive_item(uuid,text,uuid,text,jsonb)', 'execute')
      or has_function_privilege('authenticated', 'public.mutate_archive_item(uuid,text,uuid,text,jsonb)', 'execute')
      or has_function_privilege('anon', 'public.mutate_workshop(uuid,uuid,text,uuid,text)', 'execute')
@@ -1956,7 +2010,7 @@ begin
     'execute'
   ) or not has_function_privilege(
     'service_role',
-    'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text,text)',
+    'public.transfer_enrollment_scope(uuid,uuid,text,text,uuid,uuid,text)',
     'execute'
   ) then
     raise exception 'service role cannot resolve or transfer enrollment scope';
@@ -1967,7 +2021,7 @@ begin
     'execute'
   ) or not has_function_privilege(
     'service_role',
-    'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text,text)',
+    'public.mutate_enrollment(uuid,uuid,text,text,uuid,text,text)',
     'execute'
   ) or not has_function_privilege(
     'service_role',
