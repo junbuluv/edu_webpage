@@ -732,10 +732,10 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
    `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts` /
-   `cases/{yield-curve,wacc,union-pacific,dcf,random,pme}.ts` /
+   `cases/{yield-curve,beta-sampling,wacc,union-pacific,dcf,random,pme}.ts` /
    `bonds/callable.ts` / `factors/ols.ts` / `clo/waterfall.ts` / `lbo/model.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 371 tests as of 2026-11-25.
+   when adding testable logic. 381 tests as of 2026-11-25.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

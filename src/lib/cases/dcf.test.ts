@@ -126,3 +126,13 @@ test('a random-draw run is repeatable and collapses to the base when ranges are 
     simulate(BASE, ranges, 200, 10),
   );
 });
+
+test('bins with a fractional width reach the highest value', () => {
+  // Adding 0.05 forty times drifts past 39 x 0.05, which once dropped the
+  // top bin (and with it the chart's marker for a beta of 1.958).
+  const b = bins([1.0, 1.958], 0.05);
+  assert.equal(b.length, 20);
+  assert.ok(Math.abs(b[b.length - 1].from - 1.95) < 1e-9);
+  assert.equal(b[b.length - 1].count, 1);
+  assert.equal(b[0].count, 1);
+});
