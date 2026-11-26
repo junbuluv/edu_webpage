@@ -1,0 +1,95 @@
+{
+  "slug": "fin-3610-case-beta-sampling",
+  "title": "Case study: How sure are we about beta?",
+  "course": "fin-3610",
+  "caseSlug": "fin-3610/beta-sampling",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "A regression on 60 months of returns gives a beta of 0.85. The risk-free rate is 4.0% and the market risk premium is 5.0%. What is the CAPM cost of equity? Answer in percent, to two decimals.",
+      "answer": 8.25,
+      "tolerance": 0.01,
+      "unit": "%",
+      "explanation": "r_E = 4.0% + 0.85 × 5.0% = 4.0% + 4.25% = 8.25%. The rate and the premium are the same for every firm; beta is the part estimated from the firm's own returns.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Returns in this quiz are from the Ken French Data Library, as in the case. High tech's beta over January 1995 to December 1999 is 1.435 with a standard error of 0.139. What is the low end of the rough 95% range, the estimate minus two standard errors? Answer to three decimals.",
+      "answer": 1.157,
+      "tolerance": 0.002,
+      "unit": "",
+      "explanation": "1.435 − 2 × 0.139 = 1.435 − 0.278 = 1.157. The high end is 1.713, so the range runs from 1.157 to 1.713.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "Utilities' beta is 0.213 over the 60 months to December 1999 and 0.523 over all months since July 1963. With a market risk premium of 4.23%, by how many percentage points does the cost of equity differ between the two? Answer to two decimals.",
+      "answer": 1.31,
+      "tolerance": 0.01,
+      "unit": "",
+      "explanation": "Only beta differs, so the gap is (0.523 − 0.213) × 4.23% = 0.310 × 4.23% = 1.31 percentage points. The risk-free rate cancels.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "The middle 90% of betas from 60 months drawn at random from all of high tech's history runs from 1.061 to 1.431. The 60 months to December 2004 give 1.958. What is the best reading?",
+      "choices": [
+        "Sixty months is too short a window, so any estimate above 1.5 is wrong",
+        "High tech's beta itself was higher in those years than over the whole history",
+        "The draws used a fixed seed, so their range cannot be compared with a window",
+        "The market risk premium was higher in 2004, which raised the estimated beta"
+      ],
+      "correctIndex": 1,
+      "explanation": "The random draws show how far a 60-month estimate lands by chance when the beta behind it is the full-history one. An estimate this far outside that range points to a beta that was really higher in 2000 to 2004. The premium does not enter the regression at all.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "A 60-month regression reports a beta of 1.435 with a standard error of 0.139. What does the standard error describe?",
+      "choices": [
+        "How much the industry's return moves, on average, when the market moves 1%",
+        "The typical gap between an estimate and the true beta, by chance alone",
+        "The share of the industry's monthly returns that the market explains",
+        "How much beta is expected to change over the next five years"
+      ],
+      "correctIndex": 1,
+      "explanation": "The standard error measures sampling error: other samples of the same size would give estimates that typically differ from the true beta by about that much. Beta itself is the first choice, R² the third, and the standard error says nothing about future changes in beta.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q6",
+      "prompt": "An analyst lengthens the window from 60 months to 240 months. What is the trade-off?",
+      "choices": [
+        "The standard error roughly halves, but older months may reflect an outdated beta",
+        "The standard error roughly quarters, and the estimate becomes free of old information",
+        "The estimate becomes exact, but only for firms whose beta is close to 1",
+        "Nothing changes, because the standard error depends only on the market's volatility"
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard error falls roughly with the square root of the number of months: four times the months, about half the error. But 240 months reach back 20 years, and the case shows betas move: high tech's went from about 1 to about 2 and back.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q7",
+      "prompt": "Over the 60 months to December 1999, the regression for utilities has an R² of 0.06 and a beta of 0.213 with a standard error of 0.116. Which statement is right?",
+      "choices": [
+        "Utilities had no market risk in those years, so their cost of equity was the risk-free rate",
+        "The market explained about 6% of the month-to-month variation in utilities' returns",
+        "The beta is precise, because an R² below 0.10 means the errors are small",
+        "Utilities returned 6% a year more than the market over those five years"
+      ],
+      "correctIndex": 1,
+      "explanation": "R² is the share of the variation the market explains: about 6%. The rough 95% range for beta, 0.213 ± 2 × 0.116, runs from −0.02 to 0.45, so the estimate is imprecise, not zero. A low R² means large errors, not small ones.",
+      "points": 1
+    }
+  ]
+}

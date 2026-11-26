@@ -1,0 +1,174 @@
+---
+title: 'How Sure Are We About Beta?'
+course: fin-3610
+topic: 'CAPM'
+order: 2
+summary: 'Estimate beta for utilities and for high-tech stocks from 60 months of real returns, then move the window and draw random samples. The same industry gives a cost of equity two points apart depending on which five years you use.'
+estimatedMinutes: 20
+relatedLessons:
+  - 'fin-3610/capm-and-sml'
+  - 'fin-3610/factor-regressions'
+quizSlug: 'fin-3610-case-beta-sampling'
+dataThrough: 'September 2026'
+sources:
+  - name: 'Ken French Data Library, Tuck School of Business at Dartmouth: Fama/French 3 Factors and 10 Industry Portfolios, monthly, July 1963 to September 2026. Copyright 2026 Eugene F. Fama and Kenneth R. French.'
+    url: 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html'
+  - name: 'FRED, Federal Reserve Bank of St. Louis: 10-year Treasury yield (DGS10), 30 January 2026, as in the cost of capital case'
+    url: 'https://fred.stlouisfed.org/series/DGS10'
+  - name: 'Aswath Damodaran, NYU Stern: Historical Implied Equity Risk Premiums, January 2026, as in the cost of capital case'
+    url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html'
+draft: false
+---
+
+import BetaSamplingExplorer from '@components/viz/BetaSamplingExplorer';
+
+## The question
+
+The CAPM gives a cost of equity from three numbers:
+
+$$
+r_E = r_f + \beta \times \text{MRP}.
+$$
+
+Two of them, the risk-free rate and the market risk premium (MRP), are
+the same for every firm. Beta is the one an analyst estimates from the
+firm's own past returns, usually the last five years of monthly returns.
+How much would the answer change with a different five years?
+
+This case estimates beta for two industries: utilities, whose stocks
+move little with the market, and high tech, whose stocks move a lot. The
+returns are real: the value-weighted utilities and high-tech portfolios
+from the Ken French Data Library, and the market, each month from July
+1963 to September 2026. Each industry is a portfolio of many firms, so
+its beta is steadier than any one firm's.
+
+## The regression
+
+Beta is the slope of a regression of the industry's monthly return over
+Treasury bills on the market's, as in
+[Estimating Alpha and Beta](/lessons/fin-3610/factor-regressions):
+
+$$
+R_{i,t} - R_{f,t} = \alpha + \beta\,(R_{m,t} - R_{f,t}) + \varepsilon_t .
+$$
+
+The regression also reports a standard error for beta: how far the
+estimate would typically land from the true beta if the same industry
+were measured over another 60 months like these.
+
+## By hand: high tech in 1999 and in 2004
+
+An analyst in December 1999 regresses the 60 months from January 1995
+to December 1999 and finds a beta of 1.435 with a standard error of
+0.139. Five years later the next 60 months, January 2000 to December
+2004, give 1.958 with a standard error of 0.118.
+
+Hold the risk-free rate and premium at the values from
+[Union Pacific's Cost of Capital](/cases/fin-3610/union-pacific-cost-of-capital),
+4.26% and 4.23%, so that only beta changes:
+
+$$
+\begin{aligned}
+r_E(1999) &= 4.26\% + 1.435 \times 4.23\% = 10.33\%, \\
+r_E(2004) &= 4.26\% + 1.958 \times 4.23\% = 12.54\%.
+\end{aligned}
+$$
+
+The same industry costs 2.21 percentage points more in equity. For a
+payment of 100 a year forever, that is the difference between a value
+of 100 / 0.1033 = 968 and 100 / 0.1254 = 797, about 18% less.
+
+Is the gap just noise? A rough 95% range is the estimate plus or minus
+two standard errors:
+
+- 1999: 1.435 ± 2 × 0.139, from 1.157 to 1.713.
+- 2004: 1.958 ± 2 × 0.118, from 1.722 to 2.194.
+
+The two ranges do not overlap. Noise alone rarely puts two estimates
+this far apart.
+
+## Replay it
+
+<BetaSamplingExplorer client:visible />
+
+Work through these steps.
+
+1. The chart opens on high tech, with the window ending December 1999.
+   The fitted line in the scatter has slope 1.435, and the cost of
+   equity is 10.33%.
+2. Press **Dec 2004**. Beta is 1.958 and the cost of equity 12.54%. In
+   the middle chart the orange marker sits near the highest point of the
+   line.
+3. Read the lower chart. Each bar counts betas from 60 months picked at
+   random from all 759. The middle 90% of the 1,000 draws runs from
+   1.061 to 1.431, around the full-history beta of 1.234. The 2004 beta
+   is far outside that range, and the 1999 beta sits just above it.
+4. Press **Draw again** a few times. The range moves by about a
+   hundredth. A thousand draws are enough to pin it down.
+5. Press **Reset**, then **Utilities**. The window ending December 1999
+   gives a beta of 0.213 with a standard error of 0.116, and the market
+   explains only 6% of the variation in utilities' monthly returns
+   (R² 0.06). Over all 759 months the beta is 0.523.
+6. Drag the slider across the years and watch the middle chart.
+   Utilities' 60-month beta has run from 0.01, in the window ending
+   February 2001, to 0.81, in the window ending August 1974.
+
+## Two reasons a beta moves
+
+**Sampling error.** Sixty months is a small sample. Even if an industry's
+true beta never changed, a different 60 months would give a different
+estimate. The random draws measure this: they mix months from every
+decade, so the true beta behind them is the full-history one, and the
+middle 90% of their estimates still spans 0.37 for high tech.
+
+**The beta itself changes.** If sampling error were the whole story,
+about one 60-month window in ten would land outside the middle 90% of
+the random draws. For high tech, 28% of the 700 windows do; for
+utilities, 25%. The windows overlap, so they are not 700 separate tests,
+but the middle chart shows the pattern: high tech's beta climbed to
+about 2 in the windows ending in 2004 and was back near 1 by 2021. A
+firm's or an industry's business, leverage and investors change, and
+its beta changes with them.
+
+So a longer window has two effects. More months cut the standard error,
+roughly by the square root of the number of months: 240 months instead
+of 60 halve it. But the older months describe the industry as it was,
+not as it is.
+
+## What analysts do about it
+
+- **Report a range.** Over 1995 to 1999, beta from 1.16 to 1.71 means a
+  cost of equity from 9.15% to 11.51%.
+- **Average across firms.** An industry beta, as in the cost of capital
+  case, is less noisy than one firm's. A single stock's beta has a much
+  larger standard error than these portfolios'.
+- **Pull extreme estimates toward 1.** Some data services report an
+  adjusted beta, two thirds of the estimate plus one third of 1, because
+  betas far from 1 tend to move back toward it.
+
+## Takeaways
+
+- A beta from 60 months is an estimate with a standard error. For high
+  tech in 1995 to 1999 it was 0.139, enough to move the cost of equity by
+  more than two points across a 95% range.
+- Betas also change over time. High tech's ranged from about 1 to about
+  2 across the 700 windows since 1968.
+- Before using a beta, ask which months it came from and how precise it
+  is.
+
+## Limits
+
+- These are industry portfolios. One firm's beta is noisier, and the
+  firm can change faster than an industry.
+- The random draws treat months as interchangeable. Real returns have
+  calm and turbulent stretches, which the draws mix together, so they
+  can understate how far apart two 60-month windows land.
+- The rough 95% range assumes the regression's standard error is right.
+  It assumes the monthly errors have constant variance and are unrelated
+  from month to month, which real returns do not quite satisfy.
+- The risk-free rate and premium are held at January 2026 values. An
+  analyst in 1999 or 2004 would have used the rate and premium of that
+  year.
+- The regressions measure returns over the one-month Treasury bill rate,
+  while the cost of equity uses the 10-year Treasury yield, as in the
+  cost of capital case. Both are common choices.
