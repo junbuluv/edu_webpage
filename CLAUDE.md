@@ -105,7 +105,10 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `/lessons/eco-1002/…`, `/practice/eco-1002-…`, `/workshops/eco-1002-…`)
   answer 301 to `/?from=eco-1002`, where the home page says the course is
   gone: the pure, unit-tested `src/lib/retired-routes.ts`, called near the top
-  of `src/middleware.ts`
+  of `src/middleware.ts`. On Vercel the middleware runs only for addresses
+  that match a page, so `src/pages/eco-1002/[...path].astro` and
+  `src/pages/macro.astro` exist only to give those addresses a route (the dev
+  server runs middleware on every address, so a dev-only check misses this)
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
