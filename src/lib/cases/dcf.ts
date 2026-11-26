@@ -165,15 +165,21 @@ export function percentile(sorted: number[], p: number): number {
 
 /** Counts of values in bins [from, from + width), from the lowest bin used. */
 export function bins(values: number[], width: number) {
+  // Bins are keyed by whole-number index; stepping `from += width` drifts
+  // for a fractional width and can skip the top bin.
   const counts = new Map<number, number>();
   for (const v of values) {
-    const from = Math.floor(v / width) * width;
-    counts.set(from, (counts.get(from) ?? 0) + 1);
+    const k = Math.floor(v / width);
+    counts.set(k, (counts.get(k) ?? 0) + 1);
   }
-  const froms = [...counts.keys()].sort((a, b) => a - b);
+  const ks = [...counts.keys()];
   const out: { from: number; to: number; count: number }[] = [];
-  for (let from = froms[0]; from <= froms[froms.length - 1]; from += width) {
-    out.push({ from, to: from + width, count: counts.get(from) ?? 0 });
+  for (let k = Math.min(...ks); k <= Math.max(...ks); k += 1) {
+    out.push({
+      from: k * width,
+      to: (k + 1) * width,
+      count: counts.get(k) ?? 0,
+    });
   }
   return out;
 }
