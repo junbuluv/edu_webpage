@@ -6,14 +6,7 @@ const TYPE_LABEL: Record<ArchiveItemType, string> = {
   notes: 'Lecture notes',
   exam: 'Exams',
   assignment: 'Assignments',
-  video: 'Videos',
 };
-
-function embedSrc(item: ArchiveItem): string {
-  if (item.provider === 'youtube')
-    return `https://www.youtube-nocookie.com/embed/${item.videoId}?rel=0`;
-  return `https://player.vimeo.com/video/${item.videoId}`;
-}
 
 interface Props {
   items: ArchiveItem[];
@@ -26,7 +19,6 @@ export default function ArchiveBrowser({ items, facets }: Props) {
   const [unit, setUnit] = useState<string | null>(null);
   const [lesson, setLesson] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const [openVideo, setOpenVideo] = useState<string | null>(null);
 
   const filtered = useMemo(
     () => filterItems(items, { type, semester, unit, lesson, query }),
@@ -165,33 +157,7 @@ export default function ArchiveBrowser({ items, facets }: Props) {
               )}
             </div>
 
-            {item.type === 'video' ? (
-              <>
-                <button
-                  type="button"
-                  className="mt-1 text-left font-medium text-accent underline"
-                  onClick={() =>
-                    setOpenVideo(openVideo === item.id ? null : item.id)
-                  }
-                  aria-expanded={openVideo === item.id}
-                  aria-label={`${openVideo === item.id ? 'Hide' : 'Play'} video: ${item.title}`}
-                >
-                  {item.title}
-                </button>
-                {openVideo === item.id && (
-                  <div className="mt-3 aspect-video w-full">
-                    <iframe
-                      className="h-full w-full rounded"
-                      src={embedSrc(item)}
-                      title={item.title}
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </>
-            ) : item.fileUrl ? (
+            {item.fileUrl ? (
               <a
                 href={item.fileUrl}
                 target="_blank"

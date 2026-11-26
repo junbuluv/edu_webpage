@@ -4,8 +4,8 @@ import { newYorkReportingRangeStartISO } from '@lib/workshop-policy';
 import { selectAllRows } from '@lib/supabase/admin';
 
 // Loader for the staff section on /dashboard. Returns per-course
-// workshop stamp metrics for both ECO 1002 and FIN 3610, filtered
-// by a time range parsed from a query param.
+// workshop stamp metrics, filtered by a time range parsed from a query
+// param.
 
 export type TimeRange = 'week' | 'month' | 'all';
 
@@ -30,7 +30,6 @@ export interface WorkshopStaffMetrics {
   recent: Array<{
     administration_id: string;
     workshop_slug: string;
-    section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
     stamped_at: string;
   }>;
   openNow: number;
@@ -43,12 +42,7 @@ export async function loadStaffMetrics(
   courseSlug: CourseSlug,
   range: TimeRange,
 ): Promise<StaffMetrics> {
-  const startISO = rangeStartISO(range);
-
-  if (courseSlug === 'eco-1002' || courseSlug === 'fin-3610') {
-    return loadWorkshopMetrics(supabase, courseSlug, startISO);
-  }
-  return null;
+  return loadWorkshopMetrics(supabase, courseSlug, rangeStartISO(range));
 }
 
 async function loadWorkshopMetrics(
@@ -62,13 +56,12 @@ async function loadWorkshopMetrics(
   const administrations = await selectAllRows<{
     id: string;
     workshop_slug: string;
-    section: 'CML' | 'CTL' | 'CWL' | 'CRL' | null;
     opens_at: string;
     closes_at: string;
   }>((from, to) =>
     supabase
       .from('workshop_administrations')
-      .select('id, workshop_slug, section, opens_at, closes_at')
+      .select('id, workshop_slug, opens_at, closes_at')
       .is('cancelled_at', null)
       .eq('course_slug', courseSlug)
       .order('id', { ascending: true })
@@ -128,7 +121,6 @@ async function loadWorkshopMetrics(
       return {
         administration_id: s.administration_id,
         workshop_slug: a?.workshop_slug ?? '',
-        section: (a?.section ?? null) as 'CML' | 'CTL' | 'CWL' | 'CRL' | null,
         stamped_at: s.stamped_at,
       };
     }),

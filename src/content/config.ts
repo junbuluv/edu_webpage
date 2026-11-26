@@ -112,6 +112,9 @@ const quizzes = defineCollection({
       title: z.string(),
       course: courseEnum,
       lessonSlug: z.string().optional(),
+      // Set on a case study's quiz instead of lessonSlug, e.g.
+      // "fin-3610/yield-curve". The quiz page links back to that case.
+      caseSlug: z.string().optional(),
       kind: z.enum(['practice', 'exam', 'assignment']).default('practice'),
       semester: semesterSchema.optional(),
       covers: z.array(z.string()).default([]),
@@ -174,33 +177,39 @@ const workshops = defineCollection({
   }),
 });
 
-const videos = defineCollection({
-  type: 'data',
-  schema: z
-    .object({
-      slug: z.string(),
-      title: z.string(),
-      course: courseEnum,
-      lessonSlug: z.string().min(1),
-      semester: semesterSchema,
-      provider: z.enum(['youtube', 'vimeo']),
-      videoId: z.string().min(1),
-      description: z.string().optional(),
-      durationMinutes: z.number().positive().optional(),
-      draft: z.boolean().default(false),
-    })
-    .refine((d) => d.course === 'eco-1002', {
-      message: 'videos are only supported for eco-1002',
-      path: ['course'],
-    }),
+// Case studies: a real episode or company worked through with data and a
+// simulation. Listed on the course page and served at /cases/<slug>. They are
+// not lessons: no progress tracking, no tutor, no place in the unit order.
+const cases = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    course: courseEnum,
+    // The lesson topic the case applies, e.g. "Yield curve".
+    topic: z.string(),
+    order: z.number(),
+    summary: z.string(),
+    estimatedMinutes: z.number().positive(),
+    // Lesson slugs to read first, e.g. "fin-3610/bond-pricing-and-yield".
+    relatedLessons: z.array(z.string()).default([]),
+    quizSlug: z.string().optional(),
+    // Last month the data covers, in words, e.g. "October 2026".
+    dataThrough: z.string().optional(),
+    sources: z
+      .array(z.object({ name: z.string(), url: z.string().url() }))
+      .min(1),
+    // Set on a case that extends another, e.g. "fin-3610/union-pacific-valuation".
+    extensionOf: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
 });
 
 export const collections = {
   lessons,
+  cases,
   quizzes,
   instructors,
   courses,
   workshops,
-  videos,
 };
 export type QuestionT = z.infer<typeof QuestionSchema>;

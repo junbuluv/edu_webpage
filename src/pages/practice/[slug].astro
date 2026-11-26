@@ -114,5 +114,18 @@ const kindLabel =
         </p>
       )
     }
+
+    {
+      quiz.caseSlug && (
+        <p class="mt-8">
+          <a
+            href={`/cases/${quiz.caseSlug}`}
+            class="text-sm text-accent underline"
+          >
+            ← Back to the case study
+          </a>
+        </p>
+      )
+    }
   </div>
 </BaseLayout>

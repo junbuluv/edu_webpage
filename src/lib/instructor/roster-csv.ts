@@ -6,7 +6,6 @@
 export interface ParsedRosterRow {
   email: string; // normalized: trimmed + lowercased
   name: string | null;
-  section: string | null;
 }
 
 export interface ParseResult {
@@ -70,9 +69,10 @@ function looksLikeEmail(s: string): boolean {
 }
 
 /**
- * Parse a header-based roster CSV. Requires an `email` column; `name` and
- * `section` are optional. Emails are trimmed + lowercased and de-duplicated
- * (last occurrence wins). Returns parse errors for missing/invalid rows.
+ * Parse a header-based roster CSV. Requires an `email` column; `name` is
+ * optional and other columns are ignored. Emails are trimmed + lowercased and
+ * de-duplicated (last occurrence wins). Returns parse errors for
+ * missing/invalid rows.
  */
 export function parseRosterCsv(text: string): ParseResult {
   const errors: string[] = [];
@@ -87,7 +87,6 @@ export function parseRosterCsv(text: string): ParseResult {
   const header = grid[0].map((h) => h.trim().toLowerCase());
   const emailIdx = header.indexOf('email');
   const nameIdx = header.indexOf('name');
-  const sectionIdx = header.indexOf('section');
   if (emailIdx === -1) {
     return { rows: [], errors: ['Header row must include an "email" column.'] };
   }
@@ -106,9 +105,7 @@ export function parseRosterCsv(text: string): ParseResult {
       continue;
     }
     const name = nameIdx === -1 ? null : (cells[nameIdx] ?? '').trim() || null;
-    const section =
-      sectionIdx === -1 ? null : (cells[sectionIdx] ?? '').trim() || null;
-    byEmail.set(email, { email, name, section });
+    byEmail.set(email, { email, name });
   }
 
   return { rows: [...byEmail.values()], errors };

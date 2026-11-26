@@ -40,43 +40,36 @@ const historicalAdministrationsResult =
     ? await admin
         .from('workshop_administrations')
         .select(
-          'id, semester, section, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
+          'id, semester, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
         )
         .eq('workshop_slug', workshop.data.slug)
         .in('id', historicalAdministrationIds)
     : { data: [], error: null };
 const { data: enrollments, error: enrollmentError } = await supabase
   .from('enrollments')
-  .select('user_id, section, semester, enrolled_at')
+  .select('user_id, semester, enrolled_at')
   .eq('user_id', user.id)
   .eq('course_slug', workshop.data.course)
   .order('enrolled_at', { ascending: false })
   .limit(1);
 const currentEnrollment = enrollments?.[0] ?? null;
 const enrolled = currentEnrollment !== null;
-const sectionAssignmentMissing =
-  workshop.data.course === 'eco-1002' &&
-  enrolled &&
-  currentEnrollment.section == null;
 const canViewCurrentSchedule = enrolled || viewerIsStaffPreview;
 const canView =
   canViewCurrentSchedule ||
   (historicalAdministrationsResult.data ?? []).length > 0;
-const canStamp =
-  enrolled &&
-  canUseStudentWorkshopAttendance(role) &&
-  !sectionAssignmentMissing;
+const canStamp = enrolled && canUseStudentWorkshopAttendance(role);
 const historicalOnly =
   !enrolled &&
   !viewerIsStaffPreview &&
   (historicalAdministrationsResult.data ?? []).length > 0;
 
-// RLS limits students to their exact instructor, semester, and section.
+// RLS limits students to their exact instructor and semester.
 const administrationsResult = canViewCurrentSchedule
   ? await supabase
       .from('workshop_administrations')
       .select(
-        'id, semester, section, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
+        'id, semester, week_of, opens_at, closes_at, cancelled_at, geofence_required, location_label, questions_revealed_at',
       )
       .eq('workshop_slug', workshop.data.slug)
       .order('opens_at', { ascending: true })
@@ -119,9 +112,6 @@ const nextTransitionAt = visibleAdmins
     return [];
   })
   .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
-
-const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
-const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
 ---
 
 <BaseLayout title={workshop.data.title}>
@@ -160,25 +150,6 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     }
 
     {
-      canView &&
-        !dataUnavailable &&
-        sectionAssignmentMissing &&
-        canUseStudentWorkshopAttendance(role) && (
-          <div
-            role="alert"
-            class="mt-6 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
-          >
-            <p class="font-medium">Your roster needs a section assignment.</p>
-            <p class="mt-1">
-              Ask your instructor to assign CML, CTL, CWL, or CRL before using
-              weekly ECO workshop attendance. Stamping stays disabled until the
-              roster is repaired.
-            </p>
-          </div>
-        )
-    }
-
-    {
       canView && !dataUnavailable && viewerIsStaffPreview && (
         <div class="mt-6 rounded border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900">
           <strong>Staff preview.</strong> You can verify the student-facing
@@ -197,20 +168,15 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
     }
 
     {
-      canView &&
-        !dataUnavailable &&
-        !sectionAssignmentMissing &&
-        visibleAdmins.length === 0 && (
-          <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
-            <p>
-              <strong>No workshop sessions are scheduled right now.</strong>{' '}
-              {courseUsesSections
-                ? 'Your instructor will open Monday (CML), Tuesday (CTL), Wednesday (CWL), and Thursday (CRL) sections each week.'
-                : 'Your instructor will open a workshop window each week.'}{' '}
-              Come back during class time.
-            </p>
-          </div>
-        )
+      canView && !dataUnavailable && visibleAdmins.length === 0 && (
+        <div class="mt-8 rounded border border-slate-200 bg-slate-50 p-5 text-sm text-ink-muted">
+          <p>
+            <strong>No workshop sessions are scheduled right now.</strong> Your
+            instructor will open a workshop window each week. Come back during
+            class time.
+          </p>
+        </div>
+      )
     }
 
     {
@@ -222,11 +188,6 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
               <>
                 Review the retained attendance records for sessions you
                 attended.
-              </>
-            ) : courseUsesSections ? (
-              <>
-                Stamp in for <em>your</em> section once you're physically in the
-                room.
               </>
             ) : (
               <>Stamp in once you're physically in the room.</>
@@ -276,9 +237,7 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
                   <div class="flex items-start justify-between gap-3">
                     <div>
                       <p class="text-sm font-medium">
-                        {a.semester} ·{' '}
-                        {a.section ? <>Section {a.section} · </> : null}
-                        week of {formatWeekOf(a.week_of)}
+                        {a.semester} · week of {formatWeekOf(a.week_of)}
                       </p>
                       <p class="mt-1 text-xs text-ink-muted">
                         Open {formatNewYorkDateTime(a.opens_at)} — closes{' '}
@@ -325,7 +284,6 @@ const courseUsesSections = COURSES_WITH_SECTIONS.has(workshop.data.course);
                       <StampInButton
                         client:load
                         administrationId={a.id}
-                        section={a.section ?? null}
                         geoRequired={a.geofence_required}
                       />
                     ) : status === 'open' && viewerIsStaffPreview ? (

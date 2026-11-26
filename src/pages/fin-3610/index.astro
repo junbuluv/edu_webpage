@@ -55,6 +55,13 @@ if ((enrolled || viewerIsAdmin) && supabase) {
   openWorkshopCount = (openAdmins ?? []).length;
 }
 const showWorkshopTeaser = totalWorkshopCount > 0;
+
+const caseStudies = (
+  await getCollection(
+    'cases',
+    (c) => !c.data.draft && c.data.course === 'fin-3610',
+  )
+).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout title="FIN 3610 — Corporate Finance">
@@ -77,7 +84,7 @@ const showWorkshopTeaser = totalWorkshopCount > 0;
         href="/fin-3610/archive"
         class="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-strong"
       >
-        Course archive — notes, exams &amp; videos →
+        Course archive — notes &amp; exams →
       </a>
       {
         viewerIsStaff && (
@@ -129,6 +136,39 @@ const showWorkshopTeaser = totalWorkshopCount > 0;
               See all workshops →
             </a>
           </div>
+        </section>
+      )
+    }
+
+    {
+      caseStudies.length > 0 && (
+        <section id="case-studies" class="mt-10">
+          <h2 class="text-xl font-semibold">Case studies</h2>
+          <p class="mt-1 max-w-measure text-sm text-ink-muted">
+            Real episodes and companies, worked through with data and a
+            simulation. Each ends with a practice quiz.
+          </p>
+          <ol class="mt-4 space-y-2">
+            {caseStudies.map((c) => (
+              <li>
+                <a
+                  href={`/cases/${c.slug}`}
+                  class="flex items-baseline justify-between gap-4 rounded border border-slate-200 px-4 py-3 hover:border-accent"
+                >
+                  <span>
+                    <span class="font-medium">{c.data.title}</span>
+                    <span class="ml-2 text-sm text-ink-muted">
+                      {c.data.topic}
+                      {c.data.extensionOf && ' · extension'}
+                    </span>
+                  </span>
+                  <span class="shrink-0 text-sm text-ink-muted">
+                    ⏱ {c.data.estimatedMinutes} min
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
         </section>
       )
     }

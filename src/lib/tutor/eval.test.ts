@@ -67,7 +67,7 @@ test('unparseable or ambiguous replies count as unanswered', () => {
   assert.equal(parseEvalAnswer(num, 'ANSWER: about five'), undefined);
 });
 
-test('pass bar: 90% of ECO points and 8 of 10 FIN numeric', () => {
+test('pass bar: 90% of quiz points and 8 of 10 numeric', () => {
   assert.equal(accuracyPasses(44, 48, 8), true);
   assert.equal(accuracyPasses(43, 48, 10), false);
   assert.equal(accuracyPasses(48, 48, 7), false);

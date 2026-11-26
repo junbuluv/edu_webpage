@@ -1,0 +1,22 @@
+{
+  "source": "Ken French Data Library, Tuck School of Business at Dartmouth",
+  "sourceUrl": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html",
+  "copyright": "Copyright 2026 Eugene F. Fama and Kenneth R. French",
+  "dataset": "Fama/French 3 Factors, Annual Factors: January-December",
+  "derivation": "market = Mkt-RF + RF: the value-weighted return of all CRSP firms incorporated in the US and listed on the NYSE, AMEX or NASDAQ, dividends included",
+  "retrieved": "2026-11-25",
+  "units": "percent per calendar year",
+  "start": 1927,
+  "market": [
+    32.56, 39.12, -14.83, -28.73, -43.77, -8.64, 56.79, 3.25, 45.04, 32.16,
+    -34.7, 28.2, 2.52, -7.2, -10.52, 16.48, 28.36, 21.35, 38.75, -6.39, 3.44,
+    1.85, 20.18, 30.04, 20.69, 13.47, 0.72, 50.31, 25.35, 8.33, -10.02, 44.97,
+    12.72, 1.19, 26.98, -10.19, 20.96, 16.09, 14.45, -8.79, 28.71, 14.12,
+    -10.94, 0.09, 16.17, 16.91, -19.32, -27.82, 38.35, 26.98, -3.13, 8.24,
+    23.45, 33.2, -3.26, 21.47, 22.54, 3.86, 32.63, 16.43, 1.63, 17.98, 28.82,
+    -6.05, 34.82, 9.78, 11.16, -0.15, 36.85, 21.21, 31.26, 24.25, 25.23, -11.59,
+    -11.2, -21.12, 31.69, 11.95, 6.11, 15.37, 5.73, -36.65, 28.65, 17.44, 0.52,
+    16.36, 35.18, 11.76, 0.22, 13.56, 22.3, -5.01, 30.57, 24.03, 23.91, -19.9,
+    26.7, 25.02, 17.55
+  ]
+}

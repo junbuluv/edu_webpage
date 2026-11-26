@@ -1,0 +1,329 @@
+---
+title: 'Estimating Alpha and Beta: Factor Regressions'
+course: fin-3610
+unit: 'Risk and return'
+order: 19.5
+summary: 'How a factor model is estimated from return data: run the regression, read alpha, the betas, standard errors, t-statistics and R-squared, then turn the betas into a cost of equity. Worked on six real portfolios, 1963 to 2026.'
+learningObjectives:
+  - 'Write the 1-factor, 3-factor and 5-factor regressions and say what each coefficient measures.'
+  - 'Read a regression table: coefficient, standard error, t-statistic and R-squared.'
+  - 'Explain why alpha changes when factors are added, and why it does not always shrink.'
+  - 'Turn estimated betas into a cost of equity and say how precise the answer is.'
+prerequisites:
+  - 'CAPM and the security market line.'
+  - 'Factor models and market efficiency (prior lesson).'
+estimatedMinutes: 30
+tags:
+  ['fin-3610', 'factor models', 'Fama-French', 'regression', 'alpha', 'beta']
+quizSlug: 'fin-3610-factor-regressions'
+draft: false
+---
+
+import FactorRegressionExplorer from '@components/viz/FactorRegressionExplorer';
+
+## The regression
+
+The last lesson stated the factor models. This one estimates them.
+For a portfolio $p$ observed every month $t$, the three-factor
+regression is
+
+$$
+R_{p,t} - R_{f,t} = \alpha_p + \beta_M (R_{m,t} - R_{f,t}) + \beta_S \, \text{SMB}_t + \beta_V \, \text{HML}_t + \varepsilon_{p,t}.
+$$
+
+Everything with a $t$ subscript except $\varepsilon_{p,t}$ is data:
+the portfolio's return, the T-bill rate $R_f$, and the factor returns
+for that month. The unknowns are $\alpha_p$ and the betas. Ordinary least squares (OLS)
+picks the values that make the sum of squared residuals
+$\varepsilon_{p,t}$ as small as possible.
+
+The same template gives all three models in this lesson:
+
+- **1-factor (CAPM)**: keep only the market term.
+- **3-factor**: market, SMB and HML, as written above.
+- **5-factor**: add RMW (profitability) and CMA (investment).
+
+## What the coefficients measure
+
+**Beta** is a slope. A market beta of 1.2 says: in a month when the
+market's excess return is 1 percentage point higher, the portfolio's
+excess return is 1.2 points higher on average, holding the other
+factors fixed.
+
+**Alpha** is what is left over. The OLS fit always passes through
+the sample averages, so
+
+$$
+\alpha_p = \overline{R_p - R_f} - \beta_M \, \overline{R_m - R_f} - \beta_S \, \overline{\text{SMB}} - \beta_V \, \overline{\text{HML}},
+$$
+
+where a bar means the average over the sample. Alpha is the average
+excess return that the factor exposures do not account for. If the
+model prices the portfolio correctly, alpha is zero. A positive
+alpha means the portfolio earned more than its exposures justify
+under that model.
+
+## Reading the output
+
+Regression software prints one row per coefficient with three
+numbers in it, plus one number for the regression as a whole.
+
+- **Coefficient**: the estimate of alpha or of a beta.
+- **Standard error**: the typical size of the estimation error. A
+  rough 95% confidence interval is the coefficient plus or minus two
+  standard errors.
+- **t-statistic**: the coefficient divided by its standard error,
+  so it counts how many standard errors the estimate sits from zero.
+  When it is above about 2 in absolute value (1.96 in a large
+  sample), you reject "the true value is zero" at the 5% level.
+- **R-squared**: the share of the variance of the portfolio's excess
+  return that the factors explain. It measures how closely the
+  portfolio moves with the factors. It does not tell you whether
+  alpha is zero.
+
+The t-statistic in the table tests against zero. For a market beta
+the natural benchmark is usually one, so compute
+$(\hat\beta_M - 1) / \text{SE}$ yourself.
+
+## Six portfolios, three models
+
+The chart runs each regression on real data from the
+[Ken French Data Library](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html):
+monthly value-weighted returns from July 1963 to September 2026,
+which is 759 months. There are four portfolios sorted on size and
+book-to-market (small value, small growth, big value, big growth;
+"value" means a high book-to-market ratio) and two industry
+portfolios (utilities, and high tech: computers, software and
+electronic equipment).
+
+Every estimate in this lesson was computed for this site by OLS from
+four of the library's files: Fama/French 3 Factors, Fama/French 5
+Factors (2x3), 6 Portfolios Formed on Size and Book-to-Market, and
+10 Industry Portfolios, in the versions built from the September
+2026 CRSP database.
+
+<FactorRegressionExplorer client:load />
+
+_Start with small value stocks under CAPM, then switch the model to
+3-factor. The cloud of dots tightens around the line. The intercept
+moves too little to see at this scale, so read it in the line above
+the chart: alpha falls from 0.326 to 0.036. Then make the same switch
+on the high-tech industry. The cloud tightens only a little and alpha
+rises, from 0.031 to 0.228. A later section explains why._
+
+## Example 1: CAPM
+
+Small value stocks, one factor. Alpha is in percent per month.
+
+| Term   | Coefficient | Std. error | t-statistic |
+| ------ | ----------: | ---------: | ----------: |
+| Alpha  |       0.326 |      0.117 |        2.78 |
+| Market |       1.072 |      0.026 |       41.09 |
+
+$R^2 = 0.690$. The t-statistics are computed from unrounded
+estimates, so dividing the rounded columns gives slightly different
+numbers.
+
+The market beta is 1.07. Tested against one, $(1.072 - 1) / 0.026
+\approx 2.8$, so it is slightly but reliably above one. Alpha is
+0.326% per month, about 3.9% per year, with a t-statistic of 2.78.
+CAPM says this alpha should be zero, and the data reject that. This
+is the value anomaly from the last lesson, stated as one number.
+
+You can rebuild alpha from averages. The portfolio's average excess
+return is 0.969% per month and the market's is 0.600%, so
+
+$$
+\alpha = 0.969 - 1.072 \times 0.600 = 0.969 - 0.643 = 0.326.
+$$
+
+The R-squared of 0.69 says the market explains 69% of the
+month-to-month variance. The rest comes from something the market
+factor does not capture.
+
+## Example 2: three factors
+
+The same portfolio, with SMB and HML added.
+
+| Term        | Coefficient | Std. error | t-statistic |
+| ----------- | ----------: | ---------: | ----------: |
+| Alpha       |       0.036 |      0.021 |        1.72 |
+| Market      |       0.998 |      0.005 |      202.64 |
+| Size (SMB)  |       0.885 |      0.007 |      122.95 |
+| Value (HML) |       0.713 |      0.007 |       99.78 |
+
+$R^2 = 0.990$.
+
+The portfolio loads heavily on both new factors, as a small value
+portfolio should. The market beta is now 0.998, which cannot be told
+from one: $(0.998 - 1) / 0.005 = -0.4$. Alpha falls from 0.326 to
+0.036, and with a t-statistic of 1.72 you can no longer reject zero. The decomposition
+shows where the old alpha went. With average monthly factor returns
+of 0.600 (market), 0.143 (SMB) and 0.292 (HML):
+
+$$
+0.969 \approx \underbrace{0.036}_{\alpha} + \underbrace{0.998 \times 0.600}_{0.599} + \underbrace{0.885 \times 0.143}_{0.127} + \underbrace{0.713 \times 0.292}_{0.208}.
+$$
+
+The size and value terms add $0.127 + 0.208 = 0.335$ per month. The
+market term falls by 0.044, from 0.643 to 0.599, because the market
+beta drops from 1.072 to 0.998. Alpha falls by the difference, about
+0.29. The three-factor model reads CAPM's alpha as payment for size
+and value exposure.
+
+One caution about the R-squared of 0.99. Small value is one of the
+six portfolios that SMB and HML are built from, so a near-perfect
+fit is partly by construction. Industry portfolios are a fairer
+test: for utilities the same step raises R-squared only from 0.33
+to 0.41.
+
+## Example 3: five factors
+
+A different portfolio, small growth stocks, under the five-factor
+model.
+
+| Term                | Coefficient | Std. error | t-statistic |
+| ------------------- | ----------: | ---------: | ----------: |
+| Alpha               |      −0.079 |      0.032 |       −2.45 |
+| Market              |       1.056 |      0.008 |      135.66 |
+| Size (SMB)          |       1.016 |      0.011 |       90.51 |
+| Value (HML)         |      −0.338 |      0.015 |      −23.27 |
+| Profitability (RMW) |      −0.191 |      0.015 |      −13.09 |
+| Investment (CMA)    |      −0.093 |      0.022 |       −4.32 |
+
+$R^2 = 0.984$.
+
+Read the signs. A negative HML beta marks a growth portfolio. A
+negative RMW beta says it moves like firms with weak profits, and a
+negative CMA beta says it moves like firms that invest aggressively.
+All three factors have positive average returns, so each negative
+beta lowers the return the model predicts. That is how the
+five-factor model accounts for part of small growth's poor record:
+alpha is $-0.169$ under three factors and $-0.079$ under five.
+
+It does not account for all of it. The t-statistic is still $-2.45$.
+Fama and French's own 2015 paper ("A five-factor asset pricing
+model," _Journal of Financial Economics_) reports the same problem:
+the five-factor model cannot explain the low average returns of
+small stocks that move like low-profit, high-investment firms.
+
+One data detail. The five-factor rows use French's five-factor file,
+whose SMB averages over sorts on book-to-market, profitability and
+investment. The three-factor file's SMB uses the book-to-market sort
+only. That is mainly why small value's R-squared can slip from 0.990 with
+three factors to 0.989 with five, which could not happen if the
+second regression only added columns to the first.
+
+## Does alpha shrink as factors are added?
+
+Alpha in percent per month, with its t-statistic in parentheses.
+
+| Portfolio    |          CAPM |      3-factor |      5-factor |
+| ------------ | ------------: | ------------: | ------------: |
+| Small value  |   0.33 (2.78) |   0.04 (1.72) |   0.03 (1.22) |
+| Small growth | −0.23 (−1.84) | −0.17 (−4.20) | −0.08 (−2.45) |
+| Big value    |   0.20 (2.19) | −0.09 (−2.23) | −0.03 (−0.76) |
+| Big growth   |   0.00 (0.08) |   0.11 (4.47) |   0.08 (3.28) |
+| Utilities    |   0.15 (1.24) |   0.04 (0.31) | −0.07 (−0.64) |
+| High tech    |   0.03 (0.27) |   0.23 (2.28) |   0.40 (4.12) |
+
+**For the value portfolios, yes.** Small value and big value both
+have CAPM alphas with t-statistics above 2. Three factors overshoot
+for big value ($t = -2.23$). With five factors both are within one
+and a quarter standard errors of zero.
+
+**Not for every portfolio.** High tech has almost no alpha under
+CAPM and an alpha of 0.40% per month, about 4.8% per year, under
+five factors. Its betas on HML, RMW and CMA are all negative, so the
+five-factor model predicts a low return. The industry earned a high
+one, and the gap shows up as alpha. Big growth shows a milder
+version: no alpha under CAPM, and 0.11% per month ($t = 4.47$) under
+three factors. Adding factors changes the benchmark; it does not
+guarantee a smaller alpha.
+
+**A smaller alpha can be a more significant one.** Small growth's
+alpha shrinks in size from $-0.23$ to $-0.17$ between CAPM and three
+factors, yet its t-statistic goes from $-1.84$ to $-4.20$. The added
+factors explain much more of the portfolio's variance, so the
+standard error of alpha falls from 0.122 to 0.040.
+
+## From betas to a cost of equity
+
+A factor model turns betas into an expected return the same way
+CAPM does, with one term per factor:
+
+$$
+r_E = R_f + \beta_M \lambda_M + \beta_S \lambda_S + \beta_V \lambda_V,
+$$
+
+where each $\lambda$ is the expected annual premium on that factor.
+There is no alpha term: a forecast assumes the model holds, and a
+past alpha is not a promise.
+
+Take illustrative inputs: $R_f = 4\%$ and a market premium of
+$5.5\%$, the middle of the 5 to 6% working range from the cost of
+capital lesson. The earlier lessons give no working range for SMB
+and HML, so use their averages in this sample, 1.7% and 3.5% per year (12
+times the monthly averages). Betas come from the full-sample
+regressions.
+
+| Industry  | CAPM                           | 3-factor                                                          |
+| --------- | ------------------------------ | ----------------------------------------------------------------- |
+| Utilities | $4 + 0.52 \times 5.5 = 6.9\%$  | $4 + 0.61 \times 5.5 - 0.20 \times 1.7 + 0.32 \times 3.5 = 8.1\%$ |
+| High tech | $4 + 1.23 \times 5.5 = 10.8\%$ | $4 + 1.12 \times 5.5 + 0.17 \times 1.7 - 0.54 \times 3.5 = 8.6\%$ |
+
+Utilities move like value stocks (a positive HML beta), so the
+three-factor model adds a bit more than one point to their cost of
+equity. High tech moves like growth stocks (a negative HML beta), so
+it loses about 2.2 points. The two industries are 3.9 points apart
+under CAPM and about half a point apart under three factors.
+
+Treat the factor version as a cross-check, not a replacement. The
+SMB and HML premia are historical averages, and the same sample's
+market average is 7.2% per year (12 times the monthly average over
+one-month T-bills), well above the 5 to 6% working range. Historical
+averages can overstate what investors expect going forward. The
+split-sample table below shows the value effect fading after 1995,
+so 3.5% for HML is probably generous. CAPM stays the default; the factor estimate tells you which
+direction CAPM may be missing.
+
+## Limits
+
+**Estimation error.** With 759 months, betas are tight. The
+utilities CAPM beta is 0.523 with a standard error of 0.027, so a
+rough 95% interval is 0.47 to 0.58. Practice usually has far less
+data. Rerun the same regression on the last 60 months (October 2021
+to September 2026) and the beta is 0.55 with a standard error of
+0.11: an interval of 0.33 to 0.77. At a 4% risk-free rate and a
+5.5% market premium that is a cost of equity anywhere from 5.8% to
+8.2%. Alpha is harder still.
+Its 60-month standard error is 0.51% per month, more than 6% per
+year, so five years of monthly data cannot tell an alpha of several
+percent a year from zero.
+
+**Sample choice.** The answer depends on the window. Split the
+sample in half and rerun CAPM:
+
+| CAPM estimate         | Jul 1963 to Jan 1995 | Feb 1995 to Sep 2026 |
+| --------------------- | -------------------: | -------------------: |
+| Small value alpha (t) |          0.54 (3.69) |          0.11 (0.59) |
+| Utilities market beta |                 0.63 |                 0.42 |
+| High tech market beta |                 1.12 |                 1.34 |
+
+The value anomaly is strong in the first half and cannot be told
+from zero in the second. Betas drift too. A long sample averages
+over conditions that may no longer hold; a short one is noisy. No
+window fixes both problems.
+
+**The standard errors rest on assumptions.** The ones reported here
+assume the residuals have constant variance and are unrelated from
+month to month. Stock volatility clusters in time, so published
+studies usually report robust standard errors, which allow for it.
+
+## Unit wrap-up
+
+That completes Unit 4. You can measure risk and return, build
+efficient portfolios, price risk with CAPM and factor models, and
+estimate the inputs from data with a sense of how precise they are.
+Unit 5 takes everything we've covered (cash flows, discount rates,
+equity vs debt) and asks: how should the firm be financed?

@@ -67,7 +67,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
   const { data: administration, error: adminError } = await admin
     .from('workshop_administrations')
     .select(
-      'id, workshop_slug, course_slug, semester, section, week_of, instructor_id, opens_at, closes_at, cancelled_at, required_lat, required_lng, required_radius_meters',
+      'id, workshop_slug, course_slug, semester, week_of, instructor_id, opens_at, closes_at, cancelled_at, required_lat, required_lng, required_radius_meters',
     )
     .eq('id', administrationId)
     .maybeSingle();
@@ -102,7 +102,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
   const { data: enrollment, error: enrollmentError } = await admin
     .from('enrollments')
-    .select('course_slug, semester, section, instructor_id')
+    .select('course_slug, semester, instructor_id')
     .eq('user_id', locals.user.id)
     .eq('course_slug', administration.course_slug)
     .eq('semester', administration.semester)
@@ -119,25 +119,24 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       ? {
           courseSlug: enrollment.course_slug,
           semester: enrollment.semester,
-          section: enrollment.section,
           instructorId: enrollment.instructor_id,
         }
       : null,
     {
       courseSlug: administration.course_slug,
       semester: administration.semester,
-      section: administration.section,
       instructorId: administration.instructor_id,
     },
   );
   if (enrollmentMatch !== 'ok') {
-    const detail =
-      enrollmentMatch === 'wrong_section'
-        ? 'This window is for a different section.'
-        : enrollmentMatch === 'section_assignment_required'
-          ? 'Your roster does not have a section assignment. Ask your instructor to update it.'
-          : 'You are not enrolled in this workshop class.';
-    return json({ ok: false, reason: enrollmentMatch, detail }, 403);
+    return json(
+      {
+        ok: false,
+        reason: enrollmentMatch,
+        detail: 'You are not enrolled in this workshop class.',
+      },
+      403,
+    );
   }
 
   // Geofence check (if set). Same soft-barrier caveat as the proctored
@@ -258,7 +257,6 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
   return json({
     ok: true,
     stamped_at: new Date().toISOString(),
-    section: administration.section,
     workshop_slug: administration.workshop_slug,
   });
 };

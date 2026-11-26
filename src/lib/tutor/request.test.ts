@@ -9,7 +9,7 @@ import {
   TUTOR_MAX_MESSAGE_CHARS,
 } from './limits.ts';
 
-const SLUG = 'eco-1002/is-lm-intro';
+const SLUG = 'fin-3610/npv-decision-rule';
 const user = (id: string, text: string) => ({
   id,
   role: 'user',

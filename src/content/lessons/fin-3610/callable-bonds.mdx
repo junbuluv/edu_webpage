@@ -1,0 +1,283 @@
+---
+title: "Callable Bonds: The Issuer's Option to Refinance"
+course: fin-3610
+unit: 'Credit markets and private equity'
+order: 29
+summary: 'A callable bond is a straight bond minus a call option held by the issuer. That option caps the price when yields fall, bends the price-yield curve against the investor, and is paid for with a higher coupon.'
+learningObjectives:
+  - "Write a callable bond as a straight bond minus the issuer's call option, and say who holds each side."
+  - 'Explain why the price of a callable bond flattens when yields fall below the coupon rate (negative convexity).'
+  - 'Compute yield to call and yield to worst from a price.'
+  - 'Explain why a make-whole call does not cap the price the way a fixed-price call does.'
+prerequisites:
+  - 'Bond pricing and yield to maturity (Unit 2).'
+  - 'Call option payoffs (Financial Options lesson).'
+estimatedMinutes: 25
+tags: ['fin-3610', 'Berk-DeMarzo Ch 24', 'bonds', 'callable bonds', 'options']
+quizSlug: 'fin-3610-callable-bonds'
+draft: false
+---
+
+import CallableBondExplorer from '@components/viz/CallableBondExplorer';
+
+## The equation first
+
+$$
+P_{\text{callable}} = P_{\text{straight}} - C_{\text{call}}.
+$$
+
+A callable bond is worth the same bond without the call feature
+(the **straight bond**, priced as in
+[Bond Pricing and Yield to Maturity](/lessons/fin-3610/bond-pricing-and-yield)),
+minus the value of a call option that the issuer holds. The rest of
+this lesson explains each term and what the minus sign does to the
+price.
+
+## What the contract says
+
+A **callable bond** gives the issuer the right to repay the bond
+before maturity. The bond contract fixes the terms:
+
+- **Call price.** What the issuer pays to retire the bond early,
+  usually face value plus a premium. Prices in this lesson are quoted
+  per 100 of face value, so a call price of 102 means \$1,020 for a
+  \$1,000 bond.
+- **Call protection period.** The years after issue during which the
+  issuer may not call. It ends on the **first call date**. A 10-year
+  bond first callable in year 3 has three years of call protection.
+
+## Who holds the option
+
+In [Financial Options](/lessons/fin-3610/financial-options), a call
+option is the right to buy an asset at a fixed strike price. Here the
+asset is the bond, the strike is the call price, and the right
+belongs to the **issuer**. The investor is on the other side: the
+investor has written the call. Unlike the European calls in that
+lesson, the issuer may use this one on any call date from the first
+call date on.
+
+Buying a callable bond is therefore two positions at once:
+
+| Position                  | What it is                                   | Value to the investor  |
+| ------------------------- | -------------------------------------------- | ---------------------- |
+| Long a straight bond      | The coupons and the face value               | $+P_{\text{straight}}$ |
+| Short a call on that bond | The issuer may buy it back at the call price | $-C_{\text{call}}$     |
+
+When does the issuer use the option? When rates fall. Suppose a firm
+issued at 6% and can now borrow at 4%. The old bond's remaining
+payments, discounted at 4%, are worth more than the call price. The
+issuer calls, pays the call price, and borrows again at 4%. A
+homeowner who refinances a mortgage after rates drop makes the same
+decision.
+
+The timing is bad for the investor. The money comes back exactly when
+it can only be reinvested at lower rates.
+
+## See it on the price-yield curve
+
+<CallableBondExplorer client:load />
+
+_Baseline: a 10-year bond with a 6% annual coupon, first callable in
+year 3 at 102, a 5% market yield and 15% rate volatility. The straight
+bond is worth 107.72 and the callable bond 102.55, so the issuer's
+option is worth 5.17._
+
+The market yield on the chart is the yield on the same bond without
+the call feature, taken to be the same for every maturity. The
+callable bond's own yield is higher: at a price of 102.55 its yield to
+maturity is 5.66%, against 5% for the straight bond.
+
+The chart prices both bonds on a binomial tree. It is the same idea as
+the binomial option model in the Financial Options lesson, with one
+step per year and the one-year interest rate in place of the stock
+price. Each year the rate moves up or down with equal odds. With a 5%
+yield and 15% volatility, next year's one-year rate is either 4.26% or
+5.75%. Working back from maturity, in every year from the first call
+date on the issuer compares the value of leaving the bond outstanding
+with the call price, and calls when the call price is lower.
+
+Three things to try:
+
+1. **Drag the market yield from 12% down to 1%.** At high yields the
+   two curves are nearly the same line, because nobody refinances a 6%
+   bond when new debt costs 10%. They separate as the yield comes down
+   toward the coupon rate, and the gap widens fast below it.
+2. **Set the yield to 6% and move rate volatility between 0% and
+   15%.** At 0% the option is worth nothing: the bond is worth 100,
+   calling it at 102 would cost the issuer 2 points, and rates will
+   never change. At 15% it is worth 2.54, because rates might fall
+   later.
+3. **Move the first call date to year 1.** The callable curve drops to
+   within one coupon of the dashed call-price line. With the call one
+   year away, the bond can be worth at most one coupon plus the call
+   price, discounted one year.
+
+## The price ceiling and negative convexity
+
+Look at the callable curve to the left of the coupon rate. The
+straight bond keeps climbing as yields fall. The callable bond climbs
+far more slowly, because the lower yields go, the more certain the
+call. From a 5% yield down to 1%, the baseline straight bond gains
+about 40 points and the callable bond about 14.
+
+Take the extreme case where a call on the first call date is certain.
+The investor then receives the coupons up to that date and the call
+price $K$ on it. With $n$ years to the first call date, the present
+value of those payments is the **price to call**:
+
+$$
+P_{\text{to call}} = \sum_{t=1}^{n} \frac{c \cdot F}{(1+y)^t} + \frac{K}{(1+y)^n}.
+$$
+
+A callable bond is never worth more than its price to call, and never
+worth more than the straight bond. For a bond that can be called right
+now, $n = 0$ and the price to call is the call price itself, so the
+call price is a ceiling on the bond's price (setting aside the notice
+the issuer must give before a call). During call protection the
+ceiling sits higher, because the above-market coupons are safe until
+the first call date. In the baseline at a 1% yield, the straight bond
+is worth 147.36 and the callable bond 116.65, exactly its price to
+call. Move the first call date to year 1 and it is worth only 106.93.
+
+The ceiling changes the shape of the curve. Start the baseline bond at
+a 5% yield and move the yield one point each way:
+
+| Yield moves from 5% to | Straight bond | Callable bond |
+| ---------------------- | ------------- | ------------- |
+| 4%                     | +8.50         | +4.35         |
+| 6%                     | −7.72         | −5.09         |
+
+The straight bond gains more than it loses. That is the convexity
+from the bond pricing lesson, and it favors the investor. The callable
+bond gains less than it loses. Its curve bends the other way, which is
+called **negative convexity**. The investor keeps about two-thirds of
+the loss from rising yields but only about half of the gain from
+falling yields.
+
+## Yield to call and yield to worst
+
+Yield to maturity assumes the bond stays outstanding until maturity.
+For a callable bond trading well above its call price that assumption
+flatters the yield, because a call is likely to end the coupons early.
+
+The **yield to call** (YTC) is the IRR if the bond is called on a
+given call date. It solves
+
+$$
+P = \sum_{t=1}^{n} \frac{c \cdot F}{(1+\text{YTC})^t} + \frac{K}{(1+\text{YTC})^n}.
+$$
+
+The **yield to worst** (YTW) is the lowest of the yield to maturity
+and the yield to every possible call date. It is what the investor
+earns if the issuer does whatever is worst for the investor.
+
+**Worked example.** The baseline bond (6% coupon, 10 years, first
+callable in year 3 at 102) trades at 104.
+
+The yield to maturity solves
+
+$$
+104 = \sum_{t=1}^{10} \frac{6}{(1+\text{YTM})^t} + \frac{100}{(1+\text{YTM})^{10}},
+$$
+
+which gives a yield to maturity of 5.47%. The yield to the first call
+date solves
+
+$$
+104 = \frac{6}{1+\text{YTC}} + \frac{6}{(1+\text{YTC})^2} + \frac{6 + 102}{(1+\text{YTC})^3},
+$$
+
+which gives a yield to call of 5.16%. As with any yield, you solve
+these by trial and error or in a spreadsheet: `=RATE(10, 6, -104, 100)`
+and `=RATE(3, 6, -104, 102)`. Later call dates give higher yields,
+starting at 5.33% for a call in year 4.
+
+So the yield to worst is 5.16%, 31 basis points below the yield to
+maturity. An investor who buys at 104 and is repaid 102 in year 3
+spreads a 2-point loss over three years. Held to maturity, a 4-point
+loss is spread over ten.
+
+Now suppose the same bond trades at 95. The yield to maturity is
+6.70% and the yield to first call is 8.57%. A call would hand the
+investor 102 for a bond bought at 95, so the worst case is no call at
+all, and the yield to worst is the 6.70% yield to maturity.
+
+For a single call price the pattern is this. At or below the call
+price, the yield to worst is the yield to maturity. Well above the
+call price, it is the yield to the first call date. Just above the
+call price the yield to maturity can still be the lower of the two.
+For this bond that holds up to a price of about 102.65: at 102.5 the
+yield to maturity is 5.67% and the yield to first call is 5.70%. So
+compute both and take the smaller.
+
+## Who pays for the option
+
+The option is valuable to the issuer, so investors do not give it
+away. The chart shows the payment as a lower price: with the coupon
+held at 6%, the callable bond sells for 102.55 where the straight bond
+sells for 107.72. At issue the payment takes the other form. Both
+sides know the bond is callable, and the investor is paid for writing
+the call through a higher coupon.
+
+An illustration from this lesson's model, not a market quote: with a
+flat 5% yield and 15% rate volatility, a 10-year bond that cannot be
+called sells at par with a 5% coupon. Make it callable from year 3 at
+102 and it needs a coupon of about 5.43% to sell at par. The extra
+0.43% a year is what the issuer pays for the right to refinance.
+
+The terms of the call move that price. Longer call protection or a
+higher call price makes the option worth less to the issuer, so the
+extra coupon shrinks. With five years of call protection in place of
+three, the par coupon in the same model is about 5.27%. More rate
+volatility makes the option worth more, as the volatility slider
+shows.
+
+Why would an issuer pay for the option? If rates fall, or the firm's
+credit improves, it can replace expensive debt with cheaper debt. A
+call also lets the firm retire a bond whose covenants have started to
+restrict it. If the option is fairly priced, it has zero NPV for both
+sides at issue: the issuer pays for exactly what it gets.
+
+## Make-whole calls
+
+Many corporate bonds, investment-grade ones especially, carry a
+different kind of call. A **make-whole call** has no fixed call price.
+If the issuer calls, it pays the present value of all the remaining
+coupons and the face value, discounted at the yield on a Treasury of
+matching maturity plus a small spread written into the contract, and
+never less than face value.
+
+An illustrative example: a bond with a 5% coupon and 7 years left has
+a make-whole spread of 0.25%. The matching Treasury yields 3%, and
+investors price the bond at a 4% yield, a credit spread of 1%.
+
+- Market value: the payments discounted at 4%, which is 106.00.
+- Make-whole price: the same payments discounted at 3.25%, which is
+  110.80.
+
+The issuer would pay 110.80 to retire a bond worth 106.00. As long as
+the make-whole spread is below the bond's credit spread, the
+make-whole price is above the market value, and it rises when Treasury
+yields fall. Falling rates therefore do not make this call a way to
+refinance cheaply.
+
+So a make-whole call puts no fixed ceiling on the price and creates
+almost no negative convexity. It is worth little to the issuer as a
+bet on interest rates, so it should add little to the coupon. Issuers
+want it for flexibility. It lets a firm retire debt for a business
+reason, such as a merger or a restructuring, by paying investors in
+full.
+
+## What to remember
+
+- Callable bond = straight bond − a call option held by the issuer.
+  The investor is short that call.
+- When yields fall below the coupon rate, the price flattens near the
+  price to call. That is negative convexity.
+- Quote a callable bond on its yield to worst, the lowest of the yield
+  to maturity and the yield to each call date. Well above the call
+  price that is the yield to first call. At or below the call price it
+  is the yield to maturity.
+- The issuer pays for the option with a higher coupon.
+- A make-whole call is priced off Treasury yields, so it does not cap
+  the price.
