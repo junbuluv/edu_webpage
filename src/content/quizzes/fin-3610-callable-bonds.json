@@ -1,0 +1,71 @@
+{
+  "slug": "fin-3610-callable-bonds",
+  "title": "Callable bonds",
+  "course": "fin-3610",
+  "lessonSlug": "fin-3610/callable-bonds",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "id": "q1",
+      "prompt": "An investor buys a callable corporate bond. Which pair of positions does the investor hold?",
+      "choices": [
+        "Long a straight bond and long a call option on it",
+        "Long a straight bond and short a call option on it",
+        "Short a straight bond and long a call option on it",
+        "Long a straight bond and long a put option on it"
+      ],
+      "correctIndex": 1,
+      "explanation": "The issuer holds the right to buy the bond back at the call price, so the investor has written (is short) that call. Callable price = straight price \u2212 call option value.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "A bond pays a 7% annual coupon, has 8 years to maturity, and is callable from year 2 at 103 (per 100 of face value). It trades at 105, where its yield to maturity is 6.19%. What is its yield to worst? Answer in percent, to two decimals.",
+      "answer": 5.74,
+      "tolerance": 0.02,
+      "unit": "%",
+      "explanation": "Start with the first call date: solve 105 = 7/(1+y) + (7 + 103)/(1+y)\u00b2. With x = 1 + y this is 105x\u00b2 \u2212 7x \u2212 110 = 0, so x = 1.0574 and the yield to first call is 5.74%. That is below the 6.19% yield to maturity, and later call dates give more (6.07% for a call in year 3), so the yield to worst is 5.74%.",
+      "points": 2
+    },
+    {
+      "type": "multi_select",
+      "id": "q3",
+      "prompt": "A bond is already callable, and market yields fall well below its coupon rate. Which statements are true?",
+      "choices": [
+        "Its price stays close to the call price",
+        "It is worth more than an otherwise identical bond that cannot be called",
+        "A further fall in yields raises its price far less than it raises a straight bond's price",
+        "The issuer is likely to call the bond and borrow again at the lower rate"
+      ],
+      "correctIndices": [0, 2, 3],
+      "explanation": "A call is now likely, so the price cannot rise much above the call price while a straight bond's price keeps climbing. That flattening is negative convexity. A callable bond is never worth more than the same bond without the call: the investor is short the option.",
+      "points": 2
+    },
+    {
+      "type": "numeric",
+      "id": "q4",
+      "prompt": "A bond pays a 6% annual coupon and will first be callable in 2 years at 102 (per 100 of face value). The market yield is 3%, low enough that a call in 2 years is certain. What is the bond worth today, per 100 of face value?",
+      "answer": 107.63,
+      "tolerance": 0.05,
+      "unit": "per 100",
+      "explanation": "With a certain call the bond is worth its price to call: 6/1.03 + (6 + 102)/1.03\u00b2 = 5.83 + 101.80 = 107.63. It is above 102 because two above-market coupons are still safe during call protection.",
+      "points": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q5",
+      "prompt": "A bond has a make-whole call at the Treasury yield plus 0.25%, and investors price the bond at the Treasury yield plus 1%. Treasury yields fall sharply. Why is calling the bond not a cheap way to refinance?",
+      "choices": [
+        "A make-whole call may be used only in the final year before maturity, when little interest is left to save",
+        "The make-whole price is fixed on the day the bond is issued, and that fixed price is far above face value",
+        "The make-whole price discounts the remaining payments at a rate below the bond's market yield, so it stays above the market value",
+        "The investor, not the issuer, decides whether the call is used, and will refuse once yields have fallen"
+      ],
+      "correctIndex": 2,
+      "explanation": "The issuer must pay the remaining payments discounted at Treasury + 0.25%, a lower rate than the Treasury + 1% the market uses. That price is above the bond's market value and climbs as Treasury yields fall, so there is no cheap refinancing and no price ceiling.",
+      "points": 1
+    }
+  ]
+}
