@@ -101,18 +101,18 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `workshop_section` type and `archive_videos`; course CHECKs allow only
   `fin-3610`). To add a course: append its slug to `COURSE_SLUGS`, add the
   JSON file, and add the slug to every `course_slug in ('fin-3610')` list in
-  `schema.sql`. Old public ECO addresses (`/eco-1002/…`, `/macro`,
-  `/lessons/eco-1002/…`, `/practice/eco-1002-…`, `/workshops/eco-1002-…`)
-  answer 301 to `/?from=eco-1002`, where the home page says the course is
-  gone: the pure, unit-tested `src/lib/retired-routes.ts`, called near the top
-  of `src/middleware.ts`. `src/pages/eco-1002/[...path].astro` and
-  `src/pages/macro.astro` give those addresses a page of their own: on Vercel
+  `schema.sql`. Old ECO addresses `/lessons/eco-1002/…`,
+  `/practice/eco-1002-…` and `/workshops/eco-1002-…` answer 301 to
+  `/?from=eco-1002`, where the home page says the course is gone: the pure,
+  unit-tested `src/lib/retired-routes.ts`, called near the top of
+  `src/middleware.ts`. Each matches a page, which a redirect needs: on Vercel
   an address with no page reaches the server only through the build's
   catch-all route, which renders `src/pages/404.astro` (on request, so the
-  header shows who is signed in) and forces status 404. The middleware runs
-  there, but a redirect it returns reaches the browser as a blank 404 (seen
-  live on `/exams`, 2026-11-26), so the middleware skips its sign-in and terms
-  gates when `context.routePattern` is `/404`. The dev server runs middleware
+  header shows who is signed in) and forces status 404, so a middleware
+  redirect there reaches the browser as a blank 404 (seen live on `/exams`,
+  2026-11-26). So `/eco-1002/…` and `/macro`, which have no page, show the 404
+  page (since 2026-11-26), and the middleware skips its sign-in and terms gates
+  when `context.routePattern` is `/404`. The dev server runs middleware
   normally on every address, so a dev-only check misses this
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
