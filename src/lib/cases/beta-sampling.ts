@@ -14,6 +14,8 @@ export type Industry = (typeof INDUSTRIES)[number];
 export interface BetaData {
   /** First month, YYYY-MM. */
   start: string;
+  source: string;
+  sourceUrl: string;
   copyright: string;
   /** The market's return over the Treasury bill rate, each month. */
   market: number[];
@@ -23,6 +25,8 @@ export interface BetaData {
 
 /** The parts of src/lib/factors/regressions.json this case reads. */
 interface RegressionsFile {
+  source: string;
+  sourceUrl: string;
   copyright: string;
   sample: { start: string };
   models: { id: string; market: number[] }[];
@@ -39,6 +43,8 @@ export function betaDataFrom(raw: RegressionsFile): BetaData {
   };
   return {
     start: raw.sample.start,
+    source: raw.source,
+    sourceUrl: raw.sourceUrl,
     copyright: raw.copyright,
     market: capm.market,
     returns: {

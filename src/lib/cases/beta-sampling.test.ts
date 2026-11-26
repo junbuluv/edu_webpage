@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { percentile } from './dcf.ts';
 import {
   INDUSTRIES,
   WINDOW,
@@ -83,6 +84,7 @@ test('the data runs July 1963 to September 2026 for both industries', () => {
     assert.equal(data.returns[id].length, data.market.length);
   }
   assert.match(data.copyright, /Fama and Kenneth R\. French/);
+  assert.match(data.sourceUrl, /^https:\/\/mba\.tuck\.dartmouth\.edu\//);
 });
 
 test('the betas the case quotes', () => {
@@ -104,4 +106,38 @@ test('the betas the case quotes', () => {
     0.523,
     5e-4,
   );
+});
+
+test('the other numbers the case and quiz quote', () => {
+  const at = (label: string) => monthIndex(data.start, label);
+  const tech = data.returns['high-tech'];
+  const utils = data.returns.utilities;
+  const tech2004 = windowBeta(tech, data.market, at('2004-12'));
+  near(tech2004.se, 0.118, 5e-4);
+  near(windowBeta(utils, data.market, at('2004-12')).beta, 0.325, 5e-4);
+  const utils1999 = windowBeta(utils, data.market, at('1999-12'));
+  near(utils1999.se, 0.116, 5e-4);
+  assert.equal(utils1999.r2.toFixed(2), '0.06');
+  near(windowBeta(tech, data.market, data.market.length - 1).beta, 1.248, 5e-4);
+
+  // Random draws with the chart's opening seed, and the windows outside them.
+  const draws = (y: number[]) =>
+    sampleBetas(y, data.market, 1000, 1).sort((a, b) => a - b);
+  const techDraws = draws(tech);
+  near(percentile(techDraws, 5), 1.061, 5e-4);
+  near(percentile(techDraws, 95), 1.431, 5e-4);
+  const outside = (y: number[], d: number[]) => {
+    const lo = percentile(d, 5);
+    const hi = percentile(d, 95);
+    return rollingBetas(y, data.market).filter((b) => b < lo || b > hi).length;
+  };
+  assert.equal(outside(tech, techDraws), 199);
+  assert.equal(outside(utils, draws(utils)), 176);
+
+  const range = (y: number[]) => {
+    const roll = rollingBetas(y, data.market);
+    return [Math.min(...roll), Math.max(...roll)].map((v) => v.toFixed(2));
+  };
+  assert.deepEqual(range(utils), ['0.01', '0.81']);
+  assert.deepEqual(range(tech), ['1.00', '2.02']);
 });

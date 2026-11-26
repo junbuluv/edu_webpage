@@ -396,15 +396,24 @@ export default function BetaSamplingExplorer() {
       </ChartFrame>
 
       <p className="mt-2 max-w-measure text-xs text-ink-muted">
-        Returns are the {NAMES.utilities.toLowerCase()} and high-tech portfolios
-        of the Ken French Data Library's 10 industries, value weighted, and the
-        market, each minus the one-month Treasury bill rate, July 1963 to{' '}
-        {monthName(LAST_END)}. {DATA.copyright}. Cost of equity = {pct(RF)} +
-        beta × {pct(PREMIUM)}: the risk-free rate and premium from the cost of
-        capital case, held fixed so only beta changes it. Orange marks the
-        chosen window and its line; the dashed black line is the full-history
-        beta. The random draws use a fixed seed, so the page shows the same
-        draws until you press Draw again.
+        Returns are the utilities and high-tech portfolios of the{' '}
+        <a
+          href={DATA.sourceUrl}
+          className="underline"
+          rel="noopener"
+          target="_blank"
+        >
+          Ken French Data Library
+        </a>
+        's 10 industries, value weighted, and the market, each minus the
+        one-month Treasury bill rate, July 1963 to {monthName(LAST_END)}.{' '}
+        {DATA.copyright}. Cost of equity = {pct(RF)} + beta × {pct(PREMIUM)}:
+        FRED's 10-year Treasury yield (DGS10) on 30 January 2026 and Aswath
+        Damodaran's implied premium for January 2026, as in the cost of capital
+        case, held fixed so only beta changes it. Orange marks the chosen window
+        and its line; the dashed black line is the full-history beta. The random
+        draws use a fixed seed, so the page shows the same draws until you press
+        Draw again.
       </p>
     </div>
   );
