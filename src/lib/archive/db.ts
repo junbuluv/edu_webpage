@@ -8,45 +8,6 @@ function unavailable(operation: string, error: unknown): never {
   throw new ArchiveServiceUnavailableError(operation);
 }
 
-export interface ArchiveVideoRow {
-  id: string;
-  course_slug: string;
-  lesson_slug: string;
-  semester_term: 'spring' | 'summer' | 'fall';
-  semester_year: number;
-  title: string;
-  provider: 'youtube' | 'vimeo';
-  video_id: string;
-  description: string | null;
-  created_by: string;
-  published: boolean;
-}
-
-/**
- * Published, non-deleted instructor-managed videos for a course, read via the
- * service-role admin client.
- */
-export async function fetchArchiveVideos(
-  course: string,
-): Promise<ArchiveVideoRow[]> {
-  try {
-    const admin = getAdminClient();
-    const { data, error } = await admin
-      .from('archive_videos')
-      .select(
-        'id, course_slug, lesson_slug, semester_term, semester_year, title, provider, video_id, description, created_by, published',
-      )
-      .eq('course_slug', course)
-      .eq('published', true)
-      .is('deleted_at', null);
-    if (error) unavailable('videos_read', error);
-    return (data ?? []) as ArchiveVideoRow[];
-  } catch (error) {
-    if (error instanceof ArchiveServiceUnavailableError) throw error;
-    return unavailable('videos_read', error);
-  }
-}
-
 export interface ArchivePaperRow {
   id: string;
   course_slug: string;
@@ -131,30 +92,6 @@ export async function fetchArchiveQuizzes(
   } catch (error) {
     if (error instanceof ArchiveServiceUnavailableError) throw error;
     return unavailable('quizzes_read', error);
-  }
-}
-
-/** Published, non-deleted videos for one lesson (service-role). */
-export async function fetchArchiveVideosForLesson(
-  course: string,
-  lessonSlug: string,
-): Promise<ArchiveVideoRow[]> {
-  try {
-    const admin = getAdminClient();
-    const { data, error } = await admin
-      .from('archive_videos')
-      .select(
-        'id, course_slug, lesson_slug, semester_term, semester_year, title, provider, video_id, description, created_by, published',
-      )
-      .eq('course_slug', course)
-      .eq('lesson_slug', lessonSlug)
-      .eq('published', true)
-      .is('deleted_at', null);
-    if (error) unavailable('lesson_videos_read', error);
-    return (data ?? []) as ArchiveVideoRow[];
-  } catch (error) {
-    if (error instanceof ArchiveServiceUnavailableError) throw error;
-    return unavailable('lesson_videos_read', error);
   }
 }
 

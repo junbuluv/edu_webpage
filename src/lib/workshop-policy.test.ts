@@ -9,7 +9,6 @@ import {
   newYorkReportingRangeStartISO,
   parseNewYorkWallTime,
   publicWorkshopQuestions,
-  sectionMatchesWeekday,
   validCoordinates,
   validRadiusMeters,
   validWorkshopWindow,
@@ -87,14 +86,6 @@ test('reporting months use the offset at New York month start', () => {
   );
 });
 
-test('section weekday mapping follows Monday through Thursday', () => {
-  assert.equal(sectionMatchesWeekday('CML', 1), true);
-  assert.equal(sectionMatchesWeekday('CTL', 2), true);
-  assert.equal(sectionMatchesWeekday('CWL', 3), true);
-  assert.equal(sectionMatchesWeekday('CRL', 4), true);
-  assert.equal(sectionMatchesWeekday('CML', 2), false);
-});
-
 test('window validation enforces ordering and a 24-hour maximum', () => {
   const opens = new Date('2026-07-13T13:00:00Z');
   assert.equal(
@@ -119,89 +110,37 @@ test('coordinate and radius validation rejects non-finite and out-of-range input
   assert.equal(validRadiusMeters(200.5), false);
 });
 
-test('enrollment matching requires exact course, semester, instructor, and ECO section', () => {
+test('enrollment matching requires exact course, semester and instructor', () => {
   const administration = {
-    courseSlug: 'eco-1002',
+    courseSlug: 'fin-3610',
     semester: 'fall-2026',
-    section: 'CML',
     instructorId: 'instructor-a',
   };
+  assert.equal(matchWorkshopEnrollment(null, administration), 'not_enrolled');
   assert.equal(
-    matchWorkshopEnrollment(
-      {
-        courseSlug: 'eco-1002',
-        semester: 'fall-2026',
-        section: 'CML',
-        instructorId: 'instructor-a',
-      },
-      administration,
-    ),
+    matchWorkshopEnrollment({ ...administration }, administration),
     'ok',
   );
   assert.equal(
     matchWorkshopEnrollment(
-      {
-        courseSlug: 'eco-1002',
-        semester: 'spring-2026',
-        section: 'CML',
-        instructorId: 'instructor-a',
-      },
+      { ...administration, semester: 'spring-2026' },
       administration,
     ),
     'not_enrolled',
   );
   assert.equal(
     matchWorkshopEnrollment(
-      {
-        courseSlug: 'eco-1002',
-        semester: 'fall-2026',
-        section: 'CTL',
-        instructorId: 'instructor-a',
-      },
+      { ...administration, courseSlug: 'other-course' },
       administration,
     ),
-    'wrong_section',
+    'not_enrolled',
   );
   assert.equal(
     matchWorkshopEnrollment(
-      {
-        courseSlug: 'eco-1002',
-        semester: 'fall-2026',
-        section: null,
-        instructorId: 'instructor-a',
-      },
-      administration,
-    ),
-    'section_assignment_required',
-  );
-  assert.equal(
-    matchWorkshopEnrollment(
-      {
-        courseSlug: 'eco-1002',
-        semester: 'fall-2026',
-        section: 'CML',
-        instructorId: 'instructor-b',
-      },
+      { ...administration, instructorId: 'instructor-b' },
       administration,
     ),
     'wrong_instructor',
-  );
-  assert.equal(
-    matchWorkshopEnrollment(
-      {
-        courseSlug: 'fin-3610',
-        semester: 'fall-2026',
-        section: null,
-        instructorId: 'instructor-a',
-      },
-      {
-        courseSlug: 'fin-3610',
-        semester: 'fall-2026',
-        section: null,
-        instructorId: 'instructor-a',
-      },
-    ),
-    'ok',
   );
 });
 

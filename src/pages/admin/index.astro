@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import type { CourseSlug } from '@lib/courses';
 import {
   getAdminClient,
   listAllAuthUsers,
@@ -524,9 +525,8 @@ const nyDateTime = new Intl.DateTimeFormat('en-US', {
                         )}
                     </td>
                     <td class="px-3 py-2">
-                      {courseMeta.get(
-                        assignment.course_slug as 'eco-1002' | 'fin-3610',
-                      )?.code ?? assignment.course_slug}
+                      {courseMeta.get(assignment.course_slug as CourseSlug)
+                        ?.code ?? assignment.course_slug}
                     </td>
                     <td class="px-3 py-2">{assignment.semester}</td>
                     <td class="px-3 py-2">

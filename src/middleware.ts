@@ -15,7 +15,6 @@ const PROTECTED_PREFIXES = [
   '/dashboard',
   '/exams',
   '/workshops',
-  '/eco-1002/archive',
   '/fin-3610/archive',
 ];
 const WORKSHOP_COOKIE_PREFIXES = ['/workshops'];

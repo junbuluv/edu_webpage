@@ -1,0 +1,105 @@
+{
+  "slug": "fin-3610-case-union-pacific-valuation",
+  "title": "Case study: What is Union Pacific worth?",
+  "course": "fin-3610",
+  "caseSlug": "fin-3610/union-pacific-valuation",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Figures in this quiz come from Union Pacific's annual reports (Form 10-K) and the case. In 2024 the railroad had operating income of $9,713 million, depreciation of $2,398 million and capital investments of $3,452 million. Its five working capital lines added $186 million of cash. With a 24.1% tax rate, what was its free cash flow? Answer in millions of dollars to the nearest million.",
+      "answer": 6504,
+      "tolerance": 2,
+      "unit": "million dollars",
+      "explanation": "Working capital released cash, so the investment in working capital is −186. FCF = 9,713 × (1 − 0.241) + 2,398 − (−186) − 3,452 = 7,372 + 2,398 + 186 − 3,452 = 6,504.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Free cash flow in 2030, the last forecast year, is $7,194 million. It grows 3% a year after that, and the WACC is 7.57%. What is the terminal value at the end of 2030? Answer in billions of dollars to one decimal.",
+      "answer": 162.1,
+      "tolerance": 0.1,
+      "unit": "billion dollars",
+      "explanation": "TV = FCF_2030 × 1.03 / (0.0757 − 0.03) = 7,409.8 / 0.0457 = 162,140 million, about $162.1 billion. Discounted five years at 7.57% it is worth about $112.6 billion today.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q3",
+      "prompt": "The enterprise value is $139,872 million, net debt is $24,984 million and there are 593.4 million shares. What is the value per share? Answer in dollars to two decimals.",
+      "answer": 193.61,
+      "tolerance": 0.1,
+      "unit": "dollars",
+      "explanation": "Equity = 139,872 − 24,984 = 114,888 million. Per share = 114,888 / 593.4 = $193.61.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "The case discounts free cash flow at the WACC and then subtracts net debt. Why?",
+      "choices": [
+        "Because free cash flow belongs only to shareholders, so discounting it at the WACC gives the equity value directly",
+        "Because debt is paid out of revenue before operating income is measured",
+        "Because free cash flow belongs to lenders and shareholders together, so its value is the whole firm, and shareholders get what is left after the debt",
+        "Because the annual report states free cash flow after interest has been paid to lenders"
+      ],
+      "correctIndex": 2,
+      "explanation": "Free cash flow is the cash available to everyone who financed the firm. Discounting it at the WACC values the whole enterprise; subtracting what is owed to lenders, net of cash, leaves the shareholders' part.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "Over 2021 to 2025, by the case's measure, Union Pacific reinvested 16.6% of its after-tax operating income. Using growth = reinvestment share × return on new investment, what return must new investment earn to support 3.79% growth a year? Answer as a percent to one decimal.",
+      "answer": 22.8,
+      "tolerance": 0.1,
+      "unit": "%",
+      "explanation": "Return on new investment = 3.79 / 16.6 = 0.228, or 22.8%. Union Pacific's report puts its return on invested capital, as adjusted, at 16.3% in 2025, an average over all its capital. 3.79% growth needs new investment to earn well above that average, or more reinvestment.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q6",
+      "prompt": "The base case values a share at $193.61 and the market price was $235.10. Which statement does the case support?",
+      "choices": [
+        "The stock was overpriced, so it should have been sold",
+        "With every other input at the base case, the price implies an operating margin of about 47% in every year",
+        "The share price will fall to $193.61 within five years",
+        "The gap must come from an error in the annual report"
+      ],
+      "correctIndex": 1,
+      "explanation": "Turning the model around shows what the price assumes: a 47% margin, or 3.79% long-run growth, or a 6.89% WACC, each with the other inputs at the base case. That is a statement about assumptions, not a prediction or a recommendation.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q7",
+      "prompt": "In 2,000 random draws, 3.5% value the share at or above the market price. What does that number mean?",
+      "choices": [
+        "Under the ranges this case chose, 3.5% of the draws give a value at or above the price",
+        "There is a 3.5% chance that the share price will rise",
+        "Union Pacific will be worth $235.10 or more 3.5% of the time",
+        "3.5% of analysts agree with the market price"
+      ],
+      "correctIndex": 0,
+      "explanation": "The draws describe the ranges the case chose. Widening one end of one range, long-run growth to 5%, raises the share to 22.6%. The number is a property of the assumptions, not a probability about the stock.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q8",
+      "prompt": "Of the three inputs the simulation draws, which one's uncertainty widens the spread of values the most?",
+      "choices": [
+        "Revenue growth in years 1 to 5",
+        "The operating margin",
+        "All three about equally",
+        "Long-run growth after year 5"
+      ],
+      "correctIndex": 3,
+      "explanation": "Fixing long-run growth at 3% narrows the middle 80% of values from $55.87 wide to $33.12 wide. Fixing either of the others narrows it by less than $5. Long-run growth drives the terminal value, which is 80% of the firm's value.",
+      "points": 1
+    }
+  ]
+}

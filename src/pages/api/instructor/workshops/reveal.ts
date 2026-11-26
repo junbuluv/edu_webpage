@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data: row, error: lookupError } = await admin
     .from('workshop_administrations')
     .select(
-      'id, workshop_slug, course_slug, semester, section, instructor_id, opens_at, cancelled_at, questions_revealed_at',
+      'id, workshop_slug, course_slug, semester, instructor_id, opens_at, cancelled_at, questions_revealed_at',
     )
     .eq('id', administrationId)
     .maybeSingle();
@@ -74,7 +74,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
         course: row.course_slug,
         semester: row.semester,
         workshop: row.workshop_slug,
-        section: row.section,
       },
       request,
     });

@@ -183,7 +183,6 @@ const ENROLL_ERR: Record<string, string> = {
   not_course_instructor: 'You are not an instructor for this course.',
   forbidden: 'You do not have permission to manage this roster.',
   invalid_input: 'Some required fields were missing.',
-  invalid_section: 'That section is not valid for this course.',
   invalid_instructor: 'Choose an active instructor assignment for this class.',
   not_found: 'That enrollment no longer exists or belongs to another class.',
   lookup_failed: 'Could not look up that account right now. Please try again.',
@@ -193,7 +192,6 @@ const ENROLL_ERR: Record<string, string> = {
 };
 const okText = okMsg ? (ENROLL_OK[okMsg] ?? null) : null;
 const errText = errMsg ? (ENROLL_ERR[errMsg] ?? null) : null;
-const usesSections = course === 'eco-1002';
 
 const importedN = Astro.url.searchParams.get('imported');
 const importSummary =
@@ -342,22 +340,6 @@ const importSummary =
                 class="mt-1 w-48 rounded border border-slate-300 px-2 py-1"
               />
             </label>
-            {usesSections && (
-              <label class="block">
-                <span class="text-ink-muted">Section</span>
-                <select
-                  name="section"
-                  required
-                  class="mt-1 rounded border border-slate-300 px-2 py-1"
-                >
-                  <option value="">—</option>
-                  <option value="CML">CML</option>
-                  <option value="CTL">CTL</option>
-                  <option value="CWL">CWL</option>
-                  <option value="CRL">CRL</option>
-                </select>
-              </label>
-            )}
             <button
               type="submit"
               class="rounded bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-strong"
@@ -414,7 +396,6 @@ const importSummary =
           lessonsTotal={roster.lessonsTotal}
           course={course}
           semester={semester}
-          usesSections={usesSections}
           canManage={canManage}
           instructorId={scopedInstructorId}
           instructorOptions={instructorOptions}

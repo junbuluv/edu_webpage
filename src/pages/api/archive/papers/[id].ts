@@ -1,9 +1,6 @@
 import type { APIRoute } from 'astro';
 import { canViewCourse } from '@lib/archive/access';
-import {
-  fetchArchivePaperById,
-  signPaperUrl,
-} from '@lib/archive/db';
+import { fetchArchivePaperById, signPaperUrl } from '@lib/archive/db';
 import { ArchiveServiceUnavailableError } from '@lib/archive/errors';
 import { isUuid } from '@lib/workshop-policy';
 
@@ -32,7 +29,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
     });
   } catch (error) {
     if (error instanceof ArchiveServiceUnavailableError) {
-      return text('Archive files are temporarily unavailable. Retry shortly.', 503);
+      return text(
+        'Archive files are temporarily unavailable. Retry shortly.',
+        503,
+      );
     }
     throw error;
   }

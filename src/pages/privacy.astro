@@ -110,8 +110,8 @@ const lastUpdated = '2026-10-07';
       <li>
         <strong>Instructors</strong> can see lesson progress and quiz attempts only
         for students who are enrolled in their own courses. Workshop attendance is
-        limited to the instructor-owned course, semester, and section. These boundaries
-        are enforced in the database and rechecked by server routes.
+        limited to the instructor-owned course and semester. These boundaries are
+        enforced in the database and rechecked by server routes.
       </li>
       <li>
         <strong>Administrators</strong> (a small group designated by the project owner)
@@ -225,8 +225,8 @@ const lastUpdated = '2026-10-07';
         Student and ordinary staff reads use PostgreSQL row-level security.
         Server-only pages and routes that require elevated database access
         recheck either the signed-in user's own record identifier or the staff
-        role, instructor ownership, semester, and section before reading or
-        changing records.
+        role, instructor ownership, and semester before reading or changing
+        records.
       </li>
       <li>
         Location checks are a convenience control rather than conclusive proof

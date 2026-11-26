@@ -10,7 +10,7 @@ quizzes are JSON; progress + auth live in Supabase. Public repo at
 - **Astro 5** with `output: 'server'` and the **`@astrojs/vercel`** adapter
 - **React 19** islands (Tailwind for styling, no shadcn-ui yet)
 - **MDX** with `remark-math` + `rehype-katex` for inline/display math
-- **Recharts** for most charts; Plotly available for heavier finance visualizations
+- **Recharts** for charts
 - **Supabase** (Postgres + auth + RLS) — see `supabase/schema.sql`
 - **Node 22.x** required (matches Vercel and CI; enforced in `package.json#engines` and `.nvmrc`)
 
@@ -19,6 +19,17 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 ## Where things live
 
 - Lessons: `src/content/lessons/<course>/<slug>.mdx`
+- Case studies (2026-11-25): `src/content/cases/<course>/<slug>.mdx`, the
+  `cases` collection in `config.ts`. A case works one real episode or company
+  through with data and a simulation. Page `src/pages/cases/[...slug].astro`
+  with `src/layouts/CaseLayout.astro`; listed in the "Case studies" block of
+  `src/pages/fin-3610/index.astro`. A case is not a lesson: no progress
+  tracking, no tutor, no place in the unit order. Its quiz is an ordinary quiz
+  file that sets `caseSlug` instead of `lessonSlug`. Calculations and data
+  live in `src/lib/cases/` (pure, alias-free, unit-tested); data files are
+  built by `scripts/cases/*.ts` from downloads that are not committed.
+  `src/lib/cases/content.test.ts` fails on a case whose lesson or quiz slug
+  names no file, or whose optional `extensionOf` names no case
 - Quizzes: `src/content/quizzes/<slug>.json`
 - Content schemas (frontmatter + quiz shape): `src/content/config.ts`
 - Visualizations: `src/components/viz/`
@@ -30,15 +41,15 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
 - Auth pages: `src/pages/auth/`, API routes under `src/pages/api/auth/`
 - Middleware injects `Astro.locals.supabase` (nullable) and `Astro.locals.user`
 - Supabase types: `src/lib/supabase/database.types.ts` — must include `Relationships: []` per table and `CompositeTypes: Record<string, never>` to match what `@supabase/supabase-js` 2.106+ expects (don't drop these fields when hand-editing)
-- Workshops (both courses): content `src/content/workshops/<slug>.json`,
+- Workshops: content `src/content/workshops/<slug>.json`,
   schema gated by `courseEnum`; React island
   `src/components/workshop/StampInButton.tsx`; student page
   `src/pages/workshops/[slug].astro`; per-course indexes
-  `src/pages/{eco-1002,fin-3610}/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
+  `src/pages/fin-3610/workshops.astro`; stamp API `src/pages/api/workshops/stamp.ts`
 - Workshop visibility tiers (set by PR #69): course pages + per-course
   workshop list (`/{course}/workshops`) are public — titles, summaries,
   lesson links, question counts visible to guests. Open-window status
-  (section / week / open|upcoming|closed) renders only for enrolled
+  (week / open|upcoming|closed) renders only for enrolled
   students + admins. Per-workshop detail (`/workshops/<slug>`) is still
   gated to signed-in users; stamp-in additionally requires enrolled +
   within geofence.
@@ -65,25 +76,32 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   course and semester); pure unit-tested classifier
   `src/lib/instructor/enroll-classify.ts`. Add matches by email; drop/update
   take a hidden `user_id`. Existing rows keep their `instructor_id` (only new
-  inserts set it). Sections `{CML,CTL,CWL,CRL}` validated, eco-1002 only.
-  RosterTable has a staff-only "Manage" column
+  inserts set it). RosterTable has a staff-only "Manage" column
 - Course archive (PRs #90–100): per-course `/{course}/archive` of prior-term
   materials (faceted browse + keyword search), gated to enrolled students +
   staff. Pure alias-free core `src/lib/archive/{types,build}.ts`
   (unit-tested); git+DB loader `load.ts`; access gates `access.ts`;
   service-role reads `db.ts`. Content is hybrid: git (lesson notes, quiz
-  JSON) + DB tables `archive_videos`/`archive_papers`/`archive_quizzes`
+  JSON) + DB tables `archive_papers`/`archive_quizzes`
   (RLS-locked, convention #6 service-role pattern). Instructor management UI
-  under `src/pages/instructor/archive/{index,video,paper,quiz}`; file uploads
+  under `src/pages/instructor/archive/{index,paper,quiz}`; file uploads
   land in the private `archive-papers` Supabase Storage bucket via gated
   signed URLs. Authored quizzes are server-graded through the git-or-DB
-  resolver `src/lib/quiz/resolve.ts` (`loadGradableQuiz`). **Videos are
-  ECO-1002 only.** Lessons render a "Lecture videos" section to
-  enrolled+staff
+  resolver `src/lib/quiz/resolve.ts` (`loadGradableQuiz`)
 - Course primitives: `src/lib/courses.ts` (slug tuple),
   `src/content/courses/<slug>.json` (metadata), `src/lib/dashboard.ts`
   (active-course resolution + per-course data loader),
-  `src/components/course/CourseSwitcher.tsx` (global header dropdown)
+  `src/components/course/CourseSwitcher.tsx` (global header dropdown, shown
+  only when the catalog has more than one course; with one course the
+  dashboard opens it in browse mode). FIN 3610 is the only course: ECO 1002
+  (Introduction to Macroeconomics), its per-day workshop sections and its
+  lecture videos were removed on 2026-11-25, from the app and from the
+  database (the guarded "Retire ECO 1002" block near the top of `schema.sql`
+  deletes the course's rows and drops the `section` columns, the
+  `workshop_section` type and `archive_videos`; course CHECKs allow only
+  `fin-3610`). To add a course: append its slug to `COURSE_SLUGS`, add the
+  JSON file, and add the slug to every `course_slug in ('fin-3610')` list in
+  `schema.sql`
 - Roles: `student`, `instructor`, `admin` (the TA role was retired on
   2026-10-07). Helpers in `src/lib/roles.ts`: `isStaff` (instructor or admin),
   `isAdmin`, `roleLabel`; use them instead of inline equality checks. Staff
@@ -100,20 +118,20 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   for uniqueness, never the raw cookie or submitted coordinates
 - Animation primitives: `src/lib/animation/useAnimatedValue.ts` (rAF
   tween honoring `prefers-reduced-motion`)
-- MDX components in `src/components/mdx/`: `ScenarioPlayer`,
-  `CompareScenarios`, `Figure` (static images with caption + source
-  credit), `BarFigure` (Recharts wrapper for hand-curated tabular data)
+- MDX components in `src/components/mdx/`: `CompareScenarios`, `Figure`
+  (static images with caption + source credit), `BarFigure` (Recharts wrapper
+  for hand-curated tabular data)
 - Lesson figures: `public/figures/<course>/<lesson-slug>/<name>.png`
   for committed images; `BarFigure` data lives inline in MDX
-- Per-chart presets + URL state: `src/lib/{islm,adas,bonds}/{presets,url-state}.ts`
+- Bond chart presets + URL state: `src/lib/bonds/{presets,url-state}.ts`
 - Weekly attendance (PR #113): pure alias-free `src/lib/attendance-weekly.ts`
-  builds a week-by-week matrix (`attended` / `missed` / `pending` /
-  `ineligible`) from the distinct `week_of` Mondays of non-cancelled
+  builds a week-by-week matrix (`attended` / `missed` / `pending`)
+  from the distinct `week_of` Mondays of non-cancelled
   `workshop_administrations`. There is no semester calendar; weeks exist only
   as those Mondays. Instructor side: per-week ✓/✗ columns in
   `RosterTable.astro` plus `week_<monday>` CSV columns. Student side: a
   "Workshop attendance" card on `/dashboard` (weekly chips + a stamp-in link
-  when a window for their section is open now), loaded in `dashboard.ts` via
+  when a window for their class is open now), loaded in `dashboard.ts` via
   the student's own RLS reads
 - Signup roles + student ID (PR #120): the signup form asks student or
   lecturer and collects an 8-digit EMPLID from students. Choosing lecturer
@@ -163,7 +181,7 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   drifts from Baruch's official colors. Fonts are self-hosted Figtree and
   JetBrains Mono (Fontsource). Design: `docs/superpowers/specs/2026-09-27-baruch-blue-theme-design.md`
   Charts use `var(--chart-1)`…`var(--chart-4)` (Midtown Blue, Tangerine,
-  Okabe-Ito green and purple), `--chart-1-soft`, `--chart-3-soft`,
+  Okabe-Ito green and purple), `--chart-3-soft`,
   `--chart-grid`, `--chart-ref`, and `--chart-ink`. Chart text is ink, never
   a series color: `global.css` sets Recharts legend, tooltip, and label text
   to ink (axis ticks keep Recharts' `#666`, 5.74:1).
@@ -172,8 +190,7 @@ Path aliases in `tsconfig.json`: `@components/*`, `@layouts/*`, `@lib/*`, `@cont
   `src/components`.
 - Lesson tutor (2026-10-05): coach-mode chat on lesson pages for enrolled
   students + staff of courses with `tutor: true` in
-  `src/content/courses/<slug>.json` (ECO 1002 and FIN 3610, one shared daily
-  cap). Island
+  `src/content/courses/<slug>.json` (FIN 3610). Island
   `src/components/tutor/TutorPanel.tsx` (mounted in `LessonLayout.astro`);
   endpoint `src/pages/api/tutor/chat.ts` (AI SDK 7 via Vercel AI Gateway,
   key `AI_GATEWAY_API_KEY`; unset = tutor off); pure alias-free helpers in
@@ -217,48 +234,57 @@ CI config: `.github/workflows/ci.yml`. Four jobs:
 - **`schema-roundtrip`** — applies `supabase/schema.sql` twice against a
   stock Postgres 15 service container with a minimal `auth` stub (roles,
   `auth.users`, and `auth.uid()`). Catches idempotency regressions
-  (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn).
-  It also exercises the upgrade path and the RLS suite
-  (`supabase/tests/security_hardening_rls.sql`). That suite also runs on the
-  upgrade-path database (July fixture plus migrations), so it may only touch
-  objects that exist there; tables added since get their own suite run only
-  on the fresh schema (`supabase/tests/lesson_tutor_rls.sql`, step "Exercise
-  lesson tutor RLS"). Step "Rehearse removing the TA role" puts production's
-  pre-2026-10-07 state (`'ta'` plus TA rows) back on the fresh database,
-  re-runs `schema.sql`, and re-runs both suites. Step "Check privilege
-  hygiene" (`supabase/tests/privilege_hygiene.sql`) fails if any public table
-  is left to default privileges (anon holds anything, authenticated holds a
-  table-level write or DDL privilege, or `service_role` cannot read) or a retired
-  function is back; the auth stub copies the legacy Supabase defaults on
-  purpose so this bites in CI. The upgrade-path step finishes by applying
-  today's `schema.sql` to the migrated July database and rerunning every
-  suite. Currently **advisory**, not
-  blocking — flip to required in the ruleset when ready by adding
-  `schema-roundtrip` to `required_status_checks`. Traps this job has
-  already sprung (the first two fixed 2026-08-26, PR #121):
-  - **Don't pin a commit SHA that lives on a feature branch.** The
-    upgrade test used to `git show <sha>:supabase/schema.sql`; rebasing
-    that branch before merge orphaned the commit and CI died with exit
-    128, while clones predating the rebase still resolved it. The
-    pre-upgrade schema is now vendored at
-    `supabase/tests/fixtures/pre_workshop_integrity_schema.sql` — a
-    historical snapshot, so never "update" it to match the current schema.
-  - **Don't write date-dependent fixtures.** A workshop fixture paired
-    section `CTL` with `opens_at = now()`, but the section/day CHECK
-    requires an ECO window to open on its section's weekday, so the suite
-    passed only on Tuesdays. Use fixed weekday-correct dates (the other
-    fixtures use `2026-07-13`, a Monday, with `CML`) or
-    `schedule_version = 1`, which is exempt from that check.
-  - **Upgrade blocks must survive databases that predate later tables.** The
-    TA rebuild (#129) touched `role_requests` unconditionally, so an older
-    database with `'ta'` but no `role_requests` (#120) could not run
-    `schema.sql` at all (fixed 2026-10-07). Put such statements inside a
-    nested `if to_regclass('public.<table>') is not null then … end if;`.
-    PL/pgSQL plans a whole IF condition at once, so joining the
-    `to_regclass` check and an `exists (select … from <table>)` with `and`
-    in one condition still fails on a missing table.
+  (drop/create policy name mismatches, ALTER TYPE + use-in-same-txn). It then
+  runs the RLS suites (`supabase/tests/security_hardening_rls.sql` and
+  `lesson_tutor_rls.sql`); both count rows, so they need a database with no
+  other fixtures. Step "Check privilege hygiene"
+  (`supabase/tests/privilege_hygiene.sql`) fails if any public table is left
+  to default privileges (anon holds anything, authenticated holds a
+  table-level write or DDL privilege, or `service_role` cannot read) or a
+  retired object is back (a retired function, a `section` column,
+  `archive_videos`); the auth stub copies the legacy Supabase defaults on
+  purpose so this bites in CI. Step "Rehearse removing ECO 1002" rehearses
+  that one-off removal the way production met it, then reruns every suite: it
+  builds a second database from
+  `supabase/tests/fixtures/pre_eco_removal_schema.sql` (the schema production
+  had before 2026-11-25: two courses, per-day `section` columns,
+  `archive_videos`), seeds ECO and FIN rows (`eco_removal_setup.sql`), applies
+  `schema.sql` twice, and checks what went and what stayed
+  (`eco_removal_check.sql`). That fixture is a historical snapshot, so never
+  "update" it to match the current schema. `schema.sql` is only expected to
+  upgrade a database at the pre-removal schema or newer, with no `'ta'` value
+  in `user_role` (the block that rebuilt that type, and its rehearsal, were
+  deleted on 2026-11-25 after production had run it).
+
+  Currently **advisory**, not blocking — flip to required in the ruleset when
+  ready by adding `schema-roundtrip` to `required_status_checks`. Traps this
+  job has already sprung:
+  - **Don't pin a commit SHA that lives on a feature branch.** An upgrade
+    test used to `git show <sha>:supabase/schema.sql`; rebasing that branch
+    before merge orphaned the commit and CI died with exit 128. A "before"
+    schema is vendored as a file under `supabase/tests/fixtures/` instead.
+  - **Don't write date-dependent fixtures.** A workshop fixture once passed
+    only on Tuesdays. A window that must be open "now" uses
+    `schedule_version = 1`: version 2 derives `week_of` from `opens_at`, and
+    an `opens_at` an hour in the past falls in the previous week for the
+    first hour of each Monday.
+  - **Upgrade blocks must survive missing tables.** A fresh database reaches
+    the guarded blocks at the top of `schema.sql` with no tables at all. Put
+    statements that touch a table inside a nested
+    `if to_regclass('public.<table>') is not null then … end if;`. PL/pgSQL
+    plans a whole IF condition at once, so joining the `to_regclass` check
+    and an `exists (select … from <table>)` with `and` in one condition still
+    fails on a missing table.
+  - **A one-course suite still needs two classes.** The RLS suite tells
+    classes apart by instructor and semester (`fall-2026` and `fall-2025`
+    stand in for what used to be two courses). Rules keyed on the course
+    alone cannot be isolated that way.
+    Reproduce locally with a throwaway Postgres (`brew install postgresql@17`
+    matches production's major version): apply `supabase/tests/auth_stub.sql`,
+    then the files in the order `ci.yml` lists them.
+
 - **`copyright-gate`** — runs `node scripts/check-copyright.mjs` over
-  lesson MDX + quiz JSON (flags missing `credit`, external/hotlinked
+  lesson and case MDX + quiz JSON (flags missing `credit`, external/hotlinked
   images, `materials/` references). Also **advisory**; the deeper,
   on-demand AI review is the `/copyright-check` skill (see "New lesson
   figure" under Common tasks).
@@ -340,10 +366,9 @@ gh api -X PUT repos/junbuluv/edu_webpage/rulesets/16747620 --input <new-payload>
 12. **Use `isStaff(role)` / `isAdmin(role)` from `@lib/roles`** for any
     staff/admin gate — never inline `role === 'instructor' || role === 'admin'`.
     The `user_role` enum has three values: `student`, `instructor`,
-    `admin` (TA was retired on 2026-10-07; the block at the top of
-    `schema.sql` rebuilt the type). Role is only half of a management check:
-    managing a course also needs a teaching assignment (`canManageClass`,
-    `instructorOwnsCourse`).
+    `admin` (TA was retired on 2026-10-07). Role is only half of a management
+    check: managing a course also needs a teaching assignment
+    (`canManageClass`, `instructorOwnsCourse`).
 13. **`<ClientRouter />` is mounted in `BaseLayout`.** Cross-page nav
     uses Astro View Transitions. If a React island appears unresponsive
     after navigation, suspect stale DOM references in test/debug code
@@ -523,8 +548,10 @@ must be committed before they can be used` — the `ALTER TYPE`
 TYPE` standalone first; on the re-paste it becomes a no-op (since
     the value now exists) and the rest runs cleanly.
 - **Removing a value from an enum** has no `DROP VALUE`: rebuild the type.
-  The guarded block at the top of `schema.sql` (TA removal, 2026-10-07) is
-  the pattern: record and drop the policies and column triggers that depend
+  The TA removal (2026-10-07) is the pattern. Its guarded block was deleted
+  from `schema.sql` on 2026-11-25, once production had run it; a copy is at
+  the top of `supabase/tests/fixtures/pre_eco_removal_schema.sql`. It works
+  like this: record and drop the policies and column triggers that depend
   on the type, remap or reject leftover rows, swap the columns to a new type,
   drop and rename, restore defaults, and let the rest of the script recreate
   what was dropped, with a check at the end of the script.
@@ -619,10 +646,17 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
 
 ## Common tasks
 
-- **New macro lesson**: copy `src/content/lessons/eco-1002/is-lm-intro.mdx`
-  as a template; pick a unique `order:` within the unit.
+- **New lesson**: copy `src/content/lessons/fin-3610/credit-risk-and-spreads.mdx`
+  as a template; pick a unique `order:` within the course.
 - **New quiz**: add JSON under `src/content/quizzes/`. The slug must match
   `quizSlug:` in the lesson frontmatter to link them.
+- **New case study**: add MDX under `src/content/cases/<course>/` (copy
+  `yield-curve.mdx`): the question, the data, the calculation once by hand,
+  the simulation, takeaways, limits. List `sources` in the frontmatter, name
+  the lessons to read first in `relatedLessons`, and add a quiz whose
+  `caseSlug` is the case's slug. Every number in the text must come from the
+  case's data file or a cited filing; recompute quiz answers from the data.
+  Use only sources in `accepted-sources.md`.
 - **New visualization**: drop a `.tsx` under `src/components/viz/`. Keep it
   self-contained, accept props for any tunable parameters, default to a
   calibrated baseline, include a "Reset" affordance for sliders. Wrap the
@@ -652,11 +686,11 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
   checklist.
 - **New workshop**: drop a JSON under `src/content/workshops/` matching
   the `workshops` collection schema in `config.ts` (5–7 questions, course
-  must be one of `eco-1002` / `fin-3610`). Visible at `/workshops/<slug>`
+  must be a slug in `COURSE_SLUGS`). Visible at `/workshops/<slug>`
   and the per-course index `/{course}/workshops` to enrolled students
   (staff see a preview).
 - **Open a workshop window**: as a staff user, visit
-  `/instructor/workshops/<slug>` and use the section/time/geofence form.
+  `/instructor/workshops/<slug>` and use the class/time/geofence form.
   Also supports SQL inserts; see `CONTRIBUTING.md`.
 - **Promote a user**: in Supabase SQL Editor,
   ```sql
@@ -697,9 +731,10 @@ TYPE` standalone first; on the re-paste it becomes a no-op (since
    `progress-aggregate.ts` / `roster-csv.ts` / `roster-export.ts` / `quiz/grade.ts` /
    `attendance-weekly.ts` / `auth/signup-role.ts` / `auth/pwned.ts` / `admin/role-decision.ts` / `text/plural.ts` /
    `theme/contrast.ts` / `chart/series-color.ts` / `animation/typing-limit.ts` /
-   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts`,
+   `tutor/{request,lesson-context,prompt,provider-options,math-delims,errors,eval,remaining,stream,thinking}.ts` /
+   `cases/{yield-curve,wacc,union-pacific,dcf,random,pme}.ts`,
    separate from the `@lib`-importing service-role modules. Keep that split
-   when adding testable logic. 264 tests as of 2026-10-07.
+   when adding testable logic. 330 tests as of 2026-11-25.
 4. `npm run build` — must compile cleanly. Build env needs at minimum:
    ```bash
    PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \

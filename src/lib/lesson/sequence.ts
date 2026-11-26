@@ -1,9 +1,8 @@
 // Returns the previous and next lessons in a course's reading order.
 //
 // Course-wide ordering: lessons are sorted by (unit index, frontmatter
-// `order`). Unit order is defined explicitly per course below — ECO 1002
-// uses within-unit `order` so we need the unit sequence; FIN 3610 uses
-// course-wide `order` so the unit sequence is essentially cosmetic.
+// `order`). Unit order is defined explicitly per course below. FIN 3610
+// also numbers `order` course-wide, so its unit sequence is a backstop.
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -13,13 +12,6 @@ type Lesson = CollectionEntry<'lessons'>;
 // Pedagogically natural unit sequences. Add entries here when a new
 // unit is introduced; unknown units fall to the end.
 const UNIT_ORDER: Record<Course, string[]> = {
-  'eco-1002': [
-    'Long-run growth',
-    'Short-run output and interest',
-    'Money and monetary policy',
-    'Open economy',
-    'Inflation and unemployment',
-  ],
   'fin-3610': [
     'Foundations',
     'Time, money, and interest rates',
@@ -27,6 +19,7 @@ const UNIT_ORDER: Record<Course, string[]> = {
     'Risk and return',
     'Capital structure and payout',
     'Options and special topics',
+    'Credit markets and private equity',
   ],
 };
 
@@ -37,9 +30,11 @@ function unitIndex(course: Course, unit: string): number {
 }
 
 export function compareLessons(a: Lesson, b: Lesson): number {
-  if (a.data.course !== b.data.course) {
-    return a.data.course.localeCompare(b.data.course);
-  }
+  // Compared as plain strings: with one course in the catalog the slug type
+  // has a single member and TypeScript would call this branch unreachable.
+  const courseA: string = a.data.course;
+  const courseB: string = b.data.course;
+  if (courseA !== courseB) return courseA.localeCompare(courseB);
   const ua = unitIndex(a.data.course, a.data.unit);
   const ub = unitIndex(b.data.course, b.data.unit);
   if (ua !== ub) return ua - ub;

@@ -43,7 +43,7 @@ const visible = allWorkshops.filter((w) =>
 const nowIso = new Date().toISOString();
 const { data: openAdmins, error: openAdminsError } = await supabase
   .from('workshop_administrations')
-  .select('workshop_slug, section, opens_at, closes_at')
+  .select('workshop_slug, opens_at, closes_at')
   .is('cancelled_at', null)
   .lte('opens_at', nowIso)
   .gt('closes_at', nowIso);
@@ -61,7 +61,7 @@ for (const a of openAdmins ?? []) {
   );
 }
 
-// Tab filter via ?course=eco-1002 (default 'all').
+// Tab filter via ?course=<slug> (default 'all').
 const filterParam = Astro.url.searchParams.get('course');
 const filterCourse: CourseSlug | 'all' =
   filterParam && isCourseSlug(filterParam) && instructorCourses.has(filterParam)
@@ -110,8 +110,7 @@ const tabCourses = [...instructorCourses].sort((a, b) => {
     <h1 class="mt-1 text-3xl font-semibold tracking-tight">Workshops</h1>
     <p class="mt-3 text-ink-muted">
       Open and close workshop windows for your courses, and view attendance
-      rosters. ECO 1002 has four per-day sections (CML/CTL/CWL/CRL) which you
-      open independently; FIN 3610 has one workshop window per week.
+      rosters. Each workshop has one window per week.
     </p>
 
     {

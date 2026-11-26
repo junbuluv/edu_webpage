@@ -6,32 +6,20 @@ import { isCourseSlug } from '@lib/courses';
 import {
   isUuid,
   parseNewYorkWallTime,
-  sectionMatchesWeekday,
   validCoordinates,
   validRadiusMeters,
   validWorkshopWindow,
-  type WorkshopSection,
 } from '@lib/workshop-policy';
 import { logDisclosureSafe } from '@lib/audit';
 
 // Open a new workshop_administrations row for one workshop window.
 // Instructor only. Posted as form data (so the page's plain <form>
-// submission works without JS).
-//
-// ECO 1002 runs four per-day sections (CML/CTL/CWL/CRL); the form sends
-// `section` and we store it. FIN 3610 has no per-day sections; the form
-// omits `section` and we store NULL. The DB has partial unique indexes
-// keyed on either (workshop_slug, semester, section, week_of, instructor_id)
-// or (workshop_slug, semester, week_of, instructor_id), depending on whether
-// section is set.
-
-const SECTIONS = new Set(['CML', 'CTL', 'CWL', 'CRL']);
-const COURSES_WITH_SECTIONS = new Set(['eco-1002']);
+// submission works without JS). A unique index allows one live window per
+// (workshop_slug, semester, week_of, instructor_id).
 
 interface ClassSelection {
   instructorId: string;
   semester: string;
-  section: string | null;
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -54,7 +42,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   );
   const classInstructorId = classSelection?.instructorId ?? '';
   const semester = classSelection?.semester.trim() ?? '';
-  const rawSection = classSelection?.section ?? null;
   const opensAt = String(form.get('opens_at') ?? '');
   const closesAt = String(form.get('closes_at') ?? '');
   const rawLat = String(form.get('required_lat') ?? '').trim();
@@ -80,19 +67,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const workshop = await getEntry('workshops', workshopSlug);
   if (!workshop || workshop.data.course !== courseSlug) {
-    return errorRedirect(workshopSlug, 'invalid_input');
-  }
-
-  const courseUsesSections = COURSES_WITH_SECTIONS.has(courseSlug);
-  const section: WorkshopSection | null = courseUsesSections
-    ? typeof rawSection === 'string' && SECTIONS.has(rawSection)
-      ? (rawSection as WorkshopSection)
-      : null
-    : null;
-  if (
-    (courseUsesSections && section == null) ||
-    (!courseUsesSections && rawSection != null)
-  ) {
     return errorRedirect(workshopSlug, 'invalid_input');
   }
 
@@ -127,9 +101,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!validWorkshopWindow(parsedOpen.date, parsedClose.date)) {
     return errorRedirect(workshopSlug, 'invalid_window');
   }
-  if (section && !sectionMatchesWeekday(section, parsedOpen.weekday)) {
-    return errorRedirect(workshopSlug, 'wrong_section_day');
-  }
   if (
     !rawLat ||
     !rawLng ||
@@ -149,7 +120,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       workshop_slug: workshopSlug,
       course_slug: courseSlug,
       semester,
-      section,
       week_of: parsedOpen.weekOf,
       instructor_id: classInstructorId,
       opens_at: parsedOpen.iso,
@@ -164,8 +134,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .single();
 
   if (error) {
-    // 23505 unique violation on whichever partial index applies (with-section
-    // for ECO; no-section for FIN).
+    // 23505: a live window already exists for this workshop, week and class.
     const reason = error.code === '23505' ? 'already_opened' : 'insert_failed';
     console.error('[instructor/workshops/open] insert_failed', error);
     return errorRedirect(workshopSlug, reason);
@@ -181,7 +150,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       course: courseSlug,
       semester,
       workshop: workshopSlug,
-      section,
       class_instructor_id: classInstructorId,
     },
     request,
@@ -223,16 +191,11 @@ function parseClassSelection(raw: string): ClassSelection | null {
     const value = parsed as Record<string, unknown>;
     if (
       typeof value.instructorId !== 'string' ||
-      typeof value.semester !== 'string' ||
-      (value.section !== null && typeof value.section !== 'string')
+      typeof value.semester !== 'string'
     ) {
       return null;
     }
-    return {
-      instructorId: value.instructorId,
-      semester: value.semester,
-      section: value.section,
-    };
+    return { instructorId: value.instructorId, semester: value.semester };
   } catch {
     return null;
   }

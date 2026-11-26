@@ -13,13 +13,10 @@ interface Props {
   course: CollectionEntry<'courses'>;
   instructors: Array<CollectionEntry<'instructors'>>;
   enrolledSemester: string | null;
-  /** The student's own section (ECO 1002), when enrolled. */
-  enrolledSection?: string | null;
   stats: Stats;
 }
 
-const { course, instructors, enrolledSemester, enrolledSection, stats } =
-  Astro.props;
+const { course, instructors, enrolledSemester, stats } = Astro.props;
 
 const avgPct =
   stats.avgScore != null ? `${Math.round(stats.avgScore * 100)}%` : '—';
@@ -45,7 +42,7 @@ const avgPct =
         (enrolledSemester || course.data.defaultSemester) && (
           <p class="mt-2 text-xs text-ink-muted">
             {enrolledSemester
-              ? `Enrolled • ${enrolledSemester}${enrolledSection ? ` • Section ${enrolledSection}` : ''}`
+              ? `Enrolled • ${enrolledSemester}`
               : `Reference semester: ${course.data.defaultSemester}`}
           </p>
         )

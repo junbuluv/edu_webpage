@@ -1,0 +1,95 @@
+{
+  "slug": "fin-3610-case-public-market-equivalent",
+  "title": "Case study: Did the fund beat the market?",
+  "course": "fin-3610",
+  "caseSlug": "fin-3610/public-market-equivalent",
+  "passingScore": 0.7,
+  "questions": [
+    {
+      "type": "numeric",
+      "id": "q1",
+      "prompt": "Market returns in this quiz are from the Ken French Data Library, as in the case. A fund takes in 50 from investors in year 1 and 50 in year 2. It pays out 30 in year 4, 60 in year 6 and 90 in year 8, and holds nothing after year 8. What is its TVPI, total value over paid in? Answer to two decimals.",
+      "answer": 1.8,
+      "tolerance": 0.01,
+      "unit": "",
+      "explanation": "With nothing left in the fund, total value is what it paid out: TVPI = (30 + 60 + 90) / (50 + 50) = 1.80. Like the IRR, it says nothing about what the stock market did over the same years.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q2",
+      "prompt": "Investors pay 100 into a fund at the end of year 1 and get 200 back at the end of year 10. A dollar put in the stock market at the end of year 1 grew to 2.5 dollars by the end of year 10. What is the fund's PME? Answer to two decimals.",
+      "answer": 0.8,
+      "tolerance": 0.01,
+      "unit": "",
+      "explanation": "The 100 paid in would have grown to 250 in the market. The payout is 200, already at the end of year 10. PME = 200 / 250 = 0.80: the fund doubled the money, but the market did better.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q3",
+      "prompt": "The case's made-up fund, started in 1990, has a PME of 0.82. What does that mean?",
+      "choices": [
+        "The fund returned only 82 of every 100 that investors paid in",
+        "The fund's IRR was 18 points below the market's average return",
+        "At market returns, the payouts were worth 82% of the pay-ins",
+        "Investors will receive another 82 for every 100 committed"
+      ],
+      "correctIndex": 2,
+      "explanation": "The fund paid out 1.90 times what it took in, so investors did not lose money. Carried to 1999 at the market's returns, though, the payouts were worth 343.4 against 420.9 for the pay-ins: 82%. The same money in the market would have done better.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q4",
+      "prompt": "The same made-up fund has a 13.28% IRR whether it starts in 1990 or in 2000, but a PME of 0.82 in one case and 1.51 in the other. Why?",
+      "choices": [
+        "The 2000 fund paid out sooner, so its money spent less time in the market",
+        "The market returned about 21% a year from 1991 to 1999 and about 1% from 2001 to 2009",
+        "Treasury bill rates were higher in the 1990s, and the PME discounts at the bill rate",
+        "The fund charged higher fees when it started in 1990 than in 2000"
+      ],
+      "correctIndex": 1,
+      "explanation": "The cash flows, their timing and so the IRR and TVPI are identical. Only the benchmark changes: the stock market returned 21.01% a year from 1991 to 1999 and 0.96% a year from 2001 to 2009. The PME uses the stock market's returns, not the bill rate.",
+      "points": 1
+    },
+    {
+      "type": "numeric",
+      "id": "q5",
+      "prompt": "The stock market returned −36.65% in 2008 and 28.65% in 2009. A pay-in of 25 at the end of 2007, put in the stock market, is worth how much at the end of 2009? Answer to one decimal.",
+      "answer": 20.4,
+      "tolerance": 0.1,
+      "unit": "",
+      "explanation": "25 × (1 − 0.3665) × (1 + 0.2865) = 25 × 0.6335 × 1.2865 = 20.4. A dollar put in the market at the end of 2007 was worth about 81 cents two years later.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q6",
+      "prompt": "The PME carries each cash flow to the end of the fund at the stock market's returns. Seen as discounting, which rate does that use?",
+      "choices": [
+        "The fund's own IRR",
+        "A cost of capital chosen in advance",
+        "The Treasury bill rate",
+        "The stock market's actual return in each year"
+      ],
+      "correctIndex": 3,
+      "explanation": "Carrying a flow forward at the market's return is the same as discounting it back at that return, year by year. The previous case discounted at a fixed 7.57% chosen in advance.",
+      "points": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q7",
+      "prompt": "A fund that bought its companies mostly with borrowed money has a PME of 1.05. Which statement is right?",
+      "choices": [
+        "It beat the market with the same timing, but its extra risk may need more",
+        "It beat the stock market by 5% in every year of its life",
+        "Its IRR was 5 percentage points above the market's average return",
+        "Because its PME is above 1, it was as safe as the stock market"
+      ],
+      "correctIndex": 0,
+      "explanation": "A PME of 1.05 means the payouts were worth 5% more than the pay-ins at market returns, over the whole fund, not 5% a year, and it says nothing direct about the IRR. Equity in companies bought with a lot of debt is riskier than the market, so a PME just above 1 may not pay enough for that risk.",
+      "points": 1
+    }
+  ]
+}
