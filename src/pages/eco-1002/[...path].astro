@@ -1,8 +1,0 @@
----
-// ECO 1002 was removed. On Vercel the site middleware runs only for addresses
-// that match a page, so this page gives /eco-1002 and everything under it a
-// route. The middleware's retired-routes rule answers first; this redirect is
-// the same rule's target, in case it ever does not.
-import { RETIRED_COURSE_TARGET } from '@lib/retired-routes';
-return Astro.redirect(RETIRED_COURSE_TARGET, 301);
----
